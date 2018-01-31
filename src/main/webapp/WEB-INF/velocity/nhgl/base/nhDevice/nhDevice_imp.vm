@@ -1,0 +1,177 @@
+<script type="text/javascript" src="$!{rc.contextPath}/assets/jquery.uploadify-3.1.min.js"></script>
+<link rel="stylesheet" type="text/css" href="$!{rc.contextPath}/assets/uploadify.css" />
+<style type="text/css">
+
+html, body {
+  height: 80%;
+  margin:0;
+  padding:0;
+}
+.label{
+	color:#FFF;
+	margin:20px;
+}
+
+.k-primary, .k-overflow-container .k-primary {
+	  color: #ffffff;
+	  border-color: #1ab38d;
+	  background-image: none;
+	  background-position: 50% 50%;
+	  -webkit-box-shadow: none;
+	  box-shadow: none;
+}
+.actions{
+	margin:10px auto;
+}
+#save{
+	width:125px;
+	color:#FFF;
+	margin-left:154px;
+	background-color:#1ab38d ;
+	background-image: none;
+	border-color: #1ab38d;
+	height:30px;
+	padding:0;
+	border:0;
+	font-weight:bold;
+	height:32px !important;
+}
+
+#download{
+	margin-left:20px;
+}
+#file_upload-button {
+	border-radius:0;
+	width:50px !important
+	border-color:#1ab38d;
+	background-color:#1ab38d !important;
+	color:#fff;
+	width:120px;
+}
+</style>
+<body>
+	
+	<div class="">		
+ 		<form class="ui-form" id="myform_id" action="$!{rc.contextPath}/nhgl/nhDevice/impNhDevice" method="post"  enctype="multipart/form-data">
+        <div style="margin-top:30px;color: #FFF;"  align="center">请以EXCEL格式导入能耗设备档案数据...</div>
+        
+        <table align="center">
+	        <br>
+		        <tr>    			       
+		    	<td valign="top" class="label"><span class="ui-form-required">*</span>上传文档：</td>
+		    	<td colspan="3">
+		    		<div id="filehidden"></div>
+		    		<table class="ui-table" width="100%" cellpadding="0" cellspacing="0" border="1" id="images_table_id">		
+		    		  <thead>
+		    			<tr style="margin-buttom:40px;">
+		    			  <th align="left" width="105px;">文件名称</th>
+		    			  <th align="left" width="60px;">类型</th>
+		    			  <th align="left" width="60px;">大小</th>
+		    			  <th width="60px;">操作</th>
+		    			</tr>
+		    		  </thead>
+		    		   <tbody>
+		    		   </tbody>
+		    		</table>
+		        </td>    
+		    </tr>
+        </table>
+		</form>
+		<div style="margin-top:20px;margin-left:155px;">
+			<input type="file" name="file"  id="file_upload" style="margin-top:20px;height:30px;width:120px;"/>	</td>					
+		</div>
+		
+        <div style="height:30px;line-height:30px;margin-top:28px;">
+			<input id="save"  value="导&nbsp;入" type="button" data-role="button" role="button" aria-disabled="false" tabindex="0"><i class="fa fa-save"></i></input>
+			<a id="download" href="$!{rc.contextPath}/download/newNhDeviceExpTemplate.xls">能耗设备档案模板下载</a></td>
+		</div>
+    <div>
+    <div id="imploading" class="ui-loading" style="display:none;z-index:9999;filter:alpha(opacity=100);opacity:1.0;width:100%;height:30px;margin-top:10px;">正在导入部门能耗数据...</div>
+<div id="errmsg" style="color:red;padding-left:30px"></div>
+<script>
+	var index = 1000;
+   	 $(document).ready(function(){
+   		$("#save").on("click",function(){
+			$("#errmsg").empty();
+   			var $uploadify = $("#file_upload").data("uploadify");
+   			
+   			var num = $("#file_upload").data("uploadify").queueData.queueLength;
+   			if(num==1){
+   				$(this).css("background","grey").attr("disabled","disabled");
+   				$("#imploading").show();
+   				$("#file_upload").uploadify("upload");
+   			}
+   			else{
+   				alert("请选择能耗设备档案导入文件！")
+   			}
+   		
+   		});
+   		
+		function initUpload(){    
+			$('#file_upload').uploadify({
+				'auto':false,
+			    'buttonText' : '浏&nbsp;览',
+			    'debug':true,
+			    'cancelImg':true,
+			    'buttonClass':"k-primary fileUploadBtn",
+				'multi' : false,
+				'fileSizeLimit':'20MB',
+				'fileObjName' : 'file',
+				'cancelImg' : '$!{rc.contextPath}/assets/cancel.png',
+		        'swf' : '$!{rc.contextPath}/assets/uploadify.swf',
+		        'uploader' : '$!{rc.contextPath}/nhgl/nhDevice/impNhDevice',
+		        'removeCompleted': true,
+		        'fileTypeExts': '*.xls',
+				 onUploadSuccess:function(file,data,response){
+					$("#imploading").hide();
+		            $("#save").css("background","#1ab38d").removeAttr("disabled");
+		              if(response){
+					  debugger;
+		            	  if(data!=null&&data!=""&&data.indexOf("导入成功!")!=-1){
+		            		  $.message(data, $.message.TYPE_OK, 2, true,true);
+		            	  }else{
+		            		  //$.message(data, $.message.TYPE_ERROR, 2, true,true);
+							  $("#errmsg").html(data);
+		            	  }		            	
+					    if(($('#fileName').val() == "" || $('#fileName').val() == null)){
+					    	var filedisplay ="<tbody> <tr id='alreadyfile"+index+"'><td>"+file.name+"</td><td>"+file.type+"</td><td>"+(file.size/1000).toFixed(0)+"KB</td><td ><a onclick=removefile('"+index+"');>移除</a></td></tr></tbody>";
+		    				var filehidden ="<div id='filehidden'><input type='hidden' name='fileorignal' value='"+file.name+"' id='fileorignal"+index+"'/><input type='hidden' name='filename' value='"+file.name+"' id='filename"+index+"'/></div>";		    	
+		    				$("#images_table_id tbody").replaceWith(filedisplay);
+		    				$("#filehidden").replaceWith(filehidden);
+		    				index++;
+						}
+		              }else{
+		    		  	 alert("文件上传失败！");
+		              }
+		  		}
+			})
+		}
+		initUpload();
+	 });
+		function removefile(ind){
+			$("#attachment"+ind).remove();
+			$("#file_upload").show();
+			$("#fileorignal"+ind).remove();
+			$("#filename"+ind).remove();
+			$("#alreadyfile"+ind).remove();
+			$('#fileType').val('');
+			$('#fileName').val('');
+			$('#fileSize').val('');
+			$('#storePath').val('');
+		
+			index = 1000
+		}
+
+		function removealreadyfile(index,fileid){
+				$('#fileType').val('');
+				$('#fileName').val('');
+				$('#fileSize').val('');
+				$('#storePath').val('');
+				$("#alreadyfile"+index).remove();
+				$("#file_upload").show();
+				index = 1000
+				var delfile ="<input type='hidden' name='delfiles' value='"+fileid+"'/>";
+			$("#filehidden").append(delfile);
+			}
+</script>
+</body>

@@ -1,0 +1,93 @@
+#parse("index/_header.vm")
+</head>
+<body style="padding-bottom:40px;">	
+	<form id="form_id_dc_edit"  class="ui-layout-center ui-dialog-form"  method="post" >
+    	<div class="ui-layout-center">
+  			<ul id="emergencyTree" class="ztree"></ul>
+    	</div>
+		<div class="actions">
+			<button class="hc_btn cancel" onclick="clearChoose()" type="button"><i class="fa fa-close"></i>清空</button>
+		</div>
+    </form>
+<script type="text/javascript">
+	$(document).ready(function(){
+		#if($!{viewOnly} != true)
+		var  _iframe_layout = $('body').layout({
+              defaults: {
+                resizable: true,
+                closable: false,
+                spacing_open: 5
+              }
+            });
+		#end
+	});
+</script>		
+<script type="text/javascript">
+    var setting = {
+	data: {
+		simpleData: {enable: true}
+      },
+      callback: {
+			onClick: function(event, treeId, treeNode) {
+				if(treeNode.isParent){
+				  //dialog.confirm('请选择分组。');
+				  alert("组名不能选择，请选择分组！");
+				  return false;
+				}
+				//debbger;
+				get_el_in_dialog("$!{dialogId}","#"+"$!{txtId}").val(treeNode.id);
+				get_el_in_dialog("$!{dialogId}","#"+"$!{txtName}").val(treeNode.name);
+				resetfocus(get_el_in_dialog("$!{dialogId}","#"+"$!{txtName}").val(treeNode.name));
+    			//var id_v = $("#"+"$!{txtId}",window.parent["emergencyPerson_add_dlg"].document);
+				//id_v.val(treeNode.id);
+				//var id_t = $("#"+"$!{txtName}",window.parent["emergencyPerson_add_dlg"].document);
+				//id_t.val(treeNode.name);  			
+				close_dialog('selectDiloag');
+			}
+		}
+    };
+	var zNodes = [];  
+	zNodes.push({id:"0", pId:"-1", name:"应急分组",url:"",target:""});   
+	#foreach($!{treeNode} in $!{emergencyGroup_tree})
+    	zNodes.push({id:$!{treeNode.id}, pId:$!{treeNode.parentId}, name:"$!{treeNode.groupName}",url:"",target:""});     
+	#end
+ 	$(document).ready(function(){
+  		$.fn.zTree.init($("#emergencyTree"), setting,zNodes).expandAll(true);
+  	});
+
+	function okClick(){
+    	var zTree = $.fn.zTree.getZTreeObj("emergencyTree");
+    	var nodes=zTree.getCheckedNodes(true);
+    	if (nodes.length == 0) {
+    	   alert("未选择");
+		   return false;
+    	}else{
+    		if (parent){
+    			$("#"+"$!{txtId}").val(nodes[0].id);
+    			$("#"+"$!{txtName}").val(nodes[0].name); 
+    		}
+    		
+    	}
+		return true;
+	}
+	function clearChoose(){
+    	if("$!{dialogId}"!=""){
+    		get_el_in_dialog("$!{dialogId}","#$!{txtId}").val("");
+    		get_el_in_dialog("$!{dialogId}","#$!{txtName}").val("");  
+    		resetfocus(get_el_in_dialog("$!{dialogId}","#"+"$!{txtName}").val(""));
+    	}else{
+			var id_v = $("#"+"$!{txtId}",window.parent["_main_frame"].document);
+			id_v.val("");
+			var id_t = $("#"+"$!{txtName}",window.parent["_main_frame"].document);
+			id_t.val("");
+			resetfocus($("#"+"$!{txtName}",window.parent["_main_frame"].document));
+		}
+		//关闭iframe
+		close_dialog('selectDiloag');
+		return true;
+    }
+</script>
+</body>
+</html>
+ 
+ 

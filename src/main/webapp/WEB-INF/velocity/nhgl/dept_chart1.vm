@@ -1,0 +1,529 @@
+<<<<<<< HEAD
+ <script type="text/javascript" src="$!{rc.contextPath}/js_nhgl/echarts_2/esl.js"> </script>
+  <script type="text/javascript" src="$!{rc.contextPath}/js_nhgl/echarts_2/echartsUtil.js"></script>
+ <div class="out" style="width:100%;">
+ ##最上方的固定列表
+=======
+ <script type="text/javascript" src="$!{nhgl_static_hc_url}/echarts_2/esl.js"> </script>
+  <script type="text/javascript" src="$!{nhgl_static_hc_url}/echarts_2/echartsUtil.js"></script>
+ <div class="out" style="width:100%;">
+ ##最上方的固定列表
+>>>>>>> 457de380b8153516088e259188a5962b5f2d5ced
+ <div style="width:100%;">
+	<div class="chart" id="pie$!{flag}" style="height:240px; border: 1px solid #ccc; padding: 10px;float:left;">
+    </div>
+    <div class="chart" id="mix$!{flag}" style="height:240px;border: 1px solid #ccc; padding: 10px;float:left;">
+       </div>	
+  </div>
+	##中间的循环列表
+    <div style="width:100%;">	
+		#foreach($ds in $bmList)
+    	<div class="chart" id="div$!{flag}$velocityCount" style="height:240px; border: 1px solid #ccc; padding: 10px;float:left;">
+    	</div>
+		#end
+      <div>
+    </div>	
+	<div style="width:100%;height:120px;overflow:scroll;">
+		<table class="ui-table" >
+        </table>
+	</div>	
+	</div>
+  <script type="text/javascript">
+  
+<<<<<<< HEAD
+  	var myChart;
+	var option;
+	var width = $(window).width();
+	var height = $(window).height();
+	var div_width = Math.floor(width/2);
+	$(".chart").width(div_width-34);
+  	$(".out").height(height-160);
+  
+  function chartFactory(option,containerId)
+  {
+  	 require.config({
+            paths: {
+                echarts: '$!{rc.contextPath}/nhgl/js_nhgl/echarts/echarts' ,
+            }
+        });
+  	require(
+        [
+            'echarts',
+            'echarts/chart/pie',
+			'echarts/chart/bar',
+		    'echarts/chart/line'
+        ],
+  		function(ec)
+		{
+			 myChart = ec.init(document.getElementById(containerId));
+             myChart.setOption(option);
+		}
+		)
+  }
+ 
+  $(document).ready(function(){
+ 	var contextPath = "$!{rc.contextPath}";
+  	//pie
+	option = {
+        	    title : {
+        	        text: '部门能耗占比图',
+        	      //  subtext: '纯属虚构',
+        	        x:'center'
+        	    },
+        	    tooltip : {
+        	        trigger: 'item',
+        	        formatter: "{a} <br/>{b} : {c} "+electric+" ({d}%)"
+        	    },
+				animation:false,//关闭动画效果提高速度
+        	    legend: {
+        	        orient : 'vertical',
+        	        x : 'right',
+        	        y : 'top',
+        	        data:$!{deptList}
+        	    },
+        	    toolbox: {
+        	        show : true,
+        	        feature : {
+        	            restore : {show: true},
+        	            saveAsImage : {show: true}
+        	        }
+        	    },
+        	    series : [
+        	        {
+        	            name:'部门能耗比',
+        	            type:'pie',
+        	            radius : '60%',
+        	            center: ['50%', 150],
+        	            itemStyle : {
+			                normal : {
+			                    label : {
+			                        position : 'inner',//'outer','inner'
+			                        //下面函数的参数为，a:代表name：访问来源,b各个快的名称，c：对应快的大小。d百分百绝对值
+			                        formatter : function(a,b,c,d) {return b+(d - 0).toFixed(0) + '%'}
+			                    },
+			                    labelLine : {
+			                        show : false
+			                    }
+			                },
+			                emphasis : {
+			                    label : {
+			                        show : true,
+			                        formatter : "{b}\n{d}%"
+			                    }
+			                }
+			            },
+        	            data:$!{pieString}
+        	        }
+        	    ]
+        	};
+		initEcharts("pie$!{flag}",option);
+		//混合图总量
+		option = {
+			 title : {
+        	        text: '总用电量',
+        	       // subtext: '纯属虚构',
+        	        x:'center'
+        	    },
+			    tooltip : {
+			        trigger: 'axis',
+					formatter:"{b} 日<br/>{a} : {c} "+electric+" <br/>{a1} : {c1} "+electric+"<br/>{a2} : {c2} "+temperataure
+			    },
+			    legend: {
+				//orient : 'vertical',
+        	        x : 'right',
+        	        y : 'top',
+			        data:['用电量','上月同期','平均温度']
+			    },
+			    xAxis : [
+			        {
+			            type : 'category',
+			            data : $!{dayList},
+						axisLabel:{
+							interval:0//控制下标完全显示
+						}
+			        }
+			    ],
+			    yAxis : [
+			        {
+			            type : 'value',
+			            name : '电量('+electric+')',
+			            axisLabel : {
+			                formatter: '{value}'//这里可以去掉ml
+			            },
+			            splitArea : {show : true}
+			        },
+			        {
+			            type : 'value',
+			            name : '温度('+temperataure+')',
+			            axisLabel : {
+			                formatter: '{value}'//这里也可以去掉°C
+			            },
+			            splitLine : {show : false}
+			        }
+			    ],
+			    series : [
+			        {
+			            name:'用电量',
+			            type:'bar',
+			            data:$!{now}
+			        },
+			        {
+			            name:'上月同期',
+			            type:'bar',
+			            data:$!{his}
+			        },
+			        {
+			            name:'平均温度',
+			            type:'line',
+			            yAxisIndex: 1,
+			            data:$!{temp}
+			        }
+			    ]
+			};
+		initEcharts("mix$!{flag}",option);
+		//下面是循环创建图表不知道可不可以。尝试下
+		#foreach($da in $nowData)
+			var v = '$da';	
+			var sj = v.split("|");
+			var nw = sj[0].substring(1,sj[0].length-1);
+			var hw = sj[1].substring(1,sj[1].length-1);
+			var tw = sj[2].substring(1,sj[2].length-1);
+			//console.info(nw); 
+			var options = {
+			 title : {
+        	        text: sj[3]+'用电量监测',
+        	       // subtext: '纯属虚构',
+        	        x:'center'
+        	    },
+			    tooltip : {
+			        trigger: 'axis',
+					formatter:"{b} 日<br/>{a} : {c} "+electric+" <br/>{a1} : {c1} "+electric+"<br/>{a2} : {c2} "+temperataure
+			    },
+			    legend: {
+				//orient : 'vertical',
+        	        x : 'right',
+        	        y : 'top',
+			        data:['用电量','上月同期','平均温度']
+			    },
+			    xAxis : [
+			        {
+			            type : 'category',
+			            data : $!{dayList}
+			        }
+			    ],
+			    yAxis : [
+			        {
+			            type : 'value',
+			            name : '电量('+electric+')',
+			            axisLabel : {
+			                formatter: '{value}'//这里可以去掉ml
+			            },
+			            splitArea : {show : true}
+			        },
+			        {
+			            type : 'value',
+			            name : '温度('+temperataure+')',
+			            axisLabel : {
+			                formatter: '{value}'//这里也可以去掉°C
+			            },
+			            splitLine : {show : false}
+			        }
+			    ],
+			    series : [
+			        {
+			            name:'用电量',
+			            type:'bar',
+			            data:nw.split(",")
+			        },
+			        {
+			            name:'上月同期',
+			            type:'bar',
+			            data:hw.split(",")
+			        },
+			        {
+			            name:'平均温度',
+			            type:'line',
+			            yAxisIndex: 1,
+			            data:tw.split(",")
+			        }
+			    ]
+			};
+			initEcharts("div$!{flag}$velocityCount",options);
+		#end
+
+		//下方table
+		var content="<tbody>";
+		var len = 0;
+		#foreach($da in $nowData)
+			var v = '$da';	
+			var sj = v.split("|");
+			var nw = sj[0].substring(1,sj[0].length-1);
+			var arr = nw.split(",");
+			content = content+"<tr><td>"+sj[3]+"</td>";
+			len = arr.length;
+			for(var j=0;j<len;j++)
+			{
+				content = content+"<td>"+arr[j]+"</td>";
+			}
+			content = content+"</tr>";
+		#end
+		content = content+"</tbody>";
+		var head="<thead><tr><td>部门</td>";
+		var days = '$!dayList';//获取的日期
+		var dayArr = days.substring(1,days.length-1);
+		for(var i=0;i<dayArr.split(",").length;i++)
+		{	var k=i+1;
+			head = head+"<td>"+k+"日</td>";
+		}
+		head = head+"</tr></thead>";
+		$(".ui-table").html("").append(head).append(content);
+	})
+  
+	
+	
+=======
+  function chartFactory(option,containerId)
+  {
+  	 require.config({
+            paths: {
+                echarts: '$!{nhgl_static_hc_url}/echarts/echarts' ,
+            }
+        });
+  	require(
+        [
+            'echarts',
+            'echarts/chart/pie',
+			'echarts/chart/bar',
+		    'echarts/chart/line'
+        ],
+  		function(ec)
+		{
+			 myChart = ec.init(document.getElementById(containerId));
+             myChart.setOption(option);
+		}
+		)
+  }
+ 
+  $(document).ready(function(){
+ 	var contextPath = "$!{rc.contextPath}";
+  	//pie
+	option = {
+        	    title : {
+        	        text: '部门能耗占比图',
+        	      //  subtext: '纯属虚构',
+        	        x:'center'
+        	    },
+        	    tooltip : {
+        	        trigger: 'item',
+        	        formatter: "{a} <br/>{b} : {c} "+electric+" ({d}%)"
+        	    },
+				animation:false,//关闭动画效果提高速度
+        	    legend: {
+        	        orient : 'vertical',
+        	        x : 'right',
+        	        y : 'top',
+        	        data:$!{deptList}
+        	    },
+        	    toolbox: {
+        	        show : true,
+        	        feature : {
+        	            restore : {show: true},
+        	            saveAsImage : {show: true}
+        	        }
+        	    },
+        	    series : [
+        	        {
+        	            name:'部门能耗比',
+        	            type:'pie',
+        	            radius : '60%',
+        	            center: ['50%', 150],
+        	            itemStyle : {
+			                normal : {
+			                    label : {
+			                        position : 'inner',//'outer','inner'
+			                        //下面函数的参数为，a:代表name：访问来源,b各个快的名称，c：对应快的大小。d百分百绝对值
+			                        formatter : function(a,b,c,d) {return b+(d - 0).toFixed(0) + '%'}
+			                    },
+			                    labelLine : {
+			                        show : false
+			                    }
+			                },
+			                emphasis : {
+			                    label : {
+			                        show : true,
+			                        formatter : "{b}\n{d}%"
+			                    }
+			                }
+			            },
+        	            data:$!{pieString}
+        	        }
+        	    ]
+        	};
+		initEcharts("pie$!{flag}",option);
+		//混合图总量
+		option = {
+			 title : {
+        	        text: '总用电量',
+        	       // subtext: '纯属虚构',
+        	        x:'center'
+        	    },
+			    tooltip : {
+			        trigger: 'axis',
+					formatter:"{b} 日<br/>{a} : {c} "+electric+" <br/>{a1} : {c1} "+electric+"<br/>{a2} : {c2} "+temperataure
+			    },
+			    legend: {
+				//orient : 'vertical',
+        	        x : 'right',
+        	        y : 'top',
+			        data:['用电量','上月同期','平均温度']
+			    },
+			    xAxis : [
+			        {
+			            type : 'category',
+			            data : $!{dayList},
+						axisLabel:{
+							interval:0//控制下标完全显示
+						}
+			        }
+			    ],
+			    yAxis : [
+			        {
+			            type : 'value',
+			            name : '电量('+electric+')',
+			            axisLabel : {
+			                formatter: '{value}'//这里可以去掉ml
+			            },
+			            splitArea : {show : true}
+			        },
+			        {
+			            type : 'value',
+			            name : '温度('+temperataure+')',
+			            axisLabel : {
+			                formatter: '{value}'//这里也可以去掉°C
+			            },
+			            splitLine : {show : false}
+			        }
+			    ],
+			    series : [
+			        {
+			            name:'用电量',
+			            type:'bar',
+			            data:$!{now}
+			        },
+			        {
+			            name:'上月同期',
+			            type:'bar',
+			            data:$!{his}
+			        },
+			        {
+			            name:'平均温度',
+			            type:'line',
+			            yAxisIndex: 1,
+			            data:$!{temp}
+			        }
+			    ]
+			};
+		initEcharts("mix$!{flag}",option);
+		//下面是循环创建图表不知道可不可以。尝试下
+		#foreach($da in $nowData)
+			var v = '$da';	
+			var sj = v.split("|");
+			var nw = sj[0].substring(1,sj[0].length-1);
+			var hw = sj[1].substring(1,sj[1].length-1);
+			var tw = sj[2].substring(1,sj[2].length-1);
+			//console.info(nw); 
+			var options = {
+			 title : {
+        	        text: sj[3]+'用电量监测',
+        	       // subtext: '纯属虚构',
+        	        x:'center'
+        	    },
+			    tooltip : {
+			        trigger: 'axis',
+					formatter:"{b} 日<br/>{a} : {c} "+electric+" <br/>{a1} : {c1} "+electric+"<br/>{a2} : {c2} "+temperataure
+			    },
+			    legend: {
+				//orient : 'vertical',
+        	        x : 'right',
+        	        y : 'top',
+			        data:['用电量','上月同期','平均温度']
+			    },
+			    xAxis : [
+			        {
+			            type : 'category',
+			            data : $!{dayList}
+			        }
+			    ],
+			    yAxis : [
+			        {
+			            type : 'value',
+			            name : '电量('+electric+')',
+			            axisLabel : {
+			                formatter: '{value}'//这里可以去掉ml
+			            },
+			            splitArea : {show : true}
+			        },
+			        {
+			            type : 'value',
+			            name : '温度('+temperataure+')',
+			            axisLabel : {
+			                formatter: '{value}'//这里也可以去掉°C
+			            },
+			            splitLine : {show : false}
+			        }
+			    ],
+			    series : [
+			        {
+			            name:'用电量',
+			            type:'bar',
+			            data:nw.split(",")
+			        },
+			        {
+			            name:'上月同期',
+			            type:'bar',
+			            data:hw.split(",")
+			        },
+			        {
+			            name:'平均温度',
+			            type:'line',
+			            yAxisIndex: 1,
+			            data:tw.split(",")
+			        }
+			    ]
+			};
+			initEcharts("div$!{flag}$velocityCount",options);
+		#end
+
+		//下方table
+		var content="<tbody>";
+		var len = 0;
+		#foreach($da in $nowData)
+			var v = '$da';	
+			var sj = v.split("|");
+			var nw = sj[0].substring(1,sj[0].length-1);
+			var arr = nw.split(",");
+			content = content+"<tr><td>"+sj[3]+"</td>";
+			len = arr.length;
+			for(var j=0;j<len;j++)
+			{
+				content = content+"<td>"+arr[j]+"</td>";
+			}
+			content = content+"</tr>";
+		#end
+		content = content+"</tbody>";
+		var head="<thead><tr><td>部门</td>";
+		var days = '$!dayList';//获取的日期
+		var dayArr = days.substring(1,days.length-1);
+		for(var i=0;i<dayArr.split(",").length;i++)
+		{	var k=i+1;
+			head = head+"<td>"+k+"日</td>";
+		}
+		head = head+"</tr></thead>";
+		$(".ui-table").html("").append(head).append(content);
+	})
+  
+	
+	
+>>>>>>> 457de380b8153516088e259188a5962b5f2d5ced
+  </script> 
+   

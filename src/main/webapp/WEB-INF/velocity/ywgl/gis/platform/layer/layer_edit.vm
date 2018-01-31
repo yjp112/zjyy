@@ -1,0 +1,364 @@
+#parse("index/_header.vm")
+<style>
+    #tab #tab-title{
+        height:28px;
+        display:block;
+    }
+    #tab-title li{
+        display:block;
+        float:left;
+        padding:4px 6px;
+        margin-right:6px;
+        border: 1px solid #ccc;
+        background: #e3e3e3;
+        cursor: pointer;
+
+    }
+    #tab-title li.k-state-active{
+        background: #fff;
+        color: #444;
+        border-bottom:1px solid #fff;
+    }
+    #tab .tab-content{
+        border: 1px solid #ccc;
+        display:none;
+    }
+    #tab .tab-content.current{
+        display:block;
+    }
+
+    #tab .tab-content .k-grid-content{
+        height:300px;
+    }
+</style>
+</head>
+<body style="">
+<form id="queryForm" class="ui-layout-center ui-dialog-form" method="post"
+      action="$!{rc.contextPath}/hl/gis/platform/layer/save">
+    <input type="hidden" name="id" value="$!{layer.id}"/>
+    <div>
+        <div class="ui-co-seg" style=" width:90%;margin: 0 auto;">
+            <table class="ui-co-table" width="100%">
+                <tr>
+                    <td width="12%" class="label"><span class="ui-form-required">*</span>JS图层编码:</td>
+                    <td width="20%">
+                        <input type="text" class="k-textbox" id="layerCodeJs" name="layerCodeJs"
+                               value="$!layer.layerCodeJs"/>
+                    </td>
+                    <td width="12%" class="label"><span class="ui-form-required">*</span>JS图层名称:</td>
+                    <td width="20%">
+                        <input type="text" class="k-textbox" id="layerNameJs" name="layerNameJs"
+                               value="$!layer.layerNameJs"/>
+                    </td>
+
+                </tr>
+                <tr>
+                    <td width="12%" class="label"><span class="ui-form-required">*</span>GIS图层编码:</td>
+                    <td width="20%">
+                        <input type="text" name="layerCodeGis" class="k-textbox" value="$!{layer.layerCodeGis}"/>
+                    </td>
+                    <td  width="12%"  class="label">含有设备类:</td>
+                    <td  width="20%">
+                        <span id="she_bei" class="k-textbox k-space-right">
+                            <input readonly type="text" onmouseover="this.title=this.value"
+                                   class="k-textbox ui-input-choose" name="names" id="names" value="$!layer.names"/>
+                            <a href="#" class="k-icon k-i-search">&nbsp;</a>
+                        </span>
+                        <input type="hidden" class="k-textbox" name="gSystemRuleIds" id="gSystemRuleIds"
+                               value="$!layer.gSystemRuleIds"/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="ui-co-seg" style=" width:90%;margin: 0 auto; margin-top: 20px;">
+            <div id="tab">
+                <ul id="tab-title">
+                    <li class="tab-1 k-state-active">单击事件</li>
+                    <li class="tab-2">框选事件</li>
+                    <li class="tab-3">飘窗事件</li>
+                </ul>
+                <div  class="tab-content current" id="tab-1"  style="height:180px">
+                    <table width="100%">
+                        <br><br>
+                        <tr>
+                            <td class="label" width="10%">单击事件:</td>
+                            <td width="20%" class="inputText">
+                                <input type="radio" id="click1" class="k-radiobox" name="clickEvent"
+                                       value="0" #if($!{layer.clickEvent} != 1) checked #end/>
+                                <span class="ui-form-text"> 无</span>
+                                <input type="radio" id="click2" class="k-radiobox" name="clickEvent"
+                                       value="1" #if($!{layer.clickEvent} == 1) checked #end/>
+                                <span class="ui-form-text"> 有</span>
+                            </td>
+                            <td width="10%" class="inputText">
+                            </td>
+                            <td width="20%" class="inputText">
+                            </td>
+                        </tr>
+                        <tbody  id="cs1" #if($!{layer.clickEvent} != 1) style="display:none" #end>
+                             <tr>
+                                <td width="10%" class="label">调用方法:</td>
+                                <td width="20%" class="inputText">
+                                    <input class="k-textbox" name="clickFunction" type="text" id="clickFunction"
+                                           style="position:relative;" value="$!layer.clickFunction"/>
+                                </td>
+                                <td width="10%" class="label">弹窗标题:</td>
+                                <td width="20%" class="inputText">
+                                    <input class="k-textbox" name="clickWindowTitle" type="text"
+                                           id="clickWindowTitle" value="$!layer.clickWindowTitle"/></td>
+                            </tr>
+                            <tr>
+                                <td width="10%" class="label">弹窗宽度:</td>
+                                <td width="20%" class="inputText">
+                                    <input class="k-textbox" name="clickWindowW" type="text" id="clickWindowW"
+                                           value="$!layer.clickWindowW"/></td>
+                                <td class="label"  width="10%">弹窗高度:</td>
+                                <td class="inputText"  width="20%">
+                                    <input class="k-textbox" name="clickWindowH" type="text" id="clickWindowH"
+                                           value="$!layer.clickWindowH"/></td>
+                            </tr>
+
+                        </tr>
+                     </tbody>
+                    </table>
+                </div>
+                <div  class="tab-content" id="tab-2" style="height:180px">
+                    <table width="100%">
+                        <br><br>
+                        <tr>
+                            <td class="label" width="10%">框选事件:</td>
+                            <td width="20%" class="inputText">
+                                <input type="radio" id="circle1" class="k-radiobox" name="circleEvent"
+                                       value="0" #if($!{layer.circleEvent} != 1) checked #end/>
+                                <span class="ui-form-text"> 无</span>
+                                <input type="radio" id="circle2" class="k-radiobox" name="circleEvent"
+                                       value="1" #if($!{layer.circleEvent} == 1) checked #end/>
+                                <span class="ui-form-text"> 有</span>
+                            </td>
+                            <td width="10%" class="inputText">
+                            </td>
+                            <td width="20%" class="inputText">
+                            </td>
+                        </tr>
+                        <tr>
+                            <tbody id="cs2" #if($!{layer.circleEvent} != 1) style="display:none" #end width="100%">
+                                <tr>
+                                    <td width="10%" class="label">调用方法:</td>
+                                    <td width="20%" class="inputText">
+                                        <input class="k-textbox" name="circleFunction" type="text" id="circleFunction"
+                                               style="position:relative;" value="$!layer.circleFunction"/>
+                                    </td>
+                                    <td width="10%" class="label">弹窗标题:</td>
+                                    <td width="20%" class="inputText">
+                                        <input class="k-textbox" name="circleWindowTitle" type="text"
+                                               id="circleWindowTitle" value="$!layer.circleWindowTitle"/></td>
+                                </tr>
+                                <tr>
+                                    <td width="10%" class="label">弹窗宽度:</td>
+                                    <td width="20%" class="inputText">
+                                        <input class="k-textbox" name="circleWindowW" type="text" id="circleWindowW"
+                                               value="$!layer.circleWindowW"/></td>
+                                    <td class="label">弹窗高度:</td>
+                                    <td class="inputText">
+                                        <input class="k-textbox" name="circleWindowH" type="text" id="circleWindowH"
+                                               value="$!layer.circleWindowH"/></td>
+                                </tr>
+                            </tbody>
+                        </tr>
+                    </table>
+                </div>
+                <div  class="tab-content" id="tab-3" style="height:180px">
+                    <table width="100%">
+                        <br><br>
+                        <tr>
+                            <td class="label" width="10%">飘窗事件:</td>
+                            <td width="20%" class="inputText">
+                                <input type="radio" id="pop1" class="k-radiobox" name="pop"
+                                       value="0" #if($!{layer.pop} != 1) checked #end/>
+                                <span class="ui-form-text"> 无</span>
+                                <input type="radio" id="pop2" class="k-radiobox" name="pop"
+                                       value="1" #if($!{layer.pop} == 1) checked #end/>
+                                <span class="ui-form-text"> 有</span>
+                            </td>
+                            <td width="10%" class="inputText">
+                            </td>
+                            <td width="20%" class="inputText">
+                            </td>
+                        </tr>
+                        <tr>
+                            <tbody id="cs3" #if($!{layer.pop} != 1) style="display:none" #end width="100%">
+                                <tr>
+                                    <td width="10%" class="label">弹窗宽度:</td>
+                                    <td width="20%" class="inputText">
+                                        <input class="k-textbox" name="popWindowW" type="text" id="popWindowW"
+                                               value="$!layer.popWindowW"/>
+                                    </td>
+                                    <td width="10%" class="label">弹窗高度:</td>
+                                    <td width="20%" class="inputText">
+                                        <input class="k-textbox" name="popWindowH" type="text" id="popWindowH"
+                                               value="$!layer.popWindowH"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="actions">
+            <button class="k-primary hc_btn k-button" id="layer_edit1" type="submit"><i class="fa fa-save"></i>保 存
+            </button>
+            <button class="hc_btn cancel" onclick="close_dialog('layer_add_dlg')" type="button"><i
+                    class="fa fa-close"></i>取 消
+            </button>
+        </div>
+    </div>
+</form>
+<script>
+
+    $(document).ready(function () {
+        _iframe_layout = $('body').layout({
+            defaults: {
+                resizable: true,
+                closable: false,
+                spacing_open: 5
+            }
+        });
+        initButton();
+        $("#tab li").click(function(){
+            $("#tab li").removeClass("k-state-active");
+            var indextab = $(this).attr("class");
+            $(this).addClass("k-state-active");
+            $("#tab .tab-content").removeClass("current");
+            var indextabC = '#' + indextab;
+            $(indextabC).addClass("current");
+        });
+
+        $("#queryForm").validator({
+            fields: {
+                layerCodeJs: "JS图层编码:required;length[~32]",
+                layerNameJs: "JS图层名称:required;length[~32]",
+                layerCodeGis: "GIS图层编码:required;length[~32]",
+                gSystemRuleIds: "length[~500]",
+                clickFunction: "length[~50]",
+                clickWindowTitle: "length[~50]",
+                circleFunction: "length[~50]",
+                circleWindowTitle: "length[~50]",
+                clickWindowW: "digits;range[1~1500]",
+                circleWindowW: "digits;range[1~1500]",
+                popWindowW: "digits;range[1~1500]",
+                clickWindowH: "digits;range[1~1500]",
+                circleWindowH: "digits;range[1~1500]",
+                flashW: "digits;range[1~1500]",
+                flashH: "digits;range[1~1500]",
+                popWindowH: "digits;range[1~1500]"
+            },
+            valid: function (form) {
+                form_btn_submit($("#layer_edit"), form, function (res) {
+                    validateCallback(res, "grid", "layer_add_dlg");
+                });
+            }
+        });
+        $("#she_bei").click(function () {
+            quick_dialog("selectDiloag", "选择设备类", "$!{rc.contextPath}/hl/gis/platform/systemRule/lookup?txtId=gSystemRuleIds&txtName=names&type=2&dialogId=layer_add_dlg", 230, 300);
+        })
+
+        $("input[name='clickEvent']").click(function () {
+            var id = $(this).val();
+            if (id == '0') {
+                $("#cs1").css("display", "none");
+            } else {
+                $("#cs1").css("display", "");
+
+            }
+        })
+
+        $("input[name='circleEvent']").click(function () {
+            var id = $(this).val();
+            if (id == '0') {
+                $("#cs2").css("display", "none");
+            } else {
+                $("#cs2").css("display", "");
+
+            }
+        })
+
+        $("input[name='pop']").click(function () {
+            var id = $(this).val();
+            if (id == '0') {
+                $("#cs3").css("display", "none");
+            } else {
+                $("#cs3").css("display", "");
+            }
+        })
+
+        function initButton(){
+            $("#clickFunction").hcAutoComplete({
+                height: 100,
+                template: '<span class="k-state-default">#: data.enumValue #(#: data.enumText #)</span>',
+                dataTextField: "enumValue",
+                dataSource: {
+                    transport: {
+                        read: {
+                            dataType: "json",
+                            url: "$!{rc.contextPath}/hl/gis/platform/layer/clickFunctionAuto"
+                        }
+                    }
+                }
+            });
+            var menuTypeAutoComplete = $("#clickFunction").data("kendoAutoComplete");
+            // 再次focus 时显示所有匹配提示信息
+            $("#clickFunction").focus(function () {
+                menuTypeAutoComplete.search($("#clickFunction").val());
+            })
+
+            $("#circleFunction").hcAutoComplete({
+                height: 100,
+                template: '<span class="k-state-default">#: data.enumValue #(#: data.enumText #)</span>',
+                dataTextField: "enumValue",
+                dataSource: {
+                    transport: {
+                        read: {
+                            dataType: "json",
+                            url: "$!{rc.contextPath}/hl/gis/platform/layer/circleFunctionAuto"
+                        }
+                    }
+                }
+            });
+            var circleAutoComplete = $("#circleFunction").data("kendoAutoComplete");
+            // 再次focus 时显示所有匹配提示信息
+            $("#circleFunction").focus(function () {
+                circleAutoComplete.search($("#circleFunction").val());
+            });
+        }
+    });
+
+    $("#layer_edit1").click(function () {
+        if (document.getElementById("click1").checked) {
+            $("#clickFunction").val("");
+            $("#clickWindowTitle").val("");
+            $("#clickWindowW").val("");
+            $("#clickWindowH").val("");
+            $("#flashW").val("");
+            $("#flashH").val("");
+        }
+        if (document.getElementById("circle1").checked) {
+            $("#circleFunction").val("");
+            $("#circleWindowTitle").val("");
+            $("#circleWindowW").val("");
+            $("#circleWindowH").val("");
+        }
+        if (document.getElementById("pop1").checked) {
+            $("#popWindowW").val("");
+            $("#popWindowH").val("");
+        }
+    });
+
+
+    #if($!viewOnly)
+        setAllReadonly();
+    #end
+</script>
+</body>
+</html>
+ 

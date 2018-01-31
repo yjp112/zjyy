@@ -1,0 +1,135 @@
+<div class="ui-layout-center" id="subMain">
+	<div class="ui-layout-center">
+		<table id="ngArea_list" class="fn-hide"></table>
+	</div>
+	<div class="ui-layout-north">
+		<div class="ui-module-name">其他分类管理</div>
+		<form id="ngArea_list_search" class="ui-form ui-form-search fn-clear">
+			<input id="treeId" type="hidden" name="treeId" value="$!{treeId}">
+			<div class="ui-form-search-left">
+				<div class="ui-form-item">
+					<label class="ui-label">分类编码：</label>
+					<input class="ui-input" type="text" name="code">
+				</div>
+				<div class="ui-form-item">
+					<label class="ui-label">分类名称：</label>
+					<input class="ui-input" type="text" name="name">
+				</div>
+			</div>
+			<div class="ui-form-search-right">
+				<button type="submit" id="queryBtn" class="btn btn-primary"><i class="iconfont icon-search"></i> 查&nbsp;询</button>
+			</div>
+		</form>
+	</div>
+</div>
+<div class="ui-layout-west">
+    <div id="ngArea_box" class="ui-box">
+		<div class="ztree-header">
+			<div class="ztree-title">其他分类树</div>
+		</div>
+		<div class="ui-box-container">
+			<ul id="NgAreaTree" class="ztree"></ul>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+var setting = {
+ 		 check: {
+				enable: false
+			},
+		data: {
+			simpleData: {
+				enable: true
+			}
+		},
+		callback: {
+			onClick: onClick
+		}
+  	 };
+   	 var zNodes = [];
+	 #foreach($!{treeNode} in $!{treeList})
+		zNodes.push({id:"$!{treeNode.id}", pId:"$!{treeNode.parentId}", name:"$!{treeNode.name}"});     
+	#end
+	 function onClick(event, treeId, treeNode) {
+	  $('#treeId').val(treeNode.id);
+		$("#queryBtn").click();
+	 }
+	$(document).ready(function(){
+		// debugger;
+		if(T.innerLayout&&!T.innerLayout.destroyed){
+			T.innerLayout.destroy();
+		}
+		T.innerLayout = $("#centerMain").layout({
+	        defaults : {
+	            resizable : false,
+	            closable : false,
+	            spacing_open : 5
+	        },
+	        west : {
+	            size : 250,
+	            resizable : true,
+	            resizerTip : "移动改变大小",
+	            closable : true,
+	            togglerTip_open : "隐藏",
+	            togglerTip_closed : "打开"
+	        },
+	        onresize_end : function(){
+	            $("#ngArea_box").box("resize");
+	        }
+   		 });
+    	_content_layouts.push(T.innerLayout);
+		_inner_layout=$("#subMain").layout({
+			defaults:{
+				resizabel:false,
+				closable: false,
+				spacing_open:5
+			},
+			onresize_end:function(){
+				$("#ngArea_list").datagridResize({width:_inner_layout.state.center.innerWidth,height:_inner_layout.state.center.innerHeight});
+			}
+		});
+		$("#ngArea_box").box({
+        	width : function(){return T.innerLayout.state.west.innerWidth;},
+        	height : function(){return T.innerLayout.state.west.innerHeight-26;}
+    	});
+    	$.fn.zTree.init($("#NgAreaTree"), setting, zNodes).expandAll(true);
+		var ngArea_datagrid=$("#ngArea_list").datagrid({
+			url:'$!{rc.contextPath}/nhgl/basic/otherCategory/list',
+			dataType: "json",
+			method: "POST",
+			singleSelected : true,
+			striped : false,
+			height:  _inner_layout.center.state.innerHeight,
+			width :  _inner_layout.center.state.innerWidth,
+			showOrderNumber : true,
+			useRp : true,
+			usepager: true,
+    		rpOptions: [10, 20, 40, 50],
+    		pageSize: 20,
+    		searchFormId:"ngArea_list_search",
+    		searchCallback:function(datagrid){},
+    		onSuccess:function(table,grid){
+    			if(!grid)return ;
+    		},
+    		colModel:[
+    			{"display":"序号"},
+    			{display: "分类编码", name: "code",onclick:function(row,a){
+    				$.dialogs.normalDialog("ngArea_view_dlg","$!{rc.contextPath}/nhgl/basic/ngArea/edit?viewOnly=true&id="+row.id,function(dlg,btn){
+    					return false;
+    				},680,250,"查看",null,false,"关闭")
+    			}},
+    			{display: "分类名称",name:"name", class:"aa",width:150,align:"left"},
+	            {display: "全称", name: "fullLevelName",width:200},
+	            {display: "人数", name: "persons",width:150,align:"right"},
+	            {display: "面积", name: "area",width:150,align:"right"},
+	            {display: "备注", name: "remark",width:200}
+    		],
+    		buttons : [
+	            	#data_grid_buttons("JCGL_QTFL")#end
+	        ]
+		});
+	
+            
+	});
+	
+</script> 

@@ -1,0 +1,329 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.base.entities.Document">
+
+	<resultMap type="com.supconit.base.entities.Document"
+		id="DocumentResultMap">
+		<id property="id" column="ID" />
+		<result property="processInstanceId" column="PROCESS_INSTANCE_ID" />
+        <result property="docType" column="DOC_TYPE" />
+        <result property="areaId" column="AREA_ID" />
+        <result property="categoryId" column="CATEGORY_ID" />
+        <result property="docNo" column="DOC_NO" />
+        <result property="docTitle" column="DOC_TITLE" />
+        <result property="docKey" column="DOC_KEY" />
+        <result property="abstracr" column="ABSTRACR" />
+        <result property="location" column="LOCATION" />
+        <result property="fileType" column="FILE_TYPE" />
+        <result property="fileName" column="FILE_NAME" />
+        <result property="fileSize" column="FILE_SIZE" />
+        <result property="storePath" column="STORE_PATH" />
+        <result property="remark" column="REMARK" />
+        <result property="status" column="STATUS" />
+        <result property="times" column="TIMES" />
+        <result property="createId" column="CREATE_ID" />
+        <result property="creator" column="CREATOR" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="updateId" column="UPDATE_ID" />
+        <result property="updator" column="UPDATOR" />
+        <result property="updateDate" column="UPDATE_DATE" />
+        <result property="categoryName" column="CATEGORY_NAME" />
+        <result property="areaName" column="AREA_NAME" />
+        
+        <result property="deviceId" column="DEVICE_ID" />
+	</resultMap>
+
+
+	<sql id="TABLE_NAME" lang="velocity">DOCUMENT</sql>
+	<sql id="SEQUENCE" lang="velocity">
+		SELECT SEQ_<include refid="TABLE_NAME" />.NEXTVAL FROM DUAL
+	</sql>
+	<sql id="SELECT_PRE" lang="velocity">
+		select
+			a.ID,
+			a.PROCESS_INSTANCE_ID,
+			a.DOC_TYPE,
+			a.AREA_ID,
+			a.AREA_NAME,
+			a.CATEGORY_ID,
+			a.CATEGORY_NAME,
+			a.DOC_NO,
+			a.DOC_TITLE,
+			a.DOC_KEY,
+			a.ABSTRACR,
+			a.LOCATION,
+			a.FILE_TYPE,
+			a.FILE_NAME,
+			a.FILE_SIZE,
+			a.STORE_PATH,
+			a.REMARK,
+			a.STATUS,
+			a.TIMES,
+			a.CREATE_ID,
+			a.CREATOR,
+			a.CREATE_DATE,
+			a.UPDATE_ID,
+			a.UPDATOR,
+			a.UPDATE_DATE,
+			a.DEVICE_ID
+          FROM <include refid="TABLE_NAME" /> a
+          LEFT JOIN DEVICE d ON a.DEVICE_ID = d.ID
+	</sql>
+	<sql id="COUNT_PRE" lang="velocity">
+		SELECT COUNT(1) FROM
+		<include refid="TABLE_NAME" />
+	</sql>
+
+	<sql id="SEARCH_CONDITION_SQL" lang="velocity">
+		<![CDATA[
+		#where()
+				#if($_parameter.condition.docNo && $_parameter.condition.docNo != '')
+					AND a.DOC_NO 
+										#set($_docNo = '%' + $_parameter.condition.docNo + '%')
+						LIKE @{_docNo,jdbcType=VARCHAR}				
+				
+				#end
+				#if($_parameter.condition.categoryIds && $_parameter.condition.categoryIds.size() > 0 )
+					#set($categoryIds =$_parameter.condition.categoryIds)
+					AND
+					#repeat( $categoryIds $id "," " a.CATEGORY_ID IN (" ")" )
+			    		@{id,jdbcType=NUMERIC}
+					#end
+					
+				#end
+				#if($_parameter.condition.areaIds && $_parameter.condition.areaIds.size() > 0 )
+					#set($areaIds =$_parameter.condition.areaIds)
+					AND
+					#repeat( $areaIds $id "," " a.AREA_ID IN (" ")" )
+			    		@{id,jdbcType=NUMERIC}
+					#end
+					
+				#end
+				#if($_parameter.condition.docTitle && $_parameter.condition.docTitle != '')
+					AND a.DOC_TITLE 
+										#set($_docTitle = '%' + $_parameter.condition.docTitle + '%')
+						LIKE @{_docTitle,jdbcType=VARCHAR}				
+				
+				#end
+				#if($_parameter.condition.docKey && $_parameter.condition.docKey != '')
+					AND a.DOC_KEY 
+										#set($_docKey = '%' + $_parameter.condition.docKey + '%')
+						LIKE @{_docKey,jdbcType=VARCHAR}				
+				
+				#end
+				#if($_parameter.condition.creator && $_parameter.condition.creator != '')
+					AND a.CREATOR = @{_creator,jdbcType=VARCHAR}				
+				
+				#end
+				#if($_parameter.condition.docType && $_parameter.condition.docType != 0)
+					AND a.DOC_TYPE = @{_parameter.condition.docType,jdbcType=NUMERIC}				
+				
+				#end
+				#if($_parameter.condition.deviceId && $_parameter.condition.deviceId != '')
+					AND a.DEVICE_ID = @{_parameter.condition.deviceId,jdbcType=NUMERIC}				
+				
+				#end
+				#if($_parameter.condition.deviceCode && $_parameter.condition.deviceCode != '')
+					AND d.DEVICE_CODE = @{_parameter.condition.deviceCode,jdbcType=VARCHAR}				
+				
+				#end
+				#if($_parameter.condition.startTime && $_parameter.condition.startTime != '')
+					AND a.CREATE_DATE>=@{_parameter.condition.startTime,jdbcType=TIMESTAMP}
+				#end
+				#if($_parameter.condition.endTime && $_parameter.condition.endTime != '')
+					AND a.CREATE_DATE<=@{_parameter.condition.endTime,jdbcType=TIMESTAMP} 
+				#end
+				
+		#end
+		]]>
+	</sql>
+
+	<select id="getById" resultMap="DocumentResultMap"
+		parameterType="long" lang="velocity">
+		<include refid="SELECT_PRE" />
+		WHERE a.ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+
+	<select id="selectPager" lang="velocity" resultMap="DocumentResultMap"  databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE" />
+		<include refid="SELECT_PRE" />
+		<include refid="SEARCH_CONDITION_SQL" />
+		#order($_parameter.condition,"a.ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER" />
+	</select>
+
+	<select id="selectPager" lang="velocity" resultMap="DocumentResultMap"
+		databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE" />
+		select
+			a.ID,
+			a.PROCESS_INSTANCE_ID,
+			a.DOC_TYPE,
+			a.AREA_ID,
+			a.AREA_NAME,
+			a.CATEGORY_ID,
+			a.CATEGORY_NAME,
+			a.DOC_NO,
+			a.DOC_TITLE,
+			a.DOC_KEY,
+			a.ABSTRACR,
+			a.LOCATION,
+			a.FILE_TYPE,
+			a.FILE_NAME,
+			a.FILE_SIZE,
+			a.STORE_PATH,
+			a.REMARK,
+			a.STATUS,
+			a.TIMES,
+			a.CREATE_ID,
+			a.CREATOR,
+			a.CREATE_DATE,
+			a.UPDATE_ID,
+			a.UPDATOR,
+			a.UPDATE_DATE,
+			a.DEVICE_ID
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" />
+		#order($_parameter.condition,"a.ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME" /> a
+		LEFT JOIN DEVICE d ON a.DEVICE_ID = d.ID
+		<include refid="SEARCH_CONDITION_SQL" />
+		<include refid="_PUBLIC_V.PAGER_AFTER" />
+	</select>
+
+	<select id="countPager" lang="velocity" resultType="long">
+		<include refid="COUNT_PRE" />
+		<include refid="SEARCH_CONDITION_SQL" />
+	</select>
+	<select id="findByDocNo" resultMap="DocumentResultMap" parameterType="string">
+		<include refid="SELECT_PRE" />
+		where DOC_NO = #{docNo}
+	</select>
+   <select id="countByDocNo" parameterType="com.supconit.base.entities.Document"  resultType="long" lang="velocity">
+        <include refid="COUNT_PRE"/>
+        WHERE DOC_NO = @{_parameter.docNo,jdbcType=VARCHAR}
+    </select>
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO
+		<include refid="TABLE_NAME" />
+		(
+		#if($_databaseId == 'oracle') ID,#end
+			PROCESS_INSTANCE_ID,
+			DEVICE_ID,
+			DOC_TYPE,
+			AREA_ID,
+			AREA_NAME,
+			CATEGORY_ID,
+			CATEGORY_NAME,
+			DOC_NO,
+			DOC_TITLE,
+			DOC_KEY,
+			ABSTRACR,
+			LOCATION,
+			FILE_TYPE,
+			FILE_NAME,
+			FILE_SIZE,
+			STORE_PATH,
+			REMARK,
+			STATUS,
+			TIMES,
+			CREATE_ID,
+			CREATOR,
+			CREATE_DATE
+		) VALUES (
+		#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end
+		    @{_parameter.processInstanceId,jdbcType=VARCHAR}, 
+		    @{_parameter.deviceId,jdbcType=NUMERIC},    
+	        @{_parameter.docType,jdbcType=NUMERIC},
+	        @{_parameter.areaId,jdbcType=NUMERIC}, 
+	        @{_parameter.areaName,jdbcType=VARCHAR},    
+	        @{_parameter.categoryId,jdbcType=NUMERIC}, 
+	        @{_parameter.categoryName,jdbcType=VARCHAR},       
+	        @{_parameter.docNo,jdbcType=VARCHAR},       
+	        @{_parameter.docTitle,jdbcType=VARCHAR},   
+	        @{_parameter.docKey,jdbcType=VARCHAR},          
+	        @{_parameter.abstracr,jdbcType=VARCHAR},             
+	        @{_parameter.location,jdbcType=VARCHAR},    
+	        @{_parameter.fileType,jdbcType=VARCHAR},        
+	        @{_parameter.fileName,jdbcType=VARCHAR},    
+	        @{_parameter.fileSize,jdbcType=NUMERIC},        
+	        @{_parameter.storePath,jdbcType=VARCHAR},       
+	        @{_parameter.remark,jdbcType=VARCHAR},   
+	        @{_parameter.status,jdbcType=NUMERIC},           
+	        @{_parameter.times,jdbcType=NUMERIC},             
+	        @{_parameter.createId,jdbcType=NUMERIC},        
+	        @{_parameter.creator,jdbcType=VARCHAR},          
+	        @{_parameter.createDate,jdbcType=TIMESTAMP}	     
+		)                                                    
+	</sql>                                                  
+                                                             
+	<insert id="insert" parameterType="com.supconit.base.entities.Document"                    
+		keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>
+		<include refid="INSERT_SQL" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.base.entities.Document"
+		keyProperty="id" keyColumn="ID" lang="velocity">
+		<include refid="INSERT_SQL" />
+		<selectKey keyProperty="id" resultType="long" order="AFTER">
+			<include refid="_PUBLIC_V.SELECT_KEY" />
+		</selectKey>
+	</insert>
+
+	<update id="update" parameterType="com.supconit.base.entities.Document"
+		lang="velocity">
+		UPDATE
+		<include refid="TABLE_NAME" />
+		#mset()
+		<![CDATA[
+		 			#if($_parameter.processInstanceId && $_parameter.processInstanceId !='')PROCESS_INSTANCE_ID = @{_parameter.processInstanceId,jdbcType=VARCHAR},#end					    
+			        #if($_parameter.deviceId && $_parameter.deviceId !='')DEVICE_ID =  @{_parameter.deviceId,jdbcType=NUMERIC},#end      	            
+			        #if($_parameter.docType && $_parameter.docType !='')DOC_TYPE =  @{_parameter.docType,jdbcType=NUMERIC},#end      	            
+			        #if($_parameter.areaId)AREA_ID = @{_parameter.areaId,jdbcType=NUMERIC},#end 
+			        #if($_parameter.areaName)AREA_NAME =  @{_parameter.areaName,jdbcType=VARCHAR},#end                  	                
+			        #if($_parameter.categoryId)CATEGORY_ID = @{_parameter.categoryId,jdbcType=NUMERIC},#end                 	                
+			        #if($_parameter.categoryName)CATEGORY_NAME =  @{_parameter.categoryName,jdbcType=VARCHAR},#end  
+			        #if($_parameter.docNo && $_parameter.docNo !='')DOC_NO = @{_parameter.docNo,jdbcType=VARCHAR},#end   	               
+			   		#if($_parameter.docTitle && $_parameter.docTitle !='')DOC_TITLE = @{_parameter.docTitle,jdbcType=VARCHAR},#end      	           
+			        #if($_parameter.docKey && $_parameter.docKey !='')DOC_KEY = @{_parameter.docKey,jdbcType=VARCHAR},#end      	                  
+			        #if($_parameter.abstracr)ABSTRACR =  @{_parameter.abstracr,jdbcType=VARCHAR},#end                 	                    
+			        #if($_parameter.location && $_parameter.location !='')LOCATION = @{_parameter.location,jdbcType=VARCHAR},#end   	            
+			        #if($_parameter.fileType && $_parameter.fileType !='')FILE_TYPE =  @{_parameter.fileType,jdbcType=VARCHAR},#end       	               
+			        #if($_parameter.fileName)FILE_NAME =  @{_parameter.fileName,jdbcType=VARCHAR},#end                                       	           
+			        #if($_parameter.fileSize)FILE_SIZE = @{_parameter.fileSize,jdbcType=NUMERIC}, #end                                 	               
+			        #if($_parameter.storePath)STORE_PATH = @{_parameter.storePath,jdbcType=VARCHAR},#end              	               
+			        REMARK = @{_parameter.remark,jdbcType=VARCHAR},     
+					#if($_parameter.status)STATUS = @{_parameter.status,jdbcType=NUMERIC},#end                                 	               
+			        #if($_parameter.times != 0)TIMES = @{_parameter.times,jdbcType=NUMERIC},#end  
+			        #if($_parameter.updateId)UPDATE_ID = @{_parameter.updateId,jdbcType=NUMERIC},#end                                   	                  
+			        #if($_parameter.updator)UPDATOR = @{_parameter.updator,jdbcType=VARCHAR},#end                                       	                     
+			        #if($_parameter.updateDate)UPDATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end   
+		]]>
+		#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+
+	<delete id="deleteById" parameterType="long" lang="velocity">
+		DELETE FROM
+		<include refid="TABLE_NAME" />
+		WHERE ID = @{_parameter,jdbcType=NUMERIC}
+	</delete>
+	<delete id="deleteByIds">
+		DELETE FROM
+		<include refid="TABLE_NAME" />
+	    WHERE ID IN    
+	        <foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+				#{id,jdbcType=NUMERIC}
+			</foreach>
+	</delete>
+
+	<select id="getByDeviceId" resultMap="DocumentResultMap" parameterType="long" lang="velocity">
+		<include refid="SELECT_PRE" />
+		WHERE a.DEVICE_ID = @{_parameter.deviceId, jdbcType=BIGINT}
+	</select>
+</mapper>

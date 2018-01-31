@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.inspection.entities.InspectionItem">
+	<resultMap type="com.supconit.inspection.entities.InspectionItem" id="inspectionItemResultMap">      
+        <result property="id" column="ID"/>
+        <result property="deviceId" column="DEVICE_ID"/>
+       	<result property="itemContent" column="ITEM_CONTENT"/>
+       	<result property="startTime" column="START_TIME"/>
+       	<result property="cycle" column="CYCLE"/>
+       	<result property="cycleUnit" column="CYCLE_UNIT"/>
+       	<result property="cycleUnits" column="CYCLE_UNIT"/>
+       	<result property="inspectionGroupId" column="INSPECTION_GROUP_ID"/>
+       	<result property="inspectionGroupName" column="INSPECTION_GROUP_NAME"/>
+       	<result property="remark" column="REMARK"/>
+       	<result property="createId" column="CREATE_ID" />
+	    <result property="creator" column="CREATOR" />
+	    <result property="createDate" column="CREATE_DATE" />
+	    <result property="updateId" column="UPDATE_ID" />
+	    <result property="updator" column="UPDATOR" />
+	    <result property="updateDate" column="UPDATE_DATE" />
+	    <result property="deviceName" column="DEVICE_NAME" />
+	    <result property="locationName" column="LOCATION_NAME" />
+	    <result property="deviceCode" column="DEVICE_CODE" />
+	    <result property="deviceSpec" column="DEVICE_SPEC" />
+	    <result property="useDepartmentName" column="DEPT_NAME" />
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">INSPECTION_ITEM</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	<sql id="select_pre" lang="velocity">
+		SELECT
+			a.*,
+			d.DEVICE_NAME,
+			d.LOCATION_NAME
+		FROM <include refid="TABLE_NAME"/> a
+		LEFT JOIN DEVICE d ON a.DEVICE_ID = d.ID
+	</sql>
+	
+	<sql id="count_pre" lang="velocity">SELECT COUNT(*) FROM <include refid="TABLE_NAME"/> a LEFT JOIN DEVICE d ON a.DEVICE_ID = d.ID </sql>
+	
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			#if($_p.deviceCode && $_p.deviceCode != '')
+				#set($_deviceCode = '%' + $_p.deviceCode + '%')
+				AND d.DEVICE_CODE LIKE @{_deviceCode} ESCAPE '/'  
+			#end
+			#if($_p.deviceName && $_p.deviceName != '')
+				#set($_deviceName = '%' + $_p.deviceName + '%')
+				AND d.DEVICE_NAME LIKE @{_deviceName} ESCAPE '/' 
+			#end
+			#if($_p.cycleUnit)
+				#set($_cycleUnit = $_p.cycleUnit)
+				AND a.CYCLE_UNIT = @{_cycleUnit}
+			#end
+			#if($_p.beginTime && $_p.beginTime != '')
+				#set($_beginTime = $_p.beginTime)
+				AND a.CREATE_DATE >= @{_beginTime,jdbcType=TIMESTAMP}
+			#end
+			#if($_p.endTime && $_p.endTime != '')
+				#set($_endTime = $_p.endTime)
+				AND a.CREATE_DATE <= @{_endTime,jdbcType=TIMESTAMP}
+			#end
+			#if($_p.deviceCategoryChildIds && $_p.deviceCategoryChildIds.size()>0)
+				#set($_deviceCategoryChildIds =$_p.deviceCategoryChildIds)
+				AND 
+				#repeat( $_deviceCategoryChildIds $id "," " d.CATEGORY_ID IN (" ")" )
+					@{id,jdbcType=BIGINT}
+				#end
+			#end
+			#if($_p.geoAreaChildIds && $_p.geoAreaChildIds.size()>0)
+				#set($_geoAreaChildIds =$_p.geoAreaChildIds)
+				AND 
+				#repeat( $_geoAreaChildIds $id "," " d.LOCATION_ID IN (" ")" )
+					@{id,jdbcType=BIGINT}
+				#end
+			#end
+		#end
+		]]>	
+    </sql>
+	
+    <!-- 插入记录-->
+    <sql id="insert_sql" lang="velocity">
+        INSERT INTO <include refid="TABLE_NAME"/>(
+	        #if($_databaseId == 'oracle') ID, #end 
+	        DEVICE_ID, 
+	        ITEM_CONTENT,
+	        START_TIME,
+	        CYCLE,
+	        CYCLE_UNIT,
+	        INSPECTION_GROUP_ID,
+	        INSPECTION_GROUP_NAME,
+	        REMARK,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE
+	    ) VALUES
+	    ( 
+	        #if($_databaseId == 'oracle') SEQ_<include refid="TABLE_NAME"/>.NEXTVAL, #end
+	        @{_parameter.deviceId,jdbcType=BIGINT},
+	        @{_parameter.itemContent,jdbcType=VARCHAR},
+	        @{_parameter.startTime,jdbcType=TIMESTAMP},
+	        @{_parameter.cycle,jdbcType=INTEGER},
+	        @{_parameter.cycleUnit,jdbcType=INTEGER},
+	        @{_parameter.inspectionGroupId,jdbcType=BIGINT},
+	        @{_parameter.inspectionGroupName,jdbcType=VARCHAR},
+	        @{_parameter.remark,jdbcType=VARCHAR},
+	        @{_parameter.createId,jdbcType=BIGINT},
+	        @{_parameter.creator,jdbcType=VARCHAR},
+	        @{_parameter.createDate,jdbcType=TIMESTAMP}
+	    )
+    </sql>
+    
+    <insert id="insert" parameterType="com.supconit.inspection.entities.InspectionItem" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="insert_sql" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.inspection.entities.InspectionItem" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    
+	<!-- 更新记录-->
+	<update id="update"  parameterType="com.supconit.inspection.entities.InspectionItem" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+			#mset()
+				<![CDATA[
+			       
+			    ]]>
+			#end
+		WHERE ID = @{_parameter.id,jdbcType=BIGINT}
+	</update>
+	
+	<update id="updateStartTimeByDeviceId"  parameterType="com.supconit.inspection.entities.InspectionItem" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+			#mset()
+				<![CDATA[
+			       #if($_parameter.startTime)START_TIME = @{_parameter.startTime,jdbcType=TIMESTAMP},#end
+			    ]]>
+			#end
+		WHERE DEVICE_ID = @{_parameter.deviceId,jdbcType=BIGINT}
+	</update>
+	
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.inspection.entities.InspectionItem" resultMap="inspectionItemResultMap" lang="velocity" databaseId="oracle">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre"/>
+		<include refid="condition_sql"/>
+		#order($_parameter.condition,"a.DEVICE_ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.inspection.entities.InspectionItem" resultMap="inspectionItemResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			a.*,
+			d.DEVICE_NAME,
+			d.LOCATION_NAME 
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"a.DEVICE_ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/> a
+		LEFT JOIN DEVICE d ON a.DEVICE_ID = d.ID
+		<include refid="condition_sql"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countByConditions" resultType="long" lang="velocity">
+        <include refid="count_pre"/>
+        <include refid="condition_sql"/>
+    </select>
+    
+    <select id="getById" resultMap="inspectionItemResultMap" parameterType="long" lang="velocity">
+		<include refid="select_pre"/>
+		WHERE a.ID = @{_parameter, jdbcType=BIGINT}
+	</select>
+	
+    <select id="getDeviceByDeviceId" resultMap="inspectionItemResultMap" parameterType="long" lang="velocity">
+		SELECT 
+			a.ID DEVICE_ID,
+			a.DEVICE_CODE,
+			a.DEVICE_NAME,
+			a.DEVICE_SPEC,
+			a.LOCATION_NAME,
+			hd.NAME DEPT_NAME
+		FROM DEVICE a
+		LEFT JOIN HO_DEPARTMENT hd ON a.USE_DEPARTMENT_ID = hd.ID
+		WHERE a.ID = @{_parameter.deviceId, jdbcType=BIGINT}
+	</select>
+	
+	<select id="getItemByDeviceId" resultMap="inspectionItemResultMap" parameterType="long" lang="velocity">
+		<include refid="select_pre"/>
+		WHERE a.DEVICE_ID = @{_parameter.deviceId, jdbcType=BIGINT}
+	</select>
+	
+	<delete id="deleteById" parameterType="long" lang="velocity"> 
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE ID = @{_parameter.id,jdbcType=BIGINT}
+	</delete>
+	
+	<delete id="deleteByDeviceId" parameterType="long" lang="velocity"> 
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE DEVICE_ID = @{_parameter.deviceId,jdbcType=BIGINT}
+	</delete>
+</mapper>

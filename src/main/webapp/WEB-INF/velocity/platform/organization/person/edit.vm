@@ -1,0 +1,351 @@
+ <link href="$!{main_static_hc_url}/css/font-awesome.min.css" rel="stylesheet">
+<style>
+.ui-form-item.ui-muilt-select.ui-from-table { width: 155px; padding: 3px 0px; }
+.ui-readonly{ width:142px;float:left;border:none;text-align: center; }
+.ui-form-item{padding: 3px 0px 3px 70px;}
+</style>
+
+#if($_type)#else#set($_type="edit")#end
+<form class="ui-form" id="platform_org_person_$!{_type}_form" action="$!{rc.contextPath}/platform/organization/personExpand/$!{_type}" method="post">
+	<input type="hidden" name="person.id" value="$!{person.id}"/>
+	<fieldset>
+	
+		<div class="ui-form-item ">
+			<label class="ui-label"><span class="ui-form-required">*</span>员工编码：</label>
+			#if($_type == 'edit')
+			<span class="ui-text" title="$!{person.code}">$!{person.code}</span>
+			#else
+			<input class="ui-input" type="text" name="person.code" value="$!{person.code}" data-rule="员工编码:required;" />
+			#end
+		</div>
+		<div class="ui-form-item ">
+			<label class="ui-label"><span class="ui-form-required">*</span>员工姓名：</label>
+			<input class="ui-input" type="text" name="person.name" value="$!{person.name}" data-rule="员工姓名:required;" />
+		</div>
+		
+		<div class="ui-form-item ">
+			<label class="ui-label">身份证号码：</label>
+			<input class="ui-input" type="text" name="person.carNum" value="$!{person.carNum}"  />
+		</div>
+		<div class="ui-form-item ">
+			<label class="ui-label">学历：</label>
+			<select  name="person.education" style="width: 176px;">
+				#foreach($!list in $!educations)
+					<option value="$!{list.enumValue}" #if($person.education==$!{list.enumValue}) selected="selected" #end>$!{list.enumText}</option> #end 
+             </select>
+		</div>
+		
+		<div class="ui-form-item ">
+			<label class="ui-label">性别：</label>
+			<select name="person.personSex" style="width: 176px;" >
+				#foreach($!list in $!personSexs)
+					<option value="$!{list.enumValue}" #if($person.personSex==$!{list.enumValue}) selected="selected" #end>$!{list.enumText}</option> #end 
+            </select>
+		</div>
+		<div class="ui-form-item ">
+			<label class="ui-label">出生年月：</label>
+			<input readonly class="ui-input Wdate" type="text" name="person.personBirth" value="$!{person.personBirth}"  onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})"/>
+		</div>
+		
+		<div class="ui-form-item ">
+			<label class="ui-label">手机：</label>
+			<input class="ui-input" type="text" name="person.personTelephone" value="$!{person.personTelephone}"  />
+		</div>
+		<div class="ui-form-item ">
+			<label class="ui-label">电子邮箱：</label>
+			<input class="ui-input" type="text" name="person.personEmail" value="$!{person.personEmail}"  />
+		</div>
+		
+		<div class="ui-form-item ">
+			<label class="ui-label">公司短号：</label>
+			<input class="ui-input" type="text" name="person.personTell" value="$!{person.personTell}"  />
+		</div>
+		<div class="ui-form-item ">
+			<label class="ui-label">办公室电话：</label>
+			<input class="ui-input" type="text" name="person.personOfficePhone" value="$!{person.personOfficePhone}"  />
+		</div>                                                                                 
+		
+		<div class="ui-form-item ">
+			<label class="ui-label">入职时间：</label>
+			<input readonly  class="ui-input Wdate" type="text" name="person.comeTime" value="$!{person.comeTime}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})" />
+		</div>
+		<div class="ui-form-item ">
+			<label class="ui-label">在职状态：</label>
+			<select name="person.status" style="width: 176px;" >
+				#foreach($!list in $!personStatus)
+					<option value="$!{list.enumValue}" #if($person.status==$!{list.enumValue}) selected="selected" #end>$!{list.enumText}</option> #end 
+            </select>
+		</div>
+		<div class="ui-form-item ">
+			<label class="ui-label">参加工作时间：</label>
+			<input readonly  class="ui-input Wdate" type="text" name="person.joinWorkTime" value="$!{person.joinWorkTime}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})" />
+		</div>
+		<div class="ui-form-item colspan2" style="width: 704px;">
+			<label class="ui-label">家庭住址：</label>
+			<input class="ui-input" style="width: 532px;"  type="text" name="person.address" value="$!{person.address}"  />
+		</div>
+		
+		<div class="ui-form-item ui-form-item-textarea colspan2" style="width: 704px;">
+      		<label class="ui-label">备注:</label>
+      		<textarea class="ui-textarea" style="width: 532px;" name="person.description">$!{person.description}</textarea>
+		</div>
+	</fieldset>
+	<!-- ------------------------------------------------------------------------------------------------------ -->
+	<fieldset>
+	<div class="ui-co-seg">
+				<table class="ui-table ui-table-new" width="100%" id="addTable">
+					<thead>
+						<tr>
+							<th width="24%" style="text-align: center;">部门</th>
+							<th width="18%" style="text-align: center;">岗位</th>
+							<th width="18%" style="text-align: center;">级别</th>
+							<th width="18%" style="text-align: center;">上级领导</th>
+							<th width="18%" style="text-align: center;">工作餐审批权限</th>
+							<th width="4%"  align="center" style="text-align: center;">
+							<a href="#" class="hc_bth addRow" title="添加行 "><i class="fa fa-plus-circle"></i></a></th>
+						</tr>
+					</thead>
+					<tbody>
+					<!-- 动态添加行 -->
+					#set($index=0)#foreach($list in $!person.departmentPersonInfos)
+						<tr>
+							<!-- 部门 -->
+							<td width="19%" align="center" >
+							<span class="ui-form-item ui-muilt-select ui-from-table">
+								<input type="hidden" name="person.departments[$index].id" value="$!{person.departments[$index].id}" />
+								<input readonly="readonly" class="ui-readonly" style="width: 165px;"  type="text" name="person.departments[$index].name" value="$!{person.departments[$index].name}" /> 
+										
+								<a href="javascript:void(0)" class="ui-input-icon" style="background:transparent;right:-32px" onclick="$.selectDepartment(this,{callback:function(selected, dlg, btn){
+				                    $.each(selected, function(idx, it) {
+				                    	debugger;
+				                    	$.post('$!{rc.contextPath}/platform/organization/personExpand/getboot?departId='+it.id,function(res){
+				                    		if(res!='')	
+				                    			$('#platform_org_person_$!{_type}_form input[name=\'person.departments[$index].name\']').val(res);
+				                    	}); 
+				                    });
+								},muilt:false,fill:{id:'#platform_org_person_$!{_type}_form input[name=\'person.departments[$index].id\']',name:'#platform_org_person_$!{_type}_form input[name=\'person.departments[$index].name\']'}})"><i class="iconfont icon-folder-open-alt"></i></a>
+							</span>
+							</td>
+							
+							<!-- 岗位 -->
+							<td width="19%" align="center">
+							<span class="ui-form-item ui-muilt-select ui-from-table">
+								<input type="hidden" name="person.departmentPersonInfos2[$index].positionId" value="$!{person.departmentPersonInfos[$index].positionId}" />
+								<input readonly="readonly" class="ui-readonly"  type="text" name="person.departmentPersonInfos2[$index].positionName" value="$!{person.departmentPersonInfos[$index].positionName}" />
+								<a href="javascript:void(0)" class="ui-input-icon" style="background:transparent;right:-8px" onclick="plat_person_select_position(this,$index)"><i class="iconfont icon-folder-open-alt"></i></a>
+							</span>
+							</td>
+							
+							<!-- 个人级别  -->
+							<td width="19%" align="center">
+								<select id="postId" name="person.departmentPersonInfos2[$index].postId" class="k-textbox">
+								<option value="">人员选择</option>
+									#foreach($!list in $!postIds)
+										<option value="$!{list.enumValue}" #if($!{person.departmentPersonInfos[$index].postId}==$!{list.enumValue}) selected="selected" #end>$!{list.enumText}</option> #end 
+           					    </select>
+           					</td>
+           					    
+           					<!-- 上级领导 -->
+							<td width="19%" align="center">
+							<span class="ui-form-item ui-muilt-select ui-from-table">
+								<input type="hidden" name="person.departmentPersonInfos2[$index].leaderId" value="$!{person.departmentPersonInfos[$index].leaderId}" />
+								<input readonly="readonly" class="ui-readonly" type="text" name="person.departmentPersonInfos2[$index].leaderName" value="$!{person.departmentPersonInfos[$index].leaderName}" />
+								<a href="javascript:void(0)" class="ui-input-icon" style="background:transparent;right:-8px"
+									onclick="$.selectPerson(this,{muilt:false,fill:{id:'#platform_org_person_$!{_type}_form input[name=\'person.departmentPersonInfos2[$index].leaderId\']',name:'#platform_org_person_$!{_type}_form input[name=\'person.departmentPersonInfos2[$index].leaderName\']'}})"><i class="iconfont icon-folder-open-alt"></i></a>
+							</span>
+							</td>
+							
+							<td width="19%" align="center">
+								<input type="radio" name="person.departmentPersonInfos2[$index].lunch" value="1" #if($!{person.departmentPersonInfos[$index].lunch}==1) checked #end/>是
+								<input type="radio" name="person.departmentPersonInfos2[$index].lunch" value="0" #if($!{person.departmentPersonInfos[$index].lunch}==0) checked #end/>否
+							</td>
+							<td width="5%" align="center"><a href="#"><i class="iconfont fa fa-close delRow"></i></a></td>
+						</tr>
+						#set($index=$index+1) #end 
+					<!-- 默认显示三条 -->
+					#if($index==0)
+						#foreach($j in [$index..2])		
+						<tr>
+							<!-- 部门 -->
+							<td width="19%" align="center" >								
+							<span class="ui-form-item ui-muilt-select ui-from-table">
+								#if($j==0)
+    								#if($!selectDepart)
+    									<input type="hidden" name="person.departments[$j].id" value="$!departId" />
+    									<input  readonly="readonly" class="ui-readonly" style="width: 165px;" type="text" name="person.departments[$j].name" value="$!departName"/> 
+									#else
+        								<input type="hidden" name="person.departments[$j].id" value="$!{person.departments[$j].id}" />
+        								<input  readonly="readonly" class="ui-readonly" style="width: 165px;" type="text" name="person.departments[$j].name" value="$!{person.departments[$j].name}" /> 
+									#end
+								#else
+    								<input type="hidden" name="person.departments[$j].id" value="$!{person.departments[$j].id}" />
+    								<input  readonly="readonly" class="ui-readonly" style="width: 165px;" type="text" name="person.departments[$j].name" value="$!{person.departments[$j].name}" /> 
+    							#end	
+								<a href="javascript:void(0)" class="ui-input-icon" style="background:transparent;right:-32px" onclick="$.selectDepartment(this,{callback:function(selected, dlg, btn){
+				                    $.each(selected, function(idx, it) {
+				                    	$.post('$!{rc.contextPath}/platform/organization/personExpand/getboot?departId='+it.id,function(res){
+				                    		if(res!='')	
+				                    			$('#platform_org_person_$!{_type}_form input[name=\'person.departments[$j].name\']').val(res);
+												
+											return false;
+				                    	}); 
+				                    });
+								},muilt:false,fill:{id:'#platform_org_person_$!{_type}_form input[name=\'person.departments[$j].id\']',name:'#platform_org_person_$!{_type}_form input[name=\'person.departments[$j].name\']'}})"><i class="iconfont icon-folder-open-alt"></i></a>
+							</span>
+							</td>
+							<!-- 岗位 -->
+							<td width="19%" align="center">
+							<span class="ui-form-item ui-muilt-select ui-from-table">
+								<input type="hidden" name="person.departmentPersonInfos2[$j].positionId" value="$!{person.departmentPersonInfos[$j].positionId}" />
+								<input readonly="readonly" class="ui-readonly"  type="text" name="person.departmentPersonInfos2[$j].positionName" value="$!{person.departmentPersonInfos[$j].positionName}" />
+								<a href="javascript:void(0)" class="ui-input-icon" style="background:transparent;right:-8px" onclick="plat_person_select_position(this,$j)"><i class="iconfont icon-folder-open-alt"></i></a>
+							</span>
+							</td>
+							
+							<!-- 个人级别  -->
+							<td width="19%" align="center">
+								<select id="postId" name="person.departmentPersonInfos2[$j].postId" class="k-textbox">
+									<option value="">人员选择</option>
+									#foreach($!list in $!postIds)
+										<option value="$!{list.enumValue}" #if($!{person.departmentPersonInfos[$j].postId}==$!{list.enumValue}) selected="selected" #end>$!{list.enumText}</option> #end 
+           					    </select>
+           					</td>
+           					    
+           					<!-- 上级领导 -->
+							<td width="19%" align="center">
+							<span class="ui-form-item ui-muilt-select ui-from-table">
+								<input type="hidden" name="person.departmentPersonInfos2[$j].leaderId" value="$!{person.departmentPersonInfos[$j].leaderId}" />
+								<input readonly="readonly" class="ui-readonly" type="text" name="person.departmentPersonInfos2[$j].leaderName" value="$!{person.departmentPersonInfos[$j].leaderName}" />
+								<a href="javascript:void(0)" class="ui-input-icon" style="background:transparent;right:-8px"
+									onclick="$.selectPerson(this,{muilt:false,fill:{id:'#platform_org_person_$!{_type}_form input[name=\'person.departmentPersonInfos2[$j].leaderId\']',name:'#platform_org_person_$!{_type}_form input[name=\'person.departmentPersonInfos2[$j].leaderName\']'}})"><i class="iconfont icon-folder-open-alt"></i></a>
+								
+							</span>
+							</td>
+							
+							<td width="19%" align="center">
+								<input type="radio" name="person.departmentPersonInfos2[$j].lunch" value="1" #if($!{person.departmentPersonInfos[$j].lunch}==1) checked #end/>是
+								<input type="radio" name="person.departmentPersonInfos2[$j].lunch" value="0" #if($!{person.departmentPersonInfos[$j].lunch}==0) checked #end/>否
+							</td>
+							<td width="5%" align="center"><a href="#"><i class="iconfont fa fa-close delRow"></i></a></td>
+						</tr>
+						#end
+					 #end
+			</tbody>			
+		</table>
+	</div>
+	</fieldset>
+	</form>
+<script type="text/javascript">
+	$(function(){
+		$("#platform_org_person_$!{_type}_form .ui-muilt-select").muiltSelect();
+	});
+
+	function plat_person_select_position(_this,j){
+		if(!$("#platform_org_person_$!{_type}_form input[name='person.departments["+j+"].id']").val()){
+			$.message("请先选择部门！", $.message.TYPE_ERROR, 4, false, true);
+			return ;
+		}
+		$.selectPositionByDeptId(_this,{callback:function(selected, dlg, btn){
+				                    $.each(selected, function(idx, it) {
+				                    var id=it.id.split("_").pop();
+				                    var name=it.name.split("]").pop();
+				                    $("#platform_org_person_$!{_type}_form input[name=\'person.departmentPersonInfos2["+j+"].positionId\']").val(id);
+				                    $("#platform_org_person_$!{_type}_form input[name=\'person.departmentPersonInfos2["+j+"].positionName\']").val(name)
+				                    });
+								},muilt:false,fill:{id:"#platform_org_person_$!{_type}_form input[name=\'person.departmentPersonInfos2["+j+"].positionId\']",name:"#platform_org_person_$!{_type}_form input[name=\'person.departmentPersonInfos2["+j+"].positionName\']"},queryCallback:function(opt){
+			return "&departmentIds=" + $("#platform_org_person_$!{_type}_form input[name='person.departments["+j+"].id']").val();
+		}});
+	}
+	
+	$(function(){
+		if($("#addTable tr").length-1==1){
+	   		$('.delRow').hide();
+	  	}
+	
+		$(".addRow").bind("click",function(){
+		
+			var len=$("#addTable tr").length-1;
+				var pre=len-1;
+				var next=len;
+				var exp = new RegExp("\\["+pre+"\\]","g");
+				var rowtemp =$("#addTable tr").eq(len).html();
+				
+				//内容替换
+				var rowcon="<tr>"+rowtemp.replace(exp,"["+next+"]")+"</tr>";
+				rowcon=rowcon.replace(">"+len+"<",">"+(next+1)+"<").replace("_"+pre,"_"+next);
+				rowcon=rowcon.replace("(this,"+pre+")","(this,"+next+")");
+				
+				$('#addTable').append(rowcon); 
+				$('.delRow').show();
+				//清除控件中的数据
+				$("#addTable input[name='person.departments["+next+"].id']").val("");
+				$("#addTable input[name='person.departments["+next+"].name']").val("");
+				$("#addTable input[name='person.departmentPersonInfos2["+next+"].positionId']").val("");
+				$("#addTable input[name='person.departmentPersonInfos2["+next+"].positionName']").val("");
+				$("#addTable select[name='person.departmentPersonInfos2["+next+"].postId']").val("");
+				$("#addTable input[name='person.departmentPersonInfos2["+next+"].leaderId']").val("");
+				$("#addTable input[name='person.departmentPersonInfos2["+next+"].leaderName']").val("");
+				$("#addTable input[name='person.departmentPersonInfos2["+next+"].lunch']").removeAttr("checked");
+		})
+		
+		// 删除行
+		$('#addTable').on("click",".delRow",function(){
+				var len1=$("#addTable tr").length;			
+				var tr=$(this).parent().parent().parent();	
+				//alert(tr.html());			
+				var index=$('#addTable tr').index(tr);
+				$(tr).remove();//删除当前行
+
+				for(var i=index,j=len1-1;i<j;i++){
+					var exp = new RegExp("\\["+i+"\\]","g");					
+					var rowtemp =$("#addTable tr").eq(i).html();
+					var rowcon=rowtemp.replace(exp,"["+(i-1)+"]").replace("_"+i,"_"+(i-1)).replace("(this,"+i+")","(this,"+(i-1)+")");
+					initValue(i);
+					rowcon=rowcon.replace(">"+(i+1)+"<",">"+i+"<");
+					$("#addTable tr").eq(i).html(rowcon);
+					writeValue(i-1);
+				}
+				if($("#addTable tr").length-1==1){
+	   				$('.delRow').hide();
+	  			 }
+	   });
+	})
+	var departmentNmae,positionName,postId,leaderName,lunch;
+	function initValue(value){
+		departmentNmae=$("#addTable input[name='person.departments["+value+"].name']").val();
+		positionName=$("#addTable input[name='person.departmentPersonInfos2["+value+"].positionName']").val();
+		postId=$("#addTable select[name='person.departmentPersonInfos2["+value+"].postId']").val();
+		leaderName=$("#addTable input[name='person.departmentPersonInfos2["+value+"].leaderName']").val();
+		lunch=$("#addTable input[name='person.departmentPersonInfos2["+value+"].lunch']:checked").val();
+	}
+	function writeValue(value){
+		$("#addTable input[name='person.departments["+value+"].name']").val(departmentNmae);
+		$("#addTable input[name='person.departmentPersonInfos2["+value+"].positionName']").val(positionName);
+		$("#addTable select[name='person.departmentPersonInfos2["+value+"].postId']").val(postId);
+		$("#addTable input[name='person.departmentPersonInfos2["+value+"].leaderName']").val(leaderName);
+		$("#addTable input[name='person.departmentPersonInfos2["+value+"].lunch'][value="+lunch+"]").attr("checked","checked");
+	}
+	function platform_org_person_$!{_type}_before_submit(){
+		$(".platform_org_person_$!{_type}_form_depts").remove();
+		$(".platform_org_person_$!{_type}_form_posts").remove();
+		//在提交之前对提交数据进行处理
+			for(var i=1;i<$("#addTable tr").length;i++){
+				if($("#addTable input[name='person.departments["+(i-1)+"].id']").val()==""||$("#addTable input[name='person.departments["+(i-1)+"].id']").val()==undefined){
+					/* $("#addTable input[name='person.departments["+(i-1)+"].id']").removeAttr("name");
+					$("#addTable input[name='person.departments["+(i-1)+"].name']").removeAttr("name");
+					$("#addTable input[name='person.departmentPersonInfos2["+(i-1)+"].positionId']").removeAttr("name");
+					$("#addTable input[name='person.departmentPersonInfos2["+(i-1)+"].positionName']").removeAttr("name");
+					$("#addTable select[name='person.departmentPersonInfos2["+(i-1)+"].postId']").removeAttr("name");
+					$("#addTable input[name='person.departmentPersonInfos2["+(i-1)+"].leaderId']").removeAttr("name");
+					$("#addTable input[name='person.departmentPersonInfos2["+(i-1)+"].leaderName']").removeAttr("name");
+					$("#addTable input[name='person.departmentPersonInfos2["+(i-1)+"].lunch']").removeAttr("name"); */ 
+				}else{
+					var deptId=$("#addTable input[name='person.departments["+(i-1)+"].id']").val();
+					//var positionId=$("#addTable input[name='person.positions["+(i-1)+"].id']").val();
+					$("#addTable tr").eq(i).children().first().append("<input type='hidden' class='platform_org_person_$!{_type}_form_depts' name='person.departmentPersonInfos2["+(i-1)+"].departmentId' value='"+deptId+"' />");
+					//$("#addTable tr").eq(i).children().eq(1).append("<input type='hidden' class='platform_org_person_$!{_type}_form_posts' name='person.positionPersonInfos["+(i-1)+"].positionId' value='"+positionId+"' />");
+				}
+			}
+	}
+	
+</script>

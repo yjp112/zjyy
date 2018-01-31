@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.visitor.entities.TmpCard">
+	<resultMap type="com.supconit.visitor.entities.TmpCard" id="tmpCardResultMap">
+		<result property="id" column="ID"/>
+        <result property="personId" column="PERSON_ID"/>
+        <result property="personName" column="PERSON_NAME"/>
+        <result property="cardNo" column="CARD_NO"/>
+        <result property="tmpCardNo" column="TMP_CARD_NO"/>
+        <result property="createDate" column="CREATE_DATE"/>
+        <result property="departId" column="departId"/>
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">ACCESS_TMPCARD</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	<sql id="select_pre" lang="velocity">
+		SELECT
+			a.ID,
+			a.PERSON_ID,
+			a.PERSON_NAME,
+	        a.CARD_NO,
+	        a.TMP_CARD_NO,
+	        a.CREATE_DATE
+            ,hdp.department_id departId
+		FROM <include refid="TABLE_NAME"/> a
+        left join ho_department_person hdp on hdp.person_id = a.person_id
+        left join ho_department hd on hd.id = hdp.department_id
+    </sql>
+	
+	<sql id="count_pre" lang="velocity">
+		SELECT
+			COUNT(a.ID)
+		FROM <include refid="TABLE_NAME"/> a
+        left join ho_department_person hdp on hdp.person_id = a.person_id
+        left join ho_department hd on hd.id = hdp.department_id
+	</sql>
+	
+	<sql id="condition_sql" lang="velocity">
+        <![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			#if($_p.personName && $_p.personName != '')
+				#set($_personName = '%' + $_p.personName + '%')
+				AND a.PERSON_NAME LIKE @{_personName}
+			#end
+			#if($_p.cardNo && $_p.cardNo != '')
+				#set($_cardNo = '%' + $_p.cardNo + '%')
+				AND a.CARD_NO LIKE @{_cardNo}
+			#end
+			#if($_parameter.condition.startTime && $_parameter.condition.startTime != '')
+					AND a.CREATE_DATE>=@{_parameter.condition.startTime,jdbcType=TIMESTAMP}
+            #end
+            #if($_parameter.condition.endTime && $_parameter.condition.endTime != '')
+                AND a.CREATE_DATE<=@{_parameter.condition.endTime,jdbcType=TIMESTAMP}
+            #end
+
+            #if($_p.departId && $_p.departId != '')
+				AND hdp.department_id in (select ho_department.id from ho_department where ( ho_department.id=   @{_parameter.condition.departId,jdbcType=VARCHAR} or    ho_department.pid =   @{_parameter.condition.departId,jdbcType=VARCHAR}    ) )
+			#end
+		#end
+		]]>
+    </sql>
+	
+    <!-- 插入记录-->
+    <sql id="insert_sql" lang="velocity">
+        INSERT INTO ACCESS_TMPCARD(
+        	#if($_databaseId == 'oracle') ID, #end
+        PERSON_ID,
+        PERSON_NAME,
+        CARD_NO,
+        TMP_CARD_NO,
+        CREATE_DATE
+        ) VALUES (
+        	#if($_databaseId == 'oracle') @{id,jdbcType=NUMERIC}, #end
+	        @{personId,jdbcType=BIGINT},
+	        @{personName,jdbcType=VARCHAR},
+	        @{cardNo,jdbcType=VARCHAR},
+	        @{tmpCardNo,jdbcType=BIGINT},
+	        @{createDate,jdbcType=VARCHAR}
+        )
+    </sql>
+    
+    <insert id="insert" parameterType="com.supconit.visitor.entities.TmpCard" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="insert_sql" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.visitor.entities.TmpCard" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    
+    <!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.visitor.entities.TmpCard" resultMap="tmpCardResultMap" lang="velocity" databaseId="oracle">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre"/>
+		<include refid="condition_sql"/>
+		#order($_parameter.condition,"a.ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.visitor.entities.TmpCard" resultMap="tmpCardResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			a.ID,
+			a.PERSON_ID,
+			a.PERSON_NAME,
+	        a.CARD_NO,
+	        a.TMP_CARD_NO,
+	        a.CREATE_DATE
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"a.ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/> a
+		<include refid="condition_sql"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countByConditions" resultType="long" lang="velocity">
+        <include refid="count_pre"/>
+        <include refid="condition_sql"/>
+    </select>
+    
+    <select id="getById" resultMap="tmpCardResultMap" parameterType="Long" lang="velocity">
+		<include refid="select_pre" />        
+        WHERE a.ID = @{_parameter.id, jdbcType=BIGINT}
+	</select>
+</mapper>

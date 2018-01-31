@@ -1,0 +1,192 @@
+#parse("index/_header.vm")
+<style>
+.print_btn{ border: 0px; padding: 5px 10px; cursor: pointer;border-radius: 3px;}
+</style>
+<script type="text/javascript" src="$!{main_static_custom_url}/js/ReportCommonFun.js"></script>
+<script type="text/javascript" src="$!{main_static_custom_url}/js/jasperreport.js"></script>
+</head>
+<body>
+	<div class="ui-layout-center ui-dialog-form">
+    		<iframe class="ui-layout-center" id="_main_frame" name="_main_frame" scrolling="auto" src="about:blank"
+				frameborder="no" width="860" height="550">
+			</iframe>
+			<div class="actions">
+		        <button class="k-primary print_btn"  onclick="printPDF2()" type="submit" > <i class="fa icon-print" style="padding-right:5px"></i>打 印</button>
+		        <button class="k-primary print_btn cancel" onclick="close_dialog('report_win')" type="button" ><i class="fa fa-close"  style="padding-right:5px"></i>取 消</button>
+		    </div>
+	 </div>
+<script type="text/javascript">
+    $(document).ready(function () {
+    	$("#platform_loading").show();
+    	$("#_main_frame")[0].src ="$!{rc.contextPath}/base/ireport?businessId=$!{businessId}&jasperPath=$!{jasperPath}"
+        iframe_loaded($("#_main_frame")[0], function(){
+        	$("#platform_loading").hide();        	
+        });
+    });
+            function printPDF2() {
+    			if(!adobeReaderInstalled()){
+                     if (!confirm("打印需要安装adobe reader，请下载安装。"))return;
+                		window.location.href="$!{rc.contextPath}/download/AdbeRdr11000_zh_CN.exe";
+               	}
+				if (isIE=navigator.userAgent.indexOf("MSIE")!=-1) {
+					// IE调用
+					var $PDFReader = null;
+
+					var $PrintDiv = $("<div id='infoDiv' style='display:none;'>").html(
+						"<font color='#15428B'>正在加载PDF，请稍后...</font>").appendTo("body");
+
+					var $PrintDiv2 = $("<div>").css({position:"absolute", left:"0px", top:"0px"}).appendTo("body");
+
+					$.blockUI( {
+						message : $('#infoDiv'),
+						css : {
+							padding : '10px',
+							backgroundColor : '#DCE7FB',
+							'-webkit-border-radius' : '10px',
+							'-moz-border-radius' : '10px',
+							opacity : 1,
+							color : '#fff',
+							cursor : 'default',
+							height : '100px',
+							top : ($(window).height() - 260) / 2 + 'px',
+							left : ($(window).width() - 200) / 2 + 'px',
+							width : '250px'
+						},
+						overlayCSS : {
+							backgroundColor : '#EEE',
+							cursor : 'default'
+						}
+					});
+					 $.ajax( {
+						url : '$!{rc.contextPath}/base/print',
+						data : {
+							businessId : '$!{businessId}',
+							jasperPath:'$!{jasperPath}'
+						},
+						type : "POST",
+						complete : function(res, status) {
+							if (status == "success") {
+								$PrintDiv2[0].innerHTML = res.responseText;
+								$PDFReader = $PrintDiv2.find("Object");
+								try {
+									(function() {
+										$.unblockUI();
+										//debugger;
+										$PDFReader[0].print();
+									}).defer(5000);
+								} catch (e) {
+									alert("Please install Adobe Reader.");
+								}
+							}
+						}
+					});
+				}/* else if (isChrome=navigator.userAgent.indexOf("Chrome")!=-1) {
+					// chrome调用
+					var $PDFReader = null;
+					var headstr = "<html><head><title></title></head><body>";
+					var footstr = "</body>";
+					var newstr = $("#report_body table")[0].outerHTML;
+					var oldstr = document.body.innerHTML;
+					document.body.innerHTML = headstr+newstr+footstr;
+					window.print();
+					document.body.innerHTML = oldstr;
+					return false;
+				} */else {
+					alert("该浏览器不支持打印功能,请使用IE浏览器！");
+				}
+            }
+			
+			
+            window.onload = function() {
+                var currentPage = 1;
+            }; 
+			
+function adobeReaderInstalled() {
+debugger
+            var displayString;
+            var acrobat = new Object();
+            acrobat.installed = false;
+            acrobat.version = "0.0";
+
+            if (navigator.plugins && navigator.plugins.length) {
+                for (x = 0; x < navigator.plugins.length; x++) {
+                    if (navigator.plugins[x].description.indexOf("Adobe Acrobat") != -1) {
+                        acrobat.version = parseFloat(navigator.plugins[x].description.split("Version ")[1]);
+                        if (acrobat.version.toString().length == 1) acrobat.version += ".0";
+                        acrobat.installed = true;
+                        displayString = "Acrobat Version: " + acrobat.version;
+                        break;
+                    } else if (navigator.plugins[x].description.indexOf("Adobe PDF Plug-In") != -1) {
+                        acrobat.installed = true;
+                        acrobat.version = "8+";
+                        displayString = "Acrobat Version 8 or Above";
+                    }
+                }
+            } else if (window.ActiveXObject) {
+                for (x = 2; x < 10; x++) {
+                    try {
+                        oAcro = eval("new ActiveXObject('PDF.PdfCtrl." + x + "');");
+                        if (oAcro) {
+                            acrobat.installed = true;
+
+                            acrobat.version = x + ".0";
+                            displayString = "Acrobat Version: " + acrobat.version;
+                        }
+                    }
+                    catch (e) { }
+                }
+
+                try {
+                    oAcro4 = new ActiveXObject("PDF.PdfCtrl.1");
+                    if (oAcro4) {
+                        acrobat.installed = true;
+                        acrobat.version = '4.0';
+                        displayString = 'Acrobat Version: ' + acrobat.version;
+                    }
+                }
+                catch (e) { }
+
+                try {
+                    oAcro7 = new ActiveXObject('AcroPDF.PDF.1');
+                    if (oAcro7) {
+                        acrobat.installed = true;
+                        acrobat.version = '7.0';
+                        displayString = 'Acrobat Version: ' + acrobat.version;
+                    }
+                }
+                catch (e) { }
+            }
+
+            return acrobat.installed;
+        }
+  			
+            function jasperPrint(prtRef, rePrtAuth, reviewAuth, flag, userid, orgid) {
+                if (beforeReportPrint(prtRef, rePrtAuth, reviewAuth)) {
+                    var jasperParametetId = "$!{businessId}";
+                    printPDF2(jasperParametetId,"$!{rc.contextPath}");
+                    updateReportPrintCounts(prtRef,flag,userid,orgid);
+                }
+            }
+			
+            function goToPage(obj) {
+              var currentPage =  document.getElementById("currentPage").value;
+                var regExp =  /^[1-9][0-9]*$/;
+                if(!currentPage.match(regExp)) {currentPage = 1;}
+                if(currentPage > 1) {currentPage = 1;}
+                currentPage = parseInt(currentPage);
+                if(obj.id == 'first') {currentPage = 1;}
+                if(obj.id == 'previous') {currentPage = 0;}
+                if(obj.id == 'next') {currentPage = 2;}
+                if(obj.id == 'last') {currentPage = 1;}
+                document.getElementById("currentPage").value = currentPage;
+                document.getElementById("exportType").value = 'html';
+                jasperForm.submit();
+            }
+            function exportReport(obj) {
+                document.getElementById("exportType").value = obj.id;
+                jasperForm.submit();
+            }
+
+        </script>
+</body>
+</html>

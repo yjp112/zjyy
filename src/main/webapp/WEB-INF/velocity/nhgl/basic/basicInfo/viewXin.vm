@@ -1,0 +1,74 @@
+ ##<script type="text/javascript" src="$!{nhgl_static_hc_url}/echarts_2/esl.js"> </script>
+ ##<script type="text/javascript" src="$!{nhgl_static_hc_url}/echarts_2/echartsUtil.js"></script>
+	  #parse("nhgl/basic/basicInfo/mzl.vm")
+      #parse("nhgl/basic/basicInfo/jzl.vm")
+      #parse("nhgl/basic/basicInfo/zyl.vm")
+      #parse("nhgl/basic/basicInfo/icu.vm")
+      #parse("nhgl/basic/basicInfo/zzbl.vm")
+      #parse("nhgl/basic/basicInfo/ssl.vm")
+      #parse("nhgl/basic/basicInfo/kfrs.vm")
+      #parse("nhgl/basic/basicInfo/ekrs.vm")
+      #parse("nhgl/basic/basicInfo/szyl.vm")
+      #parse("nhgl/basic/basicInfo/pjwd.vm")
+      <input type="hidden" id="mzlMonth"/>
+      <input type="hidden" id="txmzlMonth"/>
+	  <input type="hidden" id="jzlMonth"/>
+	  <input type="hidden" id="zylMonth"/>
+	  <input type="hidden" id="icuMonth"/>
+	  <input type="hidden" id="zzblMonth"/>
+	  <input type="hidden" id="sslMonth"/>
+	  <input type="hidden" id="kfrsMonth"/>
+	  <input type="hidden" id="ekrsMonth"/>
+	  <input type="hidden" id="szylMonth"/>
+	  <input type="hidden" id="pjwdMonth"/>
+	  <div class="nh-ct" style="width:49%;float:left;height:34px;">
+        <button id="subMzlButton" type="button" onclick="replyMzl()" style="display: none;" class="btn btn-primary"><i class="iconfont icon-reply"></i>返&nbsp;回</button>
+      </div>
+      <div class="nh-ct" style="width:49%;float:left;height:34px;">
+        <button id="subZylButton" type="button" onclick="replyZyl()" style="display: none;" class="btn btn-primary"><i class="iconfont icon-reply"></i>返&nbsp;回</button>
+      </div>
+      <div id="mix1" class="nh-chart" style="width:48%;float:left;margin-left:2%"></div>	
+      <div id="mix3" class="nh-chart" style="width:48%;float:left;margin-left:2%"></div>
+      
+      <div class="nh-ct" style="width:49%;float:left;height:34px;">
+        <button id="subIcuButton" type="button" onclick="replyIcu()" style="display: none;" class="btn btn-primary"><i class="iconfont icon-reply"></i>返&nbsp;回</button>
+      </div>
+       <div class="nh-ct" style="width:49%;float:left;height:34px;">
+        <button id="subSzylButton" type="button" onclick="replySzyl()" style="display: none;" class="btn btn-primary"><i class="iconfont icon-reply"></i>返&nbsp;回</button>
+      </div>
+      <div id="mix4" class="nh-chart" style="width:48%;float:left;margin-left:2%"></div>	
+      <div id="mix5" class="nh-chart" style="width:48%;float:left;margin-left:2%"></div>
+      
+     
+      <div class="nh-ct" style="width:49%;float:left;height:34px;">
+        <button id="subSslButton" type="button" onclick="replySsl()" style="display: none;" class="btn btn-primary"><i class="iconfont icon-reply"></i>返&nbsp;回</button>
+      </div>
+      <div class="nh-ct" style="width:49%;float:left;height:34px;">
+        <button id="subEkrsButton" type="button" onclick="replyEkrs()" style="display: none;" class="btn btn-primary"><i class="iconfont icon-reply"></i>返&nbsp;回</button>
+      </div>
+      <div id="mix6" class="nh-chart" style="width:48%;float:left;margin-left:2%"></div>	
+      <div id="mix7" class="nh-chart" style="width:48%;float:left;margin-left:2%"></div>
+      
+      <div class="nh-ct" style="width:49%;float:left;height:34px;">
+        <button id="subKfrsButton" type="button" onclick="replyKfrs()" style="display: none;" class="btn btn-primary"><i class="iconfont icon-reply"></i>返&nbsp;回</button>
+      </div>
+      <div class="nh-ct" style="width:49%;float:left;height:34px;">
+        <button id="subJzlButton" type="button" onclick="replyJzl()" style="display: none;" class="btn btn-primary"><i class="iconfont icon-reply"></i>返&nbsp;回</button>
+      </div>
+      <div id="mix8" class="nh-chart" style="width:48%;float:left;margin-left:2%"></div>	
+      <div id="mix9" class="nh-chart" style="width:48%;float:left;margin-left:2%"></div>
+	  
+      <div class="nh-ct" style="width:49%;float:left;height:34px;">
+        <button id="subZzblButton" type="button" onclick="replyZzbl()" style="display: none;" class="btn btn-primary"><i class="iconfont icon-reply"></i>返&nbsp;回</button>
+      </div>
+      <div class="nh-ct" style="width:49%;float:left;height:34px;">
+        <button id="subPjwdButton" type="button" onclick="replyPjwd()" style="display: none;" class="btn btn-primary"><i class="iconfont icon-reply"></i>返&nbsp;回</button>
+      </div>
+	  <div id="mix10" class="nh-chart" style="width:48%;float:left;margin-left:2%"></div>
+      <div id="mix999" class="nh-chart" style="width:48%;float:left;margin-left:2%"></div>
+  <script type="text/javascript">
+  $(document).ready(function(){
+  	$("#start").attr("value",$!year);
+	
+  });
+  </script> 

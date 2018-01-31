@@ -1,0 +1,1310 @@
+#parse("index/_header.vm")
+<link href="$!{main_static_custom_url}/js/uploadify/uploadify.css" rel="stylesheet">
+<script src="$!{main_static_custom_url}/js/uploadify/jquery.uploadify-3.1.min.js"></script>
+
+<style>
+	#tab #tab-title{
+		height:28px;
+		display:block;
+	}
+	#tab-title li{
+		display:block;
+		float:left;
+		padding:4px 6px;
+		margin-right:6px;
+		border: 1px solid #ccc;
+		background: #e3e3e3;
+		cursor: pointer;
+		
+	}
+	#tab-title li.k-state-active{
+		background: #fff;
+		color: #444;
+		border-bottom:1px solid #fff;
+	}
+	#tab .tab-content{
+		border: 1px solid #ccc;
+		display:none;
+	}
+	#tab .tab-content.current{
+		display:block;
+	}
+	
+	#tab .tab-content .k-grid-content{
+		height:300px;
+	}
+	.ui-dialog-form table .k-widget {
+      width: 85%;
+    }
+</style>
+</head>
+<body>
+<form id="queryForm" method="post" action="$!{rc.contextPath}/device/device/save?flag=$!{flage}"
+      class="ui-layout-center ui-dialog-form">
+<input type="hidden" name="id" value="$!{device.id}"/>
+<div class="actions">
+    <button  class="k-primary hc_btn" id="device_bt" type="submit"><i class="fa fa-save"></i>保 存</button>
+    #if("$!{from}"!="gis")
+        <a class="k-primary hc_btn" href="#" onclick="backbtn('$!{flage}')"><i class="fa fa-reply"></i></i>返回</a>
+    #end
+</div>
+<div class="ui-composer">
+<div class="ui-co-seg">
+<div id="tab">
+<ul id="tab-title">
+    <li class="tab-1 k-state-active"> 基础信息</li>
+    #if($!{device.id})
+        <li class="tab-2">点位信息</li>
+        <li class="tab-3">报警记录</li>
+        <li class="tab-4">维修记录</li>
+        <li class="tab-5">保养记录</li>
+        <li class="tab-6">随机备件</li>
+		<li class="tab-7">变更历史</li>
+        <li class="tab-8">文档资料</li>
+        <li class="tab-9">启停记录</li>
+        <!--  <li><a id="a_tabs7">扩展属性</a></li>-->
+    #end
+    <li class="tab-10">随机档案</li>
+    <li class="tab-11">设备图片</li>
+</ul>
+<!--基础信息-->
+<div class="tab-content current" id="tab-1" style="height:393px">
+    <table class="ui-co-table" width="100%">
+        <tr>
+			<td class="label">所属设备：</td>
+            <td >
+                #if(!($!viewOnly))<span class="k-textbox k-space-right" id="parentNames">#end
+                <input type="hidden" id="parentId" name="parentId" value="$!{device.parentId}" class="k-textbox"/>
+                <input readonly type="text" id="parentName" name="parentName" value="$!{device.parentName}" class="k-textbox ui-input-choose" style="width: 100%;"/>
+                #if(!($!viewOnly))<a href="#" class="k-icon k-i-search">&nbsp;</a>
+                </span>#end
+            </td>
+			
+            <td class="label"><label><span class="ui-form-required">*</span>设备编码：</label></td>
+            <td ><input class="k-textbox" type="text" name="deviceCode" value="$!{device.deviceCode}"/></td>
+            <td class="label"><label><span class="ui-form-required">*</span>设备名称：</label></td>
+            <td ><input class="k-textbox" type="text" name="deviceName" value="$!{device.deviceName}"></td>
+            
+        </tr>
+        <tr>
+			<td class="label">规格型号：</td>
+            <td ><input class="k-textbox" type="text" name="deviceSpec" value="$!{device.deviceSpec}"></td>
+				
+            <td class="label"><span class="ui-form-required">*</span>设备类别：</td>
+            <td >
+                #if(!($!viewOnly))<span class="k-textbox k-space-right" id="categoryNames">#end
+                <input type="hidden" id="categoryId" name="categoryId" value="$!{device.categoryId}" class="k-textbox"/>
+                <input readonly type="text" id="categoryName" name="categoryName" value="$!{device.categoryName}" class="k-textbox ui-input-choose"  style="width: 100%;"/>
+                #if(!($!viewOnly))<a href="#" class="k-icon k-i-search">&nbsp;</a>
+                </span>#end
+            </td>
+            <td class="label"><label><span class="ui-form-required">*</span>安装位置：</label></td>
+            <td >
+                #if(!($!viewOnly))<span class="k-textbox k-space-right" id="locationNames">#end
+                <input type="hidden" id="locationId" name="locationId" value="$!{device.locationId}" class="k-textbox"/>
+                <input readonly type="text" id="locationName" name="locationName" value="$!{device.locationName}" class="k-textbox ui-input-choose" style="width: 100%;"/>
+                #if(!($!viewOnly))<a href="#" class="k-icon k-i-search">&nbsp;</a>
+                </span>#end
+            </td>
+        </tr>
+        <tr>
+			<td class="label"><label><span class="ui-form-required">*</span>使用部门：</label></td>
+            <td >
+                #if(!($!viewOnly))<span class="k-textbox k-space-right" id="useDepartmentNames">#end
+                <input type="hidden" id="useDepartmentId" name="useDepartmentId" value="$!{device.useDepartmentId}"
+                       class="k-textbox"/>
+                <input readonly type="text" id="useDepartmentName" name="useDepartmentName" value="$!{device.useDepartmentName}" class="k-textbox ui-input-choose"  style="width: 100%;"/>
+                #if(!($!viewOnly))<a href="#" class="k-icon k-i-search">&nbsp;</a>
+                </span>#end
+            </td>
+			
+            <td class="label"><label><span class="ui-form-required">*</span>管理负责人：</td>
+            <td >
+                #if(!($!viewOnly))<span class="k-textbox k-space-right" id="managePersonNames">#end
+                <input type="hidden" id="managePersonIds" name="managePersonIds" value="$!{device.managePersonIds}"
+                       class="k-textbox"/>
+                <input readonly type="text" id="managePersonName" name="managePersonName" value="$!{device.managePersonName}" class="k-textbox ui-input-choose"  style="width: 100%;"/>
+                #if(!($!viewOnly))<a href="#" class="k-icon k-i-search">&nbsp;</a>
+                </span>#end
+            </td>
+            <td class="label"><span class="ui-form-required">*</span>管理部门：</td>
+            <td >
+                <input class="k-textbox" type="hidden" id="manageDepartmentId" name="manageDepartmentId"
+                       value="$!{device.manageDepartmentId}"/>
+                <input type="text" class="k-textbox" id="manageDepartmentName" name="manageDepartmentName"
+                       value="$!{device.manageDepartmentName}"/>
+            </td>
+            
+        </tr>
+        <tr>
+			<td class="label"><label>生产厂商：</label></td>
+            <td >
+                #if(!($!viewOnly))<span class="k-textbox k-space-right" id="supplierNames">#end
+                <input type="hidden" id="supplierId" name="supplierId" value="$!{device.supplierId}" class="k-textbox"/>
+                <input readonly type="text" id="supplierName" name="supplierName" value="$!{device.supplierName}" class="k-textbox ui-input-choose" style="width: 100%;"/>
+                #if(!($!viewOnly))<a href="#" class="k-icon k-i-search">&nbsp;</a>
+                </span>#end
+            </td>
+			
+            <td class="label"><label>检修周期：</label></td>
+            <td >
+                <input type="text" class="k-textbox fInt" name="maitainCycle" value="$!{device.maitainCycle}"/>
+                <span>天</span>
+            </td>
+            <td class="label"><label>检修后运行：</td>
+            <td >
+                <input class="k-textbox fNum2" type="text" name="timeAfterMaintain" readonly="true"
+                       value="$!{device.timeAfterMaintain}"/>
+                <span class="ui-form-unit">小时</span>
+            </td>
+            
+        </tr>
+        <tr>
+			<td class="label">累计运行：</td>
+            <td >
+                <input class="k-textbox fNum2" type="text" name="totalRunningTime" readonly="true"
+                       value="$!{device.totalRunningTime}"/>
+                <span class="ui-form-unit">小时</span>
+            </td>
+			
+            <td class="label"><label>特种设备：</label></td>
+            <td >
+                <input type="radio" readonly class="ui-radio" name="specialStatus" #if("$!{device.specialStatus}"==1)
+                       checked #end value="1"><span class="ui-form-text">是</span>
+                <input type="radio" readonly class="ui-radio" name="specialStatus" #if("$!{device.specialStatus}"!=1)
+                       checked #end value="0"><span class="ui-form-text">否</span>
+            </td>
+            <td class="label"><label>设备条码：</label></td>
+            <td >
+                <input class="k-textbox" type="text" name="barcode" value="$!{device.barcode}"/>
+            </td>
+
+        </tr>
+        <tr>
+			<td class="label"><label>出厂日期：</td>
+            <td>
+                <input id="startTime"  type="text" class="k-textbox" name="prduceDate"
+                       value="#date_format($!{device.prduceDate},'yyyy-MM-dd')" />
+            </td>
+			
+            <td class="label"><label>资产编码：</label></td>
+            <td >
+                <input class="k-textbox" type="text" name="assetsCode" value="$!{device.assetsCode}"/>
+            </td>
+            <td class="label"><label>启用日期：</label></td>
+            <td>
+                <input id="endTime"  type="text" class="k-textbox" name="enableDate"
+                       value="#date_format( $!{device.enableDate},'yyyy-MM-dd')"/>
+            </td>
+            
+        </tr>
+        <tr>
+			<td class="label"><label>使用状态：</td>
+            <td class="ui-search-c inputText">
+                <select name="status" class="k-textbox" #if($!{showFlag})disabled="true"#end >
+                    #foreach($!{e} in $!{lstStatus})
+                        <option value="$!{e.enumValue}" #if($!{device.status}==$!{e.enumValue})
+                                selected="selected" #end>$!{e.enumText}</option>
+                    #end
+                </select>
+            </td>
+			
+            <td class="label">资产原值：</td>
+            <td >
+                <input class="k-textbox fNum2" type="text" name="assetsCost" value="$!{device.assetsCost}"/>
+                <span class="ui-form-unit">元</span>
+            </td>
+            <td class="label">合同编号：</td>
+            <td >
+                <input class="k-textbox" type="text" name="contractNo" value="$!{device.contractNo}"/>
+            </td>
+            
+        </tr>
+         <tr> 
+            <td class="label"><label>设备类型：</label></td>
+            <td >
+                <input type="radio" readonly class="ui-radio" name="deviceType" #if("$!{device.deviceType}"==1)
+                       checked #end value="1"><span class="ui-form-text">工艺</span>
+                <input type="radio" readonly class="ui-radio" name="deviceType" #if("$!{device.deviceType}"!=1)
+                       checked #end value="0"><span class="ui-form-text">公用动力</span>
+            </td>
+            <td class="label">维修类别：</td>
+            <td class="ui-search-c inputText">
+                <select name="repairType" class="k-textbox" #if($!{showFlag})disabled="true"#end >
+                    <option value="" >-请选择-</option>
+                    #foreach($!{e} in $!{lstRepairType})
+                        <option value="$!{e.enumValue}" #if($!{device.repairType}==$!{e.enumValue})
+                                selected="selected" #end>$!{e.enumText}</option>
+                    #end
+                </select>
+            </td>           
+        </tr>
+    </table>
+</div>
+    #if($!{device.id})
+    <!--点位信息-->
+    <div class="tab-content" id="tab-2">
+        <div id="grid5"></div>
+    </div>
+	
+    <div class="tab-content" id="tab-3">
+        <div id="grid2"></div>
+    </div>
+	
+    <!--维修记录-->
+    <div class="tab-content" id="tab-4">
+        <div id="grid3"></div>
+    </div>
+	
+    <!--保养记录-->
+    <div class="tab-content" id="tab-5">
+        <div id="grid4"></div>
+    </div>
+	
+    <!--随机备件-->
+    <div class="tab-content" id="tab-6">
+        <div id="grid11"></div>
+    </div>
+	
+    <!--变更历史-->
+    <div class="tab-content" id="tab-7">
+        <div id="grid6"></div>
+    </div>
+	
+    <!--扩展属性
+    <div style="height:400px">
+        <table id="grid7" cellspacing="0" width="100%">
+
+        </table>
+    </div>-->
+	#end
+	
+    #if($!{device.id})
+    <!--启停记录-->
+    <div  class="tab-content" id="tab-9">
+        <div id="grid10"></div>
+    </div>
+	#end
+
+<!--文档资料-->
+<div  class="tab-content" id="tab-8" style="height:393px;width:100%;overflow-y: scroll;">
+    <table width="95%" class="ui-table">
+        <div id="filehidden"></div>
+        <thead>
+        <tr>
+            <th style="text-align: left;" width="40%">文档名称</th>
+            <th style="text-align: left;" width="20%">文档类型</th>
+            <th style="text-align: left;" width="20%">文档大小</th>
+        </tr>
+        </thead>
+        <tbody>
+            #set($index=1)
+			#foreach($!{document} in $!{listDocuments})
+            	 <tr id='alreadyfile$!{index}'>
+            	   <td ><a href="${rc.contextPath}/fileupload/download?fileName=$!{document.fileName}&path=$!{document.storePath}"> $!{document.fileName}</a></td>
+            	   <td > $!{document.fileType}&nbsp; </td>
+            	   <td > $!{document.fileSize}KB</td>
+            	 </tr>
+            #end
+        </tbody>
+    </table>
+</div>	
+	
+<!--随机档案-->
+<div  class="tab-content" id="tab-10" style="height:393px;width:100%;overflow-y: scroll;">
+    <table width="95%" class="ui-table" id="images_table_id">
+        <div id="filehidden"></div>
+        <thead>
+        <tr>
+            <th style="text-align: left;" width="40%">档案名称</th>
+            <th style="text-align: left;" width="20%">档案类型</th>
+            <th style="text-align: left;" width="20%">档案大小</th>
+            <th width="20%">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+            #set($index=1)
+            #foreach($!{attach} in $!{listAttachments})
+
+            <tr id='alreadyfile$!{index}'>
+                <td align="left" width="10%">
+                <a id="showImageId_$velocityCount" href="${rc.contextPath}/hl/device/attachment/download?fileName=$!{attach.fileName}&path=$!{attach.storePath}"> $!{attach.fileName}</a>
+                </td>
+                <td align="left"> $!{attach.fileType}&nbsp; </td>
+                <td align="left">$!{attach.fileSize}KB</td>
+                <td align="center" name="tdControl"><a href="#" onclick="removealreadyfile('$!{index}','$!{attach.id}')">移除</a>
+                </td>
+            </tr>
+                #set($index=$index+1)
+            #end
+        </tbody>
+    </table>
+    <div style="position:relative;left:5px;width:100px;">
+        <input type="file" name="file" id="file_upload" style="height:50px;width:50px;"/>
+    </div>
+</div>
+
+<!--设备图片-->
+<div  class="tab-content" id="tab-11" style="height:393px">
+    <div style="margin-left:6px;width:120px">
+        <div style="float:left">
+        <img id="photo1" width='128px' height='95px'  #if(${imageSysName}) src="${imagePath}/${imageSysName}" #else src='$!{main_static_custom_url}/css/images/default.jpg' #end onerror="this.src='$!{main_static_custom_url}/css/images/default.jpg';" />
+		</div>
+    </div>
+    <div style="width:350px;height:30px">
+        <div style="float:left;padding-top:10px;padding-left:10px">
+            <input type="file" name="file" id="file_upload1" style="height:50px;width:50px;"/>
+        </div>
+        <input type='hidden' name='fileorignal1' id='fileorignal1'/>
+        <input type='hidden' name='filename1' id='filename1'/>
+        <input type='hidden' name='delfiles1' id='delfiles1'/>
+    </div>
+</div>
+
+</div>
+</div>
+</div>
+</form>
+#parse("index/_footer.vm")
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        _iframe_layout = $('body').layout({
+            defaults: {
+                resizable: true,
+                closable: false,
+                spacing_open: 5
+            }
+        });
+
+        #if($!{showFlag})
+            setAllReadonly("dialog");
+        #else
+            commonSingleDateWithout("startTime", "yyyy-MM-dd", "zh-CN");
+            commonSingleDateWithout("endTime", "yyyy-MM-dd", "zh-CN");
+        #end
+        
+        $("#tab li").click(function(){
+        	$("#tab li").removeClass("k-state-active");
+        	var indextab = $(this).attr("class");
+        	$(this).addClass("k-state-active");
+			
+        	$("#tab .tab-content").removeClass("current");
+        	var indextabC = '#' + indextab;
+        	$(indextabC).addClass("current");
+        });
+
+    });
+</script>
+<script type="text/javascript">
+
+    $("#supplierNames").click(function () {
+        if (!'$!{viewOnly}')
+            quick_dialog("selectDiloag", "选择厂商", "$!{rc.contextPath}/hl/device/supplier/lookup/supplierId/supplierName?flag=0", 950, 400);
+    });
+    $("#categoryNames").click(function () {
+        if (!'$!{viewOnly}')
+            quick_dialog("choose_deviceCategory", "选择设备类别", "$!{rc.contextPath}/hl/device/deviceCategory/lookup/categoryId/categoryName?type=1", 300, 300);
+    });
+    $("#locationNames").click(function () {
+        if (!'$!{viewOnly}')
+        	chooseGeoarea1('locationId','locationName','');
+        //    quick_dialog("selectDiloag", "选择安装位置", "$!{rc.contextPath}/hl/device/geoArea/lookup/locationId/locationName", 270, 350);
+    });
+
+    $("#useDepartmentNames").click(function () {
+        if (!'$!{viewOnly}')
+            quick_dialog("choose_dept", "选择部门", "$!{rc.contextPath}/hl/device_choose/dept/useDepartmentId/useDepartmentName", 280, 400);
+    });
+
+    $("#managePersonNames").click(function () {
+        if (!'$!{viewOnly}')
+           // quick_dialog("selectDiloag", "选择人员", "$!{rc.contextPath}/hl/device_choose/personPage/managePersonIds/managePersonName/manageDepartmentId/manageDepartmentName?type=1", 950, 450);
+        	choosePersons(1, "managePersonIds", "managePersonName","", "","manageDepartmentId", "manageDepartmentName", "");
+    });
+    $("#parentNames").click(function () {
+        if (!'$!{viewOnly}')
+        	chooseDevices1('parentId','parentName','','');
+    });
+
+    function isAccount(o) {
+        var nums = $(o).val();//这行必须是数字
+        if (!isZzs(nums)) {
+            $(o).val("");
+            notify("请输入正整数!", "error");
+        }
+    }
+    //清空厂商
+    function clearSupplier() {
+        $("#supplierId").val("");
+        $("#supplierName").val("");
+    }
+    //文件随机档案
+    var index = 1000;
+    //文件上传
+    function initUpload() {
+        //上次随机档案
+        $('#file_upload').uploadify({
+    	    'buttonText' : '浏览',                
+    		'buttonClass' : 'k-primary fileUploadBtn',
+    		'queueID': 'context',
+    		'multi' : true,                        
+    		'fileSizeLimit':'100MB',               
+    		'fileObjName' : 'file', 
+    		'cancelImg' : '$!{main_static_custom_url}/js/uploadify/cancel.png',
+            'swf'       : '$!{main_static_custom_url}/js/uploadify/uploadify.swf',
+            'uploader'  : '${rc.contextPath}/fileupload/fileup',
+            'removeCompleted': true,
+            'removeTimeout':'1',
+            onUploadSuccess: function (file, data, response) {
+                if (response) {
+                    var obj = eval('(' + data + ')');
+                    //var filedisplay ="<div class='panel_box FL' name='chosendiv' id='attachment"+index+"'><a>"+obj.orignalname+"</a><a class='delete' onclick=removefile('"+index+"')></a></div>";
+                    var filedisplay = "<tr id='alreadyfile" + index + "'><td>" + obj.orignalname + "</td><td>" + obj.postfix + "</td><td align='left'>" + obj.filesize + "KB</td><td align='center'><a href='#' onclick=removefile('" + index + "')>移除</a></td></tr>";
+                    var filehidden = "<input type='hidden' name='fileorignal' value='" + obj.orignalname + "' id='fileorignal" + index + "'/><input type='hidden' name='filename' value='" + obj.filename + "' id='filename" + index + "'/>";
+                    //$("#filediv").append(filedisplay);
+                    $("#images_table_id").append(filedisplay);
+                    $("#filehidden").append(filehidden);
+                    index++;
+                } else {
+                    alert("文件上传失败！");
+                }
+            }
+        });
+
+        //上传设备图片
+        $('#file_upload1').uploadify({
+            'buttonText': '上传图片',
+            'buttonClass': 'k-primary fileUploadBtn',
+            'fileSizeLimit': '5MB',
+            'fileTypeDesc': "Image Files",
+            'fileTypeExts': '*.gif; *.jpg; *.png; *.bmp',
+            'multi': false,
+    		'fileObjName' : 'file', 
+    		'cancelImg' : '$!{main_static_custom_url}/js/uploadify/cancel.png',
+            'swf'       : '$!{main_static_custom_url}/js/uploadify/uploadify.swf',
+            'uploader'  : '${rc.contextPath}/fileupload/fileup',
+            'removeCompleted': true,
+            'removeTimeout':'1',
+            onUploadSuccess: function (file, data, response) {
+                if (response) {
+                    var obj = eval('(' + data + ')');
+                    $("#photo1").attr("src", "${imageTempPath}" + obj.filename);
+                    $("#filename1").val(obj.filename);
+                    $("#fileorignal1").val(obj.orignalname);
+                    $("#delfiles1").val("$!{attachId}");
+                } else {
+                    alert("文件上传失败！");
+                }
+            }
+        });
+    }
+
+    function removefile(ind) {
+        $("#attachment" + ind).remove();
+        $("#fileorignal" + ind).remove();
+        $("#filename" + ind).remove();
+        $("#alreadyfile" + ind).remove();
+    }
+
+    function removealreadyfile(index, fileid) {
+        $("#alreadyfile" + index).remove();
+        var delfile = "<input type='hidden' name='delfiles' value='" + fileid + "'/>";
+        $("#filehidden").append(delfile);
+    }
+
+
+</script>
+<script type="text/javascript">
+
+function backbtn(flag) {
+
+    if (flag == 1) {
+        window.location.href = "$!{rc.contextPath}/device/imp_exp/exp";
+    } else {
+        window.location.href = "$!{rc.contextPath}/device/device/list";
+    }
+
+}
+$(document).ready(function () {
+    #if($!{showFlag})
+        fNumPage();
+    #end
+
+    $("#queryForm").validator({
+        fields: {
+            deviceCode: "required; length[~32]",
+            deviceName: "required; length[~50]",
+            deviceSpec: "length[~50]",
+            categoryName: "required",
+            locationName: "required",
+            useDepartmentName: "required",
+            manageDepartmentName: "required",
+            managePersonName: "required",
+            maitainCycle: "'digits';length[~5]",
+            barcode: "length[~60]",
+            assetsCode: "length[~32]",
+            assetsCost: "'xiaoshu';length[~13]",
+            contractNo: "length[~20]",
+            depreciationRate: "'xiaoshu';length[~6]",
+            depreciationYears: "'digits';length[~5]"
+        },
+        valid: function (form) {
+            form_btn_submit($("#device_bt"), form, function (res) {
+                //console.log(res);
+                validateCallback(res, "grid", "");
+            });
+        }
+    });
+
+    //点位
+    quick_datagrids("#grid5", "#queryForm5", "$!{rc.contextPath}/montrol/alarm/deviceTag/list?monitorID=$!{device.hpid}", [
+        {
+            field: "id",
+            hidden: true,
+            width: 20
+        },
+        {
+            field: "tagName",
+            title: "位号名",
+			headerAttributes: {"class": "k-grid-text"},
+            attributes: {"class": "k-grid-text"},
+            sortable: false
+
+        },
+        {
+            field: "tagTypeStr",
+            title: "位号类型",
+			headerAttributes: {"class": "k-grid-equilong"},
+            attributes: {"class": "k-grid-equilong"},
+            sortable: false
+        },
+        {
+            field: "alarmPonitStr",
+            sortable: false,
+			headerAttributes: {"class": "k-grid-equilong"},
+            attributes: {"class": "k-grid-equilong"},
+            title: "位号性质"
+        },
+        {
+            field: "isWriteStr",
+            title: "是否可写",
+			headerAttributes: {"class": "k-grid-equilong"},
+            attributes: {"class": "k-grid-equilong"},
+            sortable: false
+        },
+        {
+            field: "tagDesc",
+            title: "位号描述",
+			headerAttributes: {"class": "k-grid-text"},
+            attributes: {"class": "k-grid-text"},
+            sortable: false
+        },
+        {
+            field: "extension1",
+            title: "操作",
+            sortable: false,
+			headerAttributes: {"class": "k-grid-equilong"},
+            attributes: {"class": "k-grid-equilong"},
+            template: "",
+            width: "100px;"
+        }
+    ], {
+        height: 393,
+        pageSize: 10,
+        sortable: {
+            mode: "multiple",
+            allowUnsort: true
+        },
+        selectable: "multiple, row",
+        dataBound: function (e) {
+            var data = e.sender._data;
+            for (var i = 0; i < data.length; i++) {
+                var html = "";
+                if (data[i].extension1 == "1") {
+                    html += " <a  href='#' class=\"k-button   k-primary\"  onclick='doquxiao(\"" + data[i].id + "\")'>取消忽略</a> ";
+                }
+                $(e.sender.tbody[0].childNodes[i].childNodes[6]).html(html);
+            }
+        }
+    }, {
+        serverSorting: true
+    }, [
+	#if(!$!{showFlag})
+        {
+            name: "添加",
+            icon: "fa fa-plus",
+            onclick: function (obj, grid) {
+                var url = "$!{rc.contextPath}/montrol/alarm/deviceTag/edit?monitorId=$!{device.hpid}";
+                quick_dialog("editMonitorTag", "添加位号", url, 700, 450, obj);
+            }
+        },
+        {
+            name: "修改",
+            icon: "fa fa-pencil",
+            onclick: function (obj, grid) {
+                var row = grid.select();
+                if (null == row || row.length == 0) {
+                    notify("请选择要修改的项！", "error");
+                    return;
+                }
+                var data = grid.dataItem(row);
+                var url = "$!{rc.contextPath}/montrol/alarm/deviceTag/edit?monitorId=$!{device.hpid}" + "&id=" + data.id;
+                quick_dialog("editMonitorTag", "修改位号", url, 700, 450, obj);
+            }
+        },
+        {
+            name: "删除",
+            icon: "fa fa-remove",
+            onclick: function (obj, grid) {
+                var row = grid.select();
+                if (null == row || row.length == 0) {
+                    notify("请选择要删除的项！", "warn");
+                    return;
+                }
+                if (!confirm("确定要删除吗？"))
+                    return;
+                else {
+                    var data = grid.dataItem(row);
+                    $.ajax({
+                        type: 'post',
+                        url: "$!{rc.contextPath}/montrol/alarm/deviceTag/delete",
+                        data: {
+                            id: data.id
+                        },
+                        dataType: 'json',
+                        success: function (msg) {
+                            if (msg.status == "fail") {
+                                notify(msg.message, "fail");
+                            } else {
+                                notify("删除成功", "success");
+                                edited_callback(grid);
+                            }
+                        },
+                        error: function () {
+                            notify("删除失败，请检查网络！", "error");
+                        }
+                    });
+                }
+            }
+        }
+		#end
+    ]);
+    //----------------------start-----------
+    //维修记录
+    if ("$!{device.id}" != "") {
+        quick_datagrids("#grid3", "#queryForm3", "$!rc.contextPath/repair/task/find?deviceId=$!{device.id}", [
+            {
+                field: "id",
+                hidden: true
+            },
+            {
+                field: "repairCode",
+                title: "维修单号",
+                sortable: false,
+                headerAttributes: {"class": "k-grid-equilong"},
+                attributes: {"class": "k-grid-equilong"},
+                template:"<a href=\"javascript:view3('#:data.id #')\" title=\"查看#: data.repairCode #的详细信息\" >#: data.repairCode #</a>"
+            },
+            {
+                field: "contact",
+                title: "报修人",
+                sortable: false,
+                headerAttributes: {"class": "k-grid-equilong"},
+                attributes: {"class": "k-grid-equilong"}
+            },
+            {
+                field: "contactTel",
+                sortable: false,
+                title: "报修人电话",
+                headerAttributes: {"class": "k-grid-num"},
+                attributes: {"class": "k-grid-num"}
+            },
+            {
+                field: "repairDate",
+                title: "报修时间",
+                sortable: false,
+                headerAttributes: {"class": "k-grid-equilong"},
+                attributes: {"class": "k-grid-equilong"}
+            },
+            {
+                field: "descripton",
+                sortable: false,
+                title: "故障描述",
+                headerAttributes: {"class": "k-grid-text"},
+            	attributes: {     
+    		  		title:"#: data.descripton==null? '':data.descripton #",
+    				"class": "k-grid-text k-grid-nowrap"          
+  		  	    }
+            },
+            {
+                field: "creator",
+                title: "创建人",
+                sortable: false,
+                headerAttributes: {"class": "k-grid-equilong"},
+                attributes: {"class": "k-grid-equilong"}
+            },
+            {
+                field: "createDate",
+                sortable: false,
+                title: "创建时间",
+                headerAttributes: {"class": "k-grid-equilong"},
+                attributes: {"class": "k-grid-equilong"}
+            }
+
+        ], { height: 393,
+            pageSize: 10
+        });
+        
+        //保养记录(包括普通保养和特种保养)
+        quick_datagrids("#grid4", "#queryForm4", "$!rc.contextPath/maintain/task/list?deviceCode=$!{device.deviceCode}", [
+            {
+                field: "id",
+                hidden: true
+            },
+            {
+                field: "maintainCode",
+                title: "保养单号",
+                sortable: false,
+                headerAttributes: {"class": "k-grid-equilong"},
+                attributes: {"class": "k-grid-equilong"},
+                template:"<a href=\"javascript:view4('#:data.id #')\" title=\"查看#: data.maintainCode #的详细信息\" >#: data.maintainCode #</a>"
+
+            },{
+                field: "maintainGroupName",
+                title: "保养班组",
+                sortable: false,
+                headerAttributes: {"class": "k-grid-text"},
+                attributes: {"class": "k-grid-text"}
+            }, {
+                field: "expectStartTime",
+  			  title: "计划开始时间",
+                sortable: false,
+                headerAttributes: {"class": "k-grid-text"},
+                attributes: {"class": "k-grid-text"}
+            }, {
+                field: "actualStartTime",
+  			  title: "实际开始时间",
+                sortable: false,
+                headerAttributes: {"class": "k-grid-text"},
+                attributes: {"class": "k-grid-text"}
+            }, {
+                field: "actualEndTime",
+                title: "实际结束时间",
+                sortable: false,
+                headerAttributes: {"class": "k-grid-text"},
+                attributes: {"class": "k-grid-text"}
+            }, {
+                field: "statuss",
+                title: "任务状态",
+                sortable: false,
+                headerAttributes: {"class": "k-grid-text"},
+                attributes: {"class": "k-grid-text"}
+            }
+
+        ], { height: 393,
+            pageSize: 10
+        });
+        
+      //随机备件
+	   quick_datagrids("#grid11", "#queryForm11", "$!{rc.contextPath}/base/deviceSpareIn/page?deviceCode=$!{device.deviceCode}", [{
+              field: "id",
+              hidden: true
+          },{
+          	 field: "deviceId",
+              hidden: true
+          }, {
+              field: "deviceName",
+              title: "设备名称",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {     
+  		  		title:"#: data.deviceName==null? '':data.deviceName #",
+  				"class": "k-grid-text k-grid-nowrap"
+		  	  },
+			  width: 100
+          }, {
+              field: "total",
+              title: "备件总量",
+              sortable: false,
+              template:function(data){
+              	var str='';
+              	if(data.id==undefined){
+              		str=""+data.total+"";
+              	}else{
+              		str="<a href='javascript:void(0)' title='查看"+data.deviceName+"的详细信息' onclick='show("+data.id+")'>"+data.total+"</a>";
+              	}
+              	return str;
+              },
+              headerAttributes: {"class": "k-grid-num"},
+              attributes: {"class": "k-grid-num"},
+			  width: 65
+          }, {
+              field: "remainder",
+              sortable: false,
+              title: "剩余总量",
+              headerAttributes: {"class": "k-grid-num"},
+          	  attributes: {"class": "k-grid-num"},
+			  width: 65
+          }, 
+          {
+              field: "used",
+              title: "已领数量",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-num"},
+          	  attributes: {"class": "k-grid-num"},
+			  width: 65
+          }, {
+              field: "supplierName",
+              sortable: false,
+              title: "生产厂商",
+              headerAttributes: {"class": "k-grid-text"},
+          	  attributes: {     
+  		  		title:"#: data.locationName==null? '':data.locationName #",
+  				"class": "k-grid-text k-grid-nowrap"
+		  	  },
+			  width: 100
+          }, {
+              field: "checkDate",
+              title: "验收时间",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+          	  attributes: {     
+  		  		title:"#: data.managePersonName==null? '':data.managePersonName #",
+  				"class": "k-grid-equilong k-grid-nowrap"
+		  	  },
+			  width: 120
+          }, {
+              field: "creator",
+              sortable: false,
+              title: "入库人",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {     
+  		  		title:"#: data.creator==null? '':data.creator #",
+  				"class": "k-grid-text k-grid-nowrap"
+		  	  },
+			  width: 80
+          }, {
+              field: "storeMan",
+              sortable: false,
+              title: "保管员",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {     
+  		  		title:"#: data.storeMan==null? '':data.storeMan #",
+  				"class": "k-grid-text k-grid-nowrap"
+		  	  },
+			  width: 80
+          }, {
+              field: "assetmanager",
+              sortable: false,
+              title: "资产管理员",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {     
+  		  		title:"#: data.assetmanager==null? '':data.assetmanager #",
+  				"class": "k-grid-text k-grid-nowrap"
+		  	  },
+			  width: 80
+          }, {
+              field: "fileName",
+              sortable: false,
+              title: "附件",
+              headerAttributes: {"class": "k-grid-text"},
+			  attributes: {     
+  		  		title:"#: data.fileName==null? '':data.fileName #",
+  				"class": "k-grid-text k-grid-nowrap"
+		  	  },
+		  	   template:function(data){
+              	var str='';
+              	if(data.fileName!=undefined){
+              		str="<a href=\"javascript:void(0)\" title=\"查看"+data.deviceName+"的附件信息\" onclick=\"window.location.href='$!{rc.contextPath}/fileupload/download?fileName="+data.fileName+"&path="+data.storePath +"'\">"+data.fileName+"</a>";
+              	}
+              	return str;
+              },
+			  width: 100
+          }, {
+              field: "createDate",
+              sortable: false,
+              title: "入库时间",
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {     
+  		  		title:"#: data.createDate==null? '':data.createDate #",
+  				"class": "k-grid-equilong k-grid-nowrap"
+		  	  },
+			  width: 120
+          }
+          
+          ], { height: 393,
+            pageSize: 10
+        });
+
+
+            quick_datagrids("#grid9", "#queryForm9", "$!{rc.contextPath}/hl/montrol/alarm/realalarm/list?deviceId=$!{device.id}", [
+                {
+                    field: "id",
+                    hidden: true
+                },
+                {
+                    field: "alarmTime",
+                    title: "报警时间",
+                    sortable: false,
+                    template: function (dataItem) {
+                        var date = dataItem.alarmTime;
+                        if (undefined != date) {
+                            var formatDate = date.substr(0, 19);
+                            return formatDate;
+                        } else {
+                            return "";
+                        }
+                    },
+                    headerAttributes: {"class": "k-grid-equilong"},
+                    attributes: {"class": "k-grid-equilong"}
+
+                },
+                {
+                    field: "showAlarmState",
+                    title: "报警状态",
+                    sortable: false,
+                    headerAttributes: {"class": "k-grid-equilong"},
+                    attributes: {"class": "k-grid-equilong"}
+                },
+                {
+                    field: "showProcessState",
+                    sortable: false,
+                    title: "处理状态",
+                    headerAttributes: {"class": "k-grid-equilong"},
+                    attributes: {"class": "k-grid-equilong"}
+                },
+                {
+                    field: "alarmRemark",
+                    title: "报警描述",
+                    sortable: false,
+                    headerAttributes: {"class": "k-grid-text"},
+                    attributes: {"class": "k-grid-text"}
+                }
+
+            ], {
+                height: 393,
+                pageSize: 10
+            });
+        //历史报警
+        quick_datagrids("#grid2", "#queryForm2", "$!{rc.contextPath}/hl/montrol/alarm/historyalarm/list?deviceId=$!{device.id}", [
+            {
+                field: "id",
+                hidden: true
+            },
+            {
+                field: "alarmTime",
+                title: "报警时间",
+                sortable: false,
+                template: function (dataItem) {
+                    var date = dataItem.alarmTime;
+                    if (undefined != date) {
+                        var formatDate = date.substr(0, 19);
+                        return formatDate;
+                    } else {
+                        return "";
+                    }
+                },
+                headerAttributes: {"class": "k-grid-equilong"},
+                attributes: {"class": "k-grid-equilong"}
+
+            },
+            {
+                field: "showAlarmState",
+                title: "报警状态",
+                sortable: false,
+                headerAttributes: {"class": "k-grid-equilong"},
+                attributes: {"class": "k-grid-equilong"}
+            },
+            {
+                field: "showProcessState",
+                sortable: false,
+                title: "处理状态",
+                headerAttributes: {"class": "k-grid-equilong"},
+                attributes: {"class": "k-grid-equilong"}
+            },
+            {
+                field: "alarmRemark",
+                title: "报警描述",
+                sortable: false,
+                headerAttributes: {"class": "k-grid-text"},
+                attributes: {"class": "k-grid-text"}
+            }
+
+        ], {height: 393,
+            pageSize: 10
+        });
+		
+        //显示变更历史
+            quick_datagrids("#grid6", "#queryForm6", "$!{rc.contextPath}/device/deviceChange/page?deviceId=$!{device.id}", [
+                {
+                    field: "id",
+                    hidden: true
+                },
+                {
+                    field: "changeProperty",
+                    title: "变更属性",
+                    sortable: false,
+                    headerAttributes: {"class": "k-grid-text"},
+                    attributes: {"class": "k-grid-text"}
+
+                },
+                {
+                    field: "oldValue",
+                    title: "原值",
+                    sortable: false,
+                    headerAttributes: {"class": "k-grid-text"},
+                    attributes: {"class": "k-grid-text"}
+                },
+                {
+                    field: "newValue",
+                    sortable: false,
+                    title: "新值",
+                    headerAttributes: {"class": "k-grid-text"},
+                    attributes: {"class": "k-grid-text"}
+                },
+                {
+                    field: "creator",
+                    title: "变更人员",
+                    sortable: false,
+                    headerAttributes: {"class": "k-grid-equilong"},
+                    attributes: {"class": "k-grid-equilong"}
+                },
+                {
+                    field: "createDate",
+                    title: "变更时间",
+                    sortable: false,
+                    headerAttributes: {"class": "k-grid-equilong"},
+                    attributes: {"class": "k-grid-equilong"}
+                }
+
+            ], {height: 393,
+                pageSize: 10
+            });
+
+
+
+        //启停记录
+        quick_datagrids("#grid10", "#queryForm10", "$!{rc.contextPath}/device/device/findstartStopRecords?deviceId=$!{device.id}", [
+            {
+                field: "id",
+                hidden: true
+            },
+            {
+                field: "startTime",
+                title: "开启时间",
+                sortable: false,
+                headerAttributes: {"class": "k-grid-equilong"},
+                attributes: {"class": "k-grid-equilong"}
+
+            },
+            {
+                field: "stopTime",
+                title: "关闭时间",
+                sortable: false,
+                headerAttributes: {"class": "k-grid-equilong"},
+                attributes: {"class": "k-grid-equilong"}
+            },
+            {
+                field: "runTimes",
+                sortable: false,
+                title: "运行时间(小时)",
+                template: function (dataItem) {
+                    if (dataItem.runTimes != null)
+                        return fInt(dataItem.runTimes);
+                    else return '';
+                },
+                headerAttributes: {"class": "k-grid-equilong"},
+                attributes: {"class": "k-grid-equilong"}
+            }
+
+        ], {
+            height: 393,
+            pageSize: 10
+        });
+        //----------------------end---------------
+    }
+    //查看模式
+    #if($!{showFlag})
+
+        //setAllReadonly();
+        #set($readonly='')
+        #if($!{showFlag})
+            #set($readonly='readonly')
+        #end
+        $(':radio').attr('disabled', true);
+        $("#file_upload").hide();
+        $("#tishiyu").hide();
+        $("#file_upload1").hide();
+        $("td[name='tdControl']").html("移除");
+        $(".icon-remove-sign").hide();
+    #else
+        initUpload();
+        inputChooseClear();
+    #end
+
+    /**
+     *不显示"序号"列
+     * DataGrid 快捷方法
+     * 参数(el)：指定装载tree的容器
+     * 参数(formId)：表单的id，自动将指定表单中的数据传送到服务器，可选
+     * 参数(readUrl)：获取数据的 URL 地址
+     * 参数(columns)：TODO
+     * 参数(options)：tree 配置，可选
+     * 参数(dsOptions)：DataSource 配置，可选
+     * 参数(operates)：生成操作按钮，可选
+     * 参数(toolbarId)：工具条的id，可选
+     **/
+    function quick_datagrids(el, formId, readUrl, columns, options, dsOptions, operates, toolbarId) {
+        options = options || {};
+        toolbarId = toolbarId || "#grid_toolbar_template";
+        var _dbopt = {
+            transport: {
+                read: {
+                    url: readUrl,
+                    type: "POST",
+                    dataType: "json",
+                    cache: false,
+                    data: function (p) {
+                        if (formId) {
+                            var arr = $(formId).serializeArray();
+                            if (arr && arr.length > 0) {
+                                var d = {};
+                                $.each(arr, function (idx, it) {
+                                    if (it.value) {
+                                        d[it.name] = it.value;
+                                    }
+                                });
+                                return d;
+                            }
+                        }
+                        return {};
+                    }
+                },
+                parameterMap: function (data, type) {
+                    if (type == "read") {
+                        data.pageNo = data.page;
+                        data.page = undefined;
+                        data.take = undefined;
+                        data.skip = undefined;
+                        delete data.page;
+                        delete data.take;
+                        delete data.skip;
+                        return data;
+                    }
+                }
+            },
+            schema: {
+                type: "json",
+                data: "rows",
+                total: "total"
+            },
+            serverPaging: true,
+            pageSize: options.pageSize || 20
+        };
+        if (dsOptions) {
+            _dbopt = $.extend(_dbopt, dsOptions);
+        }
+        var _opt = {
+            dataSource: new kendo.data.DataSource(_dbopt),
+            toolbar: hc.template($(toolbarId).html().replace(/&lt;/g, '<').replace(/&gt;/g, '>')),
+            height: "100%",
+            groupable: false,
+            selectable: true,
+            pageable: {
+                refresh: false,
+                pageSizes: [5, 10, 20, 50],
+                input: false,
+                buttonCount: 5,
+				messages: {
+                    empty: "没有数据",
+                    display: "共{2}条数据，本页显示{0}-{1}条",
+                    page: "",
+                    of: "/ {0}",
+                    itemsPerPage: "",
+                    first: "首页",
+                    last: "末页",
+                    next: "下一页",
+                    previous: "上一页",
+                    refresh: "刷新",
+                    morePages: "更多页"
+                }
+            },
+            columns: columns
+        };
+        if (options) {
+            _opt = $.extend(_opt, options);
+        }
+        $(el).hcGrid(_opt);
+
+        var $toolbar =
+        $(".k-grid-toolbar .toolbar .grid_operates", el);
+        if (operates && operates.length > 0) {
+            $.each(operates, function (idx, it) {
+                var $oper =
+                $('<li><a href="javascript:void(0)">' + (it.icon ? '<i class="' + it.icon + '"></i>' : '') + it.name + '</a></li>');
+                if (it.onclick && $.isFunction(it.onclick)) {
+                    $("a",$oper).bind("click.toolbar", function (e) {
+                        it.onclick(this, $(el).data("kendoGrid"));
+                    });
+                }
+                    $toolbar.append($oper);
+            });
+        }
+
+        if (formId) {
+            $(formId).submit(function (event) {
+                var _this = this;
+            //    btn_running($("*[type='submit']", _this));
+                var grid = $(el).data("kendoGrid");
+                grid.dataSource.xquery({
+                    page: 1,
+                    pageSize: grid.dataSource.pageSize()
+                }, function () {
+              //      btn_enabled($("button[type='submit']", _this));
+                });
+                event.preventDefault();
+                return false;
+            });
+        }
+
+    }
+
+});
+function  doquxiao(id){
+    $.ajax({
+        type: 'post',
+        url: "$!{rc.contextPath}/hl/montrol/alarm/deviceTag/quxiaohulue",
+        data: {
+            id: id
+        },
+        dataType: 'json',
+        success: function (msg) {
+            if (msg.status == "fail") {
+                notify(msg.message,"fail");
+            } else {
+                notify("取消忽略成功", "success");
+                var grid = $("#grid").data("kendoGrid");
+                edited_callback(grid);
+            }
+        },
+        error: function () {
+            notify("取消忽略失败，请检查网络！", "error");
+        }
+    });
+}
+function view3(id){
+	quick_dialog("repair_dlg", "查看维修单", "$!{rc.contextPath}/repair/process/edit?viewOnly=true&openStyle=dialog&id="+id, 1364, 700);
+//	window.location.href="$!{rc.contextPath}/repair/process/edit?viewOnly=true&menuCode=$!{menu.code}&id="+id;
+}
+function view4(id){
+	quick_dialog("maintain_dlg", "查看保养单", "$!{rc.contextPath}/maintain/task/edit?viewOnly=true&openStyle=dialog&id="+id, 1364, 700);
+//	template:"<a href=\"javascript:void(0)\" title=\"查看#: data.maintainCode #的详细信息\" onclick=\"window.location.href = '$!{rc.contextPath}/maintain/task/edit?viewOnly=true&menuCode='+menuCode+'&id=#: data.id #'\">#: data.maintainCode #</a>"
+}
+function view11(id){
+	quick_dialog("inspection_dlg", "查看巡检单", "$!{rc.contextPath}/inspection/task/edit?viewOnly=true&openStyle=dialog&id="+id, 1364, 700);
+//	template:"<a href=\"javascript:void(0)\" title=\"查看#: data.maintainCode #的详细信息\" onclick=\"window.location.href = '$!{rc.contextPath}/maintain/task/edit?viewOnly=true&menuCode='+menuCode+'&id=#: data.id #'\">#: data.maintainCode #</a>"
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+#parse("index/_header.vm")
+</head>
+<body>		
+	<form id="myform_id" method="post" class="ui-dialog-form">
+	    <table width="100%">  
+	        <tr>
+	            <td width="100" class="label"><label>报警设备：</label></td>
+	            <td width="300">
+	            	<input style="width:240px" class="k-textbox" type="text" readonly="readonly" value="$!{mObject.deviceName}">
+	            </td>
+	        </tr>  
+	        <tr>
+	            <td width="100" class="label"><label>所处位置：</label></td>
+	            <td width="300"><input class="k-textbox" style="width:240px" type="text" readonly="readonly" value="$!{mObject.areaStr}"></td>
+	        </tr>        
+	        <tr>
+	            <td class="label"><label>报警级别：</label></td>
+	            <td>
+	            	<input class="k-textbox" style="width:240px" type="text" readonly="readonly" value="$!{level.alarmLevel}">
+	            </td>
+	        </tr>          
+	        <tr>
+	            <td class="label"><label>报警值：</label></td>
+	            <td>
+	            	<input class="k-textbox" style="width:240px" type="text" readonly="readonly" value="$!{mObject.alarmData}">
+	            </td>
+	        </tr>              
+	        <tr>
+	            <td class="label">报警描述：</td>
+	            <td><input class="k-textbox" style="width:240px" type="text" readonly="readonly" value="$!{mObject.alarmRemark}"></td>
+	        </tr>
+	        <tr>
+	            <td class="label">报警状态：</td>
+	            <td><input class="k-textbox" style="width:240px" type="text" readonly="readonly" #if($mObject.alarmState == 1) value="正在报警" #end #if($mObject.alarmState == 2) value="已恢复" #end #if($mObject.alarmState == 3) value="已消失" #end ></td>
+	        </tr>
+            <tr>
+                <td class="label">报警时间：</td>
+                <td><input class="k-textbox" style="width:240px" type="text" readonly="readonly" value="$!mObject.alarmTime.substring(0,19)"></td>
+            </tr>
+            <tr>
+                <td class="label">恢复时间：</td>
+                <td><input class="k-textbox" style="width:240px" type="text" readonly="readonly" value="$!mObject.lastAlarmTime" ></td>
+            </tr>
+	    </table>
+	</form>
+</body>
+</html>	

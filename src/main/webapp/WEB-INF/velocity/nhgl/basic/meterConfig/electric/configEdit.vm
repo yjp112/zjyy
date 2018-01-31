@@ -1,0 +1,82 @@
+<!--
+<div class="ui-layout-north">
+	#bread_crumbs("PZXX")
+</div>-->
+<script type="text/javascript">
+$(function(){
+	$("#centerMain").css("overflow","auto");
+});
+</script>
+<div class="ui-module-name">
+	<label id="menuName">#crumbs("$!menu.code",1)</label>
+</div>
+<div class="ui-form ui-form-search fn-clear" style="overflow:auto">
+<form class="ui-form" id="cm_edit_form" action="$!{rc.contextPath}/nhgl/basic/meterConfig/electric/update" method="post" style="overflow:auto">
+	<div style="display:inline-block;width:100%">
+		<button class="btn" type="button" onclick="resetForm()" style="margin-left:20px"><i class="iconfont icon-reply"></i>取消</button>
+		<button class="btn" type="button" onclick="save()" ><i class="iconfont icon-save"></i>保存</button>
+	</div>
+#set($jjr = 0)
+#set($bfbg = 0)
+#set($btws = 0)
+#foreach($cm in $cmlist)
+	<input name="id" type="hidden" value="$!{cm.id}"/>
+	#if($JJR == $cm.typeCode && $jjr == 0)
+		#set($jjr = 1)
+		<div class="ui-form-item" style="width:100%;">
+			<label class="ui-label">$!{cm.typeName}：</label>
+		</div>
+	#end
+	#if($BFBG == $cm.typeCode && $bfbg == 0)
+		#set($bfbg = 1)
+		<div class="ui-form-item" style="width:100%;">
+			<label class="ui-label">$!{cm.typeName}：</label>
+		</div>
+	#end
+	#if($BTWS == $cm.typeCode && $btws == 0)
+		#set($btws = 1)
+		<div class="ui-form-item" style="width:100%;">
+			<label class="ui-label">$!{cm.typeName}：</label>
+		</div>
+	#end
+	<div class="ui-form-item">
+		<label class="ui-label" style="width:50%;margin-left:40%;text-align:left"><span class="ui-form-required">*</span class="ui-form-required">配置项名称：$!{cm.name}</label>
+	</div>
+	#if($cm.typeCode == $JJR)
+	<div class="ui-form-item" style="width:604px">
+		<label class="ui-label"><span class="ui-form-required">*</span>配置项值：</label>
+		<input onclick="WdatePicker({dateFmt:'yyyy-MM-dd',maxDate:'#F{$dp.$D(\'endTime\'+$cm.id)}'})" data-rule="开始时间：required" name="startTime" id="startTime$cm.id" class="ui-input Wdate" type="text" value="$cm.startTime"/>
+        <label style="width:20px;float:left;margin-left:11px">-</label>
+		<input onclick="WdatePicker({dateFmt:'yyyy-MM-dd',minDate:'#F{$dp.$D(\'startTime\'+$cm.id)}'})" name="endTime" data-rule="结束时间：required" id="endTime$cm.id" class="ui-input Wdate" type="text" value="$cm.endTime"/>
+	</div>
+	#else
+	<div class="ui-form-item" style="width:604px">
+		<label class="ui-label"><span class="ui-form-required">*</span>配置项值：</label>
+		<input onclick="WdatePicker({dateFmt:'HH:mm'})" data-rule="开始时间：required" name="startTime" id="startTime$cm.id" class="ui-input Wdate" type="text" value="$cm.startTime"/>
+        <label style="width:20px;float:left;margin-left:11px">-</label>
+		<input onclick="WdatePicker({dateFmt:'HH:mm'})" name="endTime" data-rule="结束时间：required" id="endTime$cm.id" class="ui-input Wdate" type="text" value="$cm.endTime"/>
+		<label class="ui-label ui-form-required" style="width:300px;margin-left:30px">如果结束时间小于开始时间，结束时间表示第二天时间。</label>
+	</div>
+	#end
+	<div class="ui-form-item">
+		<label class="ui-label"><span class="ui-form-required">*</span>是否有效：</label>
+		<select class="ui-select" name="flag">
+               <option #if($cm.flag=="1") selected  #end value="1">有效</option>
+               <option #if($cm.flag=="0") selected  #end value="0">无效</option>
+        </select>
+	</div>
+	<div class="ui-form-item" style="width:100%">
+	</div>
+#end
+</form>
+</div>
+<script type="text/javascript">
+function save(){
+    $.forms.submits("#cm_edit_form", function(){
+        return true;
+    });
+}
+function resetForm(){
+	location.reload();
+}
+</script>

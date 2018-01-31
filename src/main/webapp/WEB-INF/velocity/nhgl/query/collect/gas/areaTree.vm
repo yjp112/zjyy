@@ -1,0 +1,62 @@
+#foreach($me in $glist)
+		#if($me.parentId == $!{technicId})
+		<li name="subli" id="$me.areaId" isp="1">
+			#if($me.tb==1)
+				<h3 class="handle handle-rise" onclick="toTab('$!me.areaId','2')">
+			#elseif($me.tb==0)
+				<h3 class="handle handle-unchanged" onclick="toTab('$!me.areaId','2')">
+			#else
+				<h3 class="handle handle-decline" onclick="toTab('$!me.areaId','2')">
+			#end
+					<span class="handle-name" name="nameCss" title="$!me.areaName">$!me.areaName</span>
+					<span class="handle-num fInt">$!me.total</span>
+					<span class="handle-bar" name="span_area" num="$!me.total" style="margin-left:-30px;"></span>
+				</h3>
+				<ul class="panel" style="overflow:auto">
+					#foreach($cm in $glist)
+						#if($!me.areaId == $!cm.parentId)
+							#if($cm.tb==1)
+								<li name="subli" isp="" id="$cm.areaId" onclick="toTab('$!cm.areaId','2')" class="pitem-rise">
+							#elseif($cm.tb==0)
+								<li name="subli" isp="" id="$cm.areaId" onclick="toTab('$!cm.areaId','2')" class="pitem-unchanged">
+							#else
+								<li name="subli" isp="" id="$cm.areaId" onclick="toTab('$!cm.areaId','2')" class="pitem-decline">
+							#end
+									<a class="pitem-link" href="javascript:;">
+										<span class="pitem-name" name="areaName" title="$!me.areaName">$!cm.areaName </span>
+										<span class="pitem-num fInt" style="width: 60px;">
+											##if($cm.tb==1)
+											##	<span class="pitem-trend">��</span>
+											##elseif($cm.tb==0)
+											##	<span class="pitem-trend">-</span>
+											##else
+											##	<span class="pitem-trend">��</span>
+											##end
+											$!cm.total
+										</span>
+										<span class="pitem-bar" name="span_area_list" num="$!cm.total"></span>
+									</a>
+								</li>
+						#end
+					#end
+				</ul>
+			</li>
+	#end
+#end
+<script>
+	$(function(){
+		fNumPage();
+   $('#qy_accordion_area').accordion({
+           "handle": ".handle",
+           "panel": ".panel"
+      });	
+	 
+	showProgress("span_area");
+	showProgress("span_area_list",10);
+	$("ul.panel li").click(function(){
+		$(".panel li").removeClass("current");
+		$(this).addClass("current");
+	});
+	})
+	
+</script>

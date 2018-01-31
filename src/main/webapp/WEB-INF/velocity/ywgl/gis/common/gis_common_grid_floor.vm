@@ -1,0 +1,16 @@
+<!---------------选择楼层---------------->
+<div id="G_MapMuneCon_tabA" style="display:none">
+    <div class="sd-floor">
+            #if($!allLou)
+            #foreach($!eachLou in $!allLou.entrySet())
+				<h2 id="lou_$!eachLou.key.id">$!eachLou.key.areaName</h2>
+				<ul class="floor-list">
+                #foreach($!louceng in $!eachLou.value)
+                    <li #if("$!louceng.remark"=="alarm" or "$!louceng.remark"=="yes")#if("$!louceng.remark"=="yes")class="floor-item"#else class="floor-item floor-item-warn"#end #else class="floor-item floor-item-disabled" #end ><a areaCode="$!louceng.areaCode" id="ceng_$!louceng.id" isShowCeng="$!louceng.remark" href="javascript:void(0);" onclick='ui_floor_click($(this))' >$!louceng.areaName</a></li>
+				#end	
+                </ul>
+			#end
+            #end                       
+    </div>
+</div>
+        

@@ -1,0 +1,46 @@
+<style>
+.ui-table {
+	margin: 0 auto;
+	border-collapse: collapse;
+}
+.ui-table td{
+	font-size: 14px;
+	padding: 10px 0;
+	border-bottom: 1px solid #0472AD;
+}
+</style>
+	
+	<div style="margin-top:2px;">
+        <table class="ui-table">
+			<tr >
+                <td class="ui-search-name first">$!{deviceType}表名称：</td>
+                <td class="ui-search-c">
+					$!{device.deviceName}
+                 </td>
+			 </tr>
+			<tr >
+                <td class="ui-search-name first">上次计数：</td>
+                <td class="ui-search-c">
+					$!{device.lastTotal}
+                 </td>
+			 </tr>
+			<tr >
+                <td class="ui-search-name first">本次计数：</td>
+                <td class="ui-search-c">
+					$!{device.total}
+                 </td>
+			 </tr>
+			<tr >
+                <td class="ui-search-name first">用$!{deviceType}量：</td>
+                <td class="ui-search-c">
+					$!{device.incremental}
+                 </td>
+			 </tr>
+			<tr >
+                <td class="ui-search-name first">最近采集时间：</td>
+                <td class="ui-search-c">
+					#date_format($!{device.collectTime},'yyyy-MM-dd')
+                 </td>
+			 </tr>
+        </table>
+    </div>

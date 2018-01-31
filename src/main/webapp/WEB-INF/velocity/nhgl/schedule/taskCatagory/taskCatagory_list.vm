@@ -1,0 +1,140 @@
+<div class="ui-layout-center" id="subMain">
+	<div class="ui-layout-center">
+		<table id="pagerTable" class="fn-hide"></table>
+	</div>
+	<div class="ui-layout-north">
+		<div class="ui-module-name">任务分类</div>
+    		<form id="queryForm" class="ui-form ui-form-search fn-clear">
+    			<input name="condition.id" id="treeId" value="" type="hidden"/>
+    			<div class="ui-form-search-left">
+    				<div class="ui-form-item">
+    					<label class="ui-label">任务分类：</label>
+    					<input class="ui-input" type="text" id="catagoryText" name="condition.catagoryText" value="$!condition.catagoryText">
+    				</div>
+    			</div>
+    			<div class="ui-form-search-right">			
+    				<button type="submit" class="btn btn-primary" id="queryBtn"><i class="iconfont icon-search"></i> 查&nbsp;询</button>
+    			</div>	
+    		</form>
+		</div>
+	</div>
+
+<div class="ui-layout-west">
+	<div id="taskCatagory_box" class="ui-box">
+		<div class="ztree-header">
+    		<div class="ztree-title">任务分类</div>
+    	</div>
+		<div class="ui-box-container">
+			<ul id="treedc" class="ztree"></ul>
+		</div>
+	</div>
+</div>
+
+    <script type="text/javascript">
+	var setting = {
+ 		 check: {
+				enable: true
+			},
+		data: {
+			simpleData: {
+				enable: true
+			}
+		},
+		callback: {
+			onClick: onClick
+		}
+  	 };
+   	 var zNodes = $!{tree};
+	 function onClick(event, treeId, treeNode, clickFlag) {
+	 	$("#treeId").attr("value",treeNode.treeId);
+		$("#pagerTable").flexReload();
+	 }
+	$(document).ready(function(){
+		
+		if(T.innerLayout&&!T.innerLayout.destroyed){
+			T.innerLayout.destroy();
+		}
+		T.innerLayout = $("#centerMain").layout({
+        defaults : {
+            resizable : false,
+            closable : false,
+            spacing_open : 5
+        },
+        west : {
+            size : 250,
+            resizable : true,
+            resizerTip : "移动改变大小",
+            closable : true,
+            togglerTip_open : "隐藏",
+            togglerTip_closed : "打开"
+        },
+        onresize_end : function(){
+            $("#taskCatagory_box").box("resize");
+        }
+    	});//_inner_layout
+    	_content_layouts.push(T.innerLayout);
+		_center_main_layout=$("#subMain").layout({
+			defaults:{
+				resizabel:false,
+				closable: false,
+				spacing_open:5
+			},
+			onresize_end:function(){
+				$("#pagerTable").datagridResize({width:_center_main_layout.state.center.innerWidth,height:_center_main_layout.state.center.innerHeight});
+			}
+		});
+		
+		$("#taskCatagory_box").box({
+        	width : function(){return T.innerLayout.state.west.innerWidth;},
+        	height : function(){return T.innerLayout.state.west.innerHeight-26;}
+    	});
+			$.fn.zTree.init($("#treedc"), setting, zNodes);
+			var height = $(window).height();
+            //列表
+			var pagerTable=$("#pagerTable").datagrid({
+			url:'$!{rc.contextPath}/nhgl/schedule/controller/taskCatagory/pager',
+			dataType: "json",
+			method: "POST",
+			singleSelected : true,
+			striped : false,
+			height:  _center_main_layout.center.state.innerHeight,
+			width :  _center_main_layout.center.state.innerWidth,
+			showOrderNumber : true,
+			useRp : true,
+			usepager: true,
+    		rpOptions: [10, 20, 40, 50],
+    		pageSize: 20,
+    		searchFormId:"queryForm",
+    		searchCallback:function(datagrid){},
+    		onSuccess:function(table,grid){
+    			if(!grid)return ;
+    		},
+    		colModel:[
+			 {display: "ID", name: "id",hide:true }, 
+			 {display: "序号"},
+			 {display: "任务分类", name: "catagoryText",width:200,"onclick":function(row,a){
+        	    var url="";
+        		url='$!{rc.contextPath}/nhgl/schedule/controller/taskCatagory/view?id='+row.id;
+        		$.dialogs.normalDialog(
+        				'addDiloag12', 
+        				url,
+        				function(dlg,btn){
+        					dlg.close(); return true;
+        				},
+        				680, 
+        				250,
+        				"查看",null,false,"关闭"
+        				
+        		);} },
+             {display: "任务分类编码", name: "catagoryCode", width: 150}, 
+             {display: "任务分类父类编码", name: "parentCode", width: 150}
+    		],
+			buttons : [
+				#data_grid_buttons("NHGL_TASK_TYPE")#end
+			]
+			});
+    });
+   
+	  
+    </script>
+

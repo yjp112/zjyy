@@ -1,0 +1,184 @@
+<div class="ui-layout-center" id="subMain">
+	<div class="ui-layout-center">
+		<table id="extractData_list" class="fn-hide"></table>
+	</div>
+	<div class="ui-layout-north">
+		<div class="ui-module-name">#crumbs("NHSJCQ",1)</div>
+		<form id="extractData_list_search" class="ui-form ui-form-search fn-clear">
+			<div class="ui-form-search-left">
+				<div class="ui-form-item">
+					<label class="ui-label">能耗类型：</label>
+					<select name="condition.nhType" class="k-textbox" style="width:165px;">
+						<option value="">---请选择---</option>
+        				#foreach($!type in $!typeList)
+        					<option value="$!{type.enumValue}">$!{type.enumText}</option>
+        				#end
+        			</select>
+				</div>
+				<div class="ui-form-item">
+					<label class="ui-label">统计维度：</label>
+					<select name="condition.weidu" class="k-textbox" style="width:165px;">
+						<option value="">---请选择---</option>
+        				#foreach($!type in $!weiduList)
+        					<option value="$!{type.enumValue}">$!{type.enumText}</option>
+        				#end
+        			</select>
+				</div>
+				<div class="ui-form-item">
+					<label class="ui-label">执行状态：</label>
+					<select class="k-textbox" name="condition.success" style="width:165px;">
+							$!{success}
+		            </select>
+				</div>
+				<div class="ui-form-item">
+					<label class="ui-label">执行时间起：</label>
+					<input class="ui-input ui-input-small  Wdate" type="text" name="condition.startTime" id="startTime" onclick="WdatePicker({dateFmt:'yyyy-MM-dd',maxDate:'#F{$dp.$D(\'endTime\')}'})" >
+				</div>
+				<div class="ui-form-item">
+					<label class="ui-label">执行时间止：</label>
+					<input class="ui-input ui-input-small  Wdate" type="text" name="condition.endTime" id="endTime" onclick="WdatePicker({dateFmt:'yyyy-MM-dd',minDate:'#F{$dp.$D(\'startTime\')}'})"  >
+				</div>
+			</div>
+			<div class="ui-form-search-right">
+				<button type="submit" id="queryBtn" class="btn btn-primary"><i class="iconfont icon-search"></i> 查&nbsp;询</button>
+			</div>
+		</form>
+	</div>
+</div>
+<script type="text/javascript">
+	$(document).ready(function(){
+		if(T.innerLayout&&!T.innerLayout.destroyed){
+			T.innerLayout.destroy();
+		}
+		T.innerLayout = $("#centerMain").layout({
+	        defaults : {
+	            resizable : false,
+	            closable : false,
+	            spacing_open : 5
+	        },
+	        west : {
+	            size : 250,
+	            resizable : true,
+	            resizerTip : "移动改变大小",
+	            closable : true,
+	            togglerTip_open : "隐藏",
+	            togglerTip_closed : "打开"
+	        },
+	        onresize_end : function(){
+	        }
+   		 });
+    	_content_layouts.push(T.innerLayout);
+		_inner_layout=$("#subMain").layout({
+			defaults:{
+				resizabel:false,
+				closable: false,
+				spacing_open:5
+			},
+			onresize_end:function(){
+				$("#extractData_list").datagridResize({width:_inner_layout.state.center.innerWidth,height:_inner_layout.state.center.innerHeight});
+			}
+		});
+		
+		
+		var ngArea_datagrid=$("#extractData_list").datagrid({
+			url:'$!{rc.contextPath}/nhgl/basic/extractData/list',
+			dataType: "json",
+			method: "POST",
+			singleSelected : true,
+			striped : false,
+			height:  _inner_layout.center.state.innerHeight,
+			width :  _inner_layout.center.state.innerWidth,
+			showOrderNumber : true,
+			showCheckbox: true,
+			useRp : true,
+			usepager: true,
+    		rpOptions: [10, 20, 40, 50],
+    		pageSize: 20,
+    		searchFormId:"extractData_list_search",
+    		searchCallback:function(datagrid){},
+    		onSuccess:function(table,grid){
+    			if(!grid)return ;
+    		},
+    		colModel:[
+    			{"display":"序号"
+				},
+    			{
+					width: 50,
+					display: "能耗类型", 
+					name: "nhTypes",
+    				headerAttributes: {"class": "k-grid-text"},
+                  	attributes: {"class": "k-grid-text"}
+				},
+    			{
+					width: 50,
+					display: "统计维度", 
+					name: "weidus",
+    				headerAttributes: {"class": "k-grid-text"},
+                  	attributes: {"class": "k-grid-text"}
+				},
+    			{
+					width: 150,
+					display: "名称", 
+					name: "jobName",
+					template:"<a href=\"javascript:void(0)\" title=\"查看#: data.jobName #的详细信息\" onclick=\"quick_dialog('jobschedule_schedule_job_add_dlg','查看#:data.jobName #的信息','$!{rc.contextPath}/jobschedule/schedule-job/edit?flag=2&id=#: data.scheduleId #',650,550)\">#: data.jobName #</a>",
+    				headerAttributes: {"class": "k-grid-text"},
+                  	attributes: {"class": "k-grid-text"}
+				},
+				{	
+					width: 150,
+					display: "抽取时间",
+    				name:"targetArguments", 
+    				headerAttributes: {"class": "k-grid-text"},
+                  	attributes: {"class": "k-grid-text"}
+				},
+    			{	
+					width: 150,
+					display: "执行开始时间",
+    				name:"startTime", 
+    				headerAttributes: {"class": "k-grid-text"},
+                  	attributes: {"class": "k-grid-text"}
+				},
+    			{	
+					width: 150,
+					display: "执行结束时间",
+    				name:"endTime", 
+    				headerAttributes: {"class": "k-grid-text"},
+                  	attributes: {"class": "k-grid-text"}
+				},
+    			{	
+					width: 150,
+					display: "消耗时间",
+    				name:"excuteTime", 
+    				headerAttributes: {"class": "k-grid-text"},
+                  	attributes: {"class": "k-grid-text"}
+				},
+    			{	
+					width: 60,
+					display: "成功/失败",
+    				name:"successText", 
+    				headerAttributes: {"class": "k-grid-text"},
+                  	attributes: {"class": "k-grid-text"}
+				},
+    			{	
+					width: 280,
+					display: "错误消息",
+					name: "errorMsg",
+					sortable: false,
+					onclick:function(row,a){
+    					$.dialogs.normalDialog("jobschedule_schedule_log_view_dlg", "$!{rc.contextPath}/nhgl/basic/extractData/view?id=" + row.id, function(dlg,btn){
+    						return false;
+    					},680,450,"看错误信息",null,false,"关闭");
+    				},
+					headerAttributes: {"class": "k-grid-text"},
+					attributes: {"class": "k-grid-text"}
+				}
+    		],
+    		buttons : [
+	            	#data_grid_buttons("NHSJCQ")#end
+	        ]
+		});
+	
+            
+	});
+	
+</script> 

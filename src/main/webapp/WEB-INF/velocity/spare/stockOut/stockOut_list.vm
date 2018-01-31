@@ -1,0 +1,154 @@
+#parse("index/_header.vm")
+</head>
+<body>
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<form class="ui-form" id='queryForm'>
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+                <tr>
+                  <td class="ui-search-name first">领用单号：</td>
+                  <td class="ui-search-c">
+					<input class="k-textbox" type="text" name="stockOutCode" value="$!stockOut.stockOutCode">
+                  </td>
+                  <td class="ui-search-name">领用日期：</td>
+                  <td class="ui-search-c">
+                      <input id="startOutTime" type="text" name="startOutTime"     />
+					  <span class="ui-form-text">至</span> 
+					  <input id="endOutTime" type="text" name="endOutTime"     />
+                  </td>
+				  <td class="ui-search-name">领用状态：</td>
+                  <td class="ui-search-c">
+                       <select class="k-textbox" name="status">
+        					<option value=''>--请选择--</option>
+        			    	${billStatusOptions}
+        			    </select>
+                  </td>
+                </tr>
+              </table>
+            </td>
+            <td width="180" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+            <td></td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+   #parse("index/_footer.vm")  
+<script type="text/javascript">
+  var _iframe_layout, _left_layout, _inner_layout;
+	$(document).ready(function(){
+	//日期
+	commonDate("startOutTime","endOutTime","yyyy-MM-dd HH:mm:ss","zh-CN");
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      }
+    });
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+
+    $('#resetBtn').click(function(){
+      $("#queryForm :text").val('');  
+    });
+
+	$('.iconfont','.ui-form-pick').each(function(){
+      $(this).click(function(){
+      	$('#treeId').val('');
+      	$('#selectBlock').hide();
+        //$(this).parent().remove();
+      })
+    })
+	
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/spare/stockOut/list?t="+new Date().getTime(), [{
+              field: "id",
+              hidden: true
+          }, {
+              field: "stockOutCode",
+              title: "领用单号",
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"},
+              sortable: false,
+			   template:"<a href=\"javascript:void(0)\" title=\"查看#: data.stockOutCode #的详细信息\" onclick=\"window.location.href='$!{rc.contextPath}/spare/stockOut/edit?viewOnly=true&id=#: data.id #'\">#: data.stockOutCode #</a>"
+          }, {
+              field: "outTime",
+              title: "领用时间",
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"},
+              sortable: false
+              
+          }, {
+              field: "outPersonName",
+              title: "领用人",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              sortable: false
+          }
+		  , {
+              field: "managerName",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              title: "仓管人"
+          }, {
+              field: "statusName",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"},
+              title: "领用状态"
+          }, {
+              field: "creator",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              title: "操作人"
+          }, {
+              field: "createDate",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"},
+              title: "操作时间"
+          }],
+     	 {
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          },resizable:true
+      }, {
+          serverSorting: true
+      }, [{
+              name: "添加",
+              icon: "fa fa-plus",
+              onclick: function (obj, grid) {
+			  	 window.location.href = '$!{rc.contextPath}/platform/bpm/start?_bpm_process_key=STOCKOUT_PROCESS';
+    			 
+			  }
+          }
+      ]);
+		
+    });
+  
+</script>

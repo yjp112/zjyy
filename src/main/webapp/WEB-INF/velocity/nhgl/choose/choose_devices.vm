@@ -1,0 +1,175 @@
+<style>
+	a.ui-input-remove,
+	a.ui-input-icon {
+		right:13px;
+	}
+	 .ui-tab ul{
+		overflow:visible;
+	}
+	.flexigrid div.fbutton .iconfont{color: rgb(68, 170, 34) !important;}
+</style>	
+<div class="row-fluid">
+	<div class="span2 first">
+        <div id="tab-container" class='ui-tab fn-mr-0'>
+         <ul class='ui-tab-items'>
+##           <li class='ui-tab-item'><a href="#tabs1"><span class="ui-tab-area"></span>设备类别</a></li>
+           <li class='ui-tab-item'><a href="#tabs2"><span class="ui-tab-type"></span>服务区域</a></li>
+         </ul>
+         <div class='ui-tab-panels'>
+##            <div id="tabs1" class='ui-tab-panel'>
+##              <div class="ui-box-1">
+##                <div class="ui-box-container" style="height:450px;overflow:auto;">
+##                    <div class="ui-box-content">
+##                      <ul id="treeDemo1" class="ztree" ></ul>
+##                    </div>
+##                </div>
+##              </div>
+##            </div>
+            <div id="tabs2" class='ui-tab-panel'>
+              <div class="ui-box-1">
+                <div class="ui-box-container" style="height:455px;overflow:auto;">
+                    <div class="ui-box-content">
+                      <ul id="treeDemo2" class="ztree" ></ul>
+                    </div>
+                </div>
+              </div>
+            </div>
+         </div>
+        </div>
+      </div>	
+	<div class="span10">
+		<form class="ui-form ui-form-search fn-clear" id='pagerForm'>
+		<input type="hidden" name="category" id="category"/>
+		<input type="hidden" name="categoryId" id="categoryId" />
+		<input type="hidden" name="serviceAreaId" id="serviceAreaId"/>
+		  <div>
+				<div class="ui-form-item">
+				  <label class="ui-label">$!deviceName编码：</label>
+				 <input class="ui-input" type="text"  name="deviceCode">
+				</div>
+				<div class="ui-form-item">
+				  <label class="ui-label">$!deviceName名称：</label>
+		          <input class="ui-input" type="text"  name="deviceName">
+				</div>
+				<div class="ui-form-item">
+					<label class="ui-label">位号：</label>
+					<input class="ui-input" type="text" name="hpid">
+				</div>
+				<div class="ui-form-search-right" style="padding-left:40px">
+				  <button type="submit" class="btn btn-primary" id="queryBtn"><i class="iconfont icon-search"></i>查询</button>
+		  		</div>
+		  </div>
+		</form>
+		<div>
+		  <table id="pagerTable" style="display: none"></table> 
+		</div>		
+	</div>
+</div>
+<script type="text/javascript">
+   var setting = {
+		data: {
+			simpleData: {
+				enable: true
+			}
+		},
+		callback: {
+			onClick: onClick
+		}
+
+	};
+	function onClick(event, treeId, treeNode, clickFlag) {
+		if(treeId=="treeDemo1"){
+			$("#categoryId").val(treeNode.id);
+		}else{
+			$("#serviceAreaId").val(treeNode.id);
+		}
+		$("#queryBtn").click();
+##		$("#categoryId").val("");
+##		$("#serviceAreaId").val("");
+	}
+    var zNodes1 = [];  
+    zNodes1.push({id:"0", pId:"-1", name:"设备类别簇",open:true});     
+    
+    #foreach($!{treeNode1} in $!{treeListDevice})
+        zNodes1.push({id:$!{treeNode1.id}, pId:$!{treeNode1.parentId}, name:"$!{treeNode1.categoryName}"});     
+    #end
+    var zNodes2 = [];  
+    #foreach($!{treeNode2} in $!{treeListArea})
+        zNodes2.push({id:$!{treeNode2.id}, pId:$!{treeNode2.parentId}, name:"$!{treeNode2.areaName}"});     
+    #end
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+    	$('#tab-container').easytabs();
+    	var category='$!{category}';
+    	$.fn.zTree.init($("#treeDemo1"), setting,zNodes1).expandAll(true);
+		$.fn.zTree.init($("#treeDemo2"), setting,zNodes2).expandAll(true);
+        //列表
+        $("#pagerTable").datagrid({
+            url: "$!{rc.contextPath}/nhgl/choose/devicePage?categoryCode="+category+"&nhtype=$!{nhtype}",
+            dataType: "json",
+            method: "GET",
+            usepager: true,
+            rpOptions: [10, 20, 40, 50],
+    		pageSize: 20,
+            singleSelect: true,
+            showCheckbox: true,
+            colModel: [
+            	{display:"checkbox",width:10},
+                {display: "$!deviceName编码", name: "deviceCode", width: 200},
+                {display: "$!deviceName名称", name: "deviceName", width: 300},
+                {display: "服务区域", name: "locationName", width: 235}
+            ], 
+            buttons : [
+            {name: '选择', bclass: 'icon-plus', onpress : bringback},
+            {separator: true}
+            ]
+            ,searchFormId:"pagerForm"
+            ,height: 455
+        });
+
+        function bringback(){
+            var rows = $("#pagerTable").getSelectedRows();
+            if (rows.length == 0) {
+                $.message("没有选择$!deviceName，请选择！", $.message.TYPE_ERROR, 4, false, true); 
+                return false;
+            }
+             var html='';   
+             var rule='$!{rule}';
+             var tabLength=$("#$!{txtId} tr").length;
+             if(rule=='1'){
+	            $.each(rows,function(index,item){
+	            html="<tr>"+
+				          "<td ><input type='hidden' name='subLeftConfigList["+(index+tabLength)+"].deviceCode' value='"+item.deviceCode+"'>"+
+				          "<input type='hidden' name='subLeftConfigList["+(index+tabLength)+"].extended1' value='"+item.extended1+"'>"+
+				          "<input type='hidden'  name='subLeftConfigList["+(index+tabLength)+"].id' value='"+item.id+"'>"+
+				          "<input type='hidden'  name='subLeftConfigList["+(index+tabLength)+"].ruleFlag' value='1'><span title='"+item.deviceCode+"' style='width:112px'>"+item.deviceCode+"</span></td>"+
+	    				  "<td ><input type='hidden' name='subLeftConfigList["+(index+tabLength)+"].deviceName' value='"+item.deviceName+"'><span style='width:160px' title='"+item.deviceName+"'>"+item.deviceName+"</span></td>"+
+						  "<td ><input type='hidden'  name='subLeftConfigList["+(index+tabLength)+"].locationName' value='"+item.locationName+"'><span style='width:100px' title='"+item.locationName+"'>"+item.locationName+"</span></td>"+
+						  "<td ><input type='text' style='text-align:right' data-rule='分摊系数:required;ftxs' data-rule-ftxs=\"[/^((-|\\+)?\\d+\\.\\d*)|(\\d+)$/,\'请输入小数或整数\']\"  class='ui-input ftxs' name='subLeftConfigList["+(index+tabLength)+"].ftxs' value='1.0' onblur='finish()'></td>"+
+						  "<td ><a  href='#' class='removedevice'><span class='btn-del'></span></a></td>"+
+	        			"</tr>"
+	            	$("#"+'$!{txtId}').append(html);
+	            })
+            }else{
+            	 $.each(rows,function(index,item){
+	            	
+	            	html="<tr>"+
+				          "<td ><input type='hidden' name='subRightConfigList["+(index+tabLength)+"].deviceCode' value='"+item.deviceCode+"'>"+
+				          "<input type='hidden' name='subRightConfigList["+(index+tabLength)+"].extended1' value='"+item.extended1+"'>"+
+				          "<input type='hidden'  name='subRightConfigList["+(index+tabLength)+"].id' value='"+item.id+"'>"+
+				          "<input type='hidden'  name='subRightConfigList["+(index+tabLength)+"].ruleFlag' value='0'><span title='"+item.deviceCode+"'  style='width:112px'>"+item.deviceCode+"</span></td>"+
+	    				  "<td ><input type='hidden' name='subRightConfigList["+(index+tabLength)+"].deviceName' value='"+item.deviceName+"'><span style='width:160px' title='"+item.deviceName+"'>"+item.deviceName+"</span></td>"+
+						  "<td ><input type='hidden'  name='subRightConfigList["+(index+tabLength)+"].locationName' value='"+item.locationName+"'><span style='width:100px' title='"+item.locationName+"'>"+item.locationName+"</span></td>"+
+						  "<td ><input type='text' style='text-align:right' data-rule='分摊系数:required;ftxs' data-rule-ftxs=\"[/^((-|\\+)?\\d+\\.\\d*)|(\\d+)$/,\'请输入小数或整数\']\" class='ui-input ftxs' name='subRightConfigList["+(index+tabLength)+"].ftxs' value='1.0' onblur='finish()'></td>"+
+						  "<td ><a  href='#' class='removedevice'><span class='btn-del'></span></a></td>"+
+
+	        			"</tr>"
+	            	$("#$!{txtId}").append(html);
+	            })
+            }
+            finish();
+        	closeDialog();
+        }
+    });
+</script>

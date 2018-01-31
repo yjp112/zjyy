@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.spare.entities.Warehouse">
+	<resultMap type="com.supconit.spare.entities.Warehouse" id="WarehouseResultMap">      
+        <result property="id" column="ID" />
+        <result property="warehouseCode" column="WAREHOUSE_CODE" />
+        <result property="warehouseName" column="WAREHOUSE_NAME" />
+        <result property="managerId" column="MANAGER_ID" />
+        <result property="managerName" column="MANAGER_NAME" />
+        <result property="upperQty" column="UPPER_QTY" />
+        <result property="safeQty" column="SAFE_QTY" />
+        <result property="lowerQty" column="LOWER_QTY" />
+        <result property="remark" column="REMARK" />
+        <result property="createId" column="CREATE_ID" />
+        <result property="creator" column="CREATOR" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="updateId" column="UPDATE_ID" />
+        <result property="updator" column="UPDATOR" />
+        <result property="updateDate" column="UPDATE_DATE" />
+        
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">WAREHOUSE</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	<sql id="select_pre" lang="velocity">
+		 select 
+	        ID,
+	        WAREHOUSE_CODE,
+	        WAREHOUSE_NAME,
+	        MANAGER_ID,
+	        MANAGER_NAME,
+	        UPPER_QTY,
+	        SAFE_QTY,
+	        LOWER_QTY,
+	        REMARK,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE,
+	        UPDATE_ID,
+	        UPDATOR,
+	        UPDATE_DATE		
+        FROM
+	    <include refid="TABLE_NAME"/> 
+	</sql>
+	
+	<sql id="count_pre" lang="velocity">SELECT COUNT(*) FROM <include refid="TABLE_NAME"/> </sql>
+	
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			#if($_p.id && $_p.id != '')
+				#set($_id = $_p.id)
+				AND ID LIKE @{_id}
+			#end
+			#if($_p.warehouseCode && $_p.warehouseCode != '')
+				#set($_warehouseCode = '%' + $_p.warehouseCode + '%')
+				AND WAREHOUSE_CODE LIKE @{_warehouseCode}
+			#end
+			#if($_p.warehouseName && $_p.warehouseName != '')
+				#set($_warehouseName = '%' + $_p.warehouseName + '%')
+				AND WAREHOUSE_NAME LIKE @{_warehouseName}
+			#end
+			#if($_p.managerId && $_p.managerId != '')
+				#set($_managerId = $_p.managerId)
+				AND MANAGER_ID = @{_managerId}
+			#end
+			
+		
+			#if($_p.managerName && $_p.managerName != '')
+				#set($_managerName = '%' + $_p.managerName + '%')
+				AND MANAGER_NAME LIKE @{_managerName}
+			#end
+			#if($_p.upperQty && $_p.upperQty != '')
+				#set($_upperQty = $_p.upperQty)
+				AND UPPER_QTY = @{_upperQty}
+			#end
+			#if($_p.safeQty && $_p.safeQty != '')
+				#set($_safeQty = $_p.safeQty)
+				AND SAFE_QTY = @{_safeQty}
+			#end
+			#if($_p.lowerQty && $_p.lowerQty != '')
+				#set($_lowerQty = $_p.lowerQty)
+				AND LOWER_QTY = @{_lowerQty}
+			#end
+			
+			
+		
+		#end
+		]]>	
+    </sql>
+	
+    <!-- 插入记录-->
+    <sql id="insert_sql" lang="velocity">
+        INSERT INTO <include refid="TABLE_NAME"/>(
+	        #if($_databaseId == 'oracle') ID, #end
+		    WAREHOUSE_CODE,
+	        WAREHOUSE_NAME,
+	        MANAGER_ID,
+	        MANAGER_NAME,
+	        UPPER_QTY,
+	        SAFE_QTY,
+	        LOWER_QTY,
+	        REMARK,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE,
+	        UPDATE_ID,
+	        UPDATOR,
+	        UPDATE_DATE
+        ) VALUES (
+        	#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end
+	        @{_parameter.warehouseCode,jdbcType=VARCHAR},
+	        @{_parameter.warehouseName,jdbcType=VARCHAR},
+	        @{_parameter.managerId,jdbcType=NUMERIC},
+	        @{_parameter.managerName,jdbcType=VARCHAR},
+	        @{_parameter.upperQty,jdbcType=NUMERIC},
+	        @{_parameter.safeQty,jdbcType=NUMERIC},
+	        @{_parameter.lowerQty,jdbcType=NUMERIC},
+	        @{_parameter.remark,jdbcType=VARCHAR},
+	        @{_parameter.createId,jdbcType=NUMERIC},
+	        @{_parameter.creator,jdbcType=VARCHAR},
+	        @{_parameter.createDate,jdbcType=TIMESTAMP},
+	        @{_parameter.updateId,jdbcType=NUMERIC},
+	        @{_parameter.updator,jdbcType=VARCHAR},
+	        @{_parameter.updateDate,jdbcType=TIMESTAMP}
+        )
+    </sql>
+    
+    <insert id="insert" parameterType="com.supconit.spare.entities.Warehouse" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="insert_sql" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.spare.entities.Warehouse" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    
+	<!-- 更新记录-->
+	<update id="update"  parameterType="com.supconit.spare.entities.Warehouse" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+			#mset()
+				<![CDATA[
+			        #if($_parameter.warehouseCode && $_parameter.warehouseCode !='')WAREHOUSE_CODE = @{_parameter.warehouseCode,jdbcType=VARCHAR},#end
+			        #if($_parameter.warehouseName && $_parameter.warehouseName !='')WAREHOUSE_NAME = @{_parameter.warehouseName,jdbcType=VARCHAR},#end
+			        #if($_parameter.managerId)MANAGER_ID = @{_parameter.managerId,jdbcType=NUMERIC},#end
+			        #if($_parameter.managerName)MANAGER_NAME = @{_parameter.managerName,jdbcType=VARCHAR},#end
+			        #if($_parameter.upperQty)UPPER_QTY = @{_parameter.upperQty,jdbcType=NUMERIC},#end
+			        #if($_parameter.safeQty)SAFE_QTY = @{_parameter.safeQty,jdbcType=NUMERIC},#end
+			        #if($_parameter.lowerQty)LOWER_QTY = @{_parameter.lowerQty,jdbcType=NUMERIC},#end
+			        #if($_parameter.remark)REMARK = @{_parameter.remark,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateId)UPDATE_ID = @{_parameter.updateId,jdbcType=NUMERIC},#end
+			        #if($_parameter.updator)UPDATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateDate)UPDATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+			        #if($_parameter.createId)CREATE_ID = @{_parameter.createId,jdbcType=NUMERIC},#end
+			        #if($_parameter.creator)CREATOR = @{_parameter.creator,jdbcType=VARCHAR},#end
+			        #if($_parameter.createDate)CREATE_DATE = @{_parameter.createDate,jdbcType=DATE},#end
+			    
+			    ]]>
+			#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.spare.entities.Warehouse" resultMap="WarehouseResultMap" lang="velocity" databaseId="oracle">
+		 <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre"/>
+		<include refid="condition_sql"/>
+		#order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.spare.entities.Warehouse" resultMap="WarehouseResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		select 
+	        ID,
+	        WAREHOUSE_CODE,
+	        WAREHOUSE_NAME,
+	        MANAGER_ID,
+	        MANAGER_NAME,
+	        UPPER_QTY,
+	        SAFE_QTY,
+	        LOWER_QTY,
+	        REMARK,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE,
+	        UPDATE_ID,
+	        UPDATOR,
+	        UPDATE_DATE		
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM
+		<include refid="TABLE_NAME"/>
+		<include refid="condition_sql"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countByConditions" resultType="long" lang="velocity">
+        <include refid="count_pre"/>
+        <include refid="condition_sql"/>
+    </select>
+    
+    <select id="getById" resultMap="WarehouseResultMap" parameterType="long" lang="velocity">
+		<include refid="select_pre"/>
+		WHERE ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+	
+	<select id="findAll" resultMap="WarehouseResultMap" lang="velocity">
+		<include refid="select_pre"/>
+		ORDER BY ID DESC
+	</select>
+	 <select id="findByCode" resultMap="WarehouseResultMap" parameterType="string" lang="velocity">
+		<include refid="select_pre"/>
+		WHERE WAREHOUSE_CODE = @{_parameter.warehouseCode, jdbcType=VARCHAR} 
+		or WAREHOUSE_NAME = @{_parameter.warehouseName, jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteById" parameterType="long" lang="velocity"> 
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</delete>
+	<delete id="deleteByIds">
+		DELETE FROM
+		<include refid="TABLE_NAME" />
+	    WHERE ID IN    
+	        <foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+				#{id,jdbcType=NUMERIC}
+			</foreach>
+	</delete>
+</mapper>

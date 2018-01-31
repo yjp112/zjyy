@@ -1,0 +1,312 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.base.entities.VideoDetail">
+
+	<resultMap type="com.supconit.base.entities.VideoDetail" id="VideoDetailResultMap">      
+        <result property="id" column="ID" />
+        <result property="deviceId" column="DEVICE_ID" />
+        <result property="videoCode" column="VIDEO_CODE" />
+        <result property="viewIp" column="VIEW_IP" />
+        <result property="viewPort" column="VIEW_PORT" />
+        <result property="channelNo" column="CHANNEL_NO" />
+        <result property="controlIp" column="CONTROL_IP" />
+        <result property="controlPort" column="CONTROL_PORT" />
+        <result property="username" column="USERNAME" />
+        <result property="password" column="PASSWORD" />
+        <result property="createId" column="CREATE_ID" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="creator" column="CREATOR" />
+        <result property="updateId" column="UPDATE_ID" />
+        <result property="updateDate" column="UPDATE_DATE" />
+        <result property="updator" column="UPDATOR" />
+        <result property="hpid" column="HPID" />
+        <result property="deviceName" column="DEVICE_NAME" />
+	</resultMap>
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+    <!-- 获取记录列表-->
+	<sql id="select_pre" lang="velocity">
+    select 
+        a.ID,
+        a.DEVICE_ID,
+        a.VIDEO_CODE,
+        a.VIEW_IP,
+        a.VIEW_PORT,
+        a.CHANNEL_NO,
+        a.CONTROL_IP,
+        a.CONTROL_PORT,
+        a.USERNAME,
+        a.PASSWORD,
+        a.CREATE_ID,
+        a.CREATE_DATE,
+        a.CREATOR,
+        a.UPDATE_ID,
+        a.UPDATE_DATE,
+        a.UPDATOR,
+        b.hpid,
+        b.device_name	
+		FROM
+		VIDEO_DETAIL a ,device b
+	</sql>
+	<sql id="count_pre" lang="velocity">
+		SELECT
+		COUNT(*)
+		FROM
+		VIDEO_DETAIL a,device b
+	</sql>
+	<sql id="TABLE_NAME" lang="velocity">VIDEO_DETAIL</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>	
+	<insert id="insert" parameterType="com.supconit.base.entities.VideoDetail" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    <insert id="insert" parameterType="com.supconit.base.entities.VideoDetail" 
+		keyProperty="id" keyColumn="ID" 		lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>        
+		<include refid="INSERT_SQL" />
+	</insert> 
+ 	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>
+		(#if($_databaseId=='oracle') ID,#end 
+			DEVICE_ID,
+	        VIDEO_CODE,
+	        VIEW_IP,
+	        VIEW_PORT,
+	        CHANNEL_NO,
+	        CONTROL_IP,
+	        CONTROL_PORT,
+	        USERNAME,
+	        PASSWORD,
+	        CREATE_ID,
+	        CREATE_DATE,
+	        CREATOR,
+	        UPDATE_ID,
+	        UPDATE_DATE,
+	        UPDATOR  
+		) VALUES (        
+		 #if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end	
+	        @{_parameter.deviceId,jdbcType=NUMERIC},
+	        @{_parameter.videoCode,jdbcType=VARCHAR},
+	        @{_parameter.viewIp,jdbcType=VARCHAR},
+	        @{_parameter.viewPort,jdbcType=NUMERIC},
+	        @{_parameter.channelNo,jdbcType=NUMERIC},
+	        @{_parameter.controlIp,jdbcType=VARCHAR},
+	        @{_parameter.controlPort,jdbcType=NUMERIC},
+	        @{_parameter.username,jdbcType=VARCHAR},
+	        @{_parameter.password,jdbcType=VARCHAR},
+	        @{_parameter.createId,jdbcType=NUMERIC},
+	        @{_parameter.createDate,jdbcType=TIMESTAMP},
+	        @{_parameter.creator,jdbcType=VARCHAR},
+	        @{_parameter.updateId,jdbcType=NUMERIC},
+	        @{_parameter.updateDate,jdbcType=TIMESTAMP},
+	        @{_parameter.updator,jdbcType=VARCHAR}		
+		)		 	        
+	</sql>   
+    <!-- 插入记录-->
+	<sql id="insert_sql">
+		INSERT INTO VIDEO_DETAIL(        
+        DEVICE_ID,
+        VIDEO_CODE,
+        VIEW_IP,
+        VIEW_PORT,
+        CHANNEL_NO,
+        CONTROL_IP,
+        CONTROL_PORT,
+        USERNAME,
+        PASSWORD,
+        CREATE_ID,
+        CREATE_DATE,
+        CREATOR,
+        UPDATE_ID,
+        UPDATE_DATE,
+        UPDATOR
+		) VALUES (        
+        #{deviceId,jdbcType=NUMERIC},
+        #{videoCode,jdbcType=VARCHAR},
+        #{viewIp,jdbcType=VARCHAR},
+        #{viewPort,jdbcType=NUMERIC},
+        #{channelNo,jdbcType=NUMERIC},
+        #{controlIp,jdbcType=VARCHAR},
+        #{controlPort,jdbcType=NUMERIC},
+        #{username,jdbcType=VARCHAR},
+        #{password,jdbcType=VARCHAR},
+        #{createId,jdbcType=NUMERIC},
+        #{createDate,jdbcType=TIMESTAMP},
+        #{creator,jdbcType=VARCHAR},
+        #{updateId,jdbcType=NUMERIC},
+        #{updateDate,jdbcType=TIMESTAMP},
+        #{updator,jdbcType=VARCHAR}		
+		)
+	</sql>
+
+	<select id="getById" resultMap="VideoDetailResultMap" parameterType="Long">
+		select 
+        a.ID,
+        a.DEVICE_ID,
+        a.VIDEO_CODE,
+        a.VIEW_IP,
+        a.VIEW_PORT,
+        a.CHANNEL_NO,
+        a.CONTROL_IP,
+        a.CONTROL_PORT,
+        a.USERNAME,
+        a.PASSWORD,
+        a.CREATE_ID,
+        a.CREATE_DATE,
+        a.CREATOR,
+        a.UPDATE_ID,
+        a.UPDATE_DATE,
+        a.UPDATOR,
+        b.hpid,
+        b.device_name	
+		FROM
+		VIDEO_DETAIL a ,device b       
+        WHERE A.DEVICE_ID=B.ID and A.ID = #{id}
+	</select>
+	
+	
+	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.base.entities.VideoDetail">
+		UPDATE	VIDEO_DETAIL
+		<set>
+        <if test="deviceId != null">DEVICE_ID = #{deviceId,jdbcType=NUMERIC},</if>
+        <if test="videoCode != null">VIDEO_CODE = #{videoCode,jdbcType=VARCHAR},</if>
+        <if test="viewIp != null">VIEW_IP = #{viewIp,jdbcType=VARCHAR},</if>
+        <if test="viewPort != null">VIEW_PORT = #{viewPort,jdbcType=NUMERIC},</if>
+        <if test="channelNo != null">CHANNEL_NO = #{channelNo,jdbcType=NUMERIC},</if>
+        <if test="controlIp != null">CONTROL_IP = #{controlIp,jdbcType=VARCHAR},</if>
+        <if test="controlPort != null">CONTROL_PORT = #{controlPort,jdbcType=NUMERIC},</if>
+        <if test="username != null">USERNAME = #{username,jdbcType=VARCHAR},</if>
+        <if test="password != null">PASSWORD = #{password,jdbcType=VARCHAR},</if>
+        <if test="createId != null">CREATE_ID = #{createId,jdbcType=NUMERIC},</if>
+        <if test="createDate != null">CREATE_DATE = #{createDate,jdbcType=TIMESTAMP},</if>
+        <if test="creator != null">CREATOR = #{creator,jdbcType=VARCHAR},</if>
+        <if test="updateId != null">UPDATE_ID = #{updateId,jdbcType=NUMERIC},</if>
+        <if test="updateDate != null">UPDATE_DATE = #{updateDate,jdbcType=TIMESTAMP},</if>
+        <if test="updator != null">UPDATOR = #{updator,jdbcType=VARCHAR},</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+    <!-- 通过 ID 获取对象-->
+	<delete id="deleteById" parameterType="Long">
+		DELETE FROM VIDEO_DETAIL WHERE ID = #{id}
+	</delete>
+	<sql id="condition_sql">
+	<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			1=1 		
+			#if($_p.id)
+				#set($_id = $_p.id)
+				AND A.ID = @{_id,jdbcType=BIGINT}
+			#end	
+			#if($_p.deviceId)
+				#set($_deviceId = $_p.deviceId)
+				AND a.DEVICE_ID = @{_deviceId,jdbcType=BIGINT}
+			#end	
+			#if($_p.videoCode && $_p.videoCode != '')
+				#set($_videoCode = '%' + $_p.videoCode + '%')
+				AND a.VIDEO_CODE LIKE @{_videoCode,jdbcType=VARCHAR}
+			#end
+			#if($_p.viewIp && $_p.viewIp != '')
+				#set($_viewIp = '%' + $_p.viewIp + '%')
+				AND a.VIEW_IP LIKE @{_viewIp,jdbcType=VARCHAR}
+			#end
+			#if($_p.viewPort)
+				#set($_viewPort = $_p.viewPort)
+				AND a.VIEW_PORT = @{_viewPort,jdbcType=NUMERIC}
+			#end
+			#if($_p.channelNo)
+				#set($_channelNo = $_p.channelNo)
+				AND a.CHANNEL_NO = @{_channelNo,jdbcType=NUMERIC}
+			#end
+			#if($_p.controlIp && $_p.controlIp != '')
+				#set($_controlIp = '%' + $_p.controlIp + '%')
+				AND a.CONTROL_IP LIKE @{_controlIp,jdbcType=VARCHAR}
+			#end
+			#if($_p.controlPort)
+				#set($_controlPort = $_p.controlPort)
+				AND a.CONTROL_PORT = @{_controlPort,jdbcType=NUMERIC}
+			#end
+			#if($_p.username && $_p.username != '')
+				#set($_username = '%' + $_p.username + '%')
+				AND a.USERNAME LIKE @{_username,jdbcType=VARCHAR}
+			#end
+			#if($_p.password && $_p.password != '')
+				#set($_password = '%' + $_p.password + '%')
+				AND a.PASSWORD LIKE @{_password,jdbcType=VARCHAR}
+			#end
+			#if($_p.hpid && $_p.hpid != '')
+				#set($_hpid = '%' + $_p.hpid + '%')
+				AND b.HPID LIKE @{_hpid,jdbcType=VARCHAR}
+			#end
+			#if($_p.deviceName && $_p.deviceName != '')
+				#set($_deviceName = '%' + $_p.deviceName + '%')
+				AND b.DEVICE_NAME @{_deviceName,jdbcType=VARCHAR}
+			#end
+         and a.device_id=b.id
+        #end							
+		]]>	
+	</sql>
+    
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.base.entities.VideoDetail" resultMap="VideoDetailResultMap" lang="velocity" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>	
+		<include refid="select_pre" />
+		<include refid="condition_sql" />
+		#order($_parameter.condition,"A.ID DESC")
+ 		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+	<select id="findByCondition" parameterType="com.supconit.base.entities.VideoDetail" resultMap="VideoDetailResultMap" lang="velocity" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		select 
+	        a.ID,
+	        a.DEVICE_ID,
+	        a.VIDEO_CODE,
+	        a.VIEW_IP,
+	        a.VIEW_PORT,
+	        a.CHANNEL_NO,
+	        a.CONTROL_IP,
+	        a.CONTROL_PORT,
+	        a.USERNAME,
+	        a.PASSWORD,
+	        a.CREATE_ID,
+	        a.CREATE_DATE,
+	        a.CREATOR,
+	        a.UPDATE_ID,
+	        a.UPDATE_DATE,
+	        a.UPDATOR,
+	        b.hpid,
+	        b.device_name	
+	        <include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+	 		#order($_parameter.condition,"A.ID DESC")
+	 		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+			FROM
+			VIDEO_DETAIL a ,device b
+		<include refid="condition_sql" />
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+
+    <select id="countByCondition" parameterType="com.supconit.base.entities.VideoDetail" resultType="long" lang="velocity">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+    
+    <!-- 删除多条记录-->
+	<delete id="deleteByIds">
+        DELETE FROM dbo.VIDEO_DETAIL WHERE ID in 
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+
+	</delete>
+ 	<select id="findByDeviceid" resultMap="VideoDetailResultMap" parameterType="long">
+		select 	*  from Video_Detail where device_id = #{videoId}
+	</select>
+</mapper>

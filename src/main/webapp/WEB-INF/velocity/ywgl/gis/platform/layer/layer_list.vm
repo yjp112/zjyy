@@ -1,0 +1,156 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+        <form class="ui-form" id='queryForm'>
+            <table width="100%">
+                <tr>
+                    <td>
+                        <table class="ui-search-table">
+                            <tr>
+                                <td class="ui-search-name first" style="padding-left: 20px;">JS图层编码：</td>
+                                <td class="ui-search-c">
+                                    <input name="layerCodeJs" value="$!layer.layerCodeJs" class="k-textbox" type="text">
+                                </td>
+                                <td class="ui-search-name" style="padding-left: 20px;">GIS图层编码：</td>
+                                <td class="ui-search-c">
+                                    <input name="layerCodeGis" value="$!layer.layerCodeGis" class="k-textbox"
+                                           type="text">
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td width="150" valign="top" style="padding-top:4px;">
+                        <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询
+                        </button>
+                        <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+                    </td>
+                    <td></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div class="ui-layout-center">
+        <div id="grid"></div>
+    </div>
+</div>
+    #parse("index/_footer.vm")
+
+<script type="text/javascript">
+    var code = '$!{menu.code}';
+    var _iframe_layout, _inner_layout;
+    $(document).ready(function () {
+        _iframe_layout = $('body').layout({
+            defaults: {
+                resizable: false,
+                closable: false,
+                spacing_open: 5
+            }
+        });
+        _inner_layout = $("#subMain").layout({
+            defaults: {
+                resizable: false,
+                closable: false,
+                spacing_open: 0
+            },
+            center: {
+                onresize_end: function () {
+                    var grid = $("#grid").data("kendoGrid");
+                    grid.resize();
+                }
+            }
+        })
+        $('#resetBtn').click(function () {
+            $("#queryForm :text").val('');
+        });
+        //列表
+        quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/hl/gis/platform/layer/list", [
+            {
+                field: "id",
+                hidden: true
+            }, {
+                field: "layerCodeJs",
+                title: "JS图层编码",
+                sortable: false,
+                headerAttributes: {"class": "k-grid-text"},
+                attributes: {"class": "k-grid-text"},
+                template: "<a href=\"javascript:void(0)\" onclick=\"quick_dialog('layer_add_dlg', '查看GIS图层', '$!{rc.contextPath}/hl/gis/platform/layer/edit?viewOnly=true&id=#: data.id #', 600, 370);\">#: data.layerCodeJs #</a>",
+                width: 150
+            }, {
+                field: "layerNameJs",
+                title: "JS图层名",
+                sortable: false,
+                width: 200,
+                headerAttributes: {"class": "k-grid-text"},
+                attributes: {
+                    title: "#: data.layerNameJs==null? '':data.layerNameJs #",
+                    "class": "k-grid-text k-grid-nowrap"
+                }
+            },  {
+                field: "layerCodeGis",
+                title: "GIS图层编码",
+                sortable: false,
+                width: 200,
+                headerAttributes: {"class": "k-grid-text"},
+                attributes: {"class": "k-grid-text"}
+            }, {
+                field: "names",
+                title: "含有的设备类别",
+                sortable: false,
+                width: 200,
+                headerAttributes: {"class": "k-grid-text"},
+                attributes: {"class": "k-grid-text"}
+            }, {
+                field: "clickEvent",
+                sortable: false,
+                title: "单击",
+                template: function (dataItem) {
+                    var type = dataItem.clickEvent;
+                    if (type == '0') {
+                        return "无";
+                    } else {
+                        return "有";
+                    }
+                },
+                headerAttributes: {"class": "k-grid-equilong"},
+                attributes: {"class": "k-grid-equilong"}
+            }, {
+                field: "circleEvent",
+                sortable: false,
+                title: "框选",
+                template: function (dataItem) {
+                    var type = dataItem.circleEvent;
+                    if (type == '0') {
+                        return "无";
+                    } else {
+                        return "有";
+                    }
+                },
+                headerAttributes: {"class": "k-grid-equilong"},
+                attributes: {"class": "k-grid-equilong"}
+            }, {
+                field: "pop",
+                sortable: false,
+                title: "飘窗",
+                template: function (dataItem) {
+                    var type = dataItem.pop;
+                    if (type == '0') {
+                        return "无";
+                    } else {
+                        return "有";
+                    }
+                },
+                headerAttributes: {"class": "k-grid-equilong"},
+                attributes: {"class": "k-grid-equilong"}
+            }
+        ],
+        {sortable: {mode: "multiple", allowUnsort: true}, resizable: true},
+        {serverSorting: true},
+        [
+            #kendo_datagrid_btns("LAYER")#end
+        ]);
+    });
+</script>
+</body>
+</html>

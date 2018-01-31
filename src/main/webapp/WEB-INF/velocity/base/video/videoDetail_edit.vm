@@ -1,0 +1,124 @@
+#parse("index/_header.vm")
+</head>
+<body style="padding-bottom:40px;">
+	<form id="myform_id" method="post" action="$!{rc.contextPath}/videoDetail/save"  class="ui-layout-center ui-dialog-form">
+		<input type="hidden" name="id" value="$!{videoDetail.id}"> 
+    <table width="100%">
+        <tr>
+	        <td width="18%" class="label"><span class="ui-form-required">*</span><label>HPID：</label></td>
+	        <td width="30%" class="inputText">
+	           <span class="k-textbox k-space-right"  onclick="chooseDevice1('deviceId','hpid','deviceName','','','addVD')" >
+	            <input readonly type="text" class="k-textbox #if(!$!{viewOnly}) ui-input-choose #end"  id="hpid" name="hpid" value="$!{videoDetail.hpid}"  />
+	            <a href="#" class="k-icon k-i-search">&nbsp;</a>
+	           </span> 
+	            
+	            <input class="k-textbox" type="hidden" id="deviceId" name="deviceId" value="$!{videoDetail.deviceId}"/>
+		
+	        </td>
+	        
+            <td width="15%" class="label"><span class="ui-form-required">*</span><label>设备名称：</label></td>
+            <td width="30%">
+				
+	            <input class="k-textbox" type="text"  readonly="true" id="deviceName" name="deviceName" value="$!{videoDetail.deviceName}"  />
+            </td>
+			<td width="7%"></td>
+        </tr>
+        <tr>
+            <td  class="label"><span class="ui-form-required">*</span>摄像头编号：</td>
+            <td >
+				 <input class="k-textbox"  type="text"   name="videoCode" value="$!{videoDetail.videoCode}" />
+			</td>
+			<td  class="label"><span class="ui-form-required">*</span>摄像头IP：</td>
+            <td >
+				 <input class="k-textbox"  type="text"  name="viewIp" value="$!{videoDetail.viewIp}" />
+			</td>
+            <td></td>
+        </tr>
+        <tr>
+	        <td  class="label"><span class="ui-form-required">*</span>摄像头端口：</td>
+	        <td >
+	            <input class="k-textbox"  type="text"   name="viewPort" value="$!{videoDetail.viewPort}"/>
+			</td>
+			<td  class="label"><span class="ui-form-required">*</span>通道号：</td>
+		    <td >
+	            <input class="k-textbox"  type="text" name="channelNo" value="$!{videoDetail.channelNo}"/>
+			</td>
+            <td></td>
+        </tr>
+        <tr>
+	        <td  class="label"><span class="ui-form-required">*</span>控制IP：</td>
+	        <td >
+	            <input class="k-textbox"  type="text"   name="controlIp" value="$!{videoDetail.controlIp}"/>
+			</td>
+			<td  class="label"><span class="ui-form-required">*</span>控制端口：</td>
+		    <td >
+	            <input class="k-textbox"  type="text"  name="controlPort" value="$!{videoDetail.controlPort}"/>
+			</td>
+	        <td></td>
+	    </tr>
+	    <tr>
+		    <td  class="label"><span class="ui-form-required">*</span>用户名：</td>
+		    <td >
+		        <input class="k-textbox"  type="text"    name="username" value="$!{videoDetail.username}"/>
+			</td>
+			<td  class="label"><span class="ui-form-required">*</span>密码：</td>
+		    <td >
+		        <input class="k-textbox"  type="text" name="password" value="$!{videoDetail.password}"/>
+			</td>
+		    <td></td>
+		</tr>
+    </table>
+    <div class="actions">
+		
+       
+        <button class="k-primary hc_btn" id="VD_bt" type="submit"><i class="fa fa-save"></i>保 存</button>
+		
+		
+        <button class="hc_btn cancel" onclick="close_dialog('addVD')" type="button"><i class="fa fa-close"></i>取 消</button>
+    </div>
+
+	</form>
+</body>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			 _iframe_layout = $('body').layout({
+		          defaults: {
+		            resizable: true,
+		            closable: false,
+		            spacing_open: 5
+		          }
+		        });
+			 #if($!{showFlag})
+					setAllReadonly("dialog");
+				 #end
+		});
+		</script>
+	<script type="text/javascript">
+
+	$(document).ready(function(){
+
+        $("#myform_id").validator({
+            fields:{
+        	    hpid: "required; length[~32]",
+        	    deviceName: "required; length[~30]",
+        	    videoCode  : "required; length[~30]",
+        	    viewIp: "required; length[~15]",
+        	    viewPort: "required;'digits'; length[~50]",
+        	    channelNo  : "required;'digits';length[~10]",
+        	    username: "required; length[~32]",
+        	    password  : "required;length[~32]",
+            },
+            valid:function(form){
+                form_btn_submit($("#VD_bt"),form,function(res){
+                    //console.info(res);
+                    validateCallback(res,"grid","addVD");
+                });
+            }
+        });
+       
+  });
+	  
+
+	</script>
+
+</html>

@@ -1,0 +1,140 @@
+#parse("index/_header.vm")
+</head>
+<body>
+  <div class="ui-layout-west" style="border-right:solid 1px #e1e5e6;" id="leftTreeWrap">
+			<div class="ui-layout-north">
+				<div class="k-header k-grid-toolbar" style="padding-left:10px;">地图备用</div>
+			</div>
+      <div class="ui-layout-center">
+  		  <ul id="geoAreaTree" class="ztree"></ul>
+      </div>
+  </div>
+
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<form class="ui-form" id='queryForm'>
+			
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+   #parse("index/_footer.vm")  
+<script type="text/javascript">
+  var _iframe_layout, _left_layout, _inner_layout;
+	$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      },
+      west: {
+        size: 0.5
+      }
+    });
+
+    _left_layout = $("#leftTreeWrap").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      }
+    });
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+
+   
+
+	$('.iconfont','.ui-form-pick').each(function(){
+      $(this).click(function(){
+      	$('#treeId').val('');
+      	$('#selectBlock').hide();
+      })
+    })
+	
+		//列表
+   quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/montrol/alarm/realalarm/list", [
+                    {
+                        field: "id",
+                        hidden: true
+                    },
+                    {
+                        field: "levelIco",
+                        template: "<div style='width:100%;text-align: center;'><i class='fa fa-info-circle' style='#:levelIco#'></i></div>",
+                        title: "级别",
+						 attributes: {"class": "k-grid-equilong"},
+                        sortable: false,width:50
+                    },
+					  {
+                        field: "deviceCode",
+                        sortable: false,
+                        title: "设备编码",
+						headerAttributes: {"class": "k-grid-text"},
+						 attributes: {"class": "k-grid-text"},
+                        template:function(dataItem) {
+                            var des = dataItem.deviceCode;
+                            return "<span  title='"+des+"'>"+des+"</span>";
+                        }
+                    },
+                    {
+                        field: "deviceName",
+                        title: "设备名称",
+                        sortable: false,
+						headerAttributes: {"class": "k-grid-text"},
+						attributes: {title:"#: data.deviceName==null? '':data.deviceName #","class": "k-grid-text k-grid-nowrap"},
+						
+                    },
+                  
+                    {
+                        field: "alarmRemark",
+                        sortable: false,
+						 attributes: {"class": "k-grid-equilong"},
+                        title: "报警描述",width:100
+                    },
+                    
+                    {
+                        field: "alarmTime",
+                        sortable: false,
+                        title: "报警时间",
+						 attributes: {"class": "k-grid-equilong"},
+                        template: function (dataItem) {
+                            var date = dataItem.alarmTime;
+                            if (undefined != date) {
+                                var formatDate = date.substr(0, 19);
+                                return formatDate;
+                            } else {
+                                return "";
+                            }
+                        }
+                    }
+                    
+                ],
+                {
+                    sortable: {
+                        mode: "multiple",
+                        allowUnsort: true
+                    }
+                }, {
+                    serverSorting: true
+                }
+        );
+		
+    });
+
+   
+  
+</script>

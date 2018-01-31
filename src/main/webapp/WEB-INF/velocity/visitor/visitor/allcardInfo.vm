@@ -1,0 +1,24 @@
+<style>
+.input-equilong .k-textbox:hover{border:1px solid #c4deed}
+</style>
+<div id="stock" style="margin-left:-5px;margin-right:5px">
+	  <!--参数type用来控制页面元素的修改权限:1代表来访登记tab页的请求；2代表是离开登记tab页的请求；3代表的是预约登记页面中新建和修改的页面请求-->
+      <table id='tableId' style="width:100%;" class="ui-table ui-table-addRow">
+        <thead>
+        <tr>
+            <th class="input-equilong" width="30">序号</th>
+            <th class="input-text" width="60">访客姓名</th>
+            <th class="input-text" width="80">访客单位</th>
+            <th class="input-text" width="80">访客证号</th>
+			<th class="input-text" width="100">发证时间</th>
+			#if(($!type)!=1)
+			<th class="input-text" width="100">收证时间</th>
+			<th class="input-text" width="80">归还访客证</th>
+			#end
+        </tr>
+        </thead>
+        <tbody id='leftvisitors' class="input-equilong">
+			
+        </tbody>
+        </table>
+</div>

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.inspection.entities.InspectionTaskContent">
+	<resultMap type="com.supconit.inspection.entities.InspectionTaskContent" id="inspectionTaskContentResultMap">      
+        <result property="id" column="ID" />
+		<result property="inspectionCode" column="INSPECTION_CODE" />
+		<result property="planId" column="PLAN_ID"/>
+		<result property="deviceId" column="DEVICE_ID"/>
+		<result property="itemContent" column="ITEM_CONTENT"/>
+		<result property="result" column="RESULT"/>
+		<result property="descripton" column="DESCRIPTON"/>
+		<result property="deviceName" column="DEVICE_NAME"/>
+		<result property="locationName" column="LOCATION_NAME"/>
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">INSPECTION_TASK_CONTENT</sql>
+	
+	<select id="selectInspectionTaskContentList" parameterType="string" resultMap="inspectionTaskContentResultMap" lang="velocity">
+		SELECT
+			a.ID,
+			a.INSPECTION_CODE,
+			a.PLAN_ID,
+			a.DEVICE_ID,
+			a.ITEM_CONTENT,
+			a.RESULT,
+			a.DESCRIPTON,
+			d.DEVICE_NAME,
+			d.LOCATION_NAME
+		FROM <include refid="TABLE_NAME"/> a
+		LEFT JOIN DEVICE d ON a.DEVICE_ID = d.ID
+		WHERE a.INSPECTION_CODE =  @{_parameter.inspectionCode,jdbcType=VARCHAR}
+		ORDER BY a.DEVICE_ID DESC
+	</select>
+	
+    
+	<delete id="deleteByInspectionCode" parameterType="string" lang="velocity"> 
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE INSPECTION_CODE =  @{_parameter.inspectionCode,jdbcType=VARCHAR}
+	</delete>
+    
+	<insert id="batchInsert" databaseId="oracle">
+       INSERT ALL 
+        <foreach collection="inspectionTaskContentList"  separator=" " item="content">
+            INTO <include refid="TABLE_NAME"/>(
+        	ID,
+            INSPECTION_CODE,
+            DEVICE_ID,
+            ITEM_CONTENT,
+            RESULT,
+            DESCRIPTON,
+            PLAN_ID
+	        ) VALUES
+            (
+            func_getseqval('SEQ_INSPECTION_TASK_CONTENT'),
+            #{inspectionCode,jdbcType=VARCHAR},
+            #{content.deviceId,jdbcType=BIGINT},
+            #{content.itemContent,jdbcType=VARCHAR},
+            #{content.result,jdbcType=INTEGER},
+            #{content.descripton,jdbcType=VARCHAR},
+            #{content.planId,jdbcType=BIGINT}
+            )
+        </foreach>
+        SELECT * FROM dual
+    </insert>
+
+
+    <insert id="batchInsert" databaseId="sqlserver">
+       INSERT INTO <include refid="TABLE_NAME"/>(
+            INSPECTION_CODE,
+            DEVICE_ID,
+            ITEM_CONTENT,
+            RESULT,
+            DESCRIPTON
+	    ) VALUES
+        <foreach collection="inspectionTaskContentList"  separator="," item="content">
+            (
+            #{inspectionCode,jdbcType=VARCHAR},
+            #{content.deviceId,jdbcType=BIGINT},
+            #{content.itemContent,jdbcType=VARCHAR},
+            #{content.result,jdbcType=INTEGER},
+            #{content.descripton,jdbcType=VARCHAR}
+            )
+        </foreach>
+    </insert>
+	
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.inspection.entities.InspectionTaskContent" resultMap="inspectionTaskContentResultMap" lang="velocity" databaseId="oracle">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			a.ID,
+			a.INSPECTION_CODE,
+			a.PLAN_ID,
+			a.DEVICE_ID,
+			a.ITEM_CONTENT,
+			a.RESULT,
+			a.DESCRIPTON,
+			d.DEVICE_NAME,
+			d.LOCATION_NAME
+		FROM <include refid="TABLE_NAME"/> a
+		LEFT JOIN DEVICE d ON a.DEVICE_ID = d.ID
+		WHERE a.INSPECTION_CODE =  @{_parameter.condition.inspectionCode,jdbcType=VARCHAR}
+		#order($_parameter.condition,"a.DEVICE_ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.inspection.entities.InspectionTaskContent" resultMap="inspectionTaskContentResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			a.ID,
+			a.INSPECTION_CODE,
+			a.PLAN_ID,
+			a.DEVICE_ID,
+			a.ITEM_CONTENT,
+			a.RESULT,
+			a.DESCRIPTON,
+			d.DEVICE_NAME,
+			d.LOCATION_NAME 
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"a.DEVICE_ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/> a
+		LEFT JOIN DEVICE d ON a.DEVICE_ID = d.ID
+		WHERE a.INSPECTION_CODE =  @{_parameter.condition.inspectionCode,jdbcType=VARCHAR}
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countByConditions" resultType="long" lang="velocity">
+        SELECT
+			count(*)
+		FROM <include refid="TABLE_NAME"/> a
+		WHERE a.INSPECTION_CODE =  @{_parameter.inspectionCode,jdbcType=VARCHAR}
+    </select>
+    
+	<!-- 更新记录-->
+	<update id="update"  parameterType="com.supconit.inspection.entities.InspectionTaskContent" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+			#mset()
+				<![CDATA[
+			        #if($_parameter.result)RESULT = @{_parameter.result,jdbcType=INTEGER},#end
+			        #if($_parameter.descripton)DESCRIPTON = @{_parameter.descripton,jdbcType=VARCHAR},#end
+			    ]]>
+			#end
+		WHERE ID = @{_parameter.id,jdbcType=BIGINT}
+	</update>
+</mapper>

@@ -1,0 +1,115 @@
+#parse("index/_header.vm")
+</head>
+<body>
+	<form id="myform_id" method="post" action="$!{rc.contextPath}/spare/warehouse/save"  class="ui-dialog-form">
+		<input type="hidden" name="id" value="$!{warehouse.id}">
+    <table width="100%">
+		         #set($readonly='')
+    	         #if($!{viewOnly})
+    	         #set($readonly='readonly')
+    	         #end
+        <tr>
+            <td width="100" class="label"><span class="ui-form-required">*</span><label>仓库编码：</label></td>
+            <td width="300"><input type="text" class="k-textbox" name="warehouseCode" value="$!{warehouse.warehouseCode}"></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td width="100" class="label"><span class="ui-form-required">*</span>仓库名称：</td>
+            <td width="300"><input type="text" class="k-textbox" name="warehouseName" value="$!{warehouse.warehouseName}" ></td>
+            <td></td>
+        </tr>
+         
+         <tr>
+         
+               
+         
+         
+	            <td class="label"><span class="ui-form-required">*</span>管理员：</td>
+	          	<td>
+	            	<input type="hidden" class="k-textbox" id="managerId" name="managerId" value="$!{warehouse.managerId}" >
+	            	<span class="k-textbox k-space-right" id="managerName1">
+                     <input  $!{readonly}  class="k-textbox" type="text" readonly="true"  name="managerName" id="managerName" value="$!{warehouse.managerName}"  />
+					 <a href="#" class="k-icon k-i-search">&nbsp;</a>
+                </span>
+	            </td>
+	            <td></td>
+	        </tr>  
+	      
+        
+        <tr>
+            <td class="label"><span class="ui-form-required"></span>最高库存：</td>
+            <td><input type="text" class="k-textbox fInt"  name="upperQty" value="$!{upperQty}" ></td>
+            <td></td>
+        </tr>
+        
+         <tr>
+            <td class="label"><span class="ui-form-required"></span>安全库存：</td>
+            <td><input type="text" class="k-textbox fInt" name="safeQty" value="$!{safeQty}" ></td>
+            <td></td>
+        </tr>
+        
+         <tr>
+            <td class="label"><span class="ui-form-required"></span>最低库存：</td>
+            <td><input type="text" class="k-textbox fInt" name="lowerQty" value="$!{lowerQty}" ></td>
+            <td></td>
+        </tr>
+        
+        <tr>
+            <td class="label">备注：</td>
+            <td><textarea  id="textAreaId"  name="remark" class="k-textbox k-textarea" style="height:60px">$!{warehouse.remark}</textarea></td>
+            <td></td>
+        </tr>
+    </table>
+    <div class="actions">
+        #if( $!{readonly} != 'readonly')
+	     <button class="k-primary hc_btn" id="sub" type="submit"><i class="fa fa-save"></i>保 存</button>
+		 <button class="hc_btn cancel" onclick="close_dialog('warehouse_add_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+        #end
+	</div>
+
+	</form>
+
+	<script type="text/javascript">
+
+	$(document).ready(function(){
+		#if($!viewOnly)
+			fNumPage();
+		#end
+
+		
+        $("#managerName1").click(function() {
+			if("$!viewOnly" != "true")
+       		quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/choose/personPage?type=1&txtId=managerId&txtName=managerName&dialogId=warehouse_add_dlg&personId=0",1135, 540);
+		});	
+
+        $("#myform_id").validator({
+		#if(!$!viewOnly)
+            fields:{
+                warehouseCode: "仓库编码:required; length[~20]",
+                warehouseName: "仓库名称:required; lenght[~30]",
+                managerName:"管理员:required; lenght[~30]",
+                upperQty: "最高库存:length[~30];digits",
+	            safeQty: "安全库存:match[lte, upperQty];digits;length[~30]",
+	            lowerQty: "最低库存:match[lte, safeQty];digits;length[~30]",
+                remark  : "length[~200]"
+            },
+		#end
+            valid:function(form){
+                form_btn_submit($("#sub"),form,function(res){
+                    //console.log(res);
+                    validateCallback(res,"grid","warehouse_add_dlg");
+                });
+            }
+        });
+
+  });
+  
+ 			#if($!viewOnly)
+			
+    	   setAllReadonly();
+    	   
+   #end
+
+	</script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<div id='hidden_judgment' style="display:none">
+<input type="hidden" name="task.criteriaDetails[0].crCondition" #if($task.criteriaDetails && $task.criteriaDetails.size()>0) value="$!task.criteriaDetails[0].crCondition" #end>
+<input type="hidden" name="task.criteriaDetails[1].crCondition" #if($task.criteriaDetails && $task.criteriaDetails.size()>1) value="$!task.criteriaDetails[1].crCondition" #end>
+<input type="hidden" name="task.criteriaDetails[0].crScore" #if($task.criteriaDetails && $task.criteriaDetails.size()>0) value="$!task.criteriaDetails[0].crScore" #end>
+<input type="hidden" name="task.criteriaDetails[1].crScore" #if($task.criteriaDetails && $task.criteriaDetails.size()>1) value="$!task.criteriaDetails[1].crScore" #end>
+</div>
+        <div  class="ui-form-item" style="width:60%">
+            <label class="ui-label" for=""><span class="ui-form-required">*</span>黄色预警:</label>
+            <input class="ui-input" type="input" id="crCondition0_start" data-rule="黄色预警起: required;length[~50];"/>
+			<span class="ui-form-text" style="color: #fff;">至</span> 
+            <input class="ui-input" type="input" id="crCondition0_end" data-rule="黄色预警止: required;float;length[~50];" data-rule-float="[/^\d+(\.\d{1,2})?$/, '请输入数字，且最多精确到小数后两位']"/><span class="ui-form-text" style="color: #fff;">度</span>
+            
+        </div>
+        <div class="ui-form-item ">
+          <label class="ui-label" for=""><span class="ui-form-required">*</span>扣分：</label>
+            <input class="ui-input" type="input" id="crScore0" data-rule="扣分: required; int;length[~50];"  data-rule-int="[/^[1-9]\d*$/, '请输入大于0整数']" value="1"/>
+             <input type="hidden" name="task.criteriaDetails[0].crLevel" value="1">         
+		</div>        
+        <div  class="ui-form-item" style="width:60%">
+            <label class="ui-label" for=""><span class="ui-form-required">*</span>红色预警:</label>
+            <input class="ui-input" type="input" id="crCondition1_start" data-rule="红色预警: required;float;length[~50];" data-rule-float="[/^\d+(\.\d{1,2})?$/, '请输入数字，且最多精确到小数后两位']"/><span class="ui-form-text" style="color: #fff;">度</span>     
+        </div>
+        <div class="ui-form-item ">
+          <label class="ui-label" for=""><span class="ui-form-required">*</span>扣分：</label>
+            <input class="ui-input" type="input" id="crScore1" data-rule="扣分: required; int;length[~50];"  data-rule-int="[/^[1-9]\d*$/, '请输入大于0整数']" value="2"/>
+             <input type="hidden" name="task.criteriaDetails[1].crLevel" value="2">              
+		</div>        
+<script type="text/javascript">
+function genarateExpression(){
+    var crCondition0_start=$('#crCondition0_start').val();
+    var crCondition0_end=$('#crCondition0_end').val();
+	var crScore0=0-Math.abs($('#crScore0').val());
+    var crCondition1_start=$('#crCondition1_start').val();
+	var crScore1=0-Math.abs($('#crScore1').val());
+	$("#hidden_judgment input[name='task.criteriaDetails[0].crCondition']").val('#sum>='+crCondition0_start+' and #sum<='+crCondition0_end);
+	$("#hidden_judgment input[name='task.criteriaDetails[1].crCondition']").val('#sum>'+crCondition1_start);
+	$("#hidden_judgment input[name='task.criteriaDetails[0].crScore']").val(crScore0);
+	$("#hidden_judgment input[name='task.criteriaDetails[1].crScore']").val(crScore1);
+}
+$(document).ready(function(){
+	
+    
+	$("#crCondition0_start ,#crCondition0_end ,#crCondition1_start").bind("blur",function(){
+	var crCondition0_start=$('#crCondition0_start').val();
+    var crCondition0_end=$('#crCondition0_end').val();
+    var crCondition1_start=$('#crCondition1_start').val();
+		if(crCondition0_start!="" && crCondition0_end!="" && crCondition1_start){
+			if((crCondition0_end-crCondition1_start)>=0 && (crCondition1_start-crCondition0_start)>=0){
+				alert("红色预警应大于黄色预警的范围。")
+			}
+		}
+	})
+	
+	$("#crScore0 ,#crScore1").bind("blur",function(){
+		var score1=$('#crScore1').val();
+		var score0=$('#crScore0').val();
+		if(score0!="" && score1!=""){
+			if((score0 -score1)>=0){
+				alert("红色预警应大于黄色预警扣分。");	
+			}
+			
+		}
+	})
+	$("#hidden_judgment input[name$='crCondition']").each(function(idx,ele){
+	   var condition=$(ele).val();
+	   if(condition==''){
+	     return;
+	   }else if(condition.indexOf("and") > 0){
+	      //#sum>=5 and #sum<=20
+		  var start=$.trim(condition.slice(condition.indexOf(">=")+2,condition.indexOf("and")));
+		  var end=$.trim(condition.slice(condition.indexOf("<=")+2));
+		  $('#crCondition0_start').val(start);
+		  $('#crCondition0_end').val(end);
+	   }else{
+	     //#sum>5
+		 var start=$.trim(condition.slice(condition.indexOf(">")+1));
+		 $('#crCondition1_start').val(start);
+	   }
+	   
+	 });
+	$("#hidden_judgment input[name$='crScore']").each(function(idx,ele){
+	   var score=Math.abs($(ele).val());
+	   	  if(score==0){
+	   	  	return false;
+	   	  }else{
+	   	  	$('#crScore'+idx).val(score);
+	   	  }
+		  
+	 });
+});//ready
+</script>

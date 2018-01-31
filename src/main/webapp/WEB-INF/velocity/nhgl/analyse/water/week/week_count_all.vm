@@ -1,0 +1,264 @@
+ <script type="text/javascript" src="$!{nhgl_static_custom_url}/echarts_2/esl.js"> </script>
+ <script type="text/javascript" src="$!{nhgl_static_custom_url}/echarts_2/echartsUtil.js"></script>
+ ##<script type="text/javascript" src="$!{rc.contextPath}/assets/echarts_2/echarts.js"> </script>
+ 
+ ##最上方的固定列表
+     <div class="nh-chart" id="mixzm$!{num}">
+       </div>	
+	##下方的列别
+		<div class="nh-chart" id="work$!{num}">
+	
+		</div>	
+  <script type="text/javascript">
+  	var myChart;
+  	var option;
+	var height = $(window).height();
+  	$(".out").height(height-160);
+	var standardCode = $("#subCode").val();;
+	var str = "{a} : {c} ";
+	var str1 = "{a1} : {c1} ";
+      $(document).ready(function(){
+		 var percentD = '$!nhDay.percentD';
+  		var percentN='$!nhDay.percentN'
+  		var dayTimeEleTotal='$!nhDay.DayDaytimeValue';
+  		var nightEleTotal='$!nhDay.DayNightValue';
+  		var sTime='$!nhDay.dayOfMonthKey';
+  		$("#sTime1").text(sTime);
+  		$("#sTime2").text(sTime);
+		if(dayTimeEleTotal == 0)
+			$("#dayTimeTotal").text("0.00");
+		else
+			$("#dayTimeTotal").text(dayTimeEleTotal);
+		if(nightEleTotal==0)
+			$("#nightTotal").text("0.00");
+		else
+			$("#nightTotal").text(nightEleTotal);  		
+  		if(percentD >0){
+			$("#percentD").text('增长'+percentD+'%');
+		}
+		else if(percentD == 0){
+			$("#percentD").text('持平');
+		}
+		else{
+			$("#percentD").text('下降'+(-percentD)+'%');
+		}
+		if(percentD == 0){
+			$("#rudD").removeClass();
+			$("#rudD").addClass("count-item count-item-unchanged");
+		}
+		else if(percentD > 0){
+			$("#rudD").removeClass();
+			$("#rudD").addClass("count-item count-item-rise");
+		}
+		else {
+			$("#rudD").removeClass();
+			$("#rudD").addClass("count-item count-item-decline");
+		}
+		
+		if(percentN >0){
+			$("#percentN").text('增长'+percentN+'%');
+		}
+		else if(percentN == 0){
+			$("#percentN").text('持平');
+		}
+		else{
+			$("#percentN").text('下降'+(-percentN)+'%');
+		}
+		if(percentN == 0){
+			$("#rudN").removeClass();
+			$("#rudN").addClass("count-item count-item-unchanged");
+		}
+		else if(percentN > 0){
+			$("#rudN").removeClass();
+			$("#rudN").addClass("count-item count-item-rise");
+		}
+		else {
+			$("#rudN").removeClass();
+			$("#rudN").addClass("count-item count-item-decline");
+		}
+      
+		//混合图总量
+		option = {
+            title : {
+                text: '$!{title}',
+                   x:'center'
+            },
+            tooltip : {
+                trigger: 'axis',
+				formatter:function(params,ticket)
+				{
+					var str="";
+					for(var i=0;i<params.length;i++){
+						str = str + params[i][0]+" : "+params[i][2];
+						if(params[i][0] == "同比涨幅")
+							str = str + " %"+"</br>";
+						else
+							str = str + " " + water+"</br>";
+					}
+					return str;
+					
+				}
+            },
+            legend: {
+			   //orient : 'vertical',
+    	        x : 'right',
+    	        y : 'top',
+                data:['周末','非周末']
+            },
+            xAxis : [
+                {
+                    type : 'category',
+                    data : $!weekList
+                }
+            ],
+            yAxis : [
+                {	
+				    name :'用水量('+water+')',
+                    type : 'value',
+                    splitArea : {show : true}
+                }
+            ],
+            series : [
+                {
+                    name:'周末',
+                    type:'bar',
+                    data:$!week
+                },
+                {
+                    name:'非周末',
+                    type:'bar',
+                    data:$!work
+                }
+            ]
+        };
+		initEcharts("mixzm$!{num}",option,function onclickWeek(chart){chart.on('click', eConsole)});
+		//var ecConfig = require(['echarts','nhgl_static/custom/echarts_2/config']);
+		
+		//setTimeout(function onclickWeek(chart){chart.on('click', eConsole)},500);
+		//var pieTwo = initChart("work$!{num}");
+    	//	pieTwo.on('click',eConsole);
+    	//	pieTwo.setOption(optionTwo,false);
+
+		//加载另外一个图
+		var options = {
+			color : ['#615EEF'],
+            title : {
+                text: '$!{titles}',
+                   x:'center'
+            },
+			
+            tooltip : {
+                trigger: 'axis',
+				formatter:function(params,ticket)
+				{
+					if(params.length==1)
+						return params[0][0]+" : "+params[0][2]+ " " +water;
+				}
+            },
+            ##legend: {
+			##   //orient : 'vertical',
+        	##        y : 'bottom',
+            ##    data:['用水量']
+            ##},
+            xAxis : [
+                {
+                    type : 'category',
+                    data : '$!dayLists'.split(",")
+                }
+            ],
+            yAxis : [
+                {
+					name : '用水量('+water+')',
+                    type : 'value',
+                    splitArea : {show : true}
+                }
+            ],
+            series : [
+                {
+                    name:'用水量',
+                    type:'bar',
+                    data:'$!weeks'.split(",")
+                }
+            ]
+        };
+		initEcharts("work$!{num}",options);
+		var allHeight = $("#chart_content_id").height();
+		var header = $(".nh-header").height();
+		var content = $(".nh-content").height();
+		if(content > allHeight-header-40)
+			$("#content").css("height",content);
+		else
+			$("#content").css("height",allHeight-header-40);
+		$(".ui-tab-panels").css("height",allHeight-header-40);
+	})
+		
+	//回调函数	
+	function eConsole(param) {
+		var value = param.value;
+		if(value == '0.00')
+				return;
+		var first = param.name.split(" ")[0];
+		var id = $("#allId").val();
+		var start = $("#start").val();
+		var title = first+$("#deptName").val()+"用水量统计分析";
+		var url = "$!{rc.contextPath}/nhgl/analyse/water/week/dayCount?standardCode=" + standardCode;
+		$.ajax({
+           type: "POST",
+           url: url,
+           data: "first="+first+"&number=$!{number}&flag=$!{flag}&id="+id+"&start="+start,
+           success: function(responseText){
+		   	var msg = responseText.split("|");
+			var dayList = msg[1].split(",");
+			var dataList = msg[0].split(",");
+            	var option1 = {
+				color : ['#615EEF'],
+                title : {
+                    text: title,
+                       x:'center'
+                },
+                tooltip : {
+                    trigger: 'axis',
+					formatter:function(params,ticket)
+					{
+						if(params.length==1)
+							return params[0][0]+" : "+params[0][2]+ " " +water;
+					}
+                },
+                ##legend: {
+				##   //orient : 'vertical',
+            	##      y : 'bottom',
+                ##    data:['用水量']
+                ##},
+                xAxis : [
+                    {
+                        type : 'category',
+                        data : dayList
+                    }
+                ],
+                yAxis : [
+                    {
+						name : '用水量('+water+')',
+                        type : 'value',
+                        splitArea : {show : true}
+                    }
+                ],
+                series : [
+                    {
+                        name:'用水量',
+                        type:'bar',
+                        data:dataList
+                    }
+                ]
+            };
+			initEcharts("work$!{num}",option1);
+           }
+        });
+		
+      }	
+	  fNumPage();
+    //  function initChart(div){
+    //	var domMain = document.getElementById(div);    	
+	//	return  require('echarts').init(domMain)
+  	//  }
+  </script> 
+   

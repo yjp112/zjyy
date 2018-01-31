@@ -1,0 +1,290 @@
+#parse("index/_header.vm")
+<link href="$!{rc.contextPath}/main_static/custom/js/uploadify/uploadify.css" rel="stylesheet">
+<script src="$!{rc.contextPath}/main_static/custom/js/uploadify/jquery.uploadify-3.1.min.js"></script>
+<style > 
+.chooseBox{width:240px;height:140px;border:#cccccc 1px solid;overflow:auto;}
+.chooseUl li{height:22px;line-height:22px;cursor:pointer;padding-left:6px;margin-bottom:1px;}
+.choosePick{background:#6ebffe;color:#FFF;}
+.t_c{text-align:center;} 
+ul{ margin:0; padding:0;} 
+##td{border:1px solid#F00;}
+.photo{ width:138px;}
+.left{text-align:left;}
+.right{text-align:right;}
+.center{text-align:center;}
+.justify{text-align:justify;}
+</style>
+</head>
+<body  style="padding-bottom:40px;">
+<form id="form_id_dc_edit"  class="ui-layout-center ui-dialog-form"  method="post" action="$!{rc.contextPath}/device/deviceCategory/save" >
+		  <input type="hidden"  name="id" value="$!{deviceCategory.id}"  />
+		  <input type="hidden" id="propertyIds" name="propertyIds" ></input>
+		  <input type="hidden" id="propertySorts" name="propertySorts" ></input>		  
+	      <table width="100%" >	      
+	       	<tr >
+		        <td width="15%" class="label" ><span class="ui-form-required">*</span><label>类别编码：</label></td>
+		        <td width="30%"><input #if($!{deviceCategory.id}) readonly="true" #end type="text" class="k-textbox" name="categoryCode" value="$!{deviceCategory.categoryCode}"></td>
+      	
+		        <td width="15%" class="label"><span class="ui-form-required">*</span><label>类别名称：</label></td>
+		        <td width="30%" ><input class="k-textbox" type="text" name="categoryName" value="$!{deviceCategory.categoryName}"/></td>
+				
+                <td width="4%" ></td>
+			</tr>
+	      	<tr>
+		        <td class="label"><label>上级类别：</label></td>
+		        <td >		        	
+		        	<span class="k-textbox k-space-right" #if($!{viewOnly} != true) onclick="chooseDeviceCategory('parentId','parentName','device_add_dlg','deviceCategory',true)" #end>
+	                     <input class="k-textbox" id="parentId" type="hidden" name="parentId" type="text" value="$!{deviceCategory.parentId}" >
+	                     <input class="k-textbox" id="parentName" name="parentName" type="text" value="$!{deviceCategory.parentName}" readonly >
+						 <a href="#" class="k-icon k-i-search">&nbsp;</a>
+	                </span>                                
+		        </td>					
+	      		<td  class="label"><span class="ui-form-required">*</span><label >序号：</label></td>
+	   	        <td  ><input id="device_seq" class="k-textbox" type="text" name="sortIndex" value="$!{deviceCategory.sortIndex}"/></td>
+				
+				<td></td>
+			</tr>
+	    <!--    	<tr>
+	      		<td  class="label"><label>类别图片：</label></td>
+	          	<td  colspan="2">              
+	          		<div id="img" class="photo" style="float:left">
+          				<!-- <img id="photos" width='128px' height='95px' src="${imagePath}${imageSysName}" onerror="this.src='$!rc.contextPath/modules/assets/images/gis/imgDeviceCategory/default.jpg';" />         				
+          				<img id="photos" width='128px' height='95px' src="${imagePath}${imageSysName}"  onerror="this.src='$!rc.contextPath/modules/assets/images/gis/imgDeviceCategory/default.jpg';"/>
+         			</div>
+         			#if($!{viewOnly} != true)						
+         			<div id="btnId" style="margin-left:150px;margin-top:20px;">
+         				<input type="file"  id="file_upload" style="height:50px;width:50px;"/>
+					</div>				
+         			#end
+         			<input type='hidden' name='fileorignal' id='fileorignal'/>
+					<input type='hidden' name='filename' id='filename'/>
+					<input type='hidden' name='delfiles' id='delfiles'/>
+                </td>
+				<td ></td>
+	      	</tr>
+	      	<tr>
+	      		<td class="label"><label>类别属性：</label></td>
+				<td style="padding-left:0px;"><table><tr >                
+	      		<td style="padding-left:0px;">						
+	      			<input #if($!{viewOnly} == true) disabled #end type="checkbox" class="ui-checkbox" id="lastNode_id" name="lastNode"  #if($!{deviceCategory.lastNode}=='0')  checked="checked" #end value="0"  />	      			
+	      		</td>
+				<td class="label"><label>是否包含子类别</label></td>
+                </tr></table></td>
+				<td ></td>
+	      	</tr>
+	      	<tr id="divProperty1" #if($!{deviceCategory.lastNode}=='0') style="padding:3px 0px;display:none;" #else style="padding:3px 0px;" #end>
+				<td ></td>
+				<td >
+					<input type="text" class="k-textbox" id="txtCodeName"  value="" />
+				</td>
+				<td >
+					#if($!{viewOnly} != true)
+					<button class="k-primary k-button" onclick="findByCodeName()" type="button"><i class="fa fa-search"></i>查询</button>
+					#end
+				</td>
+				<td ></td>
+	      	</tr>
+	      	<tr id="divProperty2" #if($!{deviceCategory.lastNode}=='0') style="padding:3px 0px;display:none;" #else style="padding:3px 0px;" #end>
+				<td  class="label"><label></label></td>
+	      		<td colspan="3" style="padding-left:0px;"><table  cellpadding="0" cellspacing="0" width="100%" >
+					<tr>
+	                	<td rowspan="2" width="228">
+	                		<div class="chooseBox subclass" ><ul class="chooseUl" id="temp_all_sub">
+							#foreach($!{all} in $!{lstPropertyAll})
+								#set ($i=0)
+								#foreach($!{d} in $!{lstProperty})
+									#if($i==0 && $!{all.id}==$!{d.id} ) #set ($i=1) #end 
+								#end 
+	    						<li onclick="addSelectClass($(this));" subId="$!{all.id}" #if($i==1) style="display:none" #else style="white-space:nowrap" #end >[$!{all.propertyCode}]$!{all.propertyName}</li>
+	    					#end
+	                        </ul></div>
+	                    </td>
+	                    #if($!{viewOnly} != true)
+	                    <td valign="down" class="t_c prten" style="padding-left: 30px;padding-right: 30px;">
+	                        <input  type="button" value=">>" onclick="selectBotn('subclass','subclassPick');"/>
+	                    </td>
+	                    #end
+	                    <td rowspan="2" width="228" style="padding-right:0px;">
+	                    	<div class="chooseBox subclassPick"><ul class="chooseUl" name="all_sub" id="all_sub">
+							#foreach($!{all} in $!{lstPropertyAll})
+								#set ($i=0)
+								#foreach($!{d} in $!{lstProperty})
+									#if($i==0 && $!{all.id}==$!{d.id} ) #set ($i=1) #end 
+								#end 
+	    						<li onclick="addSelectClass($(this));" subId="$!{all.id}" #if($i==0) style="display:none" #else style="white-space:nowrap" #end >[$!{all.propertyCode}]$!{all.propertyName}</li>
+	    					#end
+	                        </ul></div>
+	                    </td>
+					</tr>
+					<tr>	
+						#if($!{viewOnly} != true)					      
+						<td valign="top" class="t_c prten">
+						   <input  type="button" value="<<" onclick="selectBotn('subclassPick','subclass');"/> 
+		                </td>
+		                #end
+					</tr>
+				</table></td>
+	      	</tr>-->
+	      	<tr>
+	      		<td  class="label" valign="top"><label for="" >备注：</label></td>
+	        	<td  colspan="3"><textarea  id="textAreaId"  cols="3" rows="3" class="k-textbox k-textarea"  name="remark">$!{deviceCategory.remark}</textarea></td>
+				<td ></td>
+			</tr>
+		</table>
+		<div class="actions">
+	        <button class="k-primary hc_btn" id="deviceSave" onclick="before()" type="submit"><i class="fa fa-save"></i>保 存</button>
+	        <button class="hc_btn cancel" onclick="close_dialog('device_add_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+	    </div>
+</form>
+</body>
+<script type="text/javascript">
+	$(document).ready(function(){
+		var  _iframe_layout = $('body').layout({
+              defaults: {
+                resizable: true,
+                closable: false,
+                spacing_open: 5
+              }
+            });
+	});
+</script>
+<script>
+$("#deviceSave").click(function(){
+	var sequence = $("#device_seq").val();
+	var reg = /^[0-9]*[1-9][0-9]*$/;
+	if("" != sequence && !reg.test(sequence)){
+			notify("序号必须为正整数，请重新输入!", "error");
+			return false;
+	}
+});
+//alert("$!{deviceCategory.id}");
+function findByCodeName(){
+	var codeName =$("#txtCodeName").val();
+	if(codeName==null || codeName==""){
+		codeName="[";//全查询
+	}
+	$(".subclass li").each(function(){
+		if($(this).html().indexOf(codeName)!=-1 && $(".subclassPick li[subId='"+$(this).attr("subId")+"']:visible").length==0){//筛选
+			$(this).show();
+		}else{
+			$(this).hide();
+		}
+	})	
+}
+function selectBotn(from,to){
+	$("."+from+" li").each(function(){
+		if($(this).hasClass("choosePick")){//已选中
+			var sbuId = $(this).attr("subId");
+			$(this).removeClass("choosePick");
+			$(this).hide();
+			$("."+to+" li[subId='"+sbuId+"']").show();
+			$("."+to+" li[subId='"+sbuId+"']").css("white-space","nowrap");
+		}
+	})
+	
+}
+
+ function before(){
+	//获取类别属性信息
+	var subIds = new Array();
+	var sorts = new Array();
+	$.each($("ul[name='all_sub'] li[subId]:visible"), function(i,val){  
+		subIds.push($(val).attr("subId"));
+		sorts.push(i);
+	}); 
+	$("#propertyIds").val(subIds);
+	$("#propertySorts").val(sorts);
+ }
+  function addSelectClass($obj){
+	if($obj.hasClass("choosePick")){
+		$obj.removeClass("choosePick");
+	}else{
+		$obj.addClass("choosePick");
+	}	
+ }
+////////////////////
+	//文件上传
+    function initUpload(){    
+		$('#file_upload').uploadify({
+    	    'buttonText' : '上传图片',
+    		'buttonClass' : 'k-primary fileUploadBtn',
+			'fileTypeDesc' : "Image Files",
+			'fileTypeExts' : '*.gif; *.jpg; *.png; *.bmp', 
+    		'multi' : false,
+    		'fileSizeLimit':'$!{fileLength}MB',               
+    		'fileObjName' : 'file', 
+    		'cancelImg' : '$!{main_static_custom_url}/js/uploadify/cancel.png',
+            'swf'       : '$!{main_static_custom_url}/js/uploadify/uploadify.swf',
+            'uploader' : '${rc.contextPath}/fileupload/fileup',
+            'removeCompleted': true,
+    		 onUploadSuccess:function(file,data,response){
+                  if(response){  
+    				 var obj = eval('(' + data + ')');
+    				 //alert("${imageTempPath}"+obj.filename);
+    				 $("#photos").attr("src","${imageTempPath}"+obj.filename);
+    				 $("#filename").val(obj.filename);
+    				 $("#fileorignal").val(obj.orignalname);
+    				 $("#delfiles").val("$!{attachId}");
+                  }else{
+        		  	 alert("文件上传失败！");
+                  }
+      		}
+    	});
+    }
+    $(document).ready(function(){
+	 	$('#form_id_dc_edit').validator({
+        fields: {
+            categoryCode: "类别编码:required; length[~32]", 
+			categoryName: "类别名称:required; length[~50]",
+			sortIndex: "序号:required; length[~5]",
+			remark: "length[~200]"
+          },
+            valid:function(form){
+                form_btn_submit($("#deviceSave"),form,function(res){
+                    //console.log(res);
+                    validateCallback(res,"grid","device_add_dlg");
+                    return false;
+                });
+            }
+        });
+		//deviceCategory.id为空就查询全部数据
+		//findByCategoryId("$!{deviceCategory.id}");
+		$("#file_upload").attr("style","margin-left:150;margin-top:20");
+		
+		//包含子类别
+		 $("#lastNode_id").change(function(){
+		     if($("#lastNode_id").is(':checked')){
+			 	$("#divProperty1").hide();		
+				$("#divProperty2").hide();
+			 }else{
+			 	$("#divProperty1").show();	
+				$("#divProperty2").show();	
+			 }
+   	   	 });
+		
+		//查看模式
+		/*#if($!{showFlag})
+			setAllReadonly("dialog");
+			$("#file_upload").hide();
+		#else
+			initUpload();
+		#end*/	
+		
+        /*#if($!viewOnly)
+        	setAllReadonly("dialog");
+			$("#file_upload").hide();
+		#else
+			initUpload();
+        #end*/
+
+		var viewSign = $!{viewOnly};
+		if(viewSign == true){
+        	setAllReadonly("dialog");
+			$("#file_upload").hide();		
+		}
+		else{
+			initUpload();
+		}
+      });
+</script>
+</html>

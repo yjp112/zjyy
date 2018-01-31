@@ -1,0 +1,187 @@
+#parse("index/_header.vm")
+<style type="text/css">
+.left{float:left}
+.right{float:right}
+</style>
+</head>
+<body style="padding-bottom:40px;">
+	<form id="myform_id" method="post" action="$!{rc.contextPath}/jobschedule/schedule-job/add"  class="ui-layout-center ui-dialog-form">
+	 <input type="hidden"  name="scheduleJob.id" value="$!{scheduleJob.id}"/>
+     <input type="hidden"  name="scheduleJob.status" value="$!{scheduleJob.status}"/>
+    <table width="100%">
+        <tr>
+	        <td width="18%" class="label"><span class="ui-form-required">*</span><label>JOB主题:</label></td>
+	        <td width="30%" class="inputText">
+	            <input class="k-textbox" type="text" name="scheduleJob.jobSubject" value="$!{scheduleJob.jobSubject}"/>
+	        </td>
+            <td width="15%" class="label"><span class="ui-form-required">*</span><label>JOB名称:</label></td>
+            <td width="30%">
+	            <input class="k-textbox" type="text" name="scheduleJob.jobName" value="$!{scheduleJob.jobName}"/>
+            </td>
+			<td width="7%"></td>
+        </tr>
+        <tr>
+            <td  class="label"><span class="ui-form-required">*</span>分组名称:</td>
+            <td >
+				 <input class="k-textbox"  type="text" name="scheduleJob.groupName" value="$!{scheduleJob.groupName}"/>
+			</td>
+			<td  class="label"><span class="ui-form-required">*</span>bean_or_class:</td>
+            <td >
+				 <select class="k-textbox" name="scheduleJob.beanOrClass">
+					$!{beanOrClass}
+				</select>
+			</td>
+            <td></td>
+        </tr>
+        <tr>
+	        <td  class="label"><span class="ui-form-required">*</span>target_object:</td>
+	        <td >
+	            <input class="k-textbox"  type="text" name="scheduleJob.targetObject" value="$!{scheduleJob.targetObject}"/>
+			</td>
+			<td  class="label"><span class="ui-form-required">*</span>target_method:</td>
+		    <td >
+	            <input class="k-textbox"  type="text" name="scheduleJob.targetMethod" value="$!{scheduleJob.targetMethod}"/>
+			</td>
+            <td></td>
+        </tr>
+        <tr>
+	        <td  class="label"><span class="ui-form-required">*</span>target_arguments:</td>
+	        <td >
+	            <input class="k-textbox"  type="text" name="scheduleJob.targetArguments" value="$!{scheduleJob.targetArguments}"/>
+			</td>
+			<td  class="label"><span class="ui-form-required">*</span>cron表达式:</td>
+		    <td >
+	            <input class="k-textbox"  type="text"id="cronExpression" name="scheduleJob.cronExpression" value="$!{scheduleJob.cronExpression}"/>
+			</td>
+	        <td></td>
+	    </tr>
+	    <tr>
+		    <td  class="label">开始时间:</td>
+		    <td >
+		        <input class="k-textbox"  type="text" id="startDate" name="scheduleJob.startDate" value="#date_format($!{scheduleJob.startDate},'yyyy-MM-dd HH:mm:ss')"/>
+			</td>
+			<td  class="label">结束时间:</td>
+		    <td >
+		        <input class="k-textbox"  type="text" id="endDate" name="scheduleJob.endDate" value="#date_format($!{scheduleJob.endDate},'yyyy-MM-dd HH:mm:ss')"/>
+			</td>
+		    <td></td>
+		</tr>
+	    <tr>
+		    <td  class="label">忽略错误:</td>
+		    <td >
+		        <select class="k-textbox" name="scheduleJob.ignoreError">
+					$!{ignoreError}
+                </select>
+			</td>
+			<td  class="label">并发:</td>
+		    <td >
+		        <select class="k-textbox" name="scheduleJob.concurrent">
+					$!{concurrent}
+                </select>
+			</td>
+		    <td></td>
+		</tr>
+		#if($scheduleJob.status)
+	    <tr>
+		    <td  class="label"><span class="ui-form-required">*</span>执行状态:</td>
+		    <td >
+		        <input class="k-textbox" type="text" readonly  name="scheduleJob.statusText" value="$!{scheduleJob.statusText}"/>
+			</td>
+			<td></td>
+		    <td></td>
+		    <td></td>
+		</tr>
+		#end
+		<tr>
+            <td valign="top" class="label">描述:</td>
+            <td colspan="3">
+				<textarea cols="3" rows="3"  class="k-textbox k-textarea"  name="scheduleJob.description">$!{scheduleJob.description}</textarea>
+			</td>
+            <td></td>
+        </tr>
+		<tr>
+            <td valign="top" class="label">执行时间举例:</td>
+            <td colspan="3">
+				<div class="k-textbox k-textarea" style="height:100px;background-color: #fff;color: black;">
+				  <ul class="left">
+				  </ul>
+				  <ul class="right">
+				  </ul>
+				</div>
+				<button type="button" style="margin-top:10px;float:right;" class="k-primary hc_btn" id="computeBtn" onclick="computeExecuteTime(this)">表达式测试</button>
+			</td>
+            <td></td>
+        </tr>
+    </table>
+    <div class="actions">
+    #if($flag!=2)
+        <button class="k-primary hc_btn" id="VD_bt" type="submit"><i class="fa fa-save"></i>保 存</button>
+    #end
+        <button class="hc_btn cancel" onclick="close_dialog('jobschedule_schedule_job_add_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+    </div>
+	</form>
+</body>
+<script type="text/javascript">	
+    function computeExecuteTime(btn){
+	  var cronExpression=$.trim($('#cronExpression').val());
+	  var startDate=$.trim($('#startDate').val());
+	  var endDate=$.trim($('#endDate').val());
+	  if(cronExpression==''){
+	    alert('请输入cron表达式');
+		return false;
+	  }
+	  var datas={};
+	  datas['scheduleJob.cronExpression']=cronExpression;
+	  datas['scheduleJob.startDate']=startDate;
+	  datas['scheduleJob.endDate']=endDate;
+	  $.ajax({  
+        url: '$!{rc.contextPath}/jobschedule/schedule-job/computeExecuteTime?t='+new Date().getTime(),  
+        data: datas,  
+        dataType: "json",  
+        type: "POST",  
+        traditional: true,  
+        success: function (jsonArray) {  
+			 if(jsonArray==null||jsonArray.length==0){
+			   $('.left').html('请检查cron表达式、开始时间、结束时间是否输入正确。');
+			    $('.right').html('');
+			   return false;
+			  } 
+			 var times_left='';
+			 var times_right='';
+			 $.each(jsonArray,function(idx,json){
+			    if(idx>4){
+			  		times_right+='<li>'+json+'</li>'
+				}else{
+			  		times_left+='<li>'+json+'</li>'
+				}
+			 })
+			 $('.left').html(times_left)
+			 $('.right').html(times_right)
+        }  
+    }); 
+	   
+	}
+	
+	$(document).ready(function(){
+	 _iframe_layout = $('body').layout({
+          defaults: {
+            resizable: true,
+            closable: false,
+            spacing_open: 5
+          }
+        });	  
+	  if('$!{scheduleJob.id}'!=''){
+	    $('#computeBtn').click();
+	  }
+	  commonDate("startDate","endDate","yyyy-MM-dd HH:mm:ss","zh-CN");
+        $("#myform_id").validator({
+            fields:{
+            },
+            valid:function(form){
+                form_btn_submit($("#VD_bt"),form,function(res){
+                    validateCallback(res,"grid","jobschedule_schedule_job_add_dlg");
+                });
+            }
+        });	  
+	});
+</script>	

@@ -1,0 +1,297 @@
+#parse("ywgl/gis/gis_head.vm")
+
+
+</head>
+<body>
+<div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+        <form class="ui-form" id='queryForm'>
+            <input type="hidden" name="hpids" value="$!hpids">
+            <table width="100%">
+                <tr>
+                    <td>
+                        <table class="ui-search-table">
+                            <tr>
+                                <td class="ui-search-name first">设备编码：</td>
+                                <td class="ui-search-c">
+                                    <input name="deviceCode" value="" class="k-textbox" type="text">
+                                </td>
+                                <td class="ui-search-name">设备名称：</td>
+                                <td class="ui-search-c">
+                                    <input name="deviceName" value="" class="k-textbox" type="text">
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td width="150" valign="top" style="padding-top:4px;">
+                        <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询
+                        </button>
+                        <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+                    </td>
+                    <td></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div class="ui-layout-center">
+        <div id="grid"></div>
+    </div>
+</div>
+    #parse("index/_footer.vm")
+<script type="text/javascript">
+    var _iframe_layout, _left_layout, _inner_layout;
+    $(document).ready(function () {
+        _iframe_layout = $('body').layout({
+            defaults: {
+                resizable: false,
+                closable: false,
+                spacing_open: 5
+            }
+        });
+
+        _inner_layout = $("#subMain").layout({
+            defaults: {
+                resizable: false,
+                closable: false,
+                spacing_open: 0
+            },
+            center: {
+                onresize_end: function () {
+                    var grid = $("#grid").data("kendoGrid");
+                    grid.resize();
+                }
+            }
+        })
+    });
+</script>
+<script>
+    var itvRefresh = null;
+    var issuccess =false;
+    function gridSuccess(grid) {
+        var gridJson = grid.items;
+        if (gridJson != null && gridJson.length > 0) {
+            newTimer(gridJson);
+        } else {
+            if (itvRefresh != null) {
+                window.clearInterval(itvRefresh);//清空原先timer
+            }
+        }
+    }
+    $(document).ready(function () {
+        quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/hl/gis/doorsPage", [
+                    {
+                        headerTemplate: '<input type="checkbox" id="no_select_device_check_all"/>',
+                        width:50,
+                        template: '<div style="text-align:center;"><input type="checkbox" name="check" /></div>'
+                    },
+                    {
+                        field: "hpid",
+                        sortable: false,
+                        hidden: true
+                    },
+                    {
+                        field: "deviceCode",
+                        title: "设备编码",
+                        sortable: false,
+                        width: 200
+                    },
+                    {
+                        field: "deviceName",
+                        title: "设备名称",
+                        sortable: false
+                    },
+                    {
+                        field: "openCloseStatus",
+                        title: "当前状态",
+                        width: 100
+                    }
+                ],
+                {
+                    sortable: {
+                        mode: "multiple",
+                        allowUnsort: true
+                    },
+                    resizable: true
+
+                },
+
+                {
+                    serverSorting: true, change: gridSuccess
+                }, [
+                    {
+                        name: "开",
+                        icon: "fa fa-plus",
+                        onclick: function (obj, grid) {
+                            var row=  getCheckedData("#grid","input[name='check']");
+                            if (row.length > 0) {
+                                var k = 1;
+                                var bits = new Array();
+                                for (var j = 0; j < row.length; j++) {
+                                    bits.push(row[j].hpid + "_SET");
+                                }
+                                //开-关 门禁
+                                writeBlock(null, bits, k, "$!{rc.contextPath}");
+                                alert("打开完成")
+                            } else {
+                                alert("请选择一行")
+                            }
+                        }
+                    },
+                    {
+                        name: "关",
+                        icon: "fa fa-plus",
+                        onclick: function (obj, grid) {
+                            var row=  getCheckedData("#grid","input[name='check']");
+                            if (row.length > 0) {
+                                var k = 1;
+                                k = 0;
+                                var bits = new Array();
+                                for (var j = 0; j < row.length; j++) {
+                                    bits.push(row[j].hpid + "_SET");
+                                }
+                                //开-关 门禁
+                                writeBlock(null, bits, k, "$!{rc.contextPath}");
+                                alert("关闭完成")
+
+                            } else {
+                                alert("请选择一行")
+                            }
+                        }
+                    }
+                ]
+        );
+        checkALL("#no_select_device_check_all","#grid input[name='check']");
+    });
+    function checkALL(checkAllSelector,checkSelector){
+        $(checkAllSelector).change(function(){
+            var isChecked = this.checked;
+            $.each($(checkSelector),function(i,v){
+                v.checked = isChecked;
+            });
+        });
+    }
+    function getCheckedData(gridSelector,checkSelector){
+        var grid = $(gridSelector).data("kendoGrid");
+        var data = grid._data;
+        var rows = $(grid.tbody).find("tr");
+        var length = rows.length;
+        var resData = [];
+        for(var i=0;i<length;i++){
+            if($(rows[i]).has(checkSelector+":checked").length>0){
+                resData.push(data[i]);
+            }
+        }
+        return resData;
+    }
+    function btnClick(com, grid, datagrid) {
+        var rows = datagrid.getSelectedRows();
+        if (rows.length > 0) {
+            var k = 1;
+            switch (com) {
+                case "开":
+                    k = 1;
+                    break;
+                case "关":
+                    k = 0;
+                    break;
+                case "开一次":
+                    k = 1;
+                    break;
+                case "常开":
+                    k = 2;
+                    break;
+                case "取消常开":
+                    k = 3;
+                    break;
+                case "常闭":
+                    k = 4;
+                    break;
+                case "取消常闭":
+                    k = 5;
+                    break;
+                default:
+                    break;
+            }
+            var bits = new Array();
+            for (var j = 0; j < rows.length; j++) {
+                bits.push(rows[j].hpid + "_SET");
+            }
+            //开-关 门禁
+            writeBlock(null, bits, k, "$!{rc.contextPath}");
+        } else {
+            alert("请选择一行")
+        }
+    }
+    //轮询设备状态
+    function newTimer(gridJson) {
+        if (itvRefresh != null) {
+            window.clearInterval(itvRefresh);//new前清空原先timer
+        }
+        //重新轮询
+        refreshDeviceState(gridJson);
+        itvRefresh = window.setInterval(function () {
+            refreshDeviceState(gridJson);
+        },$!{refreshFindTime});
+    }
+
+
+    //-------轮询设备状态-------
+    var xmlhttp = createXmlhttp(completeXmlhttp);
+    function completeXmlhttp(data) {
+        var devices = data.lstResultDevice;
+        if (devices == null) {
+            return;
+        }
+        for (k in devices) {
+            var td =$("td[name='" + devices[k].hpid + "']");
+            if (td.length> 0) {
+                if (td.children("div").children("img").attr("openCloseStatus")!=devices[k].openCloseStatus){
+                    var img = getImg(devices[k].openCloseStatus);
+                        td.children("div").html(img);
+                }
+            }
+        }
+        issuccess =false;
+    }
+    function refreshDeviceState(gridJson) {
+        if(issuccess){
+            return;
+        }
+        issuccess =true;
+        if (gridJson == null || gridJson.length == 0) {
+            return;
+        }
+        var codes = new Array();
+        for (k in gridJson) {
+            codes.push(gridJson[k].hpid);
+        }
+        if (xmlhttp == null) {
+            alert("xmlhttp==null");
+        }
+        var url = "$!{rc.contextPath}/hl/gis/afterFindDevices?r=" + Math.random();
+        sendXmlhttp(xmlhttp, "POST", url, "codes=" + codes);
+
+
+    }
+
+    function writeBlock(hpids, bits, val, projectName) {
+        var dataIn = {"hpids": hpids, "bits": bits, "val": val};
+        $.ajax({
+            'url': projectName + "/hl/gis/writeBit?r=" + Math.random(),
+            'data': dataIn,
+            'traditional': true,
+            'dataType': 'json',
+            'type': 'get',
+            'error': function (data) {
+            },
+            'success': function (data) {
+            }
+        });
+    }
+
+
+    //--------------------------------
+</script>
+</body>
+</html>
+	

@@ -1,0 +1,53 @@
+#if($alterNew)
+<script type="text/javascript">
+	$(function(){
+		$.message("单位信息还未添加，请先添加！", $.message.TYPE_WARN, 4, true, true);
+	});
+</script>
+#end
+
+<div class="ui-layout-center">
+
+<form id="plat_org_company_edit_form" class="ui-form" method="post" action="$!{rc.contextPath}/platform/organization/company/edit">
+	<input type="hidden" name="company.id" value="$!{company.id}"/>
+	<fieldset>
+		<div class="ui-form-item">
+			<label class="ui-label"><span class="ui-form-required">*</span>单位编码：</label>
+			<input class="ui-input" type="text" name="company.code" value="$!{company.code}" data-rule="单位编码:required;" />
+		</div>
+		<div class="ui-form-item colspan2">
+			<label class="ui-label"><span class="ui-form-required">*</span>单位名称：</label>
+			<input class="ui-input ui-input-large" type="text" name="company.name" value="$!{company.name}" data-rule="单位名称:required;" />
+		</div>
+		<div class="ui-form-item ui-form-item-textarea colspan3">
+      		<label class="ui-label">备注:</label>
+      		<textarea class="ui-textarea ui-textarea-large" name="company.description">$!{company.description}</textarea>
+		</div>
+	</fieldset>
+</form>
+
+</div>
+<div class="ui-layout-north">
+	#bread_crumbs('PLAT_ORG_COMPANY')
+	#operate_buttons('',true)
+		<div><button class="btn" type="button" onclick="plat_org_company_save(this)"><i class="iconfont icon-save"></i>保存</button></div>
+		<div><button class="btn" type="button" onclick="loadUrl('$!{rc.contextPath}/platform/organization/company/show')"><i class="iconfont icon-mail-reply"></i>返回</button></div>
+	#end
+</div>
+<script type="text/javascript">
+	$(function(){
+		if(_inner_layout) _inner_layout.destroy();
+		_inner_layout = $("#centerMain").layout({
+			defaults : {
+				resizable : false,
+				closable : false,
+				spacing_open : 5
+			}
+		});
+	});
+	function plat_org_company_save(btn){
+		$.forms.submits("#plat_org_company_edit_form",function(){
+			loadUrl("$!{rc.contextPath}/platform/organization/company/show");
+		},btn);
+	}
+</script>

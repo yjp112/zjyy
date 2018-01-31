@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.spare.entities.Inventory">
+	<resultMap type="com.supconit.spare.entities.Inventory" id="InventoryResultMap">      
+        <result property="id" column="ID" />
+        <result property="inventoryCode" column="INVENTORY_CODE" />
+        <result property="bpmKey" column="BPM_KEY" />
+        <result property="processId" column="PROCESS_ID" />
+        <result property="warehouseId" column="WAREHOUSE_ID" />
+        <result property="inventoryTime" column="INVENTORY_TIME" />
+        <result property="inventoryPersonId" column="INVENTORY_PERSON_ID" />
+        <result property="inventoryPersonName" column="INVENTORY_PERSON_NAME" />
+        <result property="status" column="STATUS" />
+        <result property="remark" column="REMARK" />
+        <result property="createId" column="CREATE_ID" />
+        <result property="creator" column="CREATOR" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="updateId" column="UPDATE_ID" />
+        <result property="updator" column="UPDATOR" />
+        <result property="updateDate" column="UPDATE_DATE" />
+        
+        <result property="warehouseName" column="warehouseName" />
+        <result property="statusName" column="statusName" />
+        
+        <collection 
+        property="inventoryDetailList" javaType="com.supconit.spare.entities.InventoryDetail">
+        <result property="id" column="d_ID" />
+        <result property="inventoryId" column="d_INVENTORY_ID" />
+        <result property="spareId" column="d_SPARE_ID" />
+        <result property="accountQty" column="d_ACCOUNT_QTY" />
+        <result property="inventoryQty" column="d_INVENTORY_QTY" />
+        <result property="descripton" column="d_DESCRIPTON" />
+        <result property="spareCode" column="d_SPARE_CODE" />
+        <result property="spareName" column="d_SPARE_NAME" />
+        </collection>
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">INVENTORY</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	<sql id="select_pre" lang="velocity">
+	    select 
+	        ID,
+	        INVENTORY_CODE,
+	        BPM_KEY,
+	        PROCESS_ID,
+	        WAREHOUSE_ID,
+	        INVENTORY_TIME,
+	        INVENTORY_PERSON_ID,
+	        INVENTORY_PERSON_NAME,
+	        STATUS,
+	        REMARK,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE,
+	        UPDATE_ID,
+	        UPDATOR,
+	        UPDATE_DATE,
+	        (select t1.WAREHOUSE_NAME from WAREHOUSE t1 where t1.id=WAREHOUSE_ID) warehouseName		
+		FROM <include refid="TABLE_NAME"/> 
+	</sql>
+	
+	<sql id="count_pre" lang="velocity">SELECT COUNT(*) FROM <include refid="TABLE_NAME"/> </sql>
+	
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			#if($_p.id && $_p.id != '')
+				#set($_id = $_p.id)
+				AND ID LIKE @{_id}
+			#end
+			#if($_p.inventoryCode && $_p.inventoryCode != '')
+				#set($_inventoryCode = '%' + $_p.inventoryCode + '%')
+				AND INVENTORY_CODE LIKE @{_inventoryCode}
+			#end
+			#if($_p.bpmKey && $_p.bpmKey != '')
+				#set($_bpmKey = '%' + $_p.bpmKey + '%')
+				AND BPM_KEY LIKE @{_bpmKey}
+			#end
+			#if($_p.processId && $_p.processId != '')
+				#set($_processId = $_p.processId)
+				AND PROCESS_ID = @{_processId}
+			#end
+			#if($_p.warehouseId && $_p.warehouseId != '')
+				#set($_warehouseId = $_p.warehouseId)
+				AND WAREHOUSE_ID = @{_warehouseId}
+			#end
+			#if($_p.inventoryTime && $_p.inventoryTime != '')
+				#set($_inventoryTime = $_p.inventoryTime)
+				AND INVENTORY_TIME = @{_inventoryTime}
+			#end
+			#if($_p.startInventoryTime && $_p.startInventoryTime != '')
+				#set($_startInventoryTime = $_p.startInventoryTime)
+				AND INVENTORY_TIME >= @{_startInventoryTime}
+			#end
+			#if($_p.endInventoryTime && $_p.endInventoryTime != '')
+				#set($_endInventoryTime = $_p.endInventoryTime)
+				AND INVENTORY_TIME <= @{_endInventoryTime}
+			#end
+			
+			
+			#if($_p.inventoryPersonName && $_p.inventoryPersonName != '')
+				#set($_inventoryPersonName = '%' + $_p.inventoryPersonName + '%')
+				AND INVENTORY_PERSON_NAME LIKE @{_inventoryPersonName}
+			#end
+			#if($_p.inventoryPersonId && $_p.inventoryPersonId != '')
+				#set($_inventoryPersonId = $_p.inventoryPersonId)
+				AND INVENTORY_PERSON_ID = @{_inventoryPersonId}
+			#end
+		#end
+		]]>	
+    </sql>
+	
+    <!-- 插入记录-->
+    <sql id="insert_sql" lang="velocity">
+        INSERT INTO <include refid="TABLE_NAME"/>(
+        	#if($_databaseId == 'oracle') ID, #end
+		        INVENTORY_CODE,
+		        BPM_KEY,
+		        PROCESS_ID,
+		        WAREHOUSE_ID,
+		        INVENTORY_TIME,
+		        INVENTORY_PERSON_ID,
+		        INVENTORY_PERSON_NAME,
+		        STATUS,
+		        REMARK,
+		        CREATE_ID,
+		        CREATOR,
+		        CREATE_DATE,
+		        UPDATE_ID,
+		        UPDATOR,
+		        UPDATE_DATE
+	        ) VALUES (
+	        	#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end
+		        @{_parameter.inventoryCode,jdbcType=VARCHAR},
+		        @{_parameter.bpmKey,jdbcType=VARCHAR},
+		        @{_parameter.processId,jdbcType=NUMERIC},
+		        @{_parameter.warehouseId,jdbcType=NUMERIC},
+		        @{_parameter.inventoryTime,jdbcType=TIMESTAMP},
+		        @{_parameter.inventoryPersonId,jdbcType=NUMERIC},
+		        @{_parameter.inventoryPersonName,jdbcType=VARCHAR},
+		        @{_parameter.status,jdbcType=VARCHAR},
+		        @{_parameter.remark,jdbcType=VARCHAR},
+		        @{_parameter.createId,jdbcType=NUMERIC},
+		        @{_parameter.creator,jdbcType=VARCHAR},
+		        @{_parameter.createDate,jdbcType=TIMESTAMP},
+		        @{_parameter.updateId,jdbcType=NUMERIC},
+		        @{_parameter.updator,jdbcType=VARCHAR},
+		        @{_parameter.updateDate,jdbcType=TIMESTAMP}
+	        )
+    </sql>
+    
+    <insert id="insert" parameterType="com.supconit.spare.entities.Inventory" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="insert_sql" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.spare.entities.Inventory" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    
+	<!-- 更新记录-->
+	<update id="update"  parameterType="com.supconit.spare.entities.Inventory" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+			#mset()
+				<![CDATA[
+			        #if($_parameter.inventoryCode && $_parameter.inventoryCode !='')INVENTORY_CODE = @{_parameter.inventoryCode,jdbcType=VARCHAR},#end
+			        #if($_parameter.bpmKey && $_parameter.bpmKey !='')BPM_KEY = @{_parameter.bpmKey,jdbcType=VARCHAR},#end
+			        #if($_parameter.processId)PROCESS_ID = @{_parameter.processId,jdbcType=NUMERIC},#end
+			        #if($_parameter.warehouseId )WAREHOUSE_ID = @{_parameter.warehouseId,jdbcType=NUMERIC},#end
+			        #if($_parameter.inventoryTime )INVENTORY_TIME = @{_parameter.inventoryTime,jdbcType=TIMESTAMP},#end
+			        #if($_parameter.inventoryPersonId)INVENTORY_PERSON_ID = @{_parameter.inventoryPersonId,jdbcType=NUMERIC},#end
+			        #if($_parameter.inventoryPersonName)INVENTORY_PERSON_NAME = @{_parameter.inventoryPersonName,jdbcType=VARCHAR},#end
+			        #if($_parameter.status)STATUS = @{_parameter.status,jdbcType=NUMERIC},#end
+			        #if($_parameter.remark)REMARK = @{_parameter.remark,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateId)UPDATE_ID = @{_parameter.updateId,jdbcType=NUMERIC},#end
+			        #if($_parameter.updator)UPDATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateDate)UPDATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+			        #if($_parameter.createId)CREATE_ID = @{_parameter.createId,jdbcType=NUMERIC},#end
+			        #if($_parameter.updator)CREATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateDate)CREATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+			    
+			    ]]>
+			#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+		<update id="updateSelective"  parameterType="com.supconit.spare.entities.Inventory" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+			#mset()
+				<![CDATA[
+			        #if($_parameter.inventoryCode && $_parameter.inventoryCode !='')INVENTORY_CODE = @{_parameter.inventoryCode,jdbcType=VARCHAR},#end
+			        #if($_parameter.bpmKey && $_parameter.bpmKey !='')BPM_KEY = @{_parameter.bpmKey,jdbcType=VARCHAR},#end
+			        #if($_parameter.processId)PROCESS_ID = @{_parameter.processId,jdbcType=NUMERIC},#end
+			        #if($_parameter.warehouseId )WAREHOUSE_ID = @{_parameter.warehouseId,jdbcType=NUMERIC},#end
+			        #if($_parameter.inventoryTime )INVENTORY_TIME = @{_parameter.inventoryTime,jdbcType=TIMESTAMP},#end
+			        #if($_parameter.inventoryPersonId)INVENTORY_PERSON_ID = @{_parameter.inventoryPersonId,jdbcType=NUMERIC},#end
+			        #if($_parameter.inventoryPersonName)INVENTORY_PERSON_NAME = @{_parameter.inventoryPersonName,jdbcType=VARCHAR},#end
+			        #if($_parameter.status)STATUS = @{_parameter.status,jdbcType=NUMERIC},#end
+			        #if($_parameter.remark)REMARK = @{_parameter.remark,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateId)UPDATE_ID = @{_parameter.updateId,jdbcType=NUMERIC},#end
+			        #if($_parameter.updator)UPDATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateDate)UPDATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+			        #if($_parameter.createId)CREATE_ID = @{_parameter.createId,jdbcType=NUMERIC},#end
+			        #if($_parameter.updator)CREATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateDate)CREATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+			    
+			    ]]>
+			#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+	<!-- 按条件查询记录-->
+    <select id="findByConditions"  resultMap="InventoryResultMap" lang="velocity" databaseId="oracle">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+        #set($_p = $_parameter.condition)
+		select 
+	        t.ID,
+	        t.INVENTORY_CODE,
+	        t.BPM_KEY,
+	        t.PROCESS_ID,
+	        t.WAREHOUSE_ID,
+	        t.INVENTORY_TIME,
+	        t.INVENTORY_PERSON_ID,
+	        t.INVENTORY_PERSON_NAME,
+	        t.STATUS,
+	        t.REMARK,
+	        t.CREATE_ID,
+	        t.CREATOR,
+	        t.CREATE_DATE,
+	        t.UPDATE_ID,
+	        t.UPDATOR,
+	        t.UPDATE_DATE,
+	        (select t2.WAREHOUSE_NAME from WAREHOUSE t2 where t2.id=t.WAREHOUSE_ID) warehouseName,
+	        t1.ENUM_TEXT statusName
+		FROM  INVENTORY t 
+		left join ENUM_DETAIL t1 on t.STATUS=t1.ENUM_VALUE and t1.TYPE_ID= @{_p.statusDictType,jdbcType=NUMERIC}
+		<![CDATA[
+		#where()
+			
+			#if($_p.id && $_p.id != '')
+				#set($_id = $_p.id)
+				AND t.ID LIKE @{_id}
+			#end
+			#if($_p.inventoryCode && $_p.inventoryCode != '')
+				#set($_inventoryCode = '%' + $_p.inventoryCode + '%')
+				AND t.INVENTORY_CODE LIKE @{_inventoryCode}
+			#end
+			#if($_p.bpmKey && $_p.bpmKey != '')
+				#set($_bpmKey = '%' + $_p.bpmKey + '%')
+				AND t.BPM_KEY LIKE @{_bpmKey}
+			#end
+			#if($_p.processId && $_p.processId != '')
+				#set($_processId = $_p.processId)
+				AND t.PROCESS_ID = @{_processId}
+			#end
+			#if($_p.warehouseId && $_p.warehouseId != '')
+				#set($_warehouseId = $_p.warehouseId)
+				AND t.WAREHOUSE_ID = @{_warehouseId}
+			#end
+			#if($_p.inventoryTime && $_p.inventoryTime != '')
+				#set($_inventoryTime = $_p.inventoryTime)
+				AND t.INVENTORY_TIME = @{_inventoryTime}
+			#end
+			#if($_p.startInventoryTime && $_p.startInventoryTime != '')
+				#set($_startInventoryTime = $_p.startInventoryTime)
+				AND t.INVENTORY_TIME >= @{_startInventoryTime}
+			#end
+			#if($_p.endInventoryTime && $_p.endInventoryTime != '')
+				#set($_endInventoryTime = $_p.endInventoryTime)
+				AND t.INVENTORY_TIME <= @{_endInventoryTime}
+			#end
+			
+			
+			#if($_p.inventoryPersonName && $_p.inventoryPersonName != '')
+				#set($_inventoryPersonName = '%' + $_p.inventoryPersonName + '%')
+				AND t.INVENTORY_PERSON_NAME LIKE @{_inventoryPersonName}
+			#end
+			#if($_p.inventoryPersonId && $_p.inventoryPersonId != '')
+				#set($_inventoryPersonId = $_p.inventoryPersonId)
+				AND t.INVENTORY_PERSON_ID = @{_inventoryPersonId}
+			#end
+		#end
+		]]>	
+		#order($_parameter.condition,"t.ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.spare.entities.Inventory" resultMap="InventoryResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		 #set($_p = $_parameter.condition)
+		select 
+	        t.ID,
+	        t.INVENTORY_CODE,
+	        t.BPM_KEY,
+	        t.PROCESS_ID,
+	        t.WAREHOUSE_ID,
+	        t.INVENTORY_TIME,
+	        t.INVENTORY_PERSON_ID,
+	        t.INVENTORY_PERSON_NAME,
+	        t.STATUS,
+	        t.REMARK,
+	        t.CREATE_ID,
+	        t.CREATOR,
+	        t.CREATE_DATE,
+	        t.UPDATE_ID,
+	        t.UPDATOR,
+	        t.UPDATE_DATE,
+	        (select t2.WAREHOUSE_NAME from WAREHOUSE t2 where t2.id=t.WAREHOUSE_ID) warehouseName,
+	        t1.ENUM_TEXT statusName
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"t.ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM  INVENTORY t 
+		left join ENUM_DETAIL t1 on t.STATUS=t1.ENUM_VALUE and t1.TYPE_ID=  @{_p.statusDictType,jdbcType=NUMERIC}
+			<![CDATA[
+				#where()
+					#set($_p = $_parameter.condition)
+					#if($_p.id && $_p.id != '')
+						#set($_id = $_p.id)
+						AND t.ID LIKE @{_id}
+					#end
+					#if($_p.inventoryCode && $_p.inventoryCode != '')
+						#set($_inventoryCode = '%' + $_p.inventoryCode + '%')
+						AND t.INVENTORY_CODE LIKE @{_inventoryCode}
+					#end
+					#if($_p.bpmKey && $_p.bpmKey != '')
+						#set($_bpmKey = '%' + $_p.bpmKey + '%')
+						AND t.BPM_KEY LIKE @{_bpmKey}
+					#end
+					#if($_p.processId && $_p.processId != '')
+						#set($_processId = $_p.processId)
+						AND t.PROCESS_ID = @{_processId}
+					#end
+					#if($_p.warehouseId && $_p.warehouseId != '')
+						#set($_warehouseId = $_p.warehouseId)
+						AND t.WAREHOUSE_ID = @{_warehouseId}
+					#end
+					#if($_p.inventoryTime && $_p.inventoryTime != '')
+						#set($_inventoryTime = $_p.inventoryTime)
+						AND t.INVENTORY_TIME = @{_inventoryTime}
+					#end
+					#if($_p.startInventoryTime && $_p.startInventoryTime != '')
+						#set($_startInventoryTime = $_p.startInventoryTime)
+						AND t.INVENTORY_TIME >= @{_startInventoryTime}
+					#end
+					#if($_p.endInventoryTime && $_p.endInventoryTime != '')
+						#set($_endInventoryTime = $_p.endInventoryTime)
+						AND t.INVENTORY_TIME <= @{_endInventoryTime}
+					#end
+					
+					
+					#if($_p.inventoryPersonName && $_p.inventoryPersonName != '')
+						#set($_inventoryPersonName = '%' + $_p.inventoryPersonName + '%')
+						AND t.INVENTORY_PERSON_NAME LIKE @{_inventoryPersonName}
+					#end
+					#if($_p.inventoryPersonId && $_p.inventoryPersonId != '')
+						#set($_inventoryPersonId = $_p.inventoryPersonId)
+						AND t.INVENTORY_PERSON_ID = @{_inventoryPersonId}
+					#end
+				#end
+			]]>	
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countByConditions" resultType="long" lang="velocity">
+        <include refid="count_pre"/>
+        <include refid="condition_sql"/>
+    </select>
+    
+    <select id="getById" resultMap="InventoryResultMap" parameterType="long" lang="velocity">
+		<include refid="select_pre"/>
+		WHERE ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+	<select id="findById" resultMap="InventoryResultMap" parameterType="long" lang="velocity">
+		select
+	        a.ID,
+	        a.INVENTORY_CODE,
+	        a.BPM_KEY,
+	        a.PROCESS_ID,
+	        a.WAREHOUSE_ID,
+	        a.INVENTORY_TIME,
+	        a.INVENTORY_PERSON_ID,
+	        a.INVENTORY_PERSON_NAME,
+	        a.STATUS,
+	        a.REMARK,
+	        a.CREATE_ID,
+	        a.CREATOR,
+	        a.CREATE_DATE,
+	        a.UPDATE_ID,
+	        a.UPDATOR,
+	        a.UPDATE_DATE,
+	        b.ID d_ID,
+	        b.INVENTORY_ID d_INVENTORY_ID,
+	        b.SPARE_ID d_SPARE_ID,
+	        b.ACCOUNT_QTY d_ACCOUNT_QTY,
+	        b.INVENTORY_QTY d_INVENTORY_QTY,
+	        b.DESCRIPTON  d_DESCRIPTON,
+	        c.spare_Code  d_SPARE_CODE,
+	        c.spare_Name  d_SPARE_NAME     
+        from INVENTORY a 
+        left join INVENTORY_DETAIL b on a.ID = b.INVENTORY_ID LEFT JOIN SPARE c on c.id=b.SPARE_ID
+		WHERE a.ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+	<delete id="deleteById" parameterType="long" lang="velocity"> 
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</delete>
+	<delete id="deleteByIds">
+		DELETE FROM
+		<include refid="TABLE_NAME" />
+	    WHERE ID IN    
+	        <foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+				#{id,jdbcType=NUMERIC}
+			</foreach>
+	</delete>
+</mapper>

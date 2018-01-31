@@ -1,0 +1,144 @@
+        <div id="tab-container">
+			<ul>
+				<li id="li_visit">所有访客</li>
+			</ul>
+			 <div id="tab1">
+		     <div class="ui-layout-north">
+            	<form class="ui-form" id='realParamsAllVisitorTab'>
+                <table width="100%">
+                  <tr>
+                    <td>
+                     <table class="ui-search-table">
+                            <tr>
+								 <td class="ui-search-name first">接待人姓名：</td>
+            				  <td class="ui-search-c">
+            		                    <input  name="reversationName" class="k-textbox" type="text">
+            		          </td>
+							  <td class="ui-search-name first">访客姓名：</td>
+            				  <td class="ui-search-c">
+            		                    <input  name="visitorName" class="k-textbox" type="text">
+            		          </td>
+							  
+							    <td class="ui-search-name first">来访时间：</td>
+            				  
+            				   <td class="ui-search-c">
+            		                  	<input id="startTime" type="text" name="startTime"/>
+            							<span class="ui-form-text">至</span> 
+            							<input id="endTime" type="text" name="endTime"/>
+            		          </td>
+                            </tr>
+							<tr>
+							  <td class="ui-search-name first">访客证：</td>
+            				  <td class="ui-search-c">
+            		                    <input  name="visitorCardNo" class="k-textbox" type="text">
+            		          </td>
+							    <td class="ui-search-name first">访客状态：</td>
+            				  
+							  <td>
+								
+								<select id="visitStatus" name="visitStatus" class="k-textbox">
+								<option value=''>--请选择--</option>
+                                #foreach($enumDetail in $!visitorStatusList)
+                                <option value="$!enumDetail.enumValue" #if($!enumDetail.enumValue ==$!{reservationVisitor.visitStatus}) selected="selected" #end>$!enumDetail.enumText</option>
+                                #end
+					            </select>
+				              </td>
+                            </tr>
+                          </table>
+                    </td>
+                    <td width="150" valign="top" style="padding-top:4px;">
+					  <input id="deptNameAllId" type="hidden" name="deptNameId">
+                      <button type="submit" class="hc_btn k-primary" id="queryBtn_a"><i class="fa fa-search"></i>查询</button>
+                      <button type="reset" class="hc_btn" id="resetBtn_a" onclick="cancelLeftTreeSelected();"><i class="fa fa-refresh"></i>重置</button>
+                    </td>
+                  </tr>
+                </table>
+            	</form>
+                </div>
+				<div class="grid-wrap">
+					<div id="allVisitorTab" class="itemTag"></div>
+				</div> 			    	   	
+            </div>
+		</div>
+
+<script type="text/javascript"> 
+$(document).ready(function(){  	
+	var tabstrip = $("#tab-container").hcTabStrip({
+        animation: {
+           open: {
+               effects: "fadeIn"
+           }
+       }
+    }).data("kendoTabStrip");
+	tabsLayout(
+			tabstrip,
+			"#subMain",
+			"",
+			"",
+			function(){
+				get_grid("#allVisitorTab").resize();
+			}
+	);	
+ 	IntiSubType();
+ 	setTimeout(function(){
+		$("#li_visit").click();
+	},100);
+});	
+
+$('#li_visit').click(function(){
+		var tmp = $(".k-grid-toolbar .toolbar .grid_operates").find("ul:first");
+});
+
+$('#resetBtn_r').click(function(){
+    	$('#deptNameReceptorId').val('');
+		$('#deptNameLeaveId').val('');
+		$('#deptNameAllId').val('');
+		$('#queryBtn_r').click();
+	    $('#queryBtn_l').click();
+	    $('#queryBtn_a').click();
+});
+$('#resetBtn_l').click(function(){
+		$('#deptNameReceptorId').val('');
+		$('#deptNameLeaveId').val('');
+		$('#deptNameAllId').val('');
+		$('#queryBtn_r').click();
+	    $('#queryBtn_l').click();
+	    $('#queryBtn_a').click();
+});
+$('#resetBtn_a').click(function(){
+		$('#deptNameReceptorId').val('');
+		$('#deptNameLeaveId').val('');
+		$('#deptNameAllId').val('');
+		$('#queryBtn_r').click();
+	    $('#queryBtn_l').click();
+	    $('#queryBtn_a').click();
+});
+	
+function IntiSubType(){
+	//所有访客
+	quick_datagrid(
+    		"#allVisitorTab", 
+    		"#realParamsAllVisitorTab", 
+    		"$!{rc.contextPath}/visitor/reception/list", 
+    		[		            
+    			{field: "id",hidden: true,sortable:false,width:100}, 
+    			{field: "deptName",title: "接待人部门",sortable: false,width: 250,headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"}}, 
+    			{field: "reversationName",title: "接待人姓名",sortable: false,width: 100,headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"},template:"<a href=\"javascript:void(0)\" title=\"查看来访#: data.reversationName #的详细信息\" onclick=\"quick_dialog('leave_register_dlg','查看#: data.reversationName #的预约详细信息','$!{rc.contextPath}/visitor/reception/edit?type=3&view=true&id=#: data.id #',1100,600)\">#: data.reversationName #</a>"}, 
+    			{field: "visitors",title: "访客姓名",sortable: false,width: 100,headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"}}, 
+    			{field: "expectVisitors",title: "访客人数",sortable: false,width: 100,headerAttributes: {"class": "k-grid-equilong"},attributes: {"class": "k-grid-equilong"}}, 
+              	{field: "visitTime.split(' ')[0]",title: "预约来访时间",sortable: false,width: 100,headerAttributes: {"class": "k-grid-equilong"},attributes: {"class": "k-grid-equilong"}}, 
+              	{field: "visitReason",title: "来访事由",sortable: false,width: 100,headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"}},
+				{field: "visitStatus",title: "访客状态",sortable: false,width: 100,headerAttributes: {"class": "k-grid-equilong"},attributes: {"class": "k-grid-equilong"}}, 
+              	{field: "creator",title: "登记人",sortable: false,width: 100,headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"}}, 
+              	{field: "createDate",title: "登记时间",sortable: false,width: 150,headerAttributes: {"class": "k-grid-equilong"},attributes: {"class": "k-grid-equilong"}}
+            ], 
+      		{sortable: {mode: "multiple",allowUnsort: true},resizable:true}, 
+      		{serverSorting: true},
+			[
+      			#kendo_datagrid_btns("FKGL_YYCX")#end   
+          	]
+    );
+	commonDateWithout("startTime","endTime","yyyy-MM-dd","zh-CN");
+}
+
+</script>

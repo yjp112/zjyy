@@ -1,0 +1,161 @@
+ <script type="text/javascript" src="$!{nhgl_static_custom_url}/echarts_2/esl.js"> </script>
+ <script type="text/javascript" src="$!{nhgl_static_custom_url}/echarts_2/echartsUtil.js"></script>
+ ##最上方的固定列表
+ <div id="subButton" class="nh-ct" style="display:none">
+	<button type="button" onclick="reply()" class="btn btn-primary"><i class="iconfont icon-reply"></i>返&nbsp;回</button>
+ </div>
+<div class="nh-chart" id="mix$!{num}">
+</div>	
+	##下方的列别
+<div class="nh-grid">
+    <table class="nh-table" id="tabledata">
+        <thead>
+			<tr>
+                <th class="nh-table-num">日期</th>
+				<th class="nh-table-num">白天(t)</th>
+				<th class="nh-table-num">夜晚(t)</th>
+			</tr>
+		</thead>
+    </table>
+ </div>
+  <script type="text/javascript">
+	var option;
+     $(document).ready(function(){
+        var percentD = '$!nhDay.percentD';
+  		var percentN='$!nhDay.percentN';
+  		var dayTimeEleTotal='$!nhDay.DayDaytimeValue';
+  		var nightEleTotal='$!nhDay.DayNightValue';
+  		var sTime='$!start';
+  		$("#sTime1").text(sTime);
+  		$("#sTime2").text(sTime);
+		if(dayTimeEleTotal == 0)
+			$("#dayTimeTotal").text("0");
+		else
+			$("#dayTimeTotal").text(dayTimeEleTotal);
+		if(nightEleTotal==0)
+			$("#nightTotal").text("0");
+		else
+			$("#nightTotal").text(nightEleTotal);  		
+  		if(percentD >0){
+			$("#percentD").text('增长'+percentD+'%');
+		}
+		else if(percentD == 0){
+			$("#percentD").text('持平');
+		}
+		else{
+			$("#percentD").text('下降'+(-percentD)+'%');
+		}
+		if(percentD == 0){
+			$("#rudD").removeClass();
+			$("#rudD").addClass("count-item count-item-unchanged");
+		}
+		else if(percentD > 0){
+			$("#rudD").removeClass();
+			$("#rudD").addClass("count-item count-item-rise");
+		}
+		else {
+			$("#rudD").removeClass();
+			$("#rudD").addClass("count-item count-item-decline");
+		}
+		
+		fNumPage();
+		var allHeight = $("#chart_content_id").height();
+		var header = $(".nh-header").height();
+		var content = $(".nh-content").height();
+		if(content > allHeight-header-40)
+			$("#content").css("height",content);
+		else
+			$("#content").css("height",allHeight-header-40);
+		$(".ui-tab-panels").css("height",allHeight-header-40);
+		if(percentN >0){
+			$("#percentN").text('增长'+percentN+'%');
+		}
+		else if(percentN == 0){
+			$("#percentN").text('持平');
+		}
+		else{
+			$("#percentN").text('下降'+(-percentN)+'%');
+		}
+		if(percentN == 0){
+			$("#rudN").removeClass();
+			$("#rudN").addClass("count-item count-item-unchanged");
+		}
+		else if(percentN > 0){
+			$("#rudN").removeClass();
+			$("#rudN").addClass("count-item count-item-rise");
+		}
+		else {
+			$("#rudN").removeClass();
+			$("#rudN").addClass("count-item count-item-decline");
+		}
+     	//混合图总量
+		option = {
+            title : {
+                text: '$!{title}',
+                   x:'center'
+            },
+            tooltip : {
+                trigger: 'axis',
+				formatter:function(params,ticket)
+				{
+					var str="";
+					for(var i=0;i<params.length;i++){
+						str = str + params[i][0]+" : "+params[i][2];
+						if(params[i][0] == "同比涨幅")
+							str = str + " %"+"</br>";
+						else
+							str = str +" "+ gas+"</br>";
+					}
+					return str;
+				}
+            },
+            legend: {
+			   //orient : 'vertical',
+    	        x : 'right',
+    	        y : 'top',
+                data:['白天','晚上']
+            },
+            xAxis : [
+                {
+                    type : 'category',
+                    data : '$!new.day'.split(",")
+                }
+            ],
+            yAxis : [
+                {
+				    name :'用蒸汽量('+gas+')',
+                    type : 'value',
+                    splitArea : {show : true}
+                }
+            ],
+            series : [
+                {
+                    name:'白天',
+                    type:'bar',
+                    data:'$!new.dayData'.split(",")
+                },
+                {
+                    name:'晚上',
+                    type:'bar',
+                    data:'$!new.nightData'.split(",")
+                }
+            ]
+        };
+		initEcharts("mix$!{num}",option);
+		
+		var content="<tbody>";
+        var first = "";
+		var dayData = '$!new.dayData';
+		var nightData = '$!new.nightData';
+		
+		var day = '$!new.day';//获取的日期
+		for(var i=0;i<dayData.split(",").length;i++)
+		{
+			first = first+"<tr><td class=nh-table-num >"+day.split(",")[i]+"</td><td class=fInt style=\"text-align:center\">"+dayData.split(",")[i]+"</td><td class=fInt style=\"text-align:center\">"+nightData.split(",")[i]+"</td></tr>";
+		}
+		content = content+first+"</tbody>";
+		$("#tabledata").append(content);
+	})
+		$(".nh-grid").circular();
+  </script> 
+   

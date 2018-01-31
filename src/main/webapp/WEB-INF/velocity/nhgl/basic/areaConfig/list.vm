@@ -1,0 +1,180 @@
+<div class="ui-layout-center" id="subMain">
+	<div class="ui-layout-center">
+		<table id="config_datalist" class="fn-hide"></table>
+	</div>
+	<div class="ui-layout-north">
+		<div class="ui-module-name">
+			<label id="menuName">#crumbs("$!menu.code",1)</label>
+		</div>
+		<form method="post" id="downloadform" hidden=true action='$!{rc.contextPath}/nhgl/basic/areaConfig/exportAreaConfig'>
+		</form>
+		<form id="deptConfig_list_search" class="ui-form ui-form-search fn-clear">
+		    <input type="hidden" id="areaId"  value="" name="areaId"/>
+		    <input type="hidden"  value="" name="condition.nhType" value="$!nhType"/>
+			<div class="ui-form-search-left">
+				<div class="ui-form-item">
+					<label class="ui-label">区域编码：</label>
+					<input class="ui-input" type="text" name="areaCode">
+				</div>
+				<div class="ui-form-item">
+					<label class="ui-label">区域名称：</label>
+					<input class="ui-input" type="text" name="areaName">
+				</div>
+				<div class="ui-form-item">
+					<label class="ui-label">位号：</label>
+					<input class="ui-input" type="text" name="bitNo">
+				</div>
+				<div class="ui-form-item">
+    			  <label class="ui-label">设备编码：</label>
+    			 <input class="ui-input" type="text"  name="deviceCode">
+    			</div>
+    			<div class="ui-form-item">
+    			  <label class="ui-label">设备名称：</label>
+    	          <input class="ui-input" type="text"  name="deviceName">
+    			</div>
+			</div>
+			<div class="ui-form-search-right">
+				<button type="submit" id="subButton" class="btn btn-primary"><i class="iconfont icon-search"></i> 查&nbsp;询</button>
+			</div>
+		</form>
+	</div>
+</div>
+<div class="ui-layout-west">
+    <div id="configlist_box" class="ui-box">
+		<div class="ztree-header">
+			<div class="ztree-title">服务区域族</div>
+		</div>
+		<div class="ui-box-container">
+			<ul id="configlist_tree" class="ztree"></ul>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	$(document).ready(function(){
+		T.nhInit();
+	 	T.tabLayout = $("#chart_content_id").layout({
+        defaults : {
+            resizable : false,
+            closable : false,
+            spacing_open : 5
+        },
+        west : {
+            size : 250,
+            resizable : true,
+            resizerTip : "移动改变大小",
+            closable : true,
+            togglerTip_open : "隐藏",
+            togglerTip_closed : "打开"
+        },
+        onresize_end : function(){
+            $("#configlist_box").box("resize");
+        }
+    });
+    	_content_layouts.push(T.tabLayout);
+		_inner_layout=$("#subMain").layout({
+			defaults:{
+				resizabel:false,
+				closable: false,
+				spacing_open:5
+			},
+			onresize_end:function(){
+				$("#config_datalist").datagridResize({width:_inner_layout.state.center.innerWidth,height:_inner_layout.state.center.innerHeight});
+			}
+		});
+		$("#configlist_box").box({
+        	width : function(){return T.tabLayout.state.west.innerWidth;},
+        	height : function(){return T.tabLayout.state.west.innerHeight-26;}
+    	});
+		var subSystemInfo_datagrid=$("#config_datalist").datagrid({
+			url:'$!{rc.contextPath}/nhgl/basic/areaConfig/pager?nhType=$!nhType',
+			dataType: "json",
+			method: "post",
+			singleSelected : true,
+			striped : false,
+			height:  _inner_layout.center.state.innerHeight,
+			width :  _inner_layout.center.state.innerWidth,
+			showOrderNumber : true,
+			useRp : true,
+			usepager: true,
+    		rpOptions: [10, 20, 40, 50],
+    		pageSize: 20,
+    		searchFormId:"deptConfig_list_search",
+    		searchCallback:function(datagrid){},
+    		onSuccess:function(table,grid){
+    			if(!grid)return ;
+    		},
+    		colModel:[
+    			{"display":"序号"},
+    			{display: "区域编码", name: "areaCode",onclick:function(row,a){
+    				$("#chart_content_id").load("$!{rc.contextPath}/nhgl/basic/areaConfig/edit?nhType=$!nhType&viewOnly=true&id="+row.id+"&areaId="+row.areaId)
+    			}},
+    			{display: "区域名称",name:"areaName",width:"200"},
+    			{display: "下级生成",name:"isSumValue",width:"50",align:"center"},
+	            {display: "能耗配置描述", name: "description",width:"660"}
+	           
+    		],
+    		buttons : [
+	            {name: '新增', bclass: 'icon-plus', onpress : add},
+            	{name: '修改', bclass: 'icon-pencil', onpress : edit},
+            	{name: '删除', bclass: 'icon-remove', onpress : remove},
+            	{name: '导入', bclass: 'icon-upload', onpress : upload},
+            	{name: '验证', bclass: 'icon-check', onpress : check},
+            	{name: '导出', bclass: 'icon-download', onpress : download}
+	        ]
+		});
+    				
+		function download(com,grid,datagrid){
+			$("#downloadform").submit();
+    	};			
+		function add(com, grid,datagrid) {
+			$("#chart_content_id").load("$!{rc.contextPath}/nhgl/basic/areaConfig/edit?nhType=$!nhType");
+        };
+            
+        function edit(com, grid,datagrid) {
+ 			if(datagrid.getSelectedRows() == 0){ 
+ 				$.message("没有选择要修改的项目信息", $.message.TYPE_ERROR, 4, false, true); return false; 
+ 			}
+ 			
+ 			var id=datagrid.getSelectedRows()[0]["id"];
+ 			var areaId =datagrid.getSelectedRows()[0]["areaId"];
+ 			$("#chart_content_id").load("$!{rc.contextPath}/nhgl/basic/areaConfig/edit?nhType=$!nhType&id=" + id+"&areaId="+areaId);
+         };
+         function check(com, grid,datagrid) {
+ 			$.dialogs.normalDialog("areaConfig_check_dlg", 
+			"$!{rc.contextPath}/nhgl/basic/areaConfig/check?nhType=$!nhType",
+			 function(dlg,btn){ 
+			  return flase; 
+			  },750,320,"验证",null,false); 
+         };
+        function remove(com, grid,datagrid){ 
+         	if(datagrid.getSelectedRows() == 0){ 
+			$.message("没有选择要删除项目信息", $.message.TYPE_ERROR, 4, false, true); return false; }
+			 if(!confirm("确定要删除吗？"))return false; $.forms.linkRunning(com); 
+			 $.post("$!{rc.contextPath}/nhgl/basic/areaConfig/delete",
+			 {"areaId" : datagrid.getSelectedRows()[0]["areaId"],"nhType":$!nhType},function(res)
+			 { $.forms.linkEnabled(com); $.forms.handleMessage(res,function()
+			 {$("#config_datalist").flexReload();}); }); };
+			 
+		function upload(com, grid,datagrid) {
+			newDialog('handle','load:$!{rc.contextPath}/nhgl/basic/areaConfig/preImp', '导入区域能耗', false, 600,500)
+        }
+	});
+    var setting = {
+	data: {
+		simpleData: {enable: true}
+      },
+      callback: {
+			onClick: function(event, treeId, treeNode) {
+				 $('#areaId').val(treeNode.id);
+				 $('#subButton').click();
+			}
+		}
+    };
+	var zNodes = [];
+	#foreach($!{treeNode} in $!{treeList})
+		zNodes.push({id:"$!{treeNode.id}", pId:"$!{treeNode.parentId}", name:"$!{treeNode.areaName}",open:true});     
+	#end 
+	$(document).ready(function(){
+	        $.fn.zTree.init($("#configlist_tree"), setting,zNodes).expandAll(true);
+	});
+</script> 

@@ -1,0 +1,58 @@
+<ul id="plat_org_department_select_tree" class="ztree"></ul>
+<script type="text/javascript">
+	var plat_org_department_select_tree;
+	$(function(){
+		var setting = {
+			#if($muilt)
+			check:{enable: true,chkboxType : { "Y" : "", "N" : ""  }},	
+			#end
+			callback: {
+				onClick : function(event, treeId, treeNode) {
+				}
+				#if(!$muilt)
+				,onDblClick : function(event, treeId, treeNode) {
+					$.ajax({
+				  		 type: "POST",
+				  		 url: '$!{rc.contextPath}/platform/organization/personExpand/getboot',
+				   		 data: "departId="+treeNode.id,
+				   		 success: function(msg){
+				   			 if(msg!=''){
+				   				treeNode.name=msg;
+				   			 }
+				   			var func = $("#_select_department").data("_dbl_click_func");
+			    			if(func && $.isFunction(func)){
+			    				func(treeNode);
+			    			}
+				         }
+					});
+				}
+				#end
+			}
+		};
+		var nodes = $!{departmentJson};
+		nodes=nodes.children;
+		#if($selected)
+		var selected = $selected;
+	
+		var resNodes = function(node){
+			if(!node)return;
+			if($.inArray(node.id,selected) >= 0){
+				#if($muilt)
+				node.checked = true;
+				#end
+			}
+			if(node.children && node.children.length > 0){
+				for(var i = 0 ; i < node.children.length ; i++){
+					resNodes(node.children[i]);
+				}
+			}
+		};
+		resNodes(nodes);
+		#end
+		
+		plat_org_department_select_tree = $.fn.zTree.init($("#plat_org_department_select_tree"), setting, nodes);
+		plat_org_department_select_tree.expandAll(true);
+	});
+	
+	
+</script>

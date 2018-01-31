@@ -1,0 +1,197 @@
+#parse("index/_header.vm")
+<script src="$!{main_static_custom_url}/js/jquery.slideBox.js"></script>
+<link href="$!{main_static_custom_url}/css/jquery.slideBox.css" rel="stylesheet">
+</head>
+<body>
+<form id="myform_id" method="post" action="$!{rc.contextPath}/visitor/reception/leave" class="ui-layout-center ui-dialog-form dialog-form">
+    	<input type="hidden" name="id" value="$!{reservationVisitor.id}"/>
+       <table width="100%" style="margin-left:-10px;" class="ui-layout-center">
+        <tr>
+            <td width="13%" class="label"><label>接待人员：</label></td>
+            <td width="20%" > 
+			   <input readonly type="text" class="k-textbox" id="receptorName" name="receptorName" value="$!{receptor.name}" />		
+			</td>
+            <td width="13%" class="label"><label>接待部门：</label></td>
+            <td >
+				<input type="hidden" class="k-textbox" readonly id="deptNameId" value="$!{receptor.deptId}">
+				<input type="text" class="k-textbox" readonly id="deptName" value="$!{receptor.deptName}">
+			</td>
+			<td rowspan="6" colspan="2" align="center">
+			  <div id="results" class="slideBox">
+				  <ul id="items" class="items">
+				    #if($!listImage.size() > 0)
+				        #foreach($image in $!listImage)
+				          <li><img src="${imagePath}/${image.fileName}"></li>
+				        #end
+				    #end
+				  </ul>
+				</div>
+			</td>
+        </tr>
+        <tr>
+            <td class="label"><label>联系方式：</label></td>
+            <td ><input readonly type="text" id="receptorContactPhone" value="$!{receptor.personTelephone}" class="k-textbox"/></td>
+			<td class="label">来访时间：</td>
+			<td class="label"><input readonly type="text" id="visitTime" class="k-textbox"  name="visitTime" value="#date_format($!{reservationVisitor.visitTime},'yyyy-MM-dd')" /></td>
+
+	    </tr>
+	    <tr>	
+			<td class="label">来访客人：</td>
+			<td ><input readonly type="text" name="visitorName" class="k-textbox" value="$!{reservationVisitor.visitor.visitorName}"></td>
+            <td class="label">访客单位：</td>
+            <td><input  readonly type="text" name="visitorUnit" class="k-textbox" value="$!{reservationVisitor.visitor.visitorUnit}"/></td>
+        </tr>
+ 	        <tr>	
+				<td class="label">访客电话：</td>
+				<td><input readonly type="text" name="visitorPhone" class="k-textbox" value="$!{reservationVisitor.visitor.visitorPhone}"/></td>
+	            <td class="label">来访人数：</td>
+	            <td><input  readonly type="text" name="expectVisitors" class="k-textbox" value="$!{reservationVisitor.expectVisitors}"/></td>     
+	        </tr>
+			<tr>
+			<td class="label">车辆数：</td>
+				<td><input  readonly type="text" name="visitCars" value="$!{reservationVisitor.visitCars}" class="k-textbox" /></td>
+			<td class="label">车牌号：</td>
+				<td><input  readonly type="text" name="visitCarNos" value="$!{reservationVisitor.visitCarNos}" class="k-textbox" /></td>
+			
+				
+	       </tr>
+	       <tr> 
+	       <td class="label">来访天数：</td>
+	            <td><input readonly id="visitDays" type="text" name="visitDays" value="$!{reservationVisitor.visitDays}" class="k-textbox" onblur="addDays()"/></td>
+					
+				<td class="label">预计离开时间：</td>
+	            <td><input readonly type="text" name="expectLeaveTime" class="k-textbox"  value="#date_format($!{reservationVisitor.expectLeaveTime},'yyyy-MM-dd')" /></td>
+	           
+	        </tr>
+	        <tr>
+				<td  class="label"><label>来访事由：</label></td>
+		        <td >
+					<select disabled id="visitorReason_id" name="visitReason" class="k-textbox">
+			                     #foreach($enumDetail in $!visitorTypeList)
+			                         <option value="$!enumDetail.enumValue" #if($!enumDetail.enumValue ==$!{reservationVisitor.visitReason}) selected="selected" #end>$!enumDetail.enumText</option>
+			                     #end
+					</select>
+		        </td>
+			</tr>
+			<tr>
+	            <td class="label">备注：</td>
+	            <td colspan="3"><textarea readonly id="textAreaId" style="height:60px"class="k-textbox k-textarea"  name="remark">$!{reservationVisitor.remark}</textarea></td>
+			</tr>
+            <tr>
+             <td  class="label"><label>登记人：</label></td>
+	            <td>  
+					 <input type="hidden" name="createId" value="$!{reservationVisitor.createId}"/>
+	                 <input readonly type="text" class="k-textbox" name="creator" value="$!{reservationVisitor.creator}">
+	            </td>
+				<td  class="label"><label>登记时间：</label></td>
+	            <td ><input readonly type="text" class="k-textbox" name="createDate" value="#date_format($!{reservationVisitor.createDate})"></td>	
+			</tr>
+            
+			<tr>
+				<td class="label">实际来访时间：</td>
+	            <td class="inputText">
+					 <input readonly type="text" class="k-textbox" name="actualVisitTime" value="#date_format($!{reservationVisitor.actualVisitTime})">
+				</td>
+				<td  class="label">发证人：</td>
+				
+				<td class="inputText">
+						<span>
+						<input type="hidden" id="grantPersonID" name="grantPersonID" value="$!{grantPerson.id}" class="ui-input"/>
+						<input readonly type="text" id="grantPersonName" name="grantPersonName" value="$!{grantPerson.name}" class="k-textbox" />
+	
+	                </span>
+				</td>
+          	</tr>
+
+          	<tr>
+				<td class="label">实际离开时间：</td>
+	            <td class="inputText">
+					 <input readonly type="text" name="actualLeaveTime" class="k-textbox" id="actualLeaveTime" value="#date_format($!{reservationVisitor.actualLeaveTime})"/>
+				</td>
+				<td  class="label">收证人：</td>
+				
+				<td class="inputText">
+					 <span>
+					    #if(($!view))
+					    <input readonly type="text" class="k-textbox" id="revokePersonName" name="revokePersonName" value="$!{revokePerson.name}" />
+	                    #elseif(!($!view))
+						<input type="hidden" id="revokePersonID" name="revokePersonID" value="$!{revokePerson.id}" class="ui-input"/>
+						<input readonly type="text" id="revokePersonName" name="revokePersonName" value="$!{revokePerson.name}" class="k-textbox" />
+	                    #end
+					 </span>
+				</td>
+	          </tr>
+          <tr>
+            <td class="label">访客卡信息：</td>
+            <td colspan="3" rowspan="5">            
+    			<div class="ui-co-cont ui-co-nob">   
+					#parse("visitor/visitor/cardInfo.vm")
+    			</div>
+			</td>
+			
+		</tr>
+    </table>
+	
+<input type="hidden" name="number" value="$!reservationVisitor.visitorList.size()" id="number" />
+</form>
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+	var _iframe_layout, _inner_layout;
+	_iframe_layout = $('body').layout({
+	      defaults: {
+	          resizable: false,
+	          closable: false,
+	          spacing_open: 0
+	        }
+	});  
+	#if($!listImage.size() > 1)
+	$("#results").slideBox();
+	#end
+	function addDays(){
+	    var date = $("#visitTime").val();
+	    var days = $("#visitDays").val()-1;
+	    if( !isZzs(days))
+		{
+			$("#visitDays").val("");
+			$("#planLeaveDate").val("");
+			return;
+		}else if(date==""){
+			return;
+		}    
+        var nd = new Date(date.replace(/-/g,"/"));
+	    nd = nd.valueOf();
+		nd = nd + days*24*60*60*1000;
+		nd = new Date(nd);
+		var y = nd.getFullYear();
+		var m = nd.getMonth()+1;
+		var d = nd.getDate();
+		if(m<10) m = "0"+m;
+		if(d<10) d = "0"+d;
+	    var curDate = y+"-"+m+"-"+d;
+	    $("#planLeaveDate").val(curDate);
+	}
+	
+	##验证是否为数字、字母、下划线并长度不能大于50
+	function vaild_number()
+	{    
+		var visitorCardNo = $("input[name$='.visitorCardNo']");
+		$.each(visitorCardNo,function(i,item){
+			if("" == $(item).val() || !isLetters($(item).val())||$(item).val().length>50)
+			{
+				$(item).val("");
+			}
+		});
+	}
+		 
+		var date = $("#visitorTime").val();
+		var days = $("#visitDays").val();
+		if(date!=''&days!=''){
+		   addDays();
+		}	
+		commonSingleDateWithout("visitTime","yyyy-MM-dd","zh-CN");
+    });
+</script>
+</body>
+</html>

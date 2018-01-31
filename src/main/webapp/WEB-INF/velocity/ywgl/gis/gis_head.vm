@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=8">
+    <!------------kendo--------------->
+    <link href="${static_url}/framework/styles/kendo.common.min.css" rel="stylesheet">
+    <link href="${static_url}/framework/styles/kendo.default.min.css" rel="stylesheet">
+    <link href="${static_url}/css/layout-default-latest.css" rel="stylesheet">
+    <link href="${static_url}/skins/hctpl3/css/skin.css" rel="stylesheet" id="skin_css_file" />
+    <script src="${static_url}/js/jquery-1.11.1.js"></script>
+    <script src="${static_url}/js/jquery.layout-latest.js"></script>
+    <script src="${static_url}/framework/js/kendo.all.min.js"></script>
+    <script src="${static_url}/js/adapter.js"></script>
+    <script src="${static_url}/js/base64.js"></script>
+    <script src="${static_url}/js/site.js"></script>
+    <!------------左侧样式--------------->
+    <link rel="stylesheet" href="${projectName}/gis_server/giscss/gisleft.css"/>
+    <script type="text/javascript" src="${projectName}/gis_server/gisjs/gisInfo.js"></script>
+    <!------------中间样式--------------->
+    <link type="text/css" rel="stylesheet" media="screen" href="${projectName}/gis_server/giscss/gisInfo.css?t=1">
+    <!------------flash--------------->
+    <script type="text/javascript" src="${projectName}/gis_server/flash/js/swfobject_modified.js"></script>
+
+    <script type="text/javascript" src="${projectName}/gis_server/gisjs/clickAndCircle.js"></script>
+
+
+<script type="text/javascript">
+//gisconfig.js里的图层配置信息全局变量
+var gs_pzlayer,geometryLayer,clickLayer,bulids,device_img;
+#if($!type)
+    $.ajax({
+        "url":"../getConstants/${type}",
+        "type":"get",
+        "dataType":"json",
+        "async":false,
+        "error":function(data){
+        },
+        "success":function(data){
+            gs_pzlayer=data.layer;
+            geometryLayer=data.geometryLayer;
+            clickLayer=data.clickLayer;
+            bulids=data.bulids;
+            device_img=data.icons;
+        }
+    });
+#end
+    var strGisIp = "http://${gis_server_ip}:${gis_server_port}/";
+    var projectName = "$!{projectName}";
+	var proxyHost=projectName+"/sendToGisServer?url=";
+	var gis_workSpace='$!{gis_workSpace}';//gisConfig.js中使用
+	var gis_tomcat_webapp='$!{gis_tomcat_webapp}';//gisConfig.js中使用
+	var device_img_path = projectName+"/gis_server/imgDeviceState/";
+</script>
+    <!------------gis--------------->
+    <script type="text/javascript" src="${projectName}/gis_server/core/OpenLayers.js"></script>
+    <script type="text/javascript" src="${projectName}/gis_server/Supconmap.js"></script>
+</head>
+

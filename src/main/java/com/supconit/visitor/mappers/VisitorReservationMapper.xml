@@ -1,0 +1,468 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+        <!-- 本页面中的参数常量：0:代表未访;1:代表在访;2:代表已访，请知晓！ -->
+<mapper namespace="com.supconit.visitor.entities.VisitorReservation">
+	<resultMap type="com.supconit.visitor.entities.VisitorReservation" id="reservationVisitorResultMap">
+		<result property="id" column="ID"/>
+        <result property="receptorID" column="VISIT_PERSONID"/>
+        <result property="visitDays" column="VISIT_DAYS"/>
+        <result property="visitTime" column="VISIT_TIME"/>
+        <result property="visitReason" column="VISTI_REASON"/>
+        <result property="remark" column="REMARK"/>
+        <result property="visitStatus" column="VISIT_STATUS"/>
+        <result property="createId" column="CREATE_ID"/>
+        <result property="creator" column="CREATOR"/>
+        <result property="createDate" column="CREATE_DATE"/>
+        <result property="updateId" column="UPDATE_ID"/>
+        <result property="updator" column="UPDATOR"/>
+        <result property="updateDate" column="UPDATE_DATE"/>
+        <result property="grantPersonID" column="GRANT_PERSONID"/>
+        <result property="grantTime" column="GRANT_TIME"/>
+        <result property="revokePersonID" column="REVOKE_PERSONID"/>
+        <result property="revokeTime" column="REVOKE_TIME"/>
+        <result property="actualVisitTime" column="ACTUAL_REACH_TIME"/>
+        <result property="actualLeaveTime" column="ACTUAL_LEAVE_TIME"/>
+        <result property="expectLeaveTime" column="EXPECT_LEAVE_TIME"/>
+        <result property="expectVisitors" column="EXPECT_VISITOTS"/>
+        <result property="actualVisitors" column="ACTUAL_VISITOTS"/>
+        <result property="visitCars" column="VISIT_CARS"/>
+        <result property="visitCarNos" column="VISIT_CARNOS"/>
+		<result property="rw" column="RW"/>
+		<result property="isToday" column="IS_TODAY"/>
+		<result property="endVisit" column="END_VISIT"/>
+		<result property="startVisit" column="START_VISIT"/>
+		<result property="visitorTotal" column="VISITOR_TOTAL"/>
+		<result property="visitorId" column="VISITOR_ID"/>
+
+
+		<!--扩展 属性-->
+        <result property="reversationName" column="PNAME"/>
+        <result property="deptNameId" column="DID"/>
+        <result property="deptName" column="DNAME"/>
+        <result property="startTime" column="STARTTIME"/>
+        <result property="endTime" column="ENDTIME"/>
+        <result property="flag" column="FLAG"/>
+        <result property="visitors" column="VISITORS"/>
+         <collection property="visitorList" javaType="com.supconit.visitor.entities.Visitor">
+            <result property="id" column="d_ID"/>
+            <result property="reservationId" column="d_RESERVATION_ID"/>
+            <result property="visitorName" column="d_NAME"/>
+            <result property="visitorUnit" column="d_COMPANY"/>
+            <result property="visitorCardType" column="d_ZJLX"/>
+            <result property="visitorCardNum" column="d_ZJHM"/>
+            <result property="visitorPhone" column="d_PHONE_NO"/>
+            <result property="visitorCardNo" column="d_VISITOR_CARD_NO"/>
+            <result property="visitorReturnCard" column="d_RETURNED"/>
+            <result property="grantTime" column="d_GRANT_TIME"/>
+            <result property="returnTime" column="d_RETURN_TIME"/>	
+        </collection>
+        
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">RESERVATION</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	<sql id="select_pre" lang="velocity">
+       SELECT 
+       	   R.ID,
+	       R.VISIT_PERSONID    VISIT_PERSONID,
+	       hp.NAME             PNAME,
+	       R.VISIT_TIME        VISIT_TIME,
+	       R.VISTI_REASON      VISTI_REASON,
+	       R.VISIT_STATUS      VISIT_STATUS,
+	       R.CREATE_ID         CREATE_ID,
+	       R.CREATOR           CREATOR,
+	       R.CREATE_DATE       CREATE_DATE,
+	       R.UPDATE_ID         UPDATE_ID,
+	       R.UPDATOR           UPDATOR,
+	       R.UPDATE_DATE       UPDATE_DATE,
+	       R.GRANT_PERSONID    GRANT_PERSONID,
+	       R.GRANT_TIME        GRANT_TIME,
+	       R.REVOKE_PERSONID   REVOKE_PERSONID,
+	       R.REVOKE_TIME       REVOKE_TIME,
+	       R.ACTUAL_REACH_TIME ACTUAL_REACH_TIME,
+	       R.ACTUAL_LEAVE_TIME ACTUAL_LEAVE_TIME,
+	       R.EXPECT_LEAVE_TIME EXPECT_LEAVE_TIME,
+	       R.EXPECT_VISITOTS   EXPECT_VISITOTS,
+	       R.ACTUAL_VISITOTS   ACTUAL_VISITOTS,
+	       R.VISIT_DEPTID      VISIT_DEPTID,
+	       R.VISIT_CARS,
+	       R.VISIT_CARNOS,
+	       (select replace(wmsys.wm_concat(v.name), ',', '/') from visitor v where R.id=v.reservation_id)  VISITORS
+		FROM
+			<include refid="TABLE_NAME"/> R
+		LEFT JOIN HO_PERSON hp ON R.VISIT_PERSONID = hp.id
+	</sql>
+    
+    <sql id="count_pre" lang="velocity">
+		SELECT
+			COUNT(*)
+		FROM
+			<include refid="TABLE_NAME"/> R
+		LEFT JOIN HO_PERSON hp ON R.VISIT_PERSONID = hp.id
+	</sql>
+	
+	<select id="findToLeaveVisitorsIds" lang="velocity" resultType="long">
+		select
+	        R.ID		
+        FROM <include refid="TABLE_NAME"/> R
+
+        WHERE R.VISIT_STATUS = 1  and R.expect_leave_time >= to_date(sysdate)
+	</select>
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			#if($_p.flag && $_p.flag == true)
+				R.EXPECT_VISITOTS > R.ACTUAL_VISITOTS AND 
+			#end
+			#if($_p.receptorID && $_p.receptorID != '')
+				#set($_receptorID = $_p.receptorID)
+				(R.CREATE_ID = @{_receptorID,jdbcType=BIGINT} OR 
+			 	R.VISIT_PERSONID = @{_receptorID,jdbcType=BIGINT})AND
+			#end
+	        EXISTS (SELECT 1 FROM VISITOR V
+	        	#where()
+		        	#if($_p.reversationName && $_p.reversationName != '')
+					#set($_reversationName = '%' + $_p.reversationName + '%')
+						AND hp.NAME LIKE @{_reversationName} ESCAPE '/'
+					#end
+		        	#if($_p.visitorCardNo && $_p.visitorCardNo != '')
+					#set($_visitorCardNo = '%' + $_p.visitorCardNo + '%')
+						AND V.VISITOR_CARD_NO LIKE @{_visitorCardNo} ESCAPE '/'
+					#end
+		        	#if($_p.visitorName && $_p.visitorName != '')
+					#set($_visitorName = '%' + $_p.visitorName + '%')
+						AND V.NAME LIKE @{_visitorName} ESCAPE '/'
+					#end
+					#if($_p.startTime && $_p.startTime != '')
+					#set($_startTime = $_p.startTime)
+						AND R.VISIT_TIME >= @{_startTime,jdbcType=TIMESTAMP} 
+					#end
+					#if($_p.endTime && $_p.endTime != '')
+					#set($_endTime = $_p.endTime)
+						AND R.VISIT_TIME <= @{_endTime,jdbcType=TIMESTAMP} 
+					#end
+					#if($_p.visitTime && $_p.visitTime != '' && $_p.visitStatus !='1')
+					#set($_visitTime = $_p.visitTime)
+						AND R.VISIT_TIME = @{_visitTime,jdbcType=TIMESTAMP}
+					#end
+					#if($_p.visitTime && $_p.visitTime != '' && $_p.visitStatus =='1')
+					#set($_visitTime = $_p.visitTime)
+					    AND R.EXPECT_LEAVE_TIME >= @{_visitTime,jdbcType=TIMESTAMP}
+					#end
+					#if($_p.visitStatus && $_p.visitStatus != '')
+					#set($_visitStatus = '%' + $_p.visitStatus + '%')
+						AND R.VISIT_STATUS LIKE @{_visitStatus}
+					#end
+					#if($_p.deptNameId && $_p.deptChildIds && $_p.deptChildIds.size()>0)
+						#set($_deptChildIds =$_p.deptChildIds)
+						AND 
+						#repeat( $_deptChildIds $id "," " R.VISIT_DEPTID IN (" ")" )
+				    		@{id,jdbcType=BIGINT}
+						#end
+					#end
+	            AND V.RESERVATION_ID=R.ID
+	            #end 
+		        )
+		#end
+		]]>
+    </sql>
+	
+    <!-- 插入记录 -->
+    <sql id="insert_sql" lang="velocity">
+        INSERT INTO <include refid="TABLE_NAME"/>(
+        	#if($_databaseId == 'oracle') ID, #end 
+	        VISIT_PERSONID,       
+	        VISIT_TIME,
+	        VISIT_DAYS,
+	        VISTI_REASON,
+	        VISIT_STATUS,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE,
+	        GRANT_PERSONID,
+	        GRANT_TIME,
+	        REVOKE_PERSONID,
+	        REVOKE_TIME,
+	        ACTUAL_REACH_TIME,
+	        ACTUAL_LEAVE_TIME,
+	        EXPECT_LEAVE_TIME,
+	        REMARK,
+	        EXPECT_VISITOTS,
+	        ACTUAL_VISITOTS,
+	        VISIT_DEPTID,
+	        VISIT_CARS,
+	        VISIT_CARNOS
+			) VALUES (
+			#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end 
+			@{_parameter.receptorID,jdbcType=BIGINT},
+	        @{_parameter.visitTime,jdbcType=VARCHAR},
+	        @{_parameter.visitDays,jdbcType=BIGINT},
+	        @{_parameter.visitReason,jdbcType=BIGINT},
+	        @{_parameter.visitStatus,jdbcType=VARCHAR},
+	        @{_parameter.createId,jdbcType=BIGINT},
+	        @{_parameter.creator,jdbcType=VARCHAR},
+	        @{_parameter.createDate,jdbcType=TIMESTAMP},
+	        @{_parameter.grantPersonID,jdbcType=BIGINT},
+	        @{_parameter.grantTime,jdbcType=TIMESTAMP},
+	        @{_parameter.revokePersonID,jdbcType=BIGINT},
+	        @{_parameter.revokeTime,jdbcType=TIMESTAMP},
+	        @{_parameter.actualVisitTime,jdbcType=TIMESTAMP},
+	        @{_parameter.actualLeaveTime,jdbcType=TIMESTAMP},
+	        @{_parameter.expectLeaveTime,jdbcType=TIMESTAMP},
+	        @{_parameter.remark,jdbcType=VARCHAR},
+	        @{_parameter.expectVisitors,jdbcType=BIGINT},
+	        @{_parameter.actualVisitors,jdbcType=BIGINT},
+	        @{_parameter.deptNameId,jdbcType=BIGINT},
+	        @{_parameter.visitCars,jdbcType=BIGINT},
+	        @{_parameter.visitCarNos,jdbcType=VARCHAR}
+		)
+    </sql>
+
+	<!-- 手机端搜索访客流程 -->
+	<sql id="SEARCH_VISITOR_RESERVATION_SQL" lang="velocity">
+		<![CDATA[
+			#if($_parameter.visitorId && $_parameter.visitorId != 0)
+				AND R.ID <= @{_parameter.visitorId,jdbcType=NUMERIC}
+			#end
+			#if($_parameter.visitPersonId && $_parameter.visitPersonId != 0)
+				AND R.VISIT_PERSONID = @{_parameter.visitPersonId,jdbcType=NUMERIC}
+			#end
+			#if($_parameter.visitStatus && $_parameter.visitStatus != -1)
+				AND R.VISIT_STATUS = @{_parameter.visitStatus,jdbcType=NUMERIC}
+			#end
+			#if($_parameter.visitorSearch && $_parameter.visitorSearch!='')
+				AND V.NAME LIKE '%'||RTRIM(@{_parameter.visitorSearch,jdbcType=VARCHAR}) ||'%' ESCAPE '/'
+			#end
+			#if($_parameter.startDate && $_parameter.startDate!='')
+				AND TO_CHAR(R.VISIT_TIME,'YYYY-MM-DD') >= @{_parameter.startDate,jdbcType=VARCHAR}
+			#end
+			#if($_parameter.endDate && $_parameter.endDate!='')
+				AND TO_CHAR(R.VISIT_TIME,'YYYY-MM-DD') < @{_parameter.endDate,jdbcType=VARCHAR}
+			#end
+		]]>
+	</sql>
+    
+    <insert id="insert" parameterType="com.supconit.meeting.entities.RoomInfo" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="insert_sql" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.meeting.entities.RoomInfo" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    
+	<!-- 更新记录 -->
+	<update id="update" parameterType="com.supconit.visitor.entities.VisitorReservation" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+		#mset()
+			<![CDATA[
+			    #if($_parameter.receptorID)VISIT_PERSONID = @{_parameter.receptorID,jdbcType=BIGINT},#end
+			    #if($_parameter.visitTime)VISIT_TIME = @{_parameter.visitTime,jdbcType=VARCHAR},#end
+			    #if($_parameter.visitDays)VISIT_DAYS = @{_parameter.visitDays,jdbcType=BIGINT},#end
+			    #if($_parameter.visitReason)VISTI_REASON = @{_parameter.visitReason,jdbcType=BIGINT},#end
+			    #if($_parameter.remark)REMARK = @{_parameter.remark,jdbcType=VARCHAR},#end
+			    #if($_parameter.visitStatus)VISIT_STATUS = @{_parameter.visitStatus,jdbcType=VARCHAR},#end
+			    #if($_parameter.expectVisitors)EXPECT_VISITOTS=@{_parameter.expectVisitors,jdbcType=BIGINT},#end
+			    #if($_parameter.actualVisitTime)ACTUAL_REACH_TIME = @{_parameter.actualVisitTime,jdbcType=TIMESTAMP},#end
+			    #if($_parameter.grantTime)GRANT_TIME = @{_parameter.grantTime,jdbcType=TIMESTAMP},#end
+			    #if($_parameter.grantPersonID)GRANT_PERSONID = @{_parameter.grantPersonID,jdbcType=BIGINT},#end
+			    #if($_parameter.revokePersonID)REVOKE_PERSONID = @{_parameter.revokePersonID,jdbcType=BIGINT},#end
+			    #if($_parameter.actualLeaveTime)ACTUAL_LEAVE_TIME = @{_parameter.actualLeaveTime,jdbcType=TIMESTAMP},#end
+			    #if($_parameter.expectLeaveTime)EXPECT_LEAVE_TIME = @{_parameter.expectLeaveTime,jdbcType=TIMESTAMP},#end
+			    #if($_parameter.revokeTime)REVOKE_TIME = @{_parameter.revokeTime,jdbcType=TIMESTAMP},#end
+			    #if($_parameter.updateId)UPDATE_ID = @{_parameter.updateId,jdbcType=BIGINT},#end
+			    #if($_parameter.updateDate)UPDATE_DATE = @{_parameter.updateDate,jdbcType=TIMESTAMP},#end
+			    #if($_parameter.updator)UPDATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+			    #if($_parameter.actualVisitors)ACTUAL_VISITOTS = @{_parameter.actualVisitors,jdbcType=BIGINT},#end
+			    #if($_parameter.deptNameId)VISIT_DEPTID = @{_parameter.deptNameId,jdbcType=BIGINT},#end
+			    #if($_parameter.visitCars)VISIT_CARS = @{_parameter.visitCars,jdbcType=BIGINT},#end
+			    #if($_parameter.visitCarNos)VISIT_CARNOS = @{_parameter.visitCarNos,jdbcType=VARCHAR},#end
+			]]>
+		#end
+		WHERE ID = @{_parameter.id,jdbcType=BIGINT}
+	</update>
+	
+    <!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.visitor.entities.VisitorReservation" resultMap="reservationVisitorResultMap" lang="velocity" databaseId="oracle">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre"/>
+		<include refid="condition_sql"/>
+		#order($_parameter.condition,"R.CREATE_DATE DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.visitor.entities.VisitorReservation" resultMap="reservationVisitorResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT 
+       	   R.ID,
+	       R.VISIT_PERSONID    VISIT_PERSONID,
+	       hp.NAME             PNAME,
+	       R.VISIT_TIME        VISIT_TIME,
+	       R.VISTI_REASON      VISTI_REASON,
+	       R.VISIT_STATUS      VISIT_STATUS,
+	       R.CREATOR           CREATOR,
+	       R.CREATE_DATE       CREATE_DATE,
+	       R.UPDATE_ID         UPDATE_ID,
+	       R.UPDATOR           UPDATOR,
+	       R.UPDATE_DATE       UPDATE_DATE,
+	       R.GRANT_PERSONID    GRANT_PERSONID,
+	       R.GRANT_TIME        GRANT_TIME,
+	       R.REVOKE_PERSONID   REVOKE_PERSONID,
+	       R.REVOKE_TIME       REVOKE_TIME,
+	       R.ACTUAL_REACH_TIME ACTUAL_REACH_TIME,
+	       R.ACTUAL_LEAVE_TIME ACTUAL_LEAVE_TIME,
+	       R.EXPECT_LEAVE_TIME EXPECT_LEAVE_TIME,
+	       R.EXPECT_VISITOTS   EXPECT_VISITOTS,
+	       R.ACTUAL_VISITOTS   ACTUAL_VISITOTS,
+	       R.VISIT_DEPTID      VISIT_DEPTID,
+	       R.VISIT_CARS,
+	       R.VISIT_CARNOS,
+	       (select v.name+',' from visitor v where R.id=v.reservation_id for xml path(''))  VISITORS    
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"R.CREATE_DATE DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/> R
+		LEFT JOIN HO_PERSON hp ON R.VISIT_PERSONID = hp.id
+		<include refid="condition_sql"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+  	<select id="countByConditions" resultType="long" lang="velocity">
+        <include refid="count_pre"/>
+        <include refid="condition_sql"/>
+    </select>
+    
+     <select id="findById2" resultMap="reservationVisitorResultMap" parameterType="Long" lang="velocity">
+		select
+	        R.ID,
+			R.VISIT_PERSONID,
+			R.VISIT_TIME,
+			R.VISIT_DAYS,
+	        R.REMARK,
+			R.VISTI_REASON,
+			R.VISIT_STATUS,
+			R.CREATE_ID,
+			R.CREATOR,
+			R.CREATE_DATE,
+	        R.GRANT_PERSONID,
+	        R.GRANT_TIME,
+	        R.REVOKE_PERSONID,
+	        R.REVOKE_TIME,
+	        R.ACTUAL_REACH_TIME,
+	        R.ACTUAL_LEAVE_TIME,
+	        R.EXPECT_LEAVE_TIME,
+	        R.EXPECT_VISITOTS,
+		    R.ACTUAL_VISITOTS,
+		    R.VISIT_DEPTID,
+		    R.VISIT_CARS,
+	        R.VISIT_CARNOS,
+		    V.ID as d_ID,
+		    V.RESERVATION_ID as d_RESERVATION_ID,
+			V.NAME as d_NAME,
+			V.COMPANY as d_COMPANY,
+			V.ZJLX as d_ZJLX,
+			V.ZJHM as d_ZJHM,
+			V.PHONE_NO as d_PHONE_NO,
+			V.VISITOR_CARD_NO as d_VISITOR_CARD_NO,
+			V.RETURNED as d_RETURNED,
+			V.GRANT_TIME as d_GRANT_TIME,
+			V.RETURN_TIME as d_RETURN_TIME
+        FROM <include refid="TABLE_NAME"/> R
+        LEFT JOIN VISITOR V on R.ID = V.RESERVATION_ID
+        WHERE R.ID = @{_parameter.id,jdbcType=BIGINT}
+        and  ( V.returned !=1 or V.returned is null)
+        order by V.reservation_id asc,V.id asc
+	</select>
+    <select id="findById" resultMap="reservationVisitorResultMap" parameterType="Long" lang="velocity">
+		select
+	        R.ID,
+			R.VISIT_PERSONID,
+			R.VISIT_TIME,
+			R.VISIT_DAYS,
+	        R.REMARK,
+			R.VISTI_REASON,
+			R.VISIT_STATUS,
+			R.CREATE_ID,
+			R.CREATOR,
+			R.CREATE_DATE,
+	        R.GRANT_PERSONID,
+	        R.GRANT_TIME,
+	        R.REVOKE_PERSONID,
+	        R.REVOKE_TIME,
+	        R.ACTUAL_REACH_TIME,
+	        R.ACTUAL_LEAVE_TIME,
+	        R.EXPECT_LEAVE_TIME,
+	        R.EXPECT_VISITOTS,
+		    R.ACTUAL_VISITOTS,
+		    R.VISIT_DEPTID,
+		    R.VISIT_CARS,
+	        R.VISIT_CARNOS,
+		    V.ID as d_ID,
+		    V.RESERVATION_ID as d_RESERVATION_ID,
+			V.NAME as d_NAME,
+			V.COMPANY as d_COMPANY,
+			V.ZJLX as d_ZJLX,
+			V.ZJHM as d_ZJHM,
+			V.PHONE_NO as d_PHONE_NO,
+			V.VISITOR_CARD_NO as d_VISITOR_CARD_NO,
+			V.RETURNED as d_RETURNED,
+			V.GRANT_TIME as d_GRANT_TIME,
+			V.RETURN_TIME as d_RETURN_TIME
+        FROM <include refid="TABLE_NAME"/> R
+        LEFT JOIN VISITOR V on R.ID = V.RESERVATION_ID
+        WHERE R.ID = @{_parameter.id,jdbcType=BIGINT}
+	</select>
+	<delete id="deleteById" parameterType="Long" lang="velocity">
+		DELETE FROM <include refid="TABLE_NAME"/>
+		WHERE ID = @{_parameter.id,jdbcType=BIGINT}
+	</delete>
+
+	<!-- Mobile端查询访客信息LIST记录-->
+	<select id="selectVisitorReservations" parameterType="com.supconit.visitor.entities.VisitorReservation" resultMap="reservationVisitorResultMap" lang="velocity" databaseId="oracle">
+		SELECT TO_CHAR(B.VISIT_TIME, 'MM/dd') START_VISIT,
+		TO_CHAR(B.VISIT_TIME + B.VISIT_DAYS - 1, 'MM/dd') END_VISIT,
+		DECODE(B.VISIT_TIME,TRUNC(SYSDATE, 'DD'),1,0) IS_TODAY,
+		B.*
+		FROM (SELECT A.*, ROWNUM AS RW
+		FROM (SELECT R.*, V.NAME VISITORS
+		FROM RESERVATION R, VISITOR V
+		WHERE R.ID = V.RESERVATION_ID
+		AND V.NAME IS NOT NULL
+		<include refid="SEARCH_VISITOR_RESERVATION_SQL"/>
+		<![CDATA[
+            	#if($_parameter.visitStatus && $_parameter.visitStatus !=0)
+					ORDER BY R.VISIT_TIME
+				#else
+					ORDER BY R.VISIT_TIME DESC
+				#end
+        ]]>
+		) A
+		<![CDATA[
+			#where()
+            	#if($_parameter.endNum && $_parameter.endNum !=0)
+					AND ROWNUM < @{_parameter.endNum,jdbcType=NUMERIC}
+				#end
+			#end
+        ]]>) B
+		<![CDATA[
+			#where()
+            	#if($_parameter.startNum && $_parameter.startNum !=0)
+					AND B.RW >= @{_parameter.startNum,jdbcType=NUMERIC}
+				#end
+			#end
+        ]]>
+	</select>
+
+	<select id="countVisitorReservations" parameterType="com.supconit.visitor.entities.VisitorReservation" resultMap="reservationVisitorResultMap" lang="velocity">
+		SELECT COUNT(1) VISITOR_TOTAL,Max(R.ID) VISITOR_ID
+		FROM RESERVATION R, VISITOR V
+		WHERE R.ID = V.RESERVATION_ID
+		AND V.NAME IS NOT NULL
+		<include refid="SEARCH_VISITOR_RESERVATION_SQL"/>
+	</select>
+</mapper>

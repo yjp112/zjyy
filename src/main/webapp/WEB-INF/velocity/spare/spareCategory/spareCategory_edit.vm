@@ -1,0 +1,103 @@
+#parse("index/_header.vm")
+</head>
+<body style="padding-bottom:40px;height:200px;">
+	<form id="myform_id" method="post" action="$!{rc.contextPath}/spare/spareCategory/save"  class="ui-dialog-form">
+		<input type="hidden" name="id" value="$!{spareCategory.id}" id="spareCategoryId">
+    <div style="">
+	<table width="100%">
+        <tr>
+            <td width="20%" class="label">#if(!$!{viewOnly})<span class="ui-form-required">*</span>#end <label>类别编码：</label></td>
+            <td width="60%">
+				 #set($readonly='')
+    	         #if($!{viewOnly})
+    	         #set($readonly='readonly')
+    	         #end
+	            <input $!{readonly} class="k-textbox ui-disabled" type="text"  name="categoryCode" value="$!{spareCategory.categoryCode}"  />
+            </td>
+			<td width="10%"></td>
+        </tr>
+        <tr>
+            <td class="label">#if(!$!{viewOnly})<span class="ui-form-required">*</span>#end 类别名称：</td>
+            <td>
+				 <input id="categoryName_id" class="k-textbox"  $!{readonly} type="text"  name="categoryName" value="$!{spareCategory.categoryName}"  />
+			</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td class="label">#if(!$!{viewOnly})<span class="ui-form-required">*</span>#end 父类别：</td>
+            <td>
+				#if(!$!{viewOnly})
+					<span class="k-textbox  k-space-right" id="parentNames">
+				#end
+					 <input class="k-textbox" type="hidden"  name="parentId" id="parentId" value="$!{spareCategory.parentId}"  />
+                     <input readonly class="k-textbox" $!{readonly} id="parentName" type="text"  name="parentName"  value="$!{spareCategory.parentName}"  />
+				#if(!$!{viewOnly})
+					<a href="#" class="k-icon k-i-search">&nbsp;</a>
+                	</span>
+                #end
+			</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td class="label">备注：</td>
+            <td>
+				<textarea  id="textAreaId" class="k-textbox k-textarea"  $!{readonly} name="remark">$!{spareCategory.remark}</textarea>
+			</td>
+            <td></td>
+        </tr>
+    </table>
+	</div>
+    <div class="actions">
+		#if( $!{readonly} != 'readonly')
+        <button class="k-primary hc_btn" type="submit" id="save" ><i class="fa fa-save"></i>保 存</button>
+		<button class="hc_btn cancel" onclick="close_dialog('category_add_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+		#end
+        
+    </div>
+
+	</form>
+
+	<script type="text/javascript">
+
+	$(document).ready(function(){
+		//获取当前的类别名称，修改的时候在选父类的时候将自身过滤掉
+		var id = $("#spareCategoryId").val();
+		$("#parentNames").click(function() {
+		  if("$!viewOnly" != "true")
+            quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/spare/spareCategory/lookup?txtId=parentId&txtName=parentName&dialogName=category_add_dlg&id=" + id, 300, 300);
+        });
+
+        $("#myform_id").validator({
+            fields:{
+                categoryCode: "类别编码:required; length[~20];",
+                categoryName: "类别名称:required; length[~30];",
+				  parentName: "父类别:required;length[~50];",
+                      remark: "length[~200]"
+            },
+            valid:function(form){
+                form_btn_submit($("#save"),form,function(res){
+                    validateCallback(res,"grid","category_add_dlg");
+                });
+            }
+        });
+        
+#*
+        $('#myform_id').validator({
+          rules: {
+            areaCode: ['not_empty',{max_length: 20},'alpha_dash'],
+            areaName: ['not_empty',{max_length: 30}],
+            sort:['not_empty',{max_length: 5},'digit'],
+            remark: [{max_length: 200}]
+          },onSuccess: function(response, validator, $form) {
+                alert(1);
+            validateCallback(response);
+            return false;
+          }
+        });
+*#
+
+  });
+
+	</script>
+</body>
+</html>

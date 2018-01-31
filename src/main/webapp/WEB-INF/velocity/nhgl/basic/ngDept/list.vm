@@ -1,0 +1,129 @@
+<div class="ui-layout-center" id="subMain">
+	<div class="ui-layout-center">
+		<table id="plat_org_dept_datalist" class="fn-hide"></table>
+	</div>
+	<div class="ui-layout-north">
+		<div class="ui-module-name">部门管理</div>
+		<form id="plat_org_dept_search_form" class="ui-form ui-form-search fn-clear">
+			<input type="hidden" name="condition.pid" value="" />
+			<div class="ui-form-search-left">
+				<div class="ui-form-item">
+					<label class="ui-label">部门编码：</label>
+		    		<input class="ui-input" type="text" name="condition.code" value="$!{condition.code}" />
+		    	</div>
+		    	<div class="ui-form-item">
+					<label class="ui-label">部门名称：</label>
+		    		<input class="ui-input" type="text" name="condition.name" value="$!{condition.name}" />
+		    	</div>
+	    	</div>
+	    	<div class="ui-form-search-right">
+				<button type="submit" id="subBtn" class="btn btn-primary"><i class="iconfont icon-search"></i> 查&nbsp;询</button>
+			</div>
+		</form>
+	</div>
+</div>
+<div class="ui-layout-west">
+	<div id="plat_org_dept_box" class="ui-box">
+      <div class="ztree-header">
+			<div class="ztree-title">部门族</div>
+		</div> 
+      <div class="ui-box-container">
+          <ul id="plat_org_dept_tree" class="ztree"></ul>
+      </div>
+    </div>
+</div>
+<script type="text/javascript">
+	var plat_org_dept_datagrid, plat_org_dept_tree;
+	$(function(){
+		if(T.innerLayout&&!T.innerLayout.destroyed){
+			T.innerLayout.destroy();
+		}
+		T.innerLayout = $("#centerMain").layout({
+	        defaults : {
+	            resizable : false,
+	            closable : false,
+	            spacing_open : 5
+	        },
+	        west : {
+	            size : 250,
+	            resizable : true,
+	            resizerTip : "移动改变大小",
+	            closable : true,
+	            togglerTip_open : "隐藏",
+	            togglerTip_closed : "打开"
+	        },
+			onresize_end : function(){
+				$("#plat_org_dept_box").box("resize");
+			}
+		});
+		_content_layouts.push(T.innerLayout);
+		_inner_layout=$("#subMain").layout({
+			defaults:{
+				resizabel:false,
+				closable: false,
+				spacing_open:5
+			},
+			onresize_end : function(){
+				$("#plat_org_dept_datalist").datagridResize({width:_inner_layout.state.center.innerWidth,height:_inner_layout.state.center.innerHeight});
+			}
+		});
+		$("#plat_org_dept_box").box({
+			width : function(){return T.innerLayout.state.west.innerWidth;},
+        	height : function(){return T.innerLayout.state.west.innerHeight-26;}
+		});
+		## 菜单树
+		var setting = {			
+			callback: {
+				onClick : function(event, treeId, treeNode){
+					$("#plat_org_dept_search_form input[name='condition.pid']").val(treeNode.id);
+					//plat_org_dept_datagrid.flexReload()
+					$("#subBtn").click();
+				}
+			}
+		};
+		var nodes = $!{departmentTree};
+		$.fn.zTree.init($("#plat_org_dept_tree"), setting, nodes).expandAll(true);
+		
+		
+		## datagrid
+		plat_org_dept_datagrid = $("#plat_org_dept_datalist").datagrid({
+			url: '$!{rc.contextPath}/nhgl/basic/ngDept/list',
+			dataType: "json",
+			method: "POST",
+			singleSelected : true,
+			striped : false,
+			height:  _inner_layout.center.state.innerHeight,
+			width :  _inner_layout.center.state.innerWidth,
+			showOrderNumber : true,
+			useRp : true,
+			usepager: true,
+    		rpOptions: [10, 20, 40, 50],
+    		pageSize: 20,
+    		searchFormId : "plat_org_dept_search_form",
+    		searchCallback : function(datagrid){
+    		},
+			colModel : [
+				{"display":"序号"},
+				{"name":"id","hide":true},
+				{"display":"部门编码","name":"code",width:150,"sortable":true,"orderField":"CODE",onclick:function(row,a){
+					$.dialogs.normalDialog("plat_org_department_view_dlg", "$!{rc.contextPath}/nhgl/basic/ngDept/view?id=" + row.id, function(dlg,btn){
+						return false;
+					},680,220,"查看部门信息",null,false,"关闭");
+				}},
+				{"display":"部门名称","name":"name",width:150},
+				{"display":"上级部门","name":"parent.name",width:150},
+				{display: "部门人数", name: "persons",width:150,align:"right"},
+	            {display: "部门面积", name: "area",width:150,align:"right"},
+				{"display":"备注","name":"description",width:150}
+			],
+			buttons : [
+				#data_grid_buttons('PLAT_ORG_NHDEPARTMENT')#end
+			]
+		});
+		
+		/*$("#plat_org_dept_search_form input[name='condition.name']").suggests({
+			serviceUrl : "$!{rc.contextPath}/nhgl/basic/ngDept/auto",
+			returnKey : "name"
+		});*/
+	});
+</script>

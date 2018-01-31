@@ -1,0 +1,264 @@
+#parse("index/_header.vm")
+</head>
+<body>
+		<form id="exportForm" method="post" hidden=true action="$!{rc.contextPath}/hikvision/acsHisEvent/exportAccessCount">
+			<input type="hidden" name="startDate">
+			<input type="hidden" name="endDate">
+			<input type="hidden" name="cardNo">
+			<input type="hidden" name="personNo">
+			<input type="hidden" name="personName">
+			<input type="hidden" name="comeStatus">
+			<input type="hidden" name="offStatus">
+			<input type="hidden" name="deptId">
+		</form>
+	<div class="ui-layout-west" style="border-right:solid 1px #e1e5e6;" id="leftTreeWrap"> 
+		<div class="ui-layout-north">
+		<div class="k-header k-grid-toolbar" style="padding-left:10px;">部门</div>
+		</div>
+    	<div class="ui-layout-center">
+  			<ul id="treeDemo_choose" class="ztree"></ul>
+    	</div>
+	</div> 
+	
+	<div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+       <form class="ui-form" id='queryForm'>
+		<input class="k-textbox" type="hidden" name="deptId" value="$!{deptId}">
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+                <tr>		 
+					<td class="ui-search-name">卡号：</td>
+	                <td class="ui-search-c">
+	                     <input class="k-textbox" type="text" name="cardNo" value="$!{cardNo}" maxlength="30" >
+	                  </td>
+					<td class="ui-search-name">员工号：</td>
+	                <td class="ui-search-c">
+	                     <input class="k-textbox" type="text" name="personNo" value="$!{personNo}" maxlength="30">
+	                </td>
+	                <td class="ui-search-name">姓名：</td>
+	                  <td class="ui-search-c">
+	                     <input class="k-textbox" type="text" name="personName" value="$!{personName}" maxlength="30">
+	                </td>
+				</tr>
+				<tr>
+					<td class="ui-search-name ">刷卡时间：</td>
+                    <td class="ui-search-c" colspan="3">
+                		<input  value="$!{searchStart}"  id="startDate"  class="k-textbox"  name="startDate"  />
+                		至
+                		<input value="$!{searchEnd}" id="endDate"  class="k-textbox"  name="endDate" />
+    				</td>
+	                  <td class="ui-search-name first">上班状态：</td>
+	                  <td class="ui-search-c">
+		               <select name="comeStatus" class="k-textbox" >
+			               	<option value="">--请选择--</option>
+	   						#foreach($!{e} in $!{comeStatusList})
+	   						<option value="$!{e.enumValue}">$!{e.enumText}</option>
+	   						#end          
+						</select>
+	               </td>
+	               <td class="ui-search-name first">下班状态：</td>
+	                  <td class="ui-search-c">
+		               <select name="offStatus" class="k-textbox" >
+			               	<option value="">--请选择--</option>
+	   						#foreach($!{e} in $!{offStatusList})
+	   						<option value="$!{e.enumValue}">$!{e.enumText}</option>
+	   						#end          
+						</select>
+	               </td>
+                </tr>
+              </table>
+            </td>
+            
+                <td width="180" style="padding-top:4px;">
+		            <button type="submit"  class="hc_btn k-primary"  id="queryBtn" ><i class="fa fa-search"></i>查询</button>
+		            <button type="reset"  class="hc_btn"  id="resetBtn" ><i class="fa fa-refresh"></i>重置</button>
+	            </td>
+                </tr>
+              </table>
+            </td>
+            
+            <td></td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+#parse("index/_footer.vm") 
+
+<script type="text/javascript">
+  var _iframe_layout, _inner_layout, _left_layout;
+	$(document).ready(function(){
+	    _iframe_layout = $('body').layout({
+	      defaults: {
+	        resizable: false,
+	        closable: false,
+	        spacing_open: 5
+	      },
+	      west: {
+	        size: 0.18
+	      }
+	    });
+        _left_layout = $('#leftTreeWrap').layout({
+            defaults: {
+                resizable: false,
+                closable: false,
+                spacing_open: 0
+            },
+            north: {
+                size: 28
+            }
+        });
+	    _inner_layout = $("#subMain").layout({
+	      defaults: {
+	        resizable: false,
+	        closable: false,
+	        spacing_open: 0
+	      },
+	      center: {
+	          onresize_end: function () {
+	              var grid = $("#grid").data("kendoGrid");
+	              grid.resize();
+	          }
+	      }
+      });
+	
+	    
+    $('#resetBtn').click(function(){
+		clearDate("startDate", "endDate");
+    	$("input[name='deptId']").val("");
+    	$("input[name='comeStatus']").val("");
+    	$("input[name='offStatus']").val("");
+		$("#queryForm :text").val(""); 
+    });
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/hikvision/acsHisEvent/listTongji?r=" + new Date(), [{
+              field: "id",
+              hidden: true
+          }, {
+              field: "personName",
+              title: "姓名",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+    		  attributes: {"class": "k-grid-text"},
+			  template:"<a href=\"javascript:void(0)\" title=\"#: data.personName #\" onclick=\"tongjiLink(#:personId#,'#:eventDate#')\">#: data.personName #</a>",
+              width: 100
+          }, {
+              field: "eventDate+'('+eventDayOfWeek+')'",
+              title: "考勤日期",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+    		  attributes: {"class": "k-grid-equilong"},
+              width: 150
+          }, {
+              field: "cardNo",
+              title: "卡号",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+    		  attributes: {"class": "k-grid-equilong"},
+              width: 150
+          }, {
+              field: "personNo",
+              title: "员工号",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+    		  attributes: {"class": "k-grid-text"},
+              width: 100
+          },  {
+              field: "comeDateString",
+              title: "上班刷卡时间",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+    		  attributes: {"class": "k-grid-equilong"},
+              width: 150
+          }, {
+              field: "comeStatusString",
+              title: "上班状态",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+    		  attributes: {"class": "k-grid-equilong"},
+              width: 150
+          },  {
+              field: "offDateString",
+              title: "下班刷卡时间",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+    		  attributes: {"class": "k-grid-equilong"},
+              width: 150
+          }, {
+              field: "offStatusString",
+              title: "下班状态",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+    		  attributes: {"class": "k-grid-equilong"},
+              width: 150
+          }  ], 
+      {
+    	  resizable:true,
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          }
+      }, {
+          serverSorting: true
+      },[
+         #kendo_datagrid_btns("YGZZ_KQGL_KQTJ")#end
+      ]);
+		
+    });
+	commonDateWithout("startDate","endDate","yyyy-MM-dd","zh-CN");
+	
+	function tongjiLink(personId,eventDate){
+    	quick_dialog("list_dlg", "考勤记录["+eventDate+"]", "$!{rc.contextPath}/hikvision/acsHisEvent/tongjiLink?personId="+personId+"&eventDate="+eventDate, 650, 400);
+    }
+	
+	function outDataExcel(){
+		 var startDate =$("#queryForm input[name=startDate]").val();
+		 if(startDate==null||startDate==""){
+			 alert("请选择刷卡时间");
+			 return false;
+		 }
+		 $("#exportForm input[name='startDate']").val($("#queryForm input[name='startDate']").val());
+		 $("#exportForm input[name='endDate']").val($("#queryForm input[name='endDate']").val());
+		 $("#exportForm input[name='cardNo']").val($("#queryForm input[name='cardNo']").val());
+		 $("#exportForm input[name='personNo']").val($("#queryForm input[name='personNo']").val());
+		 $("#exportForm input[name='personName']").val($("#queryForm input[name='personName']").val());
+		 $("#exportForm input[name='comeStatus']").val($("#queryForm select[name='comeStatus']").val());
+		 $("#exportForm input[name='offStatus']").val($("#queryForm select[name='offStatus']").val());
+		 $("#exportForm input[name='depId']").val($("#queryForm input[name='depId']").val());
+		 $("#exportForm").submit();
+	}
+</script>
+<script type="text/javascript">     
+    /* zTree */ 
+    var selectId = "";
+	var selectName = "";
+      var setting = {
+    	data: {
+    		simpleData: {enable: true}
+          },
+          callback: {
+    			onClick: function(event, treeId, treeNode) {
+					$("input[name='deptId']").val(treeNode.id);
+	    			$('#queryBtn').click();
+    			}
+    		}
+    };
+	var zNodes = [];
+	zNodes.push({id:"10001", pId:"0", name:"中控信息", open:"true"});
+    #foreach($!{treeNode} in $!{treeList})
+        zNodes.push({id:$!{treeNode.id}, pId:$!{treeNode.pid}, name:"$!{treeNode.name}"});     
+    #end
+  	$(document).ready(function(){
+  		$.fn.zTree.init($("#treeDemo_choose"), setting,zNodes);
+  	});
+	function cancelLeftTreeSelected(){
+		$.fn.zTree.init($("#treeDemo_choose"), setting,zNodes);
+	}
+</script>
+</body>
+</html>

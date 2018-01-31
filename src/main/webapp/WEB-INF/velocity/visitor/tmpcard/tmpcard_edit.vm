@@ -1,0 +1,108 @@
+#parse("index/_header.vm")
+<script src="$!{main_static_custom_url}/js/webcam/webcam.js"></script>
+<script src="$!{main_static_custom_url}/js/jquery.slideBox.js"></script>
+<link href="$!{main_static_custom_url}/css/jquery.slideBox.css" rel="stylesheet">
+<style>
+    .ui-dialog-form{padding:0;bottom:0!improtant;margin-bottom:38px;}
+</style>
+<OBJECT ID="TestOCX"  width="0" height="0" CODEBASE="$!{rc.contextPath}/download/dc_card/hundureD8eActive.ocx" class="hundureD8eActive.ocx" CLASSID="CLSID:FBDA651F-2228-41D7-8C63-98BD44D85D91"></OBJECT>
+</head>
+<body>
+<div class="ui-layout-center dialog-form ui-dialog-form">
+    <form id="myform_id" method="post" action="$!{rc.contextPath}/visitor/tmpcard/come">
+        <input type="hidden" name="id" value=""/>
+        <div class="ui-layout-center" style="padding:10px 0;">
+            <table width="100%" style="margin-left:-8%;" >
+                <tr>
+                    <td class="label"><span class="ui-form-required">*</span><label>员工姓名：</label></td>
+                    <td colspan="2">
+                        <span class="k-textbox k-space-right" id="managePersonNames">
+                        <input type="hidden" id="personId" name="personId" value="" class="k-textbox"/>
+                        <input type="hidden" id="cardNo" name="cardNo" value="" class="k-textbox"/>
+                        <input readonly type="text" id="personName" name="personName" value="" class="k-textbox ui-input-choose"  style="width: 100%;"/>
+                        <a href="#" class="k-icon k-i-search">&nbsp;</a>
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label"><label>临时卡号：</label></td>
+                    <td colspan="2">
+                        <input type="text" class="k-textbox" readonly id="tmpCardNo" name="tmpCardNo" value="">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label"><label>发卡日期：</label></td>
+                    <td colspan="2">
+                        <input type="text" class="k-textbox" readonly id="createDate" name="createDate" value="$!{nows}">
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="ui-layout-south">
+            <div class="actions">
+                <button class="k-primary hc_btn" id="save_button_id" type="submit"><i class="fa fa-save"></i>保 存</button>
+                <button class="hc_btn cancel" onclick="close_dialog('tmpPersonAdd')" type="button"><i class="fa fa-close"></i>取 消</button>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<script type="text/javascript">
+
+
+    $("#managePersonNames").click(function () {
+        choosetmpPersons("selectDiloag", "personId", "personName","", "1000", "520");
+    });
+
+    $(document).ready(function(){
+//        	var obj =document.getElementById("TestOCX");
+//        	obj.D8eExit();
+//        	obj.LONGD8eInit();
+        $('body').layout({
+            defaults: {
+                resizable: true,
+                closable: false,
+                spacing_open: 0
+            },
+            north: {
+                size: 34
+            }
+        });
+        $('.ui-dialog-form').layout({
+            defaults: {
+                resizable: true,
+                closable: false,
+                spacing_open: 0
+            },
+            south: {
+                size: 38
+            },
+            east: {
+                size: 330
+            }
+        });
+        function readCardCode(){
+            var obj =document.getElementById("TestOCX");
+            var cardNo=obj.BSTRReadCard();
+			var no = $("#tmpCardNo").val();
+			if(no==""){
+			  $("#tmpCardNo").val(cardNo);
+			}
+        }
+         setInterval(readCardCode,3000);
+        $("#myform_id").validator({
+            fields:{
+                personName:"员工姓名:required;length[~20]",
+//                tmpCardNo:"临时卡号:required;length[~20]"
+            },
+            valid: function (form) {
+                form_btn_submit($("#save_button_id"), form, function (res) {
+                    validateCallback(res, "visitorTab", "tmpPersonAdd");
+                });
+            }
+        });
+    });
+</script>
+</body>
+</html>

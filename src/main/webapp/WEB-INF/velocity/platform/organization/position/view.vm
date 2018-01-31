@@ -1,0 +1,22 @@
+<form class="ui-form">
+	<fieldset>
+		<div class="ui-form-item ">
+			<label class="ui-label">岗位编码：</label>
+			<span class="ui-text" title="$!{position.code}">$!{position.code}</span>
+		</div>
+		<div class="ui-form-item ">
+			<label class="ui-label">岗位名称：</label>
+			<span class="ui-text" title="$!{position.name}">$!{position.name}</span>
+		</div>
+		
+		<div class="ui-form-item ">
+			<label class="ui-label">所属部门：</label>
+			<span class="ui-text" title="$!{position.department.name}">$!{position.department.name}</span>
+		</div>
+		
+		<div class="ui-form-item ui-form-item-textarea colspan2">
+      		<label class="ui-label">备注:</label>
+      		<textarea class="ui-textarea ui-readonly" readonly="readonly">$!{position.description}</textarea>
+		</div>
+	</fieldset>
+</form>

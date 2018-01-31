@@ -1,0 +1,333 @@
+#parse("index/_header.vm")
+</head>
+<body style="padding-bottom:40px;">
+<form id="myform_id" method="post" action="$!{rc.contextPath}/hl/gis/platform/flashConfig/save" class="ui-layout-center ui-dialog-form">
+	<input type="hidden" name="id" value="$!{flashConfig.id}">
+	<input type="hidden"  id="hidden_model" value="$!{flashConfig.model}"  />
+	<input type="hidden"  id="hidden_layoutDirection" value="$!{flashConfig.layoutDirection}"  />
+    <table width="100%">
+		<tr>
+            <td width="20%" class="label"><span class="ui-form-required">*</span><label>模式：</label></td>
+            <td width="30%">
+	            <select id="model_id" name="model" class="k-textbox" onchange="modelChange(this.value);">
+		            <option value=''>--请选择--</option>
+				    ${modelOptions}
+	            </select>
+            </td>
+            <td width="15%"></td>
+			<td width="30%"></td>
+			<td width="7%"></td>
+        </tr>
+		
+        <tr>
+            <td class="label"><span class="ui-form-required">*</span><label>系统编码：</label></td>
+            <td><input type="text" class="k-textbox" name="fullCode" value="$!{flashConfig.fullCode}"></td>
+
+            <td class="label"><span class="ui-form-required">*</span>系统名称：</td>
+            <td><input type="text" class="k-textbox" id="systemName"  name="systemName" value="$!{flashConfig.systemName}"></td>
+            <td width="10%"></td>
+        </tr>
+        <tr id="row0">
+			<td id="row00" class="label"><span class="ui-form-required">*</span><label>系统：</label></td>
+            <td id="row01">
+                <input class="k-textbox" type="hidden" name="g_system_rule_id" id="g_system_rule_id" value="$!{flashConfig.g_system_rule_id}"/>
+	            	<span id="parentName_choose" class="k-textbox k-space-right">
+                        <input readonly type="text" class="k-textbox" id="parentName" value="$!{flashConfig.g_system_rule_name}"/>
+                    <a href="#" class="k-icon k-i-search">&nbsp;</a>
+                </span>
+            </td>
+
+            <td id="row02" class="label"><span class="ui-form-required">*</span>flash名：</td>
+            <td id="row03"><input type="text" class="k-textbox" name="flashName" value="$!{flashConfig.flashName}"></td>
+			<td></td>
+        </tr>
+		
+        <tr id="row2">
+            <td class="label"><span class="ui-form-required">*</span>flash宽：</td>
+            <td><input type="text" class="k-textbox" name="flashW" value="$!{flashConfig.flashW}"></td>
+			
+            <td class="label"><span class="ui-form-required">*</span>flash高：</td>
+            <td><input type="text" class="k-textbox" name="flashH" value="$!{flashConfig.flashH}"></td>
+
+            <td></td>
+        </tr>
+		
+        <tr id="row3">
+	        <td class="label"><span class="ui-form-required">*</span>位置：</td>
+	        <td>
+				<select id="layoutDirection_id" name="layoutDirection" class="k-textbox">
+		            <option value=''>--请选择--</option>
+				    ${positionOptions}
+	            </select>
+			</td>
+	        <td></td>
+	    </tr>
+	    
+	    <tr>
+		    <td class="label">参数：</td>
+	        <td><input type="text" class="k-textbox" name="parameter" value="$!{flashConfig.parameter}"></td>
+	
+	        <td class="label">扩展1：</td>
+	        <td><input type="text" class="k-textbox" name="extend1" value="$!{flashConfig.extend1}"></td>
+		    <td></td>
+		</tr>
+		
+		<tr>
+			<td class="label">扩展2：</td>
+	        <td><input type="text" class="k-textbox" name="extend2" value="$!{flashConfig.extend2}"></td>
+	
+	        <td class="label">扩展3：</td>
+	        <td><input type="text" class="k-textbox" name="extend3" value="$!{flashConfig.extend3}"></td>
+			<td></td>
+		</tr>
+		<tr>
+			<td class="label">备注：</td>
+	        <td colspan="3"><textarea class="k-textbox" style="height:80px" name="remark">$!{flashConfig.remark}</textarea></td>
+			<td></td>
+		</tr>
+		
+    </table>
+    <div class="actions">
+        <button class="k-primary hc_btn" id="save_button_id" type="submit"><i class="fa fa-save"></i>保 存</button>
+        <button class="hc_btn cancel" onclick="close_dialog('flashConfig_add_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+    </div>
+
+</form>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+	      defaults: {
+	        resizable: true,
+	        closable: false,
+	        spacing_open: 5
+	      }
+	    });
+		
+		if($("#hidden_model").val()!=""){
+				$("#model_id").val($("#hidden_model").val());
+		}
+		if($("#hidden_layoutDirection").val()!=""){
+				$("#layoutDirection_id").val($("#hidden_layoutDirection").val());
+		}
+	});
+
+	$("#parentName_choose").click(function () {
+            quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/hl/gis/platform/systemRule/lookup?txtId=g_system_rule_id&txtName=parentName&dialogId=flashConfig_add_dlg&type=4", 300, 300);
+    });
+    $(document).ready(function () {
+		var val =$("select[name='model']").val();
+		modelChange(val);
+		$("#layoutDirection_id").val("$!{flashConfig.layoutDirection}");
+		
+		$("#myform_id").validator({
+            fields: {
+            		fullCode: "系统编码:required; length[~30]",
+            		systemName: "系统名称:required; length[~30]",
+    				parentName: "系统: length[~30]",
+            		flashName: "flash名:required;length[~30]",
+            		flashH: "flash高: length[~30]",
+            		flashW: "flash宽: length[~30]",
+            		model: "模式:required; length[~30]",
+            		layoutDirection: "位置: length[~30]",
+            		parameter: "参数: length[~100]",
+            		extend1: "扩展1: length[~100]",
+            		extend2: "扩展2: length[~100]",
+            		extend3: "扩展3: length[~100]",
+            		remark: "备注: length[~500]"
+                },
+                valid: function (form) {
+                    form_btn_submit($("#save_button_id"), form, function (res) {
+                        validateCallback(res, "grid", "flashConfig_add_dlg");
+                    });
+                },
+                beforeSubmit:function(form){
+            		return before_save_button_id();
+           		}
+       });
+    });
+	
+	function modelChange(val){
+		if(val==''){
+			$("#row0").hide();
+			$("#row2").hide();
+			$("#row3").hide();
+			
+		}else if(val=='GIS_WINDOW'){
+			$("#row0").show();
+			$("#row00").show();
+			$("#row01").show();
+			$("#row02").show();
+			$("#row03").show();
+			$("#row2").show();
+			$("#row3").hide();
+			
+		}else if(val=='GIS_POP'){
+			$("#row0").show();
+			$("#row00").show();
+			$("#row01").show();
+			$("#row02").show();
+			$("#row03").show();
+			$("#row2").show();
+			$("#row3").hide();
+		}else if(val=='LAYOUT'){
+			$("#row0").show();
+			$("#row00").hide();
+		    $("#row01").hide();
+			$("#row2").show();
+			$("#row02").show();
+			$("#row03").show();
+			$("#row3").show();
+		}else if(val=='FLASH'){
+			$("#row0").show();
+			$("#row00").hide();
+			$("#row01").hide();
+			$("#row02").show();
+			$("#row03").show();
+			$("#row2").hide();
+			$("#row3").hide();
+		}
+	}
+	
+	function before_save_button_id(){
+		var model = $("select[name='model']").val();
+		var fullCode = $("input[name='fullCode']").val();
+		var systemName = $("input[name='systemName']").val();
+		var flag = false;
+		if(model ==""){
+			$("select[name='model']").blur();
+			flag=true;
+		}
+		if(fullCode ==""){
+			$("input[name='fullCode']").blur();
+			flag=true;
+		}
+		if(systemName ==""){
+			$("input[name='systemName']").blur();
+			flag=true;
+		}
+		if(flag==true){
+			return false;
+		}
+		var val =$("select[name='model']").val();
+		var g_system_rule_id = $("input[name='g_system_rule_id']").val();
+		var flashName = $("input[name='flashName']").val();
+		var flashH = $("input[name='flashH']").val();
+		var flashW = $("input[name='flashW']").val();
+		var layoutDirection = $("select[name='layoutDirection']").val();
+		var res = true;
+		if(val=='GIS_WINDOW'){
+			$("select[name='layoutDirection']").val("");
+			if(g_system_rule_id==""){
+				notify("系统不能为空，请重新输入!", "error");
+				return false;
+			}
+			res = valids("flashName",flashName);
+			if(!res){
+				return false;
+			}
+			res = valids("flashH",flashH);
+			if(!res){
+				return false;
+			}
+			res = valids("flashW",flashW);
+			if(!res){
+				return false;
+			}
+		}else if(val=='GIS_POP'){
+			$("select[name='layoutDirection']").val("");
+			if(g_system_rule_id==""){
+				notify("系统不能为空，请重新输入!", "error");
+				return false;
+			}
+			res = valids("flashName",flashName);
+			if(!res){
+				return false;
+			}
+			res = valids("flashH",flashH);
+			if(!res){
+				return false;
+			}
+			res = valids("flashW",flashW);
+			if(!res){
+				return false;
+			}
+		}else if(val=='FLASH'){
+			$("input[name='g_system_rule_id']").val("");
+			//$("input[name='flashName']").val("");
+			$("input[name='flashH']").val("");
+			$("input[name='flashW']").val("");
+			if(!res){
+				return false;
+			}
+			res = valids("flashName",flashName);
+			if(!res){
+				return false;
+			}
+		}else if(val=='LAYOUT'){
+			$("input[name='g_system_rule_id']").val("");
+			//$("input[name='flashH']").val("");
+			//$("input[name='flashW']").val("");
+			//$("select[name='layoutDirection']").val("");
+			res = valids("flashName",flashName);
+			res = res && valids("flashH",flashH);
+			res = res && valids("flashW",flashW);
+			res = res && valids("layoutDirection",layoutDirection);
+			if(!res){
+				return false;
+			}
+		}else{
+			return false;
+		}
+		//$("#save_button_id").attr("type","submit");
+	}
+	function valids(type,value){
+	    //val value = $.trim(value);
+		var reg = /^[0-9]*[1-9][0-9]*$/;
+		if(type=="flashName"){
+			if(value==""){
+				notify("flash名不能为空，请重新输入!", "error");
+				return false;
+			}else{
+				return true;
+			}
+		}else if(type=="flashH"){
+			if(value==""){
+				notify("flash高不能为空，请重新输入!", "error");
+				return false;
+			}else if("" != value && !reg.test(value)){
+				notify("flash高名必须为正整数，请重新输入!", "error");
+				//$("#save_button_id").attr("type","button");
+				return false;
+			}else{
+				return true;
+			}
+		}else if(type=="flashW"){
+			if(value==""){
+				notify("flash宽不能为空，请重新输入!", "error");
+				return false;
+			}else if("" != value && !reg.test(value)){
+				notify("flash宽必须为正整数，请重新输入!", "error");
+			    //$("#save_button_id").attr("type","button");
+				return false;
+			}else{
+				return true;
+			}
+		}else if(type="layoutDirection"){
+			if(value==""){
+				notify("位置不能为空，请重新输入!", "error");
+				return false;
+			}else{
+				return true;
+			}
+		}else{
+			return true;
+		}
+	}
+
+        #if($!viewOnly)
+        	setAllReadonly();
+        #end
+</script>
+</body>
+</html>

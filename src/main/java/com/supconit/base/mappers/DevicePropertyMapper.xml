@@ -1,0 +1,329 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.base.entities.DeviceProperty">
+
+	<resultMap type="com.supconit.base.entities.DeviceProperty" id="DevicePropertyResultMap">      
+        <result property="id" column="ID" />
+        <result property="propertyCode" column="PROPERTY_CODE" />
+        <result property="propertyName" column="PROPERTY_NAME" />
+        <result property="inputType" column="INPUT_TYPE" />
+        <result property="enumValues" column="ENUM_VALUES" />
+        <result property="status" column="STATUS" />
+        <result property="remark" column="REMARK" />
+        <result property="createId" column="CREATE_ID" />
+        <result property="creator" column="CREATOR" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="updateId" column="UPDATE_ID" />
+        <result property="updator" column="UPDATOR" />
+        <result property="updateDate" column="UPDATE_DATE" />
+        
+        <result property="statusName" column="STATUS_NAME"/>
+        <result property="inputTypeName" column="INPUT_TYPE_NAME"/>
+        <result property="propertyValue" column="PROPERTY_VALUE"/>
+	</resultMap>
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+    <!-- 获取记录列表-->
+	<sql id="select_pre" lang="velocity">
+    select 
+        A.ID,
+        A.PROPERTY_CODE,
+        A.PROPERTY_NAME,
+        A.INPUT_TYPE,
+        A.ENUM_VALUES,
+        A.STATUS,
+        A.REMARK,
+        A.CREATE_ID,
+        A.CREATOR,
+        A.CREATE_DATE,
+        A.UPDATE_ID,
+        A.UPDATOR,
+        A.UPDATE_DATE,
+        E1.ENUM_TEXT AS INPUT_TYPE_NAME,
+        E2.ENUM_TEXT AS STATUS_NAME
+		FROM
+		DEVICE_PROPERTY A
+		LEFT JOIN ENUM_DETAIL E1
+        ON A.INPUT_TYPE = E1.ENUM_VALUE 
+        AND E1.TYPE_ID = 3 
+        LEFT JOIN ENUM_DETAIL E2
+        ON A.STATUS = E2.ENUM_VALUE 
+        AND E2.TYPE_ID = 2
+	</sql>
+	<sql id="count_pre" lang="velocity">
+		SELECT
+		COUNT(*)
+		FROM
+		DEVICE_PROPERTY A
+	</sql>
+	<sql id="TABLE_NAME" lang="velocity">DEVICE_PROPERTY</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>	
+	<insert id="insert" parameterType="com.supconit.base.entities.DeviceProperty" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="INSERT_SQL"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    <insert id="insert" parameterType="com.supconit.base.entities.DeviceProperty" 
+		keyProperty="id" keyColumn="ID" 		lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>        
+		<include refid="INSERT_SQL" />
+	</insert>    
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>
+		(#if($_databaseId=='oracle') ID,#end    
+	        PROPERTY_CODE,
+	        PROPERTY_NAME,
+	        INPUT_TYPE,
+	        ENUM_VALUES,
+	        STATUS,
+	        REMARK,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE	
+		) VALUES (        
+		 #if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end	
+	        @{_parameter.propertyCode,jdbcType=VARCHAR},
+	        @{_parameter.propertyName,jdbcType=VARCHAR},
+	        @{_parameter.inputType,jdbcType=INTEGER},
+	        @{_parameter.enumValues,jdbcType=VARCHAR},
+	        @{_parameter.status,jdbcType=INTEGER},
+	        @{_parameter.remark,jdbcType=VARCHAR},
+	        @{_parameter.createId,jdbcType=BIGINT},
+	        @{_parameter.creator,jdbcType=VARCHAR},
+	        @{_parameter.createDate,jdbcType=TIMESTAMP}	
+		)
+	</sql>		 	        	
+    <!-- 插入记录-->
+	<sql id="insert_sql">
+		INSERT INTO DEVICE_PROPERTY(        
+        PROPERTY_CODE,
+        PROPERTY_NAME,
+        INPUT_TYPE,
+        ENUM_VALUES,
+        STATUS,
+        REMARK,
+        CREATE_ID,
+        CREATOR,
+        CREATE_DATE
+		) VALUES (        
+        #{propertyCode,jdbcType=VARCHAR},
+        #{propertyName,jdbcType=VARCHAR},
+        #{inputType,jdbcType=INTEGER},
+        #{enumValues,jdbcType=VARCHAR},
+        #{status,jdbcType=INTEGER},
+        #{remark,jdbcType=VARCHAR},
+        #{createId,jdbcType=BIGINT},
+        #{creator,jdbcType=VARCHAR},
+        #{createDate,jdbcType=TIMESTAMP}	
+		)
+	</sql>
+
+	<select id="getById" resultMap="DevicePropertyResultMap" parameterType="Long">
+		<include refid="select_pre" />        
+        WHERE A.ID = #{id}
+	</select>
+	<select id="findByCategoryId" resultMap="DevicePropertyResultMap" parameterType="hashmap">
+		SELECT 
+        B.ID,
+        B.PROPERTY_CODE,
+        B.PROPERTY_NAME,
+        B.INPUT_TYPE,
+        B.ENUM_VALUES,
+        B.STATUS,
+        B.REMARK
+		FROM DEVICE_CATEGORY_PROPERTY A,DEVICE_PROPERTY B,DEVICE_CATEGORY C
+		<where>
+		 B.STATUS=1 
+		 AND A.PROPERTY_ID = B.ID 
+		 AND A.CATEGORY_ID = C.ID  
+        <if test="id != null ">and C.ID = #{id} </if>
+		</where>
+        ORDER BY A.PROPERTY_SORT
+	</select>
+    <select id="findByCodeName" resultMap="DevicePropertyResultMap" parameterType="hashmap">
+		SELECT 
+        ID,
+        PROPERTY_CODE,
+        PROPERTY_NAME
+		FROM DEVICE_PROPERTY 
+		<where>
+        <if test="codeName != null and codeName != ''"> PROPERTY_CODE LIKE '%'+#{codeName}+'%' OR
+         PROPERTY_NAME LIKE '%'+#{codeName}+'%' </if>
+		</where>
+        ORDER BY ID
+	</select>
+	<select id="findByCode1" resultType="long" parameterType="com.supconit.base.entities.DeviceProperty">
+		SELECT
+		COUNT(*)
+		FROM
+		DEVICE_PROPERTY 
+		where
+        PROPERTY_CODE = #{propertyCode} 
+      
+	</select>
+	<select id="findByName1" resultType="long" parameterType="com.supconit.base.entities.DeviceProperty">
+		SELECT
+		COUNT(*)
+		FROM
+		DEVICE_PROPERTY 
+		where
+        
+         PROPERTY_NAME = #{propertyName}
+		
+	</select>
+    <select id="findAll" resultMap="DevicePropertyResultMap" lang="velocity">
+		<include refid="select_pre" />
+		WHERE A.STATUS!=0
+		ORDER BY A.ID 
+	</select>
+	<select id="findByDeviceId" resultMap="DevicePropertyResultMap" parameterType="hashmap" databaseId="sqlserver">
+        SELECT 
+		a.ID,
+        a.PROPERTY_NAME,
+        a.INPUT_TYPE,
+        a.ENUM_VALUES,
+        ISNULL(c.PROPERTY_VALUE,'') PROPERTY_VALUE
+		FROM DEVICE_PROPERTY  a
+		inner JOIN DEVICE_CATEGORY_PROPERTY b 
+		ON b.PROPERTY_ID = a.ID AND b.CATEGORY_ID = #{categoryId}
+		LEFT JOIN DEVICE_EXTEND_PROPERTY c
+		ON c.PROPERTY_ID = A.ID AND c.DEVICE_ID = #{deviceId}
+		WHERE a.STATUS=1
+	    ORDER BY B.PROPERTY_SORT
+	</select>
+	<select id="findByDeviceId" resultMap="DevicePropertyResultMap" parameterType="hashmap" databaseId="oracle">
+        SELECT 
+		a.ID,
+        a.PROPERTY_NAME,
+        a.INPUT_TYPE,
+        a.ENUM_VALUES,
+        nvl(c.PROPERTY_VALUE,'') PROPERTY_VALUE
+		FROM DEVICE_PROPERTY  a
+		inner JOIN DEVICE_CATEGORY_PROPERTY b 
+		ON b.PROPERTY_ID = a.ID AND b.CATEGORY_ID = #{categoryId}
+		LEFT JOIN DEVICE_EXTEND_PROPERTY c
+		ON c.PROPERTY_ID = A.ID AND c.DEVICE_ID = #{deviceId}
+		WHERE a.STATUS=1
+	    ORDER BY B.PROPERTY_SORT
+	</select>
+	<!--查询属性是否在设备类别中已被使用-删除设备属性验证用-->
+	<select id="findUseCount"  parameterType="long" resultType="long">
+	    select 
+		COUNT(A.ID)
+		FROM
+		DEVICE_CATEGORY_PROPERTY A
+        WHERE A.PROPERTY_ID = #{id}
+	</select>
+	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.base.entities.DeviceProperty">
+		UPDATE	DEVICE_PROPERTY
+		<set>
+        <!--if test="propertyCode != null">PROPERTY_CODE = #{propertyCode,jdbcType=VARCHAR},</if-->
+        PROPERTY_NAME = #{propertyName,jdbcType=VARCHAR},
+        INPUT_TYPE = #{inputType,jdbcType=INTEGER},
+        <!--if test="enumValues != null">ENUM_VALUES = #{enumValues,jdbcType=VARCHAR},</if-->
+        STATUS = #{status,jdbcType=INTEGER},
+        REMARK = #{remark,jdbcType=VARCHAR},
+        <if test="updateId != null">UPDATE_ID = #{updateId,jdbcType=BIGINT},</if>
+        <if test="updator != null">UPDATOR = #{updator,jdbcType=VARCHAR},</if>
+        <if test="updateDate != null">UPDATE_DATE = #{updateDate,jdbcType=TIMESTAMP},</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+    <!-- 通过 ID 获取对象-->
+	<delete id="deleteById" parameterType="Long">
+		DELETE FROM DEVICE_PROPERTY WHERE ID = #{id}
+	</delete>
+	<sql id="condition_sql" lang="velocity">
+	<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			1=1 		
+			#if($_p.id)
+				#set($_id = $_p.id)
+				AND A.ID = @{_id,jdbcType=BIGINT}
+			#end	
+			#if($_p.propertyCode && $_p.propertyCode != '')
+				#set($_propertyCode = '%' + $_p.propertyCode + '%')
+				AND A.PROPERTY_CODE LIKE @{_propertyCode,jdbcType=VARCHAR}
+			#end		
+			#if($_p.propertyName && $_p.propertyName != '')
+				#set($_propertyName = '%' + $_p.propertyName + '%')
+				AND A.PROPERTY_NAME LIKE @{_propertyName,jdbcType=VARCHAR}
+			#end	
+			#if($_p.inputType)
+				#set($_inputType = $_p.inputType)
+				AND A.INPUT_TYPE = @{_inputType,jdbcType=NUMERIC}
+			#end		
+			#if($_p.enumValues && $_p.enumValues != '')
+				#set($_enumValues = '%' + $_p.enumValues + '%')
+				AND A.ENUM_VALUES LIKE @{_enumValues,jdbcType=VARCHAR}
+			#end	
+			#if($_p.status)
+				#set($_status = $_p.status)
+				AND A.STATUS = @{_status,jdbcType=NUMERIC}
+			#end	
+		#end							
+		]]>	
+	</sql>
+    
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.base.entities.DeviceProperty" resultMap="DevicePropertyResultMap" lang="velocity" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>	
+		<include refid="select_pre" />
+		<include refid="condition_sql" />
+		#order($_parameter.condition,"A.ID DESC")
+ 		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+	<select id="findByCondition" parameterType="com.supconit.base.entities.DeviceProperty" resultMap="DevicePropertyResultMap" lang="velocity" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>	
+		select 
+        A.ID,
+        A.PROPERTY_CODE,
+        A.PROPERTY_NAME,
+        A.INPUT_TYPE,
+        A.ENUM_VALUES,
+        A.STATUS,
+        A.REMARK,
+        A.CREATE_ID,
+        A.CREATOR,
+        A.CREATE_DATE,
+        A.UPDATE_ID,
+        A.UPDATOR,
+        A.UPDATE_DATE,
+        E1.ENUM_TEXT AS INPUT_TYPE_NAME,
+        E2.ENUM_TEXT AS STATUS_NAME
+        <include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+ 		#order($_parameter.condition,"A.ID DESC")
+ 		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM
+		DEVICE_PROPERTY A
+		LEFT JOIN ENUM_DETAIL E1
+        ON A.INPUT_TYPE = E1.ENUM_VALUE 
+        AND E1.TYPE_ID = 3 
+        LEFT JOIN ENUM_DETAIL E2
+        ON A.STATUS = E2.ENUM_VALUE 
+        AND E2.TYPE_ID = 2
+		<include refid="condition_sql" />
+ 		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+
+    <select id="countByCondition" parameterType="com.supconit.base.entities.DeviceProperty" resultType="long" lang="velocity">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+    <!-- 删除多条记录-->
+	<delete id="deleteByIds">
+        DELETE FROM DEVICE_PROPERTY WHERE ID in 
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+
+	</delete>
+
+</mapper>

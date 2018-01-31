@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>流程监控图</title>
+</head>
+
+<body>
+	<div id="_bpm_monitor_pic" style="width:1500px;height:500px;"></div>
+	<script src="$!{platform_static_url}/js/jquery.min.js" type="text/javascript"></script>
+	<script src="$!{platform_static_url}/js/jquery.popupoverlay.js" type="text/javascript"></script>
+	<script src="$!{platform_static_url}/zrender/esl/esl.js" type="text/javascript"></script>
+	<script src="$!{rc.contextPath}/platform/bpm/monitor/render?processInstanceId=$!{processInstanceId}" type="text/javascript"></script>
+</body>
+</html>

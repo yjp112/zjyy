@@ -1,0 +1,195 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<div class="ui-layout-center" id="subMain">
+	<div class="ui-layout-north">
+		 <form class="ui-form" id='queryForm'>
+	     <table width="100%">
+	       <tr>
+	         <td>
+	           <table class="ui-search-table">
+	             <tr>
+	               <td class="ui-search-name first" style="width: 100px;">统计时间：</td>
+                   <td class="ui-search-c" >
+					 <input id="startTime"  class="k-textbox" type="text" name="startTime"/>
+					 <span class="ui-form-text">至</span> 
+					 <input class="k-textbox" id="endTime" type="text" name="endTime"/>
+                   </td>
+		           <td class="ui-search-name">设备类别：</td>
+					<td class="inputText" >
+					<span class="k-textbox k-space-right"   onclick="chooseDeviceCategory('categoryId','categoryName','',1)" >
+					   <input readonly  class="k-textbox  ui-input-choose" type="text" id="categoryName" name="categoryName" />
+					   <a href="#" class="k-icon k-i-search">&nbsp;</a>
+		             </span>
+						<input class="k-textbox" type="hidden" id="categoryId" name="categoryId"/>
+					</td>
+	             </tr>
+	           </table>
+	         </td>
+	         <td width="150" valign="top" style="padding-top:4px;">
+	           <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+	           <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+	         </td>
+	         <td></td>
+	       </tr>
+	     </table>
+	 	</form>
+	</div>
+	<div class="ui-layout-center">
+	  <div id="grid" style="display:none;"></div> 
+	  <div id="pie_id" style="height:500px"></div> 
+     </div>
+</div>
+#parse("index/_footer.vm")  
+<script src="$!{main_static_custom_url}/js/echarts/echarts.js"></script>
+<script type="text/javascript">
+var now=new Date();
+var myRateChart = null;
+     var _iframe_layout,_inner_layout;
+	$(document).ready(function(){
+		_iframe_layout = $('body').layout({
+		      defaults: {
+		        resizable: false,
+		        closable: false,
+		        spacing_open: 5
+		      }
+		    });
+		 _inner_layout = $("#subMain").layout({
+		      defaults: {
+		        resizable: false,
+		        closable: false,
+		        spacing_open: 0
+		      },
+		      center: {
+		          onresize_end: function () {
+##		              var grid = $("#grid").data("kendoGrid");
+##		              grid.resize();
+		          }
+		      }
+     })
+	
+	//列表
+	quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/repair/repair/pie?r=" + new Date(), [
+	      {
+	          field: "id",
+	          hidden: true
+	      }
+		  ], 
+	  {
+	      sortable: {
+	          mode: "multiple",
+	          allowUnsort: true
+	      },
+	      pageable:false, 
+	      showNumber:false,
+	      resizable:true
+	      
+	  },{
+		  change:generateRateChart
+	  }, {
+	      serverSorting: true
+	  }); 
+	  
+	  $('#resetBtn').click(function(){
+		clearDateWithout("startTime", "endTime");
+		$("#queryForm :text").val('');  
+    });
+//加载时间控件
+ commonMonthWithout("startTime", "endTime", "yyyy-MM", "zh-CN");
+});
+//加载chart
+function loadEchart(option){
+        require.config({
+            packages: [
+                {
+                    name: 'echarts',
+                    location: '$!{main_static_custom_url}/js/echarts',
+                    main: 'echarts'
+                }
+            ]
+        });
+        require(
+                [
+                    'echarts',
+                    'echarts/chart/pie'
+                ],
+                function(ec) {
+                    myRateChart = ec.init(document.getElementById('pie_id'));
+                    myRateChart.setOption(option);
+                }
+        )
+    }
+function generateRateChart(grid,g) {
+	var datas1 = new Array();
+    var shortcut = new Array();
+	var datas2 = new Array();
+    var data = grid.items;
+    $.each(data,function(index,item){
+    	if(item.causeValue!=undefined){
+			var tmp1="{value:"+item.sumCause+",name:'"+item.causeValue+"'}";
+			shortcut.push(item.causeValue);
+			var j1 = (new Function("return " + tmp1))();
+        	datas1.push(j1);
+		}
+		if(item.repairTypeValue!=undefined){
+			var tmp2="{value:"+item.sumRepair+",name:'"+item.repairTypeValue+"'}";
+			shortcut.push(item.repairTypeValue);
+			var j2 = (new Function("return " + tmp2))();
+        	datas2.push(j2);
+		}
+    });
+    option = {
+		title : {
+            text: '类别原因归类分析',
+            x:'center'
+        },
+        tooltip : {
+            trigger: 'item',
+            formatter: "{a} <br/>{b} : {c}({d}%)"
+        },
+        legend: {
+	        x : 'right',
+			orient : 'vertical',
+			data:shortcut,
+	    },
+        series : [
+            {
+	            name:'维修类别',
+	            type:'pie',
+	            selectedMode: 'single',
+	            radius : [0, 70],
+	            itemStyle : {
+	                normal : {
+	                    label : {
+	                        position : 'inner'
+	                    },
+	                    labelLine : {
+	                        show : false
+	                    }
+	                }
+	            },
+	            data:datas2
+	        },
+	        {
+	            name:'原因归类',
+	            type:'pie',
+	            radius : [100, 140],
+	            data:datas1
+	        }
+        ]		
+	};
+ 	if(myRateChart==null){
+        loadEchart(option);
+    }else{
+        if(data.length!=0){
+			loadEchart(option);
+            myRateChart.setOption(option);
+        }else{
+            myRateChart.clear();
+			myRateChart.setOption(option);
+        }
+    }
+}    
+</script>
+</body>
+</html>

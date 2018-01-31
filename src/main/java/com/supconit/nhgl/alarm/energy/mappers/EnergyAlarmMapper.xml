@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.alarm.energy.entities.EnergyAlarm">
+
+	<resultMap type="com.supconit.nhgl.alarm.energy.entities.EnergyAlarm" id="YnbjResultMap">
+		<id property="id" column="ID" />
+		<result property="deviceId" column="DEVICE_ID" />
+		<result property="alarmTime" column="ALARM_TIME" />
+		<result property="content" column="CONTENT" />
+		<result property="deviceCode" column="DEVICE_CODE" />
+	</resultMap>
+	
+	
+	<sql id="TABLE_NAME" lang="velocity">NH_ENERGY_ALARM</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	<sql id="SELECT_PRE" lang="velocity">SELECT * FROM <include refid="TABLE_NAME"/></sql>
+	<sql id="COUNT_PRE" lang="velocity">SELECT COUNT(1) FROM <include refid="TABLE_NAME"/></sql>
+
+	<sql id="SEARCH_CONDITION_SQL" lang="velocity">
+		<![CDATA[
+			#where()
+				#if($_parameter.condition.id && $_parameter.condition.id != '')
+					  A.ID = @{_parameter.condition.id,jdbcType=VARCHAR} AND
+				#end
+				#if($_parameter.condition.deviceId && $_parameter.condition.deviceId != '')
+					 A.DEVICE_ID 
+						#set($_deviceId = '%' + $_parameter.condition.deviceId + '%')
+						LIKE @{_deviceId,jdbcType=VARCHAR} AND				
+				
+				#end
+				#if($_parameter.condition.content && $_parameter.condition.content != '')
+					 A.CONTENT 
+						#set($_content = '%' + $_parameter.condition.content + '%')
+						LIKE @{_content,jdbcType=VARCHAR}	AND			
+				
+				#end
+				#if($_parameter.condition.deviceCode && $_parameter.condition.deviceCode != '')
+					D.DEVICE_CODE
+						#set($_deviceCode = '%' + $_parameter.condition.deviceCode + '%')
+						LIKE @{_deviceCode,jdbcType=VARCHAR}	AND			
+				
+				#end
+				#if($_parameter.condition.start && $_parameter.condition.start != '')
+					 A.ALARM_TIME>=@{_parameter.condition.start,jdbcType=TIMESTAMP} AND
+				#end
+				#if($_parameter.condition.end && $_parameter.condition.end != '')
+					 A.ALARM_TIME<=@{_parameter.condition.end,jdbcType=TIMESTAMP} 
+				#end
+			#end
+		]]>	
+	</sql>
+	<sql id="select_column">
+	    SELECT
+			A.ID,
+			A.ALARM_TIME,
+			A.DEVICE_ID,
+			A.CONTENT,
+			(
+				SELECT
+					 D.DEVICE_CODE+';'
+				FROM
+					DEVICE D
+				WHERE
+					';' + A.DEVICE_ID + ';' LIKE '%;' + CAST (D.ID AS VARCHAR(10)) + ';%' FOR XML PATH ('')
+			) DEVICE_CODE
+		FROM
+			NH_ENERGY_ALARM A
+	</sql>
+	<sql id="select_column_oracle">
+			SELECT A.ID, A.ALARM_TIME, A.DEVICE_ID, A.CONTENT, (
+			SELECT listagg(D.DEVICE_CODE,';') WITHIN
+			GROUP (ORDER BY d.device_code)
+			FROM DEVICE D
+			WHERE a.device_id LIKE '%'||to_char(D.ID)||'%') DEVICE_CODE
+			FROM NH_ENERGY_ALARM A
+	</sql>
+	<sql id="count_column">
+		select count(1)
+		from NH_ENERGY_ALARM A
+	</sql>
+	<sql id="condition_sql">
+		<where>
+			<if test="id != null "> A.ID = #{id} and </if>
+	        <if test="deviceId != null and deviceId != ''">	A.DEVICE_ID like '%'+#{deviceId}+'%' and </if>
+	        <if test="content != null and content != ''">	A.CONTENT like '%'+#{content}+'%' and </if>
+	        <if test="deviceCode != null and deviceCode != ''">	D.DEVICE_CODE like '%'+#{deviceCode}+'%' and </if>
+	        <if test="start != null and start !='' "> A.ALARM_TIME >= #{start} and </if>
+	        <if test="end != null and end != ''">	A.ALARM_TIME &lt;dateadd(day,1,#{end}) and </if>
+	        1=1 
+		</where>
+	</sql>
+	<select id="findByCondition" resultMap="YnbjResultMap" lang="velocity" databaseId="oracle">
+		 <include refid="_PUBLIC_V.PAGER_BEFORE" />
+		<include refid="select_column_oracle"/>
+		<include refid="SEARCH_CONDITION_SQL"/>
+		#order($_parameter.condition,"A.ALARM_TIME DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER" />
+	</select>
+	<select id="findByCondition" resultMap="YnbjResultMap" lang="velocity" databaseId="sqlserver">
+		 <include refid="_PUBLIC_V.PAGER_BEFORE" />
+	     SELECT
+			A.ID,
+			A.ALARM_TIME,
+			A.DEVICE_ID,
+			A.CONTENT,
+			(
+				SELECT
+					 D.DEVICE_CODE+';'
+				FROM
+					DEVICE D
+				WHERE
+					';' + A.DEVICE_ID + ';' LIKE '%;' + CAST (D.ID AS VARCHAR(10)) + ';%' FOR XML PATH ('')
+			) DEVICE_CODE
+	     <include refid="_PUBLIC_V.ROW_NUMBER_OVER" />
+		 #order($_parameter.condition,"A.ALARM_TIME DESC")
+		 <include refid="_PUBLIC_V.AS_ROW_NUM" />
+		 FROM <include refid="TABLE_NAME"/>
+        <include refid="SEARCH_CONDITION_SQL"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER" /> 
+	</select>
+	<select id="countByCondition" resultType="long" parameterType="com.supconit.nhgl.alarm.energy.entities.EnergyAlarm">
+		<include refid="count_column"/>
+		<include refid="SEARCH_CONDITION_SQL"/>
+	</select>
+	<select id="getById" resultMap="YnbjResultMap" parameterType="long" lang="velocity">
+		<include refid="select_column" />
+				WHERE A.ID = @{_parameter, jdbcType=NUMERIC}
+			</select>
+	
+	<select id="selectPager" lang="velocity" resultMap="YnbjResultMap" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="SELECT_PRE"/>
+		<include refid="SEARCH_CONDITION_SQL"/>
+		#order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	
+	<select id="selectPager" lang="velocity" resultMap="YnbjResultMap" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT * 
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/>
+		<include refid="SEARCH_CONDITION_SQL"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+
+	<select id="countPager" lang="velocity" resultType="long">
+		<include refid="COUNT_PRE"/><include refid="SEARCH_CONDITION_SQL"/>
+	</select>
+	
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>(
+		
+			#if($_databaseId == 'oracle') ID,#end
+				DEVICE_ID
+				,ALARM_TIME
+				,CONTENT
+		) VALUES (
+			#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end
+				 @{_parameter.deviceId,jdbcType=VARCHAR}
+				,@{_parameter.alarmTime,jdbcType=TIMESTAMP}
+				,@{_parameter.content,jdbcType=VARCHAR}
+		)
+	</sql>
+	
+	<insert id="insert" parameterType="com.supconit.nhgl.alarm.energy.entities.EnergyAlarm" 
+		keyProperty="id" keyColumn="ID" 		lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>       
+		<include refid="INSERT_SQL" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.nhgl.alarm.energy.entities.EnergyAlarm" 
+		keyProperty="id" keyColumn="ID" 		 lang="velocity">
+        <include refid="INSERT_SQL"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER">
+        	<include refid="_PUBLIC_V.SELECT_KEY"/> 
+        </selectKey>    
+     </insert>
+    
+	<update id="update" parameterType="com.supconit.nhgl.alarm.energy.entities.EnergyAlarm" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/> 
+		#mset()
+			<![CDATA[
+				#if($_parameter.deviceId)DEVICE_ID = @{_parameter.deviceId,jdbcType=VARCHAR},#end
+				#if($_parameter.alarmTime)ALARM_TIME = @{_parameter.alarmTime,jdbcType=TIMESTAMP},#end
+				#if($_parameter.content)CONTENT = @{_parameter.content,jdbcType=VARCHAR},#end
+			]]>
+		#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+	
+	<delete id="deleteById" parameterType="long" lang="velocity">
+		DELETE FROM <include refid="TABLE_NAME" /> WHERE ID = @{_parameter,jdbcType=NUMERIC}
+	</delete>
+    		
+</mapper>

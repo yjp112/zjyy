@@ -1,0 +1,211 @@
+<div class="ui-layout-center" id="subMain">
+	<div class="ui-layout-center">
+		<table id="plat_org_person_datalist" class="fn-hide"></table>
+	</div>
+	<div class="ui-layout-north">
+		<form id="plat_org_person_search_form" class="ui-form ui-form-search fn-clear" style="margin-top:0;">
+			<input type="hidden" name="condition.departments[0].id" value="" />
+			<input type="hidden" name="condition.positions[0].id" value="" />
+			<div class="ui-form-search-left" style="width:600px">
+				<div class="ui-form-item">
+					<label class="ui-label">人员编码：</label>
+		    		<input class="ui-input" type="text" name="condition.code" value="$!{condition.code}" />
+		    	</div>
+		    	<div class="ui-form-item">
+					<label class="ui-label">人员名称：</label>
+		    		<input class="ui-input" type="text" name="condition.name" value="$!{condition.name}" />
+		    	</div>
+	    	</div>
+	    	<div class="ui-form-search-right">
+				<button type="submit" class="btn btn-primary"><i class="iconfont icon-search"></i> 查询</button>
+			</div>
+		</form>
+	</div>
+</div>
+<div class="ui-layout-north">
+	#bread_crumbs('PLAT_ORG_PERSON_NEW')
+</div>
+<div class="ui-layout-west">
+	<div id="plat_org_person_box" class="ui-box">
+      <div class="ui-box-head">部门岗位簇</div>
+      <div class="ui-box-container">
+          <ul id="plat_org_person_tree" class="ztree"></ul>
+      </div>
+    </div>
+</div>
+<script type="text/javascript">
+	var plat_org_person_datagrid, plat_org_person_tree;
+	$(function(){
+		if(_inner_layout) _inner_layout.destroy();
+		var _center_main_layout = $("#centerMain").layout({
+			defaults : {
+				resizable : false,
+				closable : false,
+				spacing_open : 5
+			},
+			west : {
+				size : 250,
+				resizable : true,
+				resizerTip : "移动改变大小",
+				closable : true,
+				togglerTip_open : "隐藏",
+				togglerTip_closed : "打开"
+			},
+			onresize_end : function(){
+				$("#plat_org_person_box").box("resize");
+			}
+		});
+		
+		_content_layouts.push(_center_main_layout);
+		_inner_layout = $("#subMain").layout({
+			defaults : {
+				resizable : false,
+				closable : false,
+				spacing_open : 5
+			},
+			onresize_end : function(){
+				$("#plat_org_person_datalist").datagridResize({width:_inner_layout.state.center.innerWidth,height:_inner_layout.state.center.innerHeight});
+			}
+		});
+		
+		$("#plat_org_person_box").box({
+			width : function(){return _center_main_layout.state.west.innerWidth;},
+			height : function(){return _center_main_layout.state.west.innerHeight;}
+		});
+		
+		## 菜单树
+		var setting = {
+			view : {
+				fontCss : function(treeId, treeNode){
+					if(treeNode.isPosition == true){
+						return {color : "blue"};
+					}
+				}
+			},
+			callback: {
+				onClick : function(event, treeId, treeNode) {
+					if(treeNode.code.indexOf('_POST_')==0){
+						$("#plat_org_person_search_form input[name='condition.departments[0].id']").val("");
+						$("#plat_org_person_search_form input[name='condition.positions[0].id']").val(treeNode.id);
+					} else{
+						$("#plat_org_person_search_form input[name='condition.positions[0].id']").val("");
+						$("#plat_org_person_search_form input[name='condition.departments[0].id']").val(treeNode.id);
+					}
+					plat_org_person_datagrid.flexReload();
+				}
+			}
+		};
+		var nodes = $!{departmentJson};
+		
+		var resc_nodes = function(n){
+			if(n){
+				if(n.code.indexOf("_POST_")==0){
+					n.name = "[岗位]" + n.name;
+					n.isPosition = true;
+				}
+				if(n.children && n.children.length > 0){
+					for(var i = 0 ; i < n.children.length ; i++){
+						resc_nodes(n.children[i]);
+					}
+				}
+			}else return;
+		};
+		resc_nodes(nodes);
+		
+		plat_org_person_tree = $.fn.zTree.init($("#plat_org_person_tree"), setting, nodes);
+		plat_org_person_tree.expandAll(true);
+		
+		
+		## datagrid
+		plat_org_person_datagrid = $("#plat_org_person_datalist").datagrid({
+			url: '$!{rc.contextPath}/platform/organization/personExpand/list',
+			dataType: "json",
+			method: "POST",
+			singleSelected : true,
+			striped : false,
+			height:  _inner_layout.center.state.innerHeight,
+			width :  _inner_layout.center.state.innerWidth,
+			showOrderNumber : true,
+			useRp : true,
+			usepager: true,
+    		rpOptions: [10, 20, 40, 60],
+    		pageSize: 20,
+    		searchFormId : "plat_org_person_search_form",
+    		searchCallback : function(datagrid){
+    		},
+    		onSuccess : function(table,grid){
+    			if(!grid)return;
+    			var rows = grid.getAllRows();
+    			if(!rows || rows.length == 0) return;
+				var ids = "";    			
+				$.each(rows,function(idx,it){
+					ids += it.id + ",";
+				});
+				$.post("$!{rc.contextPath}/platform/organization/department/find-by-persons?personIds=" + ids,function(res){
+					if(!res){return;}
+					$("table tr",table).each(function(){
+						$("td:eq(4)",this).removeClass("ui-loading");
+						var r = res[$(this).attr("id").substring(3)];
+						if(r) {
+							var a = '';
+							var rr = r[0].split(",");
+							var ids = r[1].split(",");
+							for(var i = 0 ; i < rr.length ; i++){
+								a+='<a href="javascript:void(0)" onclick=\'$.dialogs.normalDialog("plat_org_department_view_dlg", "$!{rc.contextPath}/platform/organization/department/view?id='+ids[i]+'", function(dlg,btn){return false;},680,220,"查看部门信息",null,false,"关闭");\'>' + rr[i] + '</a>，';
+							}
+							if(a) a = a.substring(0,a.length - 1);
+							$("td:eq(4) > div",this).html(a);
+						}
+					});
+				});
+				$.post("$!{rc.contextPath}/platform/organization/position/find-by-persons?personIds=" + ids,function(res){
+					if(!res){return;}
+					$("table tr",table).each(function(){
+						$("td:eq(5)",this).removeClass("ui-loading");
+						var r = res[$(this).attr("id").substring(3)];
+						if(r) {
+							var a = '';
+							var rr = r[0].split(",");
+							var ids = r[1].split(",");
+							for(var i = 0 ; i < rr.length ; i++){
+								a+='<a href="javascript:void(0)" onclick=\'$.dialogs.normalDialog("plat_org_position_view_dlg", "$!{rc.contextPath}/platform/organization/position/view?position.id='+ids[i]+'", function(dlg,btn){return false;},680,200,"查看岗位信息",null,false,"关闭");\'>' + rr[i] + '</a>，';
+							}
+							if(a) a = a.substring(0,a.length - 1);
+							$("td:eq(5) > div",this).html(a);
+						}
+					});
+				});
+				$.post("$!{rc.contextPath}/platform/authorization/user/find-by-persons?personIds=" + ids,function(res){
+					if(!res){return;}
+					$("table tr",table).each(function(){
+						$("td:eq(6)",this).removeClass("ui-loading");
+						var r = res[$(this).attr("id").substring(3)];
+						if(r) {
+							var a = '';
+							var rr = r[0].split(",");
+							var ids = r[1].split(",");
+							for(var i = 0 ; i < rr.length ; i++){
+								a+='<a href="javascript:void(0)" onclick="">' + rr[i] + '</a>，';
+							}
+							if(a) a = a.substring(0,a.length - 1);
+							$("td:eq(6) > div",this).html(a);
+						}
+					});
+				});
+				
+    		},
+			colModel : [
+				{"display":"序号"},
+				{"name":"id","hide":true},
+				{"display":"人员编码","name":"code","sortable":true,"orderField":"CODE",width:80},
+				{"display":"人员名称","name":"name","sortable":true,"orderField":"NAME",width:80},
+				{"display":"所属部门","customClass":"ui-loading",width:160},
+				{"display":"所属岗位","customClass":"ui-loading",width:160},
+				{"display":"对应用户","customClass":"ui-loading",width:120}
+			],
+			buttons : [
+				#data_grid_buttons('PLAT_ORG_PERSON_NEW')#end
+			]
+		});
+	});
+</script>

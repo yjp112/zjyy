@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconicom/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.ywgl.patrol.entities.PatrolDetails">
+    
+ 
+   <sql id="TABLE_NAME" lang="velocity">PATROL_DETAILS</sql> 
+   <sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+   
+   
+ 	<select id="findDetailsCuont"  resultType="long" lang="velocity">
+		select count(*) from <include refid="TABLE_NAME"/>
+		 where PERSON_ID=@{_parameter.personId,jdbcType=NUMERIC} and
+		 PATROL_TIME between @{_parameter.startTime,jdbcType=TIMESTAMP} and
+		  @{_parameter.endTime,jdbcType=TIMESTAMP}
+		 
+		  </select>
+	
+</mapper>

@@ -1,0 +1,230 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<div class="ui-layout-north" style="border-right:solid 1px #e1e5e6;" id="searchLayout">
+  <form class="ui-form" id='queryForm'>	
+        <table width="100%">
+          <tr>
+	         <td >
+	           <table class="ui-search-table" >
+                  <tr>
+                  <td class="ui-search-name first" style="width: 100px;">统计时间：</td>
+                  <td class="ui-search-c" >
+                  <input id="startTime"  class="k-textbox" type="text" name="beginDate"  />
+							      <span class="ui-form-text">至</span> 
+									<input class="k-textbox" id="endTime" type="text" name="endDate"  />
+                  </td>
+            </tr>
+	           </table>
+	         </td>
+            <td width="150" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+            <td></td>
+          </tr>
+        </table>
+    </form>
+</div>
+
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<div id="graphic_rate_id" style="height:300px">
+    	</div>
+    </div>
+    <div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+#parse("index/_footer.vm")  
+<script src="$!{main_static_custom_url}/js/echarts/echarts.js"></script>
+
+<script type="text/javascript">
+
+var myRateChart = null;
+var flag = 0;
+
+var _iframe_layout, _left_layout, _inner_layout;
+$(document).ready(function(){
+_iframe_layout = $('body').layout({
+  defaults: {
+    resizable: false,
+    closable: false,
+    spacing_open: 5
+  },
+  north: {
+    size: 0.1
+  }
+});
+
+_inner_layout = $("#subMain").layout({
+    defaults: {
+      resizable: false,
+      closable: false,
+      spacing_open: 0
+    },
+    north:{
+    	size: 0.6
+    },
+    center: {
+        onresize_end: function () {
+            var grid = $("#grid").data("kendoGrid");
+            grid.resize();
+        }
+    }
+  });
+  
+$('#resetBtn').click(function(){
+    $("#queryForm :text").val('');  
+    //消除时间约束
+    clearDateWithout("startTime", "endTime");
+  });
+  
+//列表
+quick_datagrid("#grid", "#queryForm", "$!rc.contextPath/repair/deviceGoodRate/device_good_rate?r=" + new Date(), [{
+          field: "id",
+          hidden: true
+      }, {
+          field: "categoryName",
+          title: "设备类别",
+          headerAttributes: {"class": "k-grid-text"},
+          attributes: {"class": "k-grid-text"},
+          sortable: true,
+          width: 200
+      }, {
+          field: "deviceNum",
+          title: "设备数量（台）",
+          headerAttributes: {"class": "k-grid-num"},
+          attributes: {"class": "k-grid-num"},
+          sortable: true,
+          template:function(dataItem){
+          	  if(dataItem.deviceNum != null)
+          		  return fInt(dataItem.deviceNum);
+          	  else return '';
+            },
+          width: 150
+      }, {
+          field: "deviceFaultNum",
+          title: "故障次数（次）",
+          headerAttributes: {"class": "k-grid-num"},
+          attributes: {"class": "k-grid-num"},
+          template:function(dataItem){
+          	  if(dataItem.deviceFaultNum != null)
+          		  return fInt(dataItem.deviceFaultNum);
+          	  else return '';
+            },
+          width: 150
+      }, {
+          field: "goodRate",
+          sortable: false,
+          headerAttributes: {"class": "k-grid-num"},
+          attributes: {"class": "k-grid-num"},
+          title: "设备完好率（%）"
+      }], 
+  {
+      sortable: {
+          mode: "multiple",
+          allowUnsort: true
+      },
+      pageable:false, 
+      showNumber:false,resizable:true
+      
+  },{
+	  change:generateRateChart
+  }, {
+      serverSorting: true
+  });
+  
+//加载时间控件
+commonDateWithout("startTime", "endTime", "yyyy-MM-dd", "zh-CN");
+	
+});
+
+//加载时间控件
+/* $("#startTime").hcDateTimePicker({
+	format: "yyyy-MM-dd HH:mm:ss", 
+	culture: "zh-CN"
+});
+$("#endTime").hcDateTimePicker({
+	format: "yyyy-MM-dd HH:mm:ss", 
+	culture: "zh-CN"
+}); */
+
+//加载chart
+function loadEchart(option){
+        require.config({
+            packages: [
+                {
+                    name: 'echarts',
+                    location: '$!{main_static_custom_url}/js/echarts',
+                    main: 'echarts'
+                }
+            ]
+        });
+        require(
+                [
+                    'echarts',
+                    'echarts/chart/line',
+                    'echarts/chart/bar'
+                ],
+                function(ec) {
+                	
+                    myRateChart = ec.init(document.getElementById('graphic_rate_id'));
+                    myRateChart.setOption(option);
+                }
+        )
+    }
+
+    function generateRateChart(grid,g) {
+
+        var categoryName = new Array();
+        var value1 = new Array();
+        var value2 = new Array();
+
+        var data = grid.items;
+        //console.log(data);
+        //var rows = data.length;
+
+        $.each(data,function(index,o){
+            categoryName.push(o.categoryName);
+            value1.push(o.deviceFaultNum);
+            value2.push(o.goodRate);
+        });
+        var option = {tooltip:{trigger: 'axis'},
+	        title : {text: '设备完好率统计',x:'center'},
+            toolbox:{show:false,feature:{mark : true,dataView : {readOnly: false},magicType:['line', 'bar'],restore : true,saveAsImage : true}},
+            calculable : false,//设置拖拽重新计算
+            legend: {data:['故障次数','设备完好率'],x : 'right',y : 'top'},
+            xAxis:[{type:'category',data:categoryName,axisLabel:{interval:0,rotate:18 }}],
+            yAxis:[
+                {type : 'value',name : '次数',axisLabel : {    
+                	formatter: '{value} 次'
+                	
+                },splitArea : {show : true}}
+                ,{type : 'value',name : '百分比',axisLabel : {  formatter: '{value}'},splitLine : {show : false} }
+            ],
+            series:[
+                {name:'故障次数',type:'bar',data:value1}
+                ,{name:'设备完好率',type:'line',yAxisIndex: 1,data:value2}
+            ]
+        };
+        
+        if(myRateChart==null){
+            if(data.length!=0)
+            	loadEchart(option);//datagrid查询结果为空
+        }else{
+            if(data.length!=0){
+                myRateChart.setOption(option);
+            }else{
+                myRateChart.clear();
+            }
+        }
+    }
+	$(document).ready(function(){
+		setTimeout(function(){
+			$("#graphic_rate_id").find("div:eq(0)").css("height","330px");
+		},300)
+	});
+</script>
+</body>
+</html>

@@ -1,0 +1,681 @@
+﻿@charset "utf-8";
+/* CSS Document */
+body{color:#808080;}
+ul, p{
+	margin:0; padding:0;
+}
+body div{ text-align:left;}
+.col_ff8b02{color:#ff8b02;}
+.bgcol_edfce2,#G_MapMuneCon_tabA{/*background: url(./image/tool/floor_bg.jpg) repeat;*/background: #010914;}
+#G_MapMuneCon_tabA{border:1px solid #016482;border-width: 0 1px;}
+/* --------------链接:a 标签----------------- */
+a, .com_a{outline:none; cursor:pointer;}
+.com_a:hover{text-decoration:none;}
+a:hover{text-decoration: none;}
+.linkText{color:#0101ff; font-size:12px; font-weight: normal;margin-right: 10px;}
+.linkText:hover{color:#0101ff;text-decoration:underline;}
+.icon18_a{padding-left:20px; line-height:18px; height:18px; background:url(./image/tool/infoIcons.gif) left center no-repeat;}
+.icon_info{background-position:-2px 0px;}
+.icon_chart{background-position:0px -18px;}
+.icon_report{background-position:0px -36px;}
+/* --------------------------------------- */
+
+/* ---------------- Tab ------------------ */
+.tabs{
+	background:url(./image/tool/bg.gif) repeat-x; border:#88c2e2 solid 1px; border-top-width:0px;border-bottom-width:0px; height:26px;border-bottom-color: #b2b4c6; border-right: none;
+}
+.tabs a{
+	text-decoration: none;
+}
+.clearfix{
+	display:block; clear:both;margin: 0; 
+}
+.tabs ul li{
+	width: 101px;
+	float:left; 
+}
+.tabs ul li.eqsearch{float: right;}
+.tabs ul li.eqsearch .icon-search{margin-right:5px;}
+.sysCf-on{/*background: url(./image/tool/tabs.gif) repeat-x; border-right:1px solid #9999ff;*/}
+.eqsearch-on{background: url(./image/tool/tabs.gif) repeat-x;border-left:1px solid #9999ff;}
+.tabs ul li a.tab{
+	display:block; height:26px;line-height: 26px; color:#003399;font-size:12px;font-family: '宋体';padding-left: 15px;
+}
+.tabs ul li a.tab span{display: inline-block;float:left;width: 16px; height: 16px;margin-top: 5px; margin-right: 6px; }
+span.icon-sysCf{ background-image:url(./image/tool/icon1.gif);background-position: -32px 0px;}
+span.icon-sysCf-on{background-image:url(./image/tool/icon1.gif);background-position: -48px 0px;}
+.tabs ul li.on a.tab{
+	display:block; color:#000;
+}
+.gis_popupTab{
+	display:block; border-bottom:#fd8f36 solid 1px; height:30px;
+}
+.gis_popupTab li{
+	float:left; height:31px; display:inline-block; *display:inline;
+}
+.gis_popupTab li a{
+ 	display: block; padding:0px 5px; height:29px; line-height:29px; *padding-bottom:6px; font-size: 12px; color: #003498;
+}
+.gis_popupTab li.on a{
+	font-weight:bold; border-bottom:#ff4700 solid 2px; color: #000;
+}
+/* --------------------------------------- */
+
+.toolbar{
+	position:relative; width:100%; height:26px; /*border-bottom:#b2b4c6 solid 1px;*/ border-top:none; background:url(./image/tool/bg.gif) repeat-x;
+}
+.toggle_menu{
+	position:absolute; /*z-index:902;*/ width:30px; left:290px; top:0px;
+}
+.toggle_menu_btn{
+	float:left; width:29px; height:26px; display:block; background-image:url(./image/tool/toggle_btns.gif); /*border-right:#b2b4c6 1px solid;*/background-position: 0 -2px;
+}
+.map_toolbar{
+	clear:both; display:block; float:right;margin: 0;margin-right: 7px; height: 26px;
+}
+.map_toolbar li{
+	float:left; margin-right:10px; line-height:26px;
+}
+.map_toolbar li a{
+	margin:4px 5px 1px 0px; display:block; line-height:20px; padding-left:24px;font-size: 12px;color: #000; font-family: '宋体';
+}
+.map_toolbar li a:hover{
+	text-decoration:none;
+}
+.map_toolbar_i_a_ranging{
+	background:url(./image/tool/map_tool_icons.gif) 0px 0px no-repeat;
+}
+.map_toolbar_i_a_fullScreen{
+	background:url(./image/tool/map_tool_icons.gif) 0px -20px no-repeat;
+}
+.map_toolbar_i_a_tool{
+	background:url(./image/tool/map_tool_icons.gif) 0px -40px no-repeat;
+}
+.map_toolbar_downIcon{
+	background:url(./image/tool/map_tool_icons.gif) 0px -60px no-repeat; padding-right:10px; display:inline-block;
+}
+.map_toolbar_i_a_region{
+	background:url(./image/tool/map_tool_icons.gif) 0px -80px no-repeat;
+}
+.G_MapToolList{
+	display:none; position:absolute; background:#FFF; border:#b2b4c6 solid 1px; width:80px;border-top:none; z-index:902;
+}
+.G_MapToolList li{
+	clear:both; height:24px; padding:0px 6px; cursor: pointer;
+}
+.G_MapToolList .list-border {border-bottom:1px #b2b4c6 dashed;}
+.G_MapToolList li:hover{
+	background:#d5ddf3;
+}
+.G_MapToolList li a.rectangleIcon{background-position:0px -240px;}
+.G_MapToolList li a.circularIcon{background-position:0px -260px;}
+.G_MapToolList li a.polygonIcon{background-position:0px -280px;}
+.G_MapToolList li a.cancelIcon{background-position:0px -300px;}
+.G_MapToolList li a{
+	font-size: 12px; height:22px; line-height:24px; padding-top:2px;padding-bottom:2px; padding-left:23px; color:#000; background:url(./image/tool/map_tool_icons.gif) no-repeat;
+}
+.G_MapToolList li a.refreshIcon{ background-position:0px -80px;}
+.G_MapToolList li a.enlargeIcon{ background-position:0px -100px;}
+.G_MapToolList li a.narrowIcon{ background-position:0px -120px;}
+.G_MapToolList li a.moveIcon{ background-position:0px -140px;}
+.G_MapToolList li a.rangingIcon{ background-position:0px -160px;}
+.G_MapToolList li a.faceIcon{ background-position:0px -180px;}
+.G_MapToolList li a.positionIcon{ background-position:0px -200px;}
+.G_MapToolList li a.refreshIcon{ background-position:0px -220px;}
+#G_Map{
+	position:relative; text-align:left; overflow:hidden; left:290px;
+}
+/* GIS 右侧信息列表 */
+.map_menu{
+	position:absolute; /*z-index:901;*/ top:0px; left:0px; width:290px;
+}
+.types_slide_wrap, .types_subTypes_wrap{
+	position:relative; background:#fff; height:75px; padding-top: 15px;
+}
+.total_count{
+	font-weight:normal; font-family:Arial;
+}
+.types_slide_title{
+	margin:0px 0px 6px 15px; padding-top:10px;
+}
+.types_slide_con{
+	width:268px; height:75px; margin:auto auto 5px 30px; overflow:hidden; position:relative;
+}
+.types_slide{
+	height:62px; margin-left:-3px;
+}
+.type_slide_block{
+	width:268px; height:62px; overflow:hidden;
+}
+.type_slide_li{
+	text-align:center; width:67px; display:block; float:left;
+}
+.type_slide_li_a{
+ 	color: #003399;text-decoration:none; outline-style:none; outline-color:inherit; outline-width:medium; display:inline-block;width: 50px;padding: 5px 0;
+}
+.type_slide_li_a:hover{
+	background-color: #f0f0fa;
+	color: #003399;
+	text-decoration: none;
+}
+.type_slide_li_aOn{
+	background-color: #f0f0fa;
+	color: #003399;
+	text-decoration: none;
+}
+.type_slide_li_a span{
+	display: block;
+	width: 50px;
+	margin: auto;
+	font-family: '宋体';
+	font-size: 12px;
+	line-height: 14px;
+	padding-top: 5px;
+}
+.type_slide_1{width:32px; height:32px; margin:auto; background-image:url(./image/tool/type_slide.gif); }
+.type_slide_A{ background-position:0 0; }
+.type_slide_B{ background-position:-32px 0;}
+.type_slide_C{ background-position:-64px 0;}
+.type_slide_D{ background-position:-96px 0;}
+.ui-switchable-nav{
+	position:absolute; top:10px; right:35px;
+}
+.ui-switchable-nav li{
+	line-height:18px; height:18px; float:left; font-size:20px; cursor:pointer; margin-right:2px; color:#c9c9c9;
+}
+.ui-switchable-nav li.ui-switchable-active{
+	color:#ff8b02 !important;
+}
+#G_TypePrev, #G_TypeNext{
+	position:absolute; display:block; top:52px; text-decoration:none !important; width:10px; height:20px; cursor:pointer;
+}
+#G_TypePrev{
+	background:url(./image/tool/main.png) no-repeat -404px 0px; left:15px; _left:12px;
+}
+#G_TypePrev:hover{
+	background-position:-432px 0px;
+}
+#G_TypeNext{
+	background:url(./image/tool/main.png) no-repeat -465px 0px; left:300px; _left:284px;
+}
+#G_TypeNext:hover{
+	background-position:-498px 0px;
+}
+.types_subTypes_con{
+	margin:0px 0px 15px 28px; display:block;
+}
+.types_subTypes_con li{
+	display:inline-block; margin-right:10px; *display:inline;
+}
+.itemsTitle{
+	background:#d5ddf2; color: #000; height: 32px;padding-left: 10px;padding-right: 10px; line-height: 32px; text-align:right; clear:both;font-size: 12px; font-family: '宋体'; border-bottom:1px solid #9fa4c1;
+}
+.itemsTitle div{ color: #000;}
+.item_list{
+	clear:both; display:block; height:130px; padding:15px 0px 0px 8px; cursor:pointer;line-height: 20px;
+}
+.item_list_icon{
+	width:20px; height:20px; background:url(../images/main.png) 0px -48px no-repeat;
+}
+.plant_pic{
+	width:74px; height:54px; padding:3px; border:#e3e3e3 solid 1px; margin:0; _margin:0px 10px 0px 5px; background-color:#FFF;
+}
+.plant_pic a{
+	width:74px; height:54px;
+}
+.plant_des{
+	float:left; width:170px;
+}
+.plant_list_title{
+	color:#00339c; font-size:14px; font-weight:bold;font-family: '宋体';
+}
+.plant_position{
+	width:16px; height:40px; margin: 0 10px; padding-left:8px; padding-top:0px; color:#FFF; font-weight:bold; background:url(./image/tool/main.png) -534px 0px no-repeat;
+}
+.plant_list_content p{
+	font-weight: normal;font-family: '宋体';font-size: 12px;color: #000;
+}
+.plant_list_content p .linkText {margin-left: 0;margin-right: 10px; color: #0101ff;}
+.item_list_fns{
+	display:block;margin-top: 10px;
+}
+/* .hover是鼠标移上去效果, .fix是选中效果 */
+.item_lists .hover, .item_lists .fix{
+	background-color:#ffffdd; height:129px !important;border-bottom:#fff solid 1px;
+}
+.hover .item_list_icon, .fix .item_list_icon{
+	background-position: -20px -48px !important;
+}
+.hover .item_list_fns, .fix .item_list_fns{
+	display:block !important;
+}
+.hover .plant_position, .fix .plant_position{
+	background-position:-510px 0px !important;
+}
+/* 弹出div：快速搜索*/
+.customize_info{
+	height:56px; background:url(../images/map_menu_header.png) no-repeat;
+}
+.customize_info .moreInfo{
+	float:right; margin:18px 20px auto auto; color:#FFF;
+}
+.moreInfo_icon{
+	display:inline-block; padding-left:20px; background:url(../images/main.png) -40px -48px no-repeat; 
+}
+.moreInfo_con_popup{
+	position:absolute; top:80px; left:0px; width:306px; padding:16px 12px; background-color:#f5ffed; z-index:902; border-color:#d3d3d3; border-width:0px 1px 1px 1px; border-style:solid;
+}
+.com_types a{
+	margin-right:15px;
+}
+.inputBox{
+	position:relative; width:290px;
+}
+.inputBox .searchBtn{
+	position:absolute; bottom:1px; right:1px; *bottom:2px; *right:2px; height:30px; width:38px; background:url(../images/main.png) -480px -24px no-repeat;/*灰色*/
+}
+.input_search{
+	padding:0px 0px 0px 10px; border:#dcdeda solid 1px; border-radius:4px; width:280px; height:30px; line-height:30px; color:#d0d0d0; font-size:14px;
+}
+.placeholder {
+	position:absolute; padding-left:10px; line-height:30px; height:30px; color: #d0d0d0; font-size:14px; cursor:text; top:0px; left:0px;
+}
+.input_search:hover, .focus .input_search, .inputBox:hover .input_search{
+	border-color:#388a00; color:#6da944;
+}
+.focus .searchBtn, .inputBox:hover .searchBtn{
+	background-position:-440px -24px; /*绿色*/
+}
+.inputBox .searchBtn:hover{
+	background-position:-400px -24px; /*橙色*/
+}
+
+/* ------------------- 分页 --------------------- */
+.ui_pagination{
+	height:24px; line-height:24px; margin:10px; display:inline-block; *display:inline; 
+}
+.ui_pagination span{
+	display:inline-block; color:#4C4C4C; float:left; height:32px; margin-right:5px;
+}
+.ui_pagination a.page{
+	display:inline-block; float:left; text-decoration:none; background:url(../images/pagination.gif) 0px 0px no-repeat;
+	color:#919191; height:24px; width:24px; line-height:24px; text-align:center;
+}
+.ui_pagination a.page:hover{
+	background-position:-24px 0px !important; color:#fff;
+}
+.ui_pagination a.page:active{
+	background-position:-48px 0px !important; color:#919191;
+}
+/* GIS popup */
+.map_popup_imgDiv{
+	width:128px; height:96px; padding:3px; border:#e9e9e9 solid 1px; background:#FFF;
+}
+.map_popup_toggle_lBtn, .map_popup_toggle_rBtn{
+	display:block; width:24px; height:24px; background:url(../images/toggle_btns.gif) 0px -30px no-repeat;
+}
+.map_popup_toggle_lBtn{
+	background-position:0px -30px;
+}
+.map_popup_toggle_lBtn:hover{
+	background-position:-24px -30px;
+}
+.map_popup_toggle_rBtn{
+	background-position:-48px -30px;
+}
+.map_popup_toggle_rBtn:hover{
+	background-position:-72px -30px;
+}
+
+/*楼层选择*/
+.ui-floor,ui-floor ul{overflow: auto; border-top:1px solid #fff;}
+.ui-floor li{display: block;float: left;margin-top: 15px;}
+
+.ui-floor ul li a{
+	color: #000;
+	display: block;
+	float: left;
+	font-weight: bold;
+	font-family: '宋体';
+	height: 50px;
+	line-height: 50px;
+	width: 50px;
+	margin-left: 20px;
+	_margin-left: 10px;
+	text-align: center;
+	text-decoration: none;
+	background-image: url(./image/tool/floor_btn.gif);
+}
+.ui-floor a.ui-floor-1{background-position:0px 0px;}
+.ui-floor a.ui-floor-1:hover{background-position: -50px 0;}
+.ui-floor a.ui-floor-1-on{background-position: -100px 0; }
+.ui-floor a.ui-floor-1-on:hover{background-position: -100px 0;}
+
+.ui-floor a.ui-floor-2{background-position:0px -50px;}
+.ui-floor a.ui-floor-2:hover{background-position: -50px -50px;}
+.ui-floor a.ui-floor-2-on{background-position: -100px -50px; }
+.ui-floor a.ui-floor-2-on:hover{background-position: -100px -50px; }
+
+.ui-floor a.ui-floor-warn{background-position: 0px -100px;}
+.ui-floor a.ui-floor-warn:hover{background-position: -50px -100px;}
+.ui-floor a.ui-floor-warn-on{background-position: -100px -100px; }
+.ui-floor a.ui-floor-warn-on:hover{background-position: -100px -100px;}
+.items-nav{
+	padding-left: 10px;
+	float: left;
+	position:relative;
+}
+.items-nav .batch-box{
+	position:absolute;
+	left:60px;
+	top:30px;
+	width:50px;
+	padding-left:10px;
+	background:#FFF;
+	border:1px solid #0CF;
+	}
+.items-nav .batch-box ul li{
+	line-height:26px;
+	}
+.items-nav-inputBox{ float: left; height: 20px; margin:2px 3px 0px 0px;_margin:4px 1px 0px 0px;}
+a.items-nav-btn{margin-right: 10px;color: #4c73c2;}
+.checkAll{outline: none; outline-style: none;}
+/*楼层图和系统图切换*/
+.ui-map-change{
+	float: right;
+	margin-top: 5px;
+}
+.ui-btn-change{
+	display: inline-block;
+	width: 49px;
+	height: 51px;
+	background-image: url(./image/tool/icon-1.gif);
+}
+.ui-btn-lc{background-position: 0px 0px;}
+.ui-btn-xt{background-position: -98px 0px;}
+.ui-btn-lc:hover{background-position: -49px 0px;}
+.ui-btn-xt:hover{background-position: -147px 0px;}
+/*设备查询*/
+.ui-search{
+	padding: 10px;
+	height: 70px;
+	position: relative;
+	background-color: #fff;
+}
+.ui-search-inputBox{
+	border: none;
+	border: 1px solid #bfd0d8;
+	border-bottom-color: #bed0da;
+	border-top-color: #8facba;
+	background-color: #fff;
+	height: 26px;
+	padding-top: 2px;
+	width: 180px;
+	float: left;
+	margin:5px 0px ;
+}
+.ui-search-inputBox input.ui-search-input{
+	width: 171px;
+	border: 0;
+	height: 18px;
+	_height:14px;
+	padding: 4px;
+	font-size: 14px;
+	font-family: '宋体';
+}
+a.ui-btn-search{
+	color: #b7bbb3;
+	margin-left: 3px;
+}
+a.ui-btn-search .icon-search{cursor: pointer;}
+a.ui-search-choose{display:inline-block;*display:inline;*zoom:1;
+	margin-left: 5px;
+	_margin-left: 2px;
+	width: 100px;
+	height: 28px;
+	line-height: 28px;
+	font-size: 14px;
+	font-family: '宋体';
+	color: #7c7c7c;
+	text-align:left;vertical-align:middle;cursor:pointer;
+	background-color:#e8eae9;
+	background:-webkit-gradient(linear, left top, left bottom, from(#fffcfd), to(#e8eae9));
+	background:-moz-linear-gradient(top, #fffcfd, #e8eae9);filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#fffcfd', endColorstr='#e8eae9');
+	background:-o-linear-gradient(top, #fffcfd, #e8eae9);
+	background:linear-gradient(top, #fffcfd, #e8eae9);
+	*background-color:#e8eae9;border:1px solid #bbbbbb;}
+a.ui-search-choose:hover{
+	text-decoration: none;
+	color: #7c7c7c;
+}
+a.ui-search-choosed{display:inline-block;*display:inline;*zoom:1;
+	margin-left: 5px;
+	_margin-left: 2px;
+	width: 100px;
+	height: 28px;
+	line-height: 28px;
+	font-size: 14px;
+	font-family: '宋体';
+	color: #b7bbb3;
+	text-align:left;vertical-align:middle;cursor:pointer;
+	background-color:#ffe68b;
+	background:-webkit-gradient(linear, left top, left bottom, from(#fefad3), to(#ffe68b));
+	background:-moz-linear-gradient(top, #fefad3, #ffe68b);filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#fefad3', endColorstr='#ffe68b');
+	background:-o-linear-gradient(top, #fefad3, #ffe68b);
+	background:linear-gradient(top, #fefad3, #ffe68b);
+	*background-color:#ffe68b;border:1px solid #f3cf55;}
+a.ui-search-choosed:hover{
+	text-decoration: none;
+	color: #b7bbb3;
+}
+span.ui-search-choose-icon{display:inline-block;*display:inline;*zoom:1;color: #4b4b4b;width: 15px;}
+span.ui-search-choose-text{
+	display:inline-block;*display:inline;*zoom:1;
+	width: 70px;
+	padding-left: 8px;
+}
+.ui-search-options{
+	background-color: #fff;
+	width: 100px;
+	height: 82px;
+	border: 1px solid #bbbbbb;
+	border-top: none;
+	position: absolute;
+	left: 211px;
+	top: 40px;
+	_top:41px;
+	z-index: 500;
+	display: none;
+}
+.ui-search-option{
+	display: block;
+	padding-left: 8px;
+	height: 26px;
+	line-height: 26px;
+}
+.ui-search-option:hover{
+	background-color: #e5eff9;
+}
+.ui-search-options .ui-search-option a{
+	display: block;
+	width: 92px;
+	font-size: 14px;
+	font-family: '宋体';
+	color: #7c7c7c;
+}
+.ui-search-options .ui-search-option a:hover{
+	text-decoration: none;
+	color: #7c7c7c;
+}
+a.ui-search-choose:hover{
+	color: #7c7c7c;
+	text-decoration: none;
+}
+a.ui-status-btn{
+	color: #4b4b4b;
+	display: inline-block;
+	height: 26px;
+	line-height: 26px;
+	width: 27px;
+	text-align: center;
+	background:url(./image/tool/oc.gif);
+}
+a.ui-status-btn:hover{
+	text-decoration: none;
+}
+.ui-light{	
+	display: inline-block;
+	height: 20px;
+	width: 20px;
+	margin:0 5px;
+	position: relative ;
+	top:5px ;
+}
+#G_ItemListsBox{ border-top: 1px solid #fff; background: #fff;}
+
+.ui-light-open{background:url(./image/tool/icon-light.gif);}
+.ui-light-closed{background:url(./image/tool/icon-light-closed.gif);}
+/*分页*/
+#G_ItemListsBox .ui-paging{ margin: auto; margin-bottom: 10px;}
+#G_ItemListsBox .ui-paging a{ float: none;}
+.ui-paging-bold i{font-style:normal;}
+.ui-paging em.ui-paging-bold{float:none;}
+/*楼层路径*/
+.geoAreaName_style { 
+	color:#000;
+	font:bold 16px "宋体";
+	height:26px; 
+	line-height: 26px;
+	text-align: center;
+	width:120px;
+	background: #fff;
+	margin-bottom: 2px;
+	filter:alpha(opacity=80);-moz-opacity:0.8;opacity:0.8;
+}
+/*map_popup*/
+.MoreR5{text-align:right; position:absolute; top:5px; right:5px; font:12px;}
+.Pd_10{padding:8px 10px;}
+.relative{ position:relative;}
+.base-info{float:left;margin-left:15px;}
+.base-info p{font-weight: normal;font-family: '宋体';font-size: 14px;color: #000; line-height:26px;}
+.base-info .door-button {font-size:12px;background: #1483c2;color: #fff;padding: 6px;border: 1px solid #0d5279;border-radius: 4px;}
+.base-info .door-button:hover {background: #94c208;}
+/* 地图主区域 */
+.ui-template-main{position:relative; width:100%}
+/* 地图右上角工具 */
+.ui-map-tools{
+	width: 120px;
+	height: 120px;
+	position: absolute;
+	top: 10px;
+	right: 12px;
+	z-index: 1000;
+}
+.ui-showvideo{
+	width: 50px;
+	height: 18px;
+	line-height: 18px;
+	font-size: 12px;
+	color: #000;
+	margin-top: 4px;
+}
+.ui-showvideo .ui-checkbox{
+	margin:3px 5px 0 2px;
+}
+.gis_imgDiv{ margin-left: 10px;margin-top:6px;}
+div.olPopupContent{overflow:hidden}
+
+/*地图图例*/
+#map-legend{display:none;width: 500px;padding-bottom:3px;background:#fff;position: absolute;top:0;right: 10px;border: 1px solid #a7a6a4;color: #000;border-top:none;z-index: 10002;font-size:12px;font-family: '宋体';}
+#map-legend .legend-title{padding:5px 10px;border-bottom: 1px solid #a7a6a4;color: #000;}
+#map-legend span.legend-title-tip{color: #fe7201;}
+#map-legend .legend-close{display: block;width:16px;height:16px;background-image:url(./image/tool/legend_tool.png); background-position: 0 0; position: absolute;top:6px;right: 10px;}
+
+.legend-state{padding: 0 10px;}
+.legend-state-ul{display: block;overflow: hidden;padding: 6px 0;border-bottom: 1px dashed #bebebe;}
+.legend-state-li{color: #000;display: block;width: 128px;padding-left:30px;height:24px;line-height:24px;float: left;position: relative;}
+.legend-state-li i{display: block;width: 24px;height: 24px; background-image:url(./image/tool/legend_icon.png);position: absolute;left: 0;top: 0; }
+.legend-state-li .legend-state-1{background-position: -102px 0;}
+.legend-state-li .legend-state-2{background-position: -102px -30px;}
+.legend-state-li .legend-state-3{background-position: -102px -60px;}
+
+.legend-name{ overflow: hidden;}
+.legend-name-ul{display: inline-block;width: 148px; padding-left: 10px; float: left;}
+.legend-name-ul-mid{border: 1px dashed #bebebe; border-width: 0 1px;}
+.legend-name-ul .legend-name-li{color: #000;display: block;width: 128px;height: 24px;line-height: 24px;padding: 3px 0;padding-left:30px;position: relative;}
+.legend-name-ul .legend-name-li i{display: block;position: absolute;width: 24px;height: 24px;left:0;top:3px;}
+
+
+
+/*custom css*/
+.tabs {
+	background: none;
+	background-color: #0472ad;
+}
+.tabs ul li.on a.tab {
+	color: #c1ff00;
+}
+.tabs ul li span.icon-sysCff{
+	background-image:url(./image/icon-sysCff.png);
+}
+.bgcol_edfce2,
+#G_MapMuneCon_tabA {
+	background: #bde2f6;
+	border: none;
+}
+
+#map-legend {
+	top: 26px;
+	border-color: #a5d1e8;
+	padding-bottom: 0;
+}
+#map-legend .legend-content .legend-block {
+	width: 100%;
+	clear: both;
+	border-bottom: 1px solid #a5d1e8;
+}
+#map-legend .legend-content .legend-block.block-nomal {
+	color: #219821;
+}
+#map-legend .legend-content .legend-block.block-start {
+	color: #147899;
+}
+#map-legend .legend-content .legend-block.block-warn {
+	color: #be4d4d;
+}
+#map-legend .legend-content .legend-block.block-broken {
+	color: #a06a0b;
+}
+.legend-block .legend-block-left {
+	float: left;
+	width: 90px;
+	text-align: center;
+	padding: 10px 0;
+	color: #0c7193;
+	font-size: 14px;
+	font-weight: bold;
+}
+.legend-block .legend-block-right {
+	float: left;
+	width: 409px;
+	border-left: 1px solid #a5d1e8;
+	padding: 10px 0;
+}
+.legend-block .legend-block-right ul {
+	padding: 0 10px;
+}
+.legend-block .legend-block-right ul li {
+	float:left;
+	width: 33%;
+	height: 26px;
+	line-height: 26px;
+}
+.legend-block .legend-block-right ul li i{
+	display: inline-block;
+	width: 24px;
+	height: 24px;
+}
+.legend-block .legend-block-right ul li .legend-name {
+	display: inline-block;
+	height: 26px;
+}

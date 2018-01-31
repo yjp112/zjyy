@@ -1,0 +1,36 @@
+<form class="ui-form fn-left" id="deviceRuntime_edit_form" >
+			<div class="module-b">
+				<div id="tab-container1" class='ui-tab-h'>
+    	         <ul class='ui-tab-items-h'>
+    	           <li class='ui-tab-item'><a href="#tab11">基本信息</a></li>
+    	           <li class='ui-tab-item'><a href="#tab12">加减重复</a></li>
+    	           <li class='ui-tab-item'><a href="#tab13">分摊系数!=1</a></li>
+    	           <li class='ui-tab-item'><a href="#tab14">未分配完</a></li>
+    	         </ul>
+    	         <div class='ui-tab-panels' style="overflow:visible;">
+    		          <div id="tab11" class='ui-tab-panel' >
+    						#parse("nhgl/basic/deptConfig/include/check1.vm")
+    		          </div>
+    		          <div id="tab12" class='ui-tab-panel' style="width:750px">
+    						#parse("nhgl/basic/deptConfig/include/check2.vm")
+    		          </div>
+    		          <div id="tab13" class='ui-tab-panel' style="width:750px">
+    		          		#parse("nhgl/basic/deptConfig/include/check3.vm")
+    		          </div>
+    		          <div id="tab14" class='ui-tab-panel' style="width:750px">
+    		          		#parse("nhgl/basic/deptConfig/include/check4.vm")
+    		          </div>
+    	          </div>
+    	         </div>
+            </div>
+
+</form>
+<script type="text/javascript">
+	 $(document).ready(function(){
+		//$('#tab-container1').tabs({height:450});
+		$('#tab-container1').tabs();
+		$('table .dgDiv').css('height','239px');
+		$('table .bDiv.strip.striped').css('height','212px');
+		$('table .ui_buttons').css('display','none');
+	 });//ready
+</script>

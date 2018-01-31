@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="
+                http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+                http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+                http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+                http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd">
+	<bean id="viewNameTranslator" class="org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator"></bean>
+
+	<bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+		<property name="converters">
+			<list>
+				<bean class="com.supconit.honeycomb.mvc.converter.StringToDateConverter"></bean>
+			</list>
+		</property>
+	</bean>
+	<bean id="webBindingInitializer" class="org.springframework.web.bind.support.ConfigurableWebBindingInitializer">
+		<property name="conversionService" ref="conversionService" />
+	</bean>
+	<util:list id="messageConverters">
+		<bean class="com.supconit.common.web.convert.PagerHttpMessageConverter"/>
+		<bean class="com.supconit.honeycomb.mvc.converter.FastJsonHttpMessageConverter" />	</util:list>
+	<bean id="handlerAdapter" class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+		<property name="order" value="1" />
+		<property name="webBindingInitializer" ref="webBindingInitializer" />
+		<property name="messageConverters" ref="messageConverters"/>
+		<property name="customArgumentResolvers">
+			<list>
+				<bean class="hc.mvc.resolvers.FormModelMethodArgumentResolver">
+					<constructor-arg ref="webBindingInitializer" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="velocityConfig" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
+		<property name="velocityEngine" ref="velocityEngine"></property>
+	</bean>
+
+    <!-- 文件上传 -->
+    <!-- <bean id="multipartResolver" class="com.supconit.honeycomb.mvc.multipart.CosMultipartResolver"></bean>
+    <bean id="multipartResolver" class="com.supconit.ywgl.utils.CommonsMultipartResolver">
+        <property name="defaultEncoding" value="UTF-8" />
+        <property name="maxUploadSize" value="10000000" />
+        <property name="excludeUrls" value="fileupload/fileup" />
+    </bean>-->
+	<bean id="handlerMapping" class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
+		<property name="order" value="1" />
+		<!-- <property name="useDefaultSuffixPattern" value="false" /> -->
+		<property name="interceptors">
+			<list>
+				<bean class="com.supconit.honeycomb.mvc.interceptors.CharsetInterceptor" />
+				<bean class="com.supconit.common.web.interceptors.MenuInterceptor" />
+				<bean class="hc.safety.web.interceptors.SafetyInterceptor" p:safetyManager-ref="safetyManager" />
+				<bean class="hc.bpm.interceptors.BpmInterceptor" />
+				<!-- bean class="com.supconit.honeycomb.dataaccess.interceptors.MenuAuthorWebInterceptor"/-->
+			</list>
+		</property>
+	</bean>
+
+	<bean id="velocityEngine" class="org.springframework.ui.velocity.VelocityEngineFactoryBean">
+		<property name="configLocation" value="${velocity.configLocation}" />
+		<property name="resourceLoaderPath" value="${velocity.resourceLoaderPath}" />
+		<property name="velocityProperties">
+			<props>
+				<prop key="input.encoding">UTF-8</prop>
+				<prop key="output.encoding">UTF-8</prop>
+				<!--<prop key="userdirective">${velocity.userdirective}</prop>-->
+			</props>
+		</property>
+	</bean>
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.velocity.VelocityViewResolver">
+		<property name="cache" value="${velocity.cache}" />
+		<property name="prefix" value="${velocity.prefix}" />
+		<property name="suffix" value="${velocity.suffix}" />
+		<property name="contentType" value="${velocity.contentType}" />
+		<property name="exposeSpringMacroHelpers" value="true" />
+		<property name="requestContextAttribute" value="rc" />
+		<property name="exposeRequestAttributes" value="true" />
+		<property name="allowRequestOverride" value="true"/>
+		<property name="attributes" ref="_globalVars" />
+		<property name="toolboxConfigLocation" value="${velocity.toolboxConfigLocation}" />
+	</bean>
+	<!-- bean id="handlerExceptionResolver" class="com.supconit.honeycomb.mvc.handler.LogedSimpleMappingExceptionResolver">
+	</bean-->
+	<bean id="handlerExceptionResolver"
+		class="com.supconit.common.web.exceptionHandler.AnnotationHandlerMethodExceptionResolver">
+		<property name="defaultErrorView" value="exceptions/exception" /><!-- 
+			错误页面 -->
+		<property name="messageConverters" ref="messageConverters" /> 
+	</bean>
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<ref  bean="mappingJacksonHttpMessageConverter" />
+			</list>
+		</property>
+	</bean>
+	<bean id="mappingJacksonHttpMessageConverter"
+		class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+		<property name="supportedMediaTypes">
+			<list>
+				<value>text/html;charset=UTF-8</value>
+			</list>
+		</property>
+	</bean>
+</beans>

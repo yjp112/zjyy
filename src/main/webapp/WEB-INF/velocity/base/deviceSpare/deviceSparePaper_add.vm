@@ -1,0 +1,103 @@
+#parse("index/_header.vm")
+<link href="$!{main_static_custom_url}/js/uploadify/uploadify.css" rel="stylesheet">
+<script src="$!{main_static_custom_url}/js/uploadify/jquery.uploadify-3.1.min.js"></script>
+</head>
+
+<body >
+	<form id="myform_id" method="post" action="$!{rc.contextPath}/base/deviceSpareIn/documentSave"  class="ui-layout-center ui-dialog-form">
+	<input type="hidden" name="deviceSpareId" id="deviceSpareId" value="$!{deviceSpareId}">
+    <table width="100%">
+       <tr>
+		<td valign="top" style="width:15%" class="label"><span class="ui-form-required">*</span>上传文档：</td>
+        <td colspan="3" >
+	        <table  class="ui-table"  width="100%" cellpadding="0" cellspacing="0" border="1" id="images_table_id">
+		        <div id="filehidden"></div>
+				  <thead>
+			        <tr>
+			          <th align="left" width="40%">附件名称</th>
+			          <th align="left" width="20%" >附件类型</th>
+			          <th align="left" width="20%" >附件大小</th>
+			          <th  width="20%" >操作</th>
+			        </tr>
+				  </thead>
+				   <tbody>
+				   </tbody>
+	        </table>
+         </td>
+        </tr>
+        <tr>
+           <td></td>
+           <td><input type="file" name="file"  id="file_upload" style="height:30px;width:150px;"/>	</td>
+        </tr>
+    </table>
+    <div class="actions">
+	    <button class="k-primary hc_btn" id="document_tb" type="submit"><i class="fa fa-save"></i>保 存</button>
+		<button class="hc_btn cancel" onclick="close_dialog('deviceSparePaper_add')" type="button"><i class="fa fa-close"></i>取 消</button>
+	</div>
+</form>
+</body>
+<script type="text/javascript">
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+	          defaults: {
+	            resizable: true,
+	            closable: false,
+	            spacing_open: 5
+	          }
+	        });
+			
+		   $("#myform_id").validator({
+	            valid:function(form){
+	                form_btn_submit($("#document_tb"),form,function(res){
+	                	//防止ie9下面出错
+	                	if ($('#file_upload').length > 0) { 
+	                		$('#file_upload').uploadify('destroy');
+	                	}
+	                    validateCallback(res,"grid","deviceSparePaper_add");
+	                });
+	            }
+	        })	
+	});
+//文件上传
+$(function(){
+	$('#file_upload').uploadify({
+		'buttonText' : '浏览',                
+		'buttonClass' : 'k-primary fileUploadBtn',
+		'queueID': 'context',
+		'multi' : false,                        
+		'fileSizeLimit':'$!{fileLength}MB',               
+		'fileObjName' : 'file', 
+		'cancelImg' : '$!{main_static_custom_url}/js/uploadify/cancel.png',
+        'swf'       : '$!{main_static_custom_url}/js/uploadify/uploadify.swf',
+        'uploader' : '${rc.contextPath}/fileupload/fileup',
+        'removeCompleted': true,
+        'removeTimeout':'1',
+		 onUploadSuccess:function(file,data,response){
+              if(response){
+              		$("#images_table_id tbody").empty();
+              		$("#filehidden").empty();
+    				var obj = eval('(' + data + ')');
+    				var filedisplay ="<tr id='alreadyfile'><td>"+obj.orignalname+"</td><td>"+obj.postfix+"</td><td>"+obj.filesize+"KB</td><td ><a href='#' onclick=removefile()>移除</a></td></tr>";
+    				var filehidden ="<input type='hidden' name='fileorignal' value='"+obj.orignalname+"' id='fileorignal'/><input type='hidden' name='filename' value='"+obj.filename+"' id='filename'/>";
+    				$("#images_table_id").append(filedisplay);
+    				$("#filehidden").append(filehidden);
+              }else{
+    		  	 alert("文件上传失败！");
+              }
+  		}
+	})
+})
+
+function removefile(){
+	$("#attachment").remove();
+	$("#file_upload").show();
+	$("#fileorignal").remove();
+	$("#filename").remove();
+	$("#alreadyfile").remove();
+	$('#fileType').val('');
+	$('#fileName').val('');
+	$('#fileSize').val('');
+	$('#storePath').val('');
+}
+</script>
+</html>

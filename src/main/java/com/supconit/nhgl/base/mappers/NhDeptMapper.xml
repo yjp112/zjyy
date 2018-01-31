@@ -1,0 +1,173 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.base.entities.NhDept">
+
+	<resultMap type="com.supconit.nhgl.base.entities.NhDept" id="NhDeptResultMap">     
+        <result property="id" column="ID" />
+        <result property="code" column="CODE" />
+        <result property="name" column="NAME" />
+        <result property="pId" column="PID" />
+        <result property="deptAddr" column="DEPT_ADDR" />
+        <result property="deptBuildDate" column="DEPT_BUILD_DATE" />
+        <result property="deptFaxes" column="DEPT_FAXES" />
+        <result property="description" column="DESCRIPTION" />
+        <result property="enabled" column="ENABLED" />
+        <result property="deptTell" column="DEPT_TELL" />
+        <result property="recordBuildDate" column="RECORD_BUILD_DATE" />
+        <result property="recordBuilder" column="RECORD_BUILDER" />
+        <result property="compId" column="COMP_ID" />
+        <result property="companyCode" column="COMPANY_CODE" />
+        <result property="lef" column="LEF" />
+        <result property="rgt" column="RGT" />
+        <result property="locationId" column="LOCATION_ID" />
+        <result property="persons" column="PERSONS" />
+        <result property="area" column="AREA" />
+		<result property="nhType" column="nhType" />
+	</resultMap>
+	
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+	<sql id="select_pre">
+		SELECT * FROM NH_DEPT
+	</sql>
+	<select id="findById" resultMap="NhDeptResultMap" parameterType="Long">
+		<include refid="select_pre" />
+		where id=#{id} 
+	</select>
+	<select id="findRootId" resultType="Long" >
+		SELECT ID FROM NH_DEPT
+		where code='ROOT'
+	</select>
+	
+	<select id="getById" resultMap="NhDeptResultMap" parameterType="Long">
+		<include refid="select_pre" />
+		where id=#{id} 
+	</select>
+	<select id="findAll" resultMap="NhDeptResultMap">
+		<include refid="select_pre" />
+	</select>
+    <select id ="findByNoIds" parameterType="map" resultMap="NhDeptResultMap">
+        select * from NH_DEPT where id not in
+        <foreach collection="ids" open="(" close=")" separator="," item="id">
+            #{id}
+        </foreach>
+    </select>	
+	<select id="findAllChildren" resultMap="NhDeptResultMap" parameterType="Long">
+	    with tt(id) as(
+	     SELECT ID FROM NH_DEPT  WHERE id=#{id}
+	      UNION ALL 
+	    select a.id from NH_DEPT a ,tt b where a.pid=b.id
+	    )
+	    select id from tt
+	</select>
+	<select id="findAllChildrenIds" resultType="Long" parameterType="Long">
+	    with tt(id) as(
+	     SELECT ID FROM NH_DEPT  WHERE id=#{id}
+	      UNION ALL 
+	    select a.id from NH_DEPT a ,tt b where a.pid=b.id
+	    )
+	    select id from tt
+	</select>
+	
+	<select id="findDeptTypeByPid" resultMap="NhDeptResultMap" parameterType="com.supconit.nhgl.base.entities.NhDept">
+		<include refid="select_pre"/>
+		a LEFT JOIN NH_DEPT_CONFIG b ON a.ID = b.DEPT_ID
+		<where>
+			1=1
+			<if test="pId != null"> and a.PID = #{pId}</if>
+			<if test="nhType!=null">and b.NH_TYPE=#{nhType}</if>
+		</where>
+	</select>
+	<select id="getTreeById" resultMap="NhDeptResultMap" parameterType="int"  lang="velocity">
+		WITH TT (ID) AS (
+				SELECT
+					ID
+				FROM
+					NH_DEPT
+				#where()
+					#if($_parameter)
+						id=@{_parameter,jdbcType=NUMERIC}
+					#end
+				#end
+				UNION ALL
+					SELECT
+						A.ID
+					FROM
+						NH_DEPT A,
+						TT B
+					WHERE
+						A.PID = B.ID
+			)
+		select * from tt
+	</select>
+	<select id="getDeptArea" resultMap="NhDeptResultMap" parameterType="com.supconit.nhgl.base.entities.NhDept" lang="velocity">
+		SELECT
+			TOP 10 ID,
+			ISNULL(SUM (AREA), 0) AS AREA,
+			NAME as name
+		FROM
+			NH_DEPT
+			where PID in(
+				select ID from NH_DEPT 
+				#where()
+					#if($_parameter.pid)
+						PID = @{_parameter.pid}
+					#end
+				#end
+			)
+		GROUP BY
+			id,
+			NAME
+	</select>
+	
+	<select id="findByCondition" resultMap="NhDeptResultMap" parameterType="com.supconit.nhgl.base.entities.NhDept" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			ID,
+			nvl(AREA, 0) as area,
+			NAME as name
+		FROM
+			NH_DEPT
+		<where>
+			<if test="pId != null">PID=#{pId}</if>
+		</where>
+		#order($_parameter.condition,"AREA DESC")
+ 		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="findByCondition" resultMap="NhDeptResultMap" parameterType="com.supconit.nhgl.base.entities.NhDept" lang="velocity" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			ID,
+			ISNULL(AREA, 0) AS AREA,
+			NAME as name
+		
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"AREA DESC")
+ 		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM
+			NH_DEPT
+		#where()
+			#if($_parameter.condition.pid)
+				PID=@{_parameter.condition.pid}
+			#end
+		#end
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="countByCondition" resultType="Long" parameterType="com.supconit.nhgl.analyse.electric.area.entities.NhArea" lang="velocity">
+		SELECT COUNT(*) FROM NH_DEPT
+		#where()
+			#if($_parameter.condition.pid)
+				PID=@{_parameter.condition.pid}
+			#end
+		#end
+	</select>
+	<select id="findByConfig" resultMap="NhDeptResultMap" parameterType="Long" lang="velocity">
+		SELECT * FROM NH_DEPT d WHERE EXISTS (
+			SELECT MAX (c.dept_ID) FROM NH_DEPT_CONFIG c WHERE d.id = c.DEPT_ID AND c.NH_TYPE =@{_parameter,jdbcType=NUMERIC} GROUP BY c.dept_ID
+		)
+	</select>
+</mapper>

@@ -1,0 +1,16 @@
+<form id="energyAlarm_edit_form" method="post" action="" class="ui-form">
+	<fieldset>
+		<div class="ui-form-item">
+			 <label class="ui-label"><span class="ui-form-required">*</span>报警时间:</label>
+	         <input  readonly class="ui-input"  type="text"  name="alarmTime" value="$!{energyAlarm.alarmTime}" />
+		</div>
+		<div class="ui-form-item ui-form-item-textarea">
+	        <label class="ui-label"><span class="ui-form-required">*</span>报警设备:</label>
+			 <textarea readonly class="ui-textarea ui-textarea-small"   name="deviceCode">$!{energyAlarm.deviceCode}</textarea>
+	    </div>
+	    <div class="ui-form-item ui-form-item-textarea">
+	        <label class="ui-label" ><span class="ui-form-required">*</span>报警说明:</label>
+	         <textarea readonly  class="ui-textarea ui-textarea-small"   name="content">$!{energyAlarm.content}</textarea>
+	    </div>
+	</fieldset>
+</form>

@@ -1,0 +1,7 @@
+<div class="ui-form-item ui-form-item-textarea colspan2">
+  <label class="ui-label">下级生成错误部门名称</label>
+  	<textarea class="ui-textarea"  readonly name="remark">通过下级生成但是配有HPID：#foreach($d in $deptConfiglst)#if($d.isSum==1)$!d.deptName ;#end#end 
+		
+不通过下级生成但没有配HPID：#foreach($d in $deptConfiglst)#if($d.isSum==0 )$!d.deptName ;#end#end 
+	</textarea>
+</div>

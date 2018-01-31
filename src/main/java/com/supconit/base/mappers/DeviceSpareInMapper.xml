@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.base.entities.DeviceSpareIn">
+
+	<resultMap type="com.supconit.base.entities.DeviceSpareIn" id="DeviceSpareInResultMap">
+		<result property="id" column="ID"/> 
+        <result property="deviceId" column="DEVICE_ID" />
+        <result property="checkDate" column="CHECK_DATE" />
+        <result property="storeMan" column="STORE_MAN" />
+        <result property="assetmanager" column="ASSETMANAGER" />
+        <result property="deptId" column="DEPT_ID" />
+        <result property="createId" column="CREATE_ID" />
+        <result property="creator" column="CREATOR" />
+        <result property="createDate" column="CREATE_DATE" /> 
+        
+        <result property="deviceName" column="DEVICE_NAME" />
+        <result property="deviceCode" column="DEVICE_CODE" />
+        <result property="spareName" column="SPARE_NAME" />
+        <result property="total" column="TOTAL" />
+        <result property="remainder" column="REMAINDER" />
+        <result property="used" column="USED" />
+        <result property="locationId" column="LOCATION_ID" />
+        <result property="categoryId" column="CATEGORY_ID" />
+        <result property="fileName" column="FILE_NAME" />
+         <result property="storePath" column="STORE_PATH" />
+        <result property="supplierName" column="supplier_name" />
+	</resultMap>
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+    <!-- 获取记录列表-->
+    <sql id="select_pre" lang="velocity">
+    	SELECT
+    		e.id,
+			d.id device_id,
+			d.device_name,
+			e.check_Date,
+			(select s.full_name from supplier s where s.id=d.supplier_id) supplier_name,
+			e.storeman,
+			e.assetmanager,
+			e.dept_id,
+			nvl(e.total,0) total,
+			nvl(e.remainder,0) remainder,
+			nvl(e.used,0) used,
+			e.file_name,
+			e.STORE_PATH,
+			d.location_id,
+			d.category_id,
+			e.CREATOR,
+			e.CREATE_DATE
+		FROM
+			device d left join (
+	    select 
+		    a.ID,
+			a.DEVICE_ID,
+			a.CHECK_DATE,
+			a.STOREMAN,
+			a.ASSETMANAGER,
+			a.DEPT_ID,
+			a.CREATOR,
+			a.CREATE_DATE,
+			SUM(b.TOTAL) TOTAL,
+			SUM(b.REMAINDER) REMAINDER,
+			SUM(b.TOTAL-b.REMAINDER) USED,
+			c.FILE_NAME, 
+			c.STORE_PATH
+		from 
+			 DEVICE_SPARE_IN a left join DEVICE_SPARE_IN_DETAIL b on a.ID=b.DEVICE_SPARE_IN_ID
+			left join ATTACHMENT c on a.ID=c.F_ID  and MODEL_TYPE=@{_parameter.condition.spareDevice}
+		GROUP BY
+			a.ID,
+			a.DEVICE_ID,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+			a.CHECK_DATE,
+			a.STOREMAN,
+			a.ASSETMANAGER,
+			a.DEPT_ID,
+			a.CREATOR,
+			a.CREATE_DATE,
+			c.FILE_NAME,
+			c.STORE_PATH
+		) e on e.device_id=d.id  
+    </sql>
+    <sql id="count_pre" lang="velocity">
+		SELECT
+		COUNT(d.id)
+		FROM
+			device d left join (
+	    select 
+		    a.ID,
+			a.DEVICE_ID,
+			a.CHECK_DATE,
+			a.CREATE_DATE,
+			a.STOREMAN,
+			a.ASSETMANAGER,
+			a.DEPT_ID,
+			SUM(b.TOTAL) TOTAL,
+			SUM(b.REMAINDER) REMAINDER,
+			SUM(b.TOTAL-b.REMAINDER) USED,
+			c.FILE_NAME, 
+			c.STORE_PATH
+		from 
+			 DEVICE_SPARE_IN a left join DEVICE_SPARE_IN_DETAIL b on a.ID=b.DEVICE_SPARE_IN_ID
+			left join ATTACHMENT c on a.ID=c.F_ID  and MODEL_TYPE=@{_parameter.condition.spareDevice}
+		GROUP BY
+			a.ID,
+			a.DEVICE_ID,
+			a.CHECK_DATE,
+			a.CREATE_DATE,
+			a.STOREMAN,
+			a.ASSETMANAGER,
+			a.DEPT_ID,
+			c.FILE_NAME, 
+			c.STORE_PATH
+		) e on e.device_id=d.id  
+	</sql>
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+			#where()
+					#set($_p = $_parameter.condition)
+					1=1 and d.id>0
+					#if($_p.deviceName && $_p.deviceName!='')
+						#set($_deviceName='%' +$_p.deviceName+ '%')
+						and d.DEVICE_NAME LIKE @{_deviceName,jdbcType=VARCHAR}
+					#end
+					#if($_p.deviceId)
+						#set($_deviceId = $_p.deviceId)
+						AND a.DEVICE_ID= @{_deviceId,jdbcType=BIGINT}
+					#end
+					#if($_p.spareName && $_p.spareName!='')
+						#set($_spareName='%' +$_p.spareName+ '%')
+						and e.SPARE_NAME LIKE @{_spareName,jdbcType=VARCHAR}
+					#end
+					#if($_p.deviceCode && $_p.deviceCode!='')
+						#set($_deviceCode='%' +$_p.deviceCode+ '%')
+						and d.DEVICE_CODE LIKE @{_deviceCode,jdbcType=VARCHAR}
+					#end
+					#if($_p.lstLocationId && $_p.lstLocationId.size()>0)	
+						#set($_lstLocationId =$_p.lstLocationId)
+						and 
+						#repeat( $_lstLocationId $ids "," " d.LOCATION_ID IN (" ")" )
+						    @{ids,jdbcType=BIGINT}
+						#end	
+					#end
+					#if($_p.lstCategoryId && $_p.lstCategoryId.size()>0)	
+						#set($_lstCategoryId =$_p.lstCategoryId)
+						and 
+						#repeat( $_lstCategoryId $ids "," " d.CATEGORY_ID IN (" ")" )
+						    @{ids,jdbcType=BIGINT}
+						#end	
+					#end
+			#end
+		]]>
+	</sql>	
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.base.entities.DeviceSpareIn" resultMap="DeviceSpareInResultMap" lang="velocity" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre" />
+		<include refid="condition_sql" />
+		#order($_parameter.condition,"e.CHECK_DATE")
+ 		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+	<select id="findByCondition" parameterType="com.supconit.base.entities.DeviceSpareIn" resultMap="DeviceSpareInResultMap" lang="velocity" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+    		e.id,
+			d.id device_id,
+			d.device_name,
+			(select s.full_name from supplier s where s.id=d.supplier_id) supplier_name,
+			e.check_Date,
+			e.storeman,
+			e.assetmanager,
+			e.dept_id,
+			isnull(e.total,0) total,
+			isnull(e.remainder,0) remainder,
+			isnull(e.used,0) used,
+			e.file_name,
+			e.STORE_PATH,
+			d.location_id,
+			d.category_id,
+			e.CREATOR,
+			e.CREATE_DATE
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+ 		#order($_parameter.condition,"e.CHECK_DATE DESC")
+ 		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM
+			device d left join (
+	    select 
+		    a.ID,
+			a.DEVICE_ID,
+			a.CHECK_DATE,
+			a.CREATOR,
+			a.CREATE_DATE,
+			a.STOREMAN,
+			a.ASSETMANAGER,
+			a.DEPT_ID,
+			SUM(b.TOTAL) TOTAL,
+			SUM(b.REMAINDER) REMAINDER,
+			SUM(b.TOTAL-b.REMAINDER) USED,
+			c.FILE_NAME,
+			c.STORE_PATH
+		from 
+			 DEVICE_SPARE_IN a left join DEVICE_SPARE_IN_DETAIL b on a.ID=b.DEVICE_SPARE_IN_ID
+			left join ATTACHMENT c on a.ID=c.F_ID  and MODEL_TYPE=@{_parameter.condition.spareDevice}
+		GROUP BY
+			a.ID,
+			a.DEVICE_ID,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+			a.CHECK_DATE,
+			a.CREATOR,
+			a.CREATE_DATE,
+			a.STOREMAN,
+			a.ASSETMANAGER,
+			a.DEPT_ID,
+			c.FILE_NAME,
+			c.STORE_PATH
+		) e on e.device_id=d.id  
+		<include refid="condition_sql" />
+ 		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+
+    <select id="countByCondition" parameterType="com.supconit.base.entities.DeviceSpareIn" resultType="long" lang="velocity">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+	<select id="findTopOne" resultMap="DeviceSpareInResultMap" databaseId="sqlserver">
+		 select 
+		    top(1)*
+		from 
+			 DEVICE_SPARE_IN 
+	    order by id desc
+	</select>
+	<select id="findTopOne" resultMap="DeviceSpareInResultMap" databaseId="oracle">
+		 select * from (select 
+		    *
+		from 
+			 DEVICE_SPARE_IN 
+	    order by id desc) where rownum=1
+	</select>	
+    <select id="findById" parameterType="map" resultMap="DeviceSpareInResultMap">
+		select 
+    	a.ID,
+        a.DEVICE_ID,
+        d.DEVICE_NAME,
+        s.FULL_NAME supplier_name,
+        a.CHECK_DATE,
+        a.STOREMAN,
+        a.ASSETMANAGER,
+        a.DEPT_ID,
+        a.CREATOR,
+        a.CREATE_DATE,
+        c.FILE_NAME,
+        c.STORE_PATH
+		FROM
+		DEVICE_SPARE_IN a 
+		left join ATTACHMENT c on a.ID=c.F_ID and MODEL_TYPE=#{modelType}
+		left join device d on d.id=a.device_id
+		LEFT JOIN SUPPLIER S ON D.SUPPLIER_ID=S.ID
+		where a.id=#{id}
+	</select>
+	 <select id="findByDeviceId" parameterType="Long" resultMap="DeviceSpareInResultMap">
+		select 
+    	a.ID,
+        a.DEVICE_ID,
+        d.DEVICE_NAME,
+        s.FULL_NAME supplier_name,
+        a.CHECK_DATE,
+        a.STOREMAN,
+        a.ASSETMANAGER,
+        a.DEPT_ID,
+        a.CREATOR,
+        a.CREATE_DATE,
+        c.FILE_NAME,
+        c.STORE_PATH
+		FROM
+		DEVICE_SPARE_IN a 
+		left join ATTACHMENT c on a.ID=c.F_ID
+		left join device d on d.id=a.device_id
+		LEFT JOIN SUPPLIER S ON D.SUPPLIER_ID=S.ID
+		where a.DEVICE_ID=#{deviceId}
+	</select>
+	<sql id="TABLE_NAME" lang="velocity">DEVICE_SPARE_IN</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+        <!-- 插入记录-->
+	<insert id="insert" parameterType="com.supconit.base.entities.DeviceSpareIn" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="INSERT_SQL"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    <insert id="insert" parameterType="com.supconit.base.entities.DeviceSpareIn" 
+		keyProperty="id" keyColumn="ID" 		lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>        
+		<include refid="INSERT_SQL" />
+	</insert>    
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>
+		(#if($_databaseId=='oracle') ID,#end
+			DEVICE_ID,
+	        CHECK_DATE,
+	        STOREMAN,
+	        ASSETMANAGER,
+	        DEPT_ID,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE	
+		) VALUES (        
+		 #if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end
+			@{_parameter.deviceId,jdbcType=NUMERIC},
+	        @{_parameter.checkDate,jdbcType=TIMESTAMP},
+	        @{_parameter.storeMan,jdbcType=VARCHAR},
+	        @{_parameter.assetmanager,jdbcType=VARCHAR},
+	        @{_parameter.deptId,jdbcType=NUMERIC},
+	        @{_parameter.createId,jdbcType=NUMERIC},
+	        @{_parameter.creator,jdbcType=VARCHAR},
+	        @{_parameter.createDate,jdbcType=TIMESTAMP}
+			)
+	</sql>		 	                
+	
+    	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.base.entities.DeviceSpareIn">
+		UPDATE	DEVICE_SPARE_IN
+		<set>
+        <if test="deviceId != null">DEVICE_ID = #{deviceId,jdbcType=NUMERIC},</if>
+        <if test="checkDate != null">CHECK_DATE = #{checkDate,jdbcType=TIMESTAMP},</if>
+        <if test="storeMan != null">STOREMAN = #{storeMan,jdbcType=VARCHAR},</if>
+        <if test="assetmanager != null">ASSETMANAGER = #{assetmanager,jdbcType=VARCHAR},</if>
+        <if test="deptId != null">DEPT_ID = #{deptId,jdbcType=NUMERIC},</if>
+        <if test="createId != null">CREATE_ID= #{createId,jdbcType=NUMERIC},</if>
+        <if test="creator != null">CREATOR = #{creator,jdbcType=VARCHAR},</if>
+        <if test="createDate != null">CREATE_DATE = #{createDate,jdbcType=TIMESTAMP},</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+		    <!-- 删除多条记录-->
+	<delete id="deleteByIds">
+        DELETE FROM DEVICE_SPARE_IN_DETAIL WHERE ID in 
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<!-- DElETE -->
+	<delete id="deleteById" parameterType="long">
+		delete from DEVICE_SPARE_IN_DETAIL where  ID = #{id}
+	</delete>
+</mapper>

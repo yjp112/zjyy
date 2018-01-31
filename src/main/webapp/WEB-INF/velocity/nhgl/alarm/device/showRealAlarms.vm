@@ -1,0 +1,81 @@
+ <div class="ui-layout-center" id="subMain">
+	<table id="realAlarm_datalist" class="fn-hide"></table>
+</div>
+<div class="ui-layout-north">
+	<div class="ui-module-name">
+    	<label id="menuName">设备报警</label>
+    </div>
+	<form id="realAlarm_list_search" class="ui-form ui-form-search fn-clear">
+			<div class="ui-form-search-left">
+				<div class="ui-form-item-larger">
+			  		<label class="ui-label">报警时间：</label>
+	          		<input id="startTime" type="text" name="startTime"  class="ui-input ui-input-small  Wdate"  onclick="WdatePicker({dateFmt:'yyyy-MM-dd',maxDate:'#F{$dp.$D(\'endTime\')}'})" value="#date_format($!realAlarm.startTime,'yyyy-MM-dd')"/>
+		      		<span class="ui-form-text">至</span> 
+					<input id="endTime" type="text" name="endTime"  class="ui-input ui-input-small  Wdate"  onclick="WdatePicker({dateFmt:'yyyy-MM-dd',minDate:'#F{$dp.$D(\'startTime\')}'})" value="#date_format($!realAlarm.endTime,'yyyy-MM-dd')"/>
+				</div>
+				<div class="ui-form-item">
+					<label class="ui-label">设备类型：</label>
+					<input id="typeId" name="typeId" value="" style="display:none">
+					<input class="ui-input ui-input-choose" id="alarmType" name="alarmType" type="text" >
+				</div>				
+			</div>
+			<div class="ui-form-search-right">
+				<button type="submit" id="subButton" class="btn btn-primary"><i class="iconfont icon-search"></i> 查&nbsp;询</button>
+			</div>
+		</form>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	$("#alarmType").click(function(){
+			chooseAlarmType("typeId", "alarmType", "alarmType_show");
+        }); 
+        if(T.innerLayout&&!T.innerLayout.destroyed){
+			T.innerLayout.destroy();
+		}
+		T.innerLayout = $("#centerMain").layout({
+			defaults : {
+				resizable : false,
+				closable : false,
+				spacing_open : 5
+			},
+			onresize_end : function(){
+				$("#realAlarm_datalist").datagridResize({width:T.innerLayout.state.center.innerWidth,height:T.innerLayout.state.center.innerHeight});
+			}
+		});
+		
+		var realAlarm_datagrid=$("#realAlarm_datalist").datagrid({
+			url:'$!{rc.contextPath}/nhgl/alarm/device/getRealAlarmPage',
+			dataType: "json",
+			method: "GET",
+			singleSelected : true,
+			striped : false,
+			height:  T.innerLayout.center.state.innerHeight,
+			width :  T.innerLayout.center.state.innerWidth,
+			showOrderNumber : true,
+			useRp : true,
+			usepager: true,
+    		rpOptions: [10, 20, 40, 50],
+    		pageSize: 20,
+    		searchFormId:"realAlarm_list_search",
+    		searchCallback:function(datagrid){},
+    		onSuccess:function(table,grid){
+    			if(!grid)return ;
+    		},
+    		colModel:[
+    			{"display":"序号"},
+    			{display: "所属区域", name: "showAreaStr", width: 70},
+	            {display: "设备名称", name: "showAlarmObject", width: 150},
+	            {display: "设备编码", name: "objectId", width: 130},
+	            {display: "报警描述", name: "alarmRemark", width: 300},
+	            {display: "报警状态", name: "showAlarmState", width: 50},
+	            {display: "报警时间", name: "alarmTime", width: 150},
+	            {display: "报警值", name: "alarmData", width: 50},
+	            {display: "恢复时间", name: "lastAlarmTime", width: 150}
+    		],
+    		buttons : [
+	            #data_grid_buttons('NHGL_SBBJ')#end
+	        ]
+		});
+});
+</script>

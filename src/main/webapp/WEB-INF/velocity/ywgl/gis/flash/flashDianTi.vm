@@ -1,0 +1,97 @@
+<!DOCTYPE html><html>
+<script type="text/javascript" src="${projectName}/gis_server/flash/js/VLC.Plugin.js"></script>
+<script type="text/javascript" src="${static_url}/js/jquery-1.11.1.js"></script>
+<div style="width:100px;height:35px;z-index:-1;position:absolute;" class="ui-loading"></div>
+<div id="dianti" style="float:left;width:$!{flashWidth}px; height:$!{flashHeight}px;" class="fn-left">
+  <object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="$!{flashWidth}" height="$!{flashHeight}" hspace="0" vspace="0" id="FlashID" title="">
+    <param name="movie" value="http://$!{serverName}:$!{serverPort}$!{rc.contextPath}/flash/$!{flashFileName}?windmacheineID=$!{device.hpid}&windmacheineName=$!{device.deviceName}&serverIP=$!{blockServer}" />
+    <param name="quality" value="high" />
+    <param name="wmode" value="opaque" /><!--不透，高质动画效果 -->
+    <param name="swfversion" value="6.0.65.0" />
+    <!-- 此 param 标签提示使用 Flash Player 6.0 r65 和更高版本的用户下载最新版本的 Flash Player。如果您不想让用户看到该提示，请将其删除。B_BA_6F_001 KX-6-1新风空调机组 -->
+    <param name="expressinstall" value="Scripts/expressInstall.swf" />
+    <!-- 下一个对象标签用于非 IE 浏览器。所以使用 IECC 将其从 IE 隐藏。 -->
+    <!--[if !IE]>-->
+    <object data="http://$!{serverName}:$!{serverPort}$!{rc.contextPath}/flash/$!{flashFileName}?windmacheineID=$!{device.hpid}&windmacheineName=$!{device.deviceName}&serverIP=$!{blockServer}" type="application/x-shockwave-flash" width="$!{flashWidth}" height="$!{flashHeight}" hspace="0" vspace="0">
+      <!--<![endif]-->
+	  
+      <param name="quality" value="high" />
+      <param name="wmode" value="opaque" />
+      <param name="swfversion" value="6.0.65.0" />
+      <param name="expressinstall" value="Scripts/expressInstall.swf" />
+      <!-- 浏览器将以下替代内容显示给使用 Flash Player 6.0 和更低版本的用户。 -->
+      <div>
+        <h4>此页面上的内容需要较新版本的 Adobe Flash Player。</h4>
+        <p><a href="http://www.adobe.com/go/getflashplayer"><img src="http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif" alt="获取 Adobe Flash Player" width="112" height="33" /></a></p>
+      </div>
+      <!--[if !IE]>-->
+    </object>
+    <!--<![endif]-->
+  </object>
+</div>
+<div class="fn-left" id="id_video_box"  style="float:left;width:460px;padding-right:4px; height:$!{flashHeight}px;"  >
+<object id ="csharpActiveX" 
+				CODEBASE="$!{rc.contextPath}/download/VideoOcxSetUp.msi" 
+				classid ="clsid:B5669C37-066F-4ED7-B988-026C02749E73" 
+		        style="top: 0px; left: 0px; width: 460px; height: $!{flashHeight}px;"
+		        id="vlc"
+		        events="True">
+	<param name="MRL" value="" />
+	<param name="ShowDisplay" value="True" />
+	<param name="AutoLoop" value="False" />
+	<param name="AutoPlay" value="False" />
+	<param name="Volume" value="50" />
+	<param name="Volume" value="50" />
+	<param name="toolbar" value="false" />
+	<param name="StartTime" value="0" />
+	<EMBED pluginspage="http://www.videolan.org"
+	       type="application/x-vlc-plugin"
+	       version="VideoLAN.VLCPlugin.2"
+		style="top: 0px; left: 0px;width: 460px; height: $!{flashHeight}px;"
+	       toolbar="false"
+	       loop="true"
+	       text="Waiting for video"
+	       name="vlc">
+	</EMBED>
+</object>
+</div>
+<script type="text/javascript">
+     $.ajax({
+         'url': "$!{rc.contextPath}/hl/video/getVideoByHpid?hpid=$!{device.hpid}" + "&&time=" + new Date().getTime(),
+         'data': '',
+         'dataType': 'json',
+         'type': 'get',
+         'error': function (data) {
+             return false;
+         },
+         'success': function (data) {
+         	try{
+              if (null != data && '' != data) {
+              	csharpActiveX.Init();
+              	csharpActiveX.Play(data.viewIp,data.channelNo,data.username,data.password);
+              }
+          }catch(e){
+        	  $("#id_video_box").html('<font color="red" style="font-weight: bold">提示：</font>您的电脑未安装视频插件或版本过低，请点击<a id="close" style="text-decoration:underline" color="red" href="http://$!{serverName}:$!{serverPort}$!{rc.contextPath}/download/VideoOcxSetUp.msi"><font color="blue" style="font-weight: bold">这里</font></a>安装。');
+       	}
+         }
+     });
+    	
+    
+
+
+	//OCX 停止接口
+	function StopPlay()
+	{
+		try{	
+	        doStop();
+	        //VodActivex.Stop();
+	    }catch(e){
+    	    //alert(e.message);
+		}
+	}
+	function initFalse(){
+	   StopPlay();
+	}
+</script>
+</body>
+</html>

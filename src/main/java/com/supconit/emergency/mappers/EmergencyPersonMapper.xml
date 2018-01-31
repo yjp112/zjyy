@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.emergency.entities.EmergencyPerson">
+
+	<resultMap type="com.supconit.emergency.entities.EmergencyPerson"
+		id="EmergencyPersonResultMap">
+		<id property="id" column="ID" />
+		<result property="personId" column="PERSON_ID"/>
+		<result property="personName" column="PERSON_NAME"/>
+        <result property="groupId" column="GROUP_ID"/>
+        <result property="header" column="HEADER"/>
+        <result property="remark" column="REMARK"/>
+        <result property="createId" column="CREATE_ID"/>
+        <result property="creator" column="CREATOR"/>
+        <result property="createDate" column="CREATE_DATE"/>
+        <result property="updateId" column="UPDATE_ID"/>
+        <result property="updator" column="UPDATOR"/>
+        <result property="updateDate" column="UPDATE_DATE"/>
+        <result property="groupName" column="groupName"/>
+	</resultMap>
+
+
+	<sql id="TABLE_NAME" lang="velocity">EMERGENCY_PERSON</sql>
+	<sql id="SEQUENCE" lang="velocity">
+		SELECT SEQ_<include refid="TABLE_NAME" />.NEXTVAL FROM DUAL
+	</sql>
+	<sql id="SELECT_PRE" lang="velocity">
+	SELECT dgp.*,dg.GROUP_NAME AS groupName
+	FROM <include refid="TABLE_NAME" /> dgp INNER JOIN EMERGENCY_GROUP dg ON dgp.GROUP_ID = dg.ID
+	
+	</sql>
+	<sql id="COUNT_PRE" lang="velocity">
+		SELECT COUNT(1) 
+		FROM <include refid="TABLE_NAME" /> dgp INNER JOIN EMERGENCY_GROUP dg ON dgp.GROUP_ID = dg.ID
+	</sql>
+
+	<sql id="CONDITION_SQL" lang="velocity">
+		<![CDATA[
+		#where()
+					 #set($_p = $_parameter.condition)
+					 	1=1
+					    #if($_p.id && $_p.id != '')
+							#set($_id = $_p.id)
+							AND dgp.ID = @{_id}
+						#end
+						 #if($_p.personId && $_p.personId != '')
+							#set($_personId = $_p.personId)
+							AND dgp.PERSON_ID = @{_personId}
+						#end
+						
+						#if($_p.personName && $_p.personName != '')
+							#set($_personName = '%' + $_p.personName + '%')
+							AND dgp.PERSON_NAME LIKE @{_personName}
+						#end
+						#if($_p.groupId && $_p.groupId != '')
+							#set($_groupId = $_p.groupId)
+							AND  dgp.GROUP_ID = @{_groupId}
+						#end
+					    #if($_p.type && $_p.type != '')
+							#set($_type = $_p.type)
+							AND  dgp.GROUP_ID in ( select id from EMERGENCY_GROUP where EMERGENCY_TYPE = @{_type})
+						#end
+					#if($_p.searchEmergencyGroupList && $_p.searchEmergencyGroupList.size() > 0 )
+						#set($_searchEmergencyGroupList =$_p.searchEmergencyGroupList)
+						AND 
+						#repeat( $_searchEmergencyGroupList $id "," " dgp.GROUP_ID IN (" ")" )
+				    		@{id,jdbcType=NUMERIC}
+						#end
+					#end 				
+		#end
+		]]>	
+	</sql>
+
+	<select id="getById" resultMap="EmergencyPersonResultMap"
+		parameterType="long" lang="velocity">
+		<include refid="SELECT_PRE" />
+		WHERE dgp.ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+	<select id="findGroupPersons" lang="velocity" resultMap="EmergencyPersonResultMap" parameterType="Long">
+		<include refid="SELECT_PRE" /> 
+        WHERE dgp.GROUP_ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+	<!-- 按条件查询记录-->
+    <select id="findByCondition"  resultMap="EmergencyPersonResultMap" lang="velocity" databaseId="oracle">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="SELECT_PRE"/>
+		<include refid="CONDITION_SQL"/>
+		#order($_parameter.condition,"dgp.ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+	<!-- 按条件查询记录-->
+    <select id="findByCondition"  resultMap="EmergencyPersonResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT dgp.*,dg.GROUP_NAME AS groupName
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"dgp.ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME" /> dgp INNER JOIN EMERGENCY_GROUP dg ON dgp.GROUP_ID = dg.ID
+		<include refid="CONDITION_SQL"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countByCondition" resultType="long" lang="velocity">
+        <include refid="COUNT_PRE"/>
+        <include refid="CONDITION_SQL"/>
+    </select>
+	<select id="findByGroupIds" resultMap="EmergencyPersonResultMap" parameterType="list">
+		<include refid="SELECT_PRE" />        
+        <where>
+	        dgp.GROUP_ID in 
+			<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+				#{item,jdbcType=NUMERIC}
+			</foreach>
+		</where>
+		ORDER BY dgp.ID ASC
+	</select>
+
+	
+
+	<sql id="INSERT_SQL" lang="velocity">
+		 INSERT INTO <include refid="TABLE_NAME"/>(
+        	#if($_databaseId == 'oracle') ID, #end
+	        PERSON_ID,
+	        PERSON_NAME,
+	        GROUP_ID,
+	        HEADER,
+	        REMARK,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE
+        ) VALUES (
+        	#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end
+	        @{_parameter.personId,jdbcType=BIGINT},
+	        @{_parameter.personName,jdbcType=VARCHAR},
+	        @{_parameter.groupId,jdbcType=BIGINT},
+	        @{_parameter.header,jdbcType=INTEGER},
+	        @{_parameter.remark,jdbcType=VARCHAR},
+	        @{_parameter.createId,jdbcType=NUMERIC},
+	        @{_parameter.creator,jdbcType=VARCHAR},
+	        @{_parameter.createDate,jdbcType=TIMESTAMP}
+        )
+	</sql>
+
+	<insert id="insert" parameterType="com.supconit.emergency.entities.EmergencyPerson"
+		keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>
+		<include refid="INSERT_SQL" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.emergency.entities.EmergencyPerson"
+		keyProperty="id" keyColumn="ID" lang="velocity">
+		<include refid="INSERT_SQL" />
+		<selectKey keyProperty="id" resultType="long" order="AFTER">
+			<include refid="_PUBLIC_V.SELECT_KEY" />
+		</selectKey>
+	</insert>
+
+	<update id="update" parameterType="com.supconit.emergency.entities.EmergencyPerson"
+		lang="velocity">
+		UPDATE
+		<include refid="TABLE_NAME" />
+		#mset()
+			<![CDATA[
+		        #if($_parameter.personId && $_parameter.personId !=0)PERSON_ID = @{_parameter.personId,jdbcType=BIGINT},#end
+		        #if($_parameter.personName && $_parameter.personName !='')PERSON_NAME = @{_parameter.personName,jdbcType=VARCHAR},#end
+		        #if($_parameter.groupId && $_parameter.groupId !='')GROUP_ID = @{_parameter.groupId,jdbcType=BIGINT},#end
+		        #if($_parameter.header)HEADER = @{_parameter.header,jdbcType=INTEGER},#end
+		        REMARK = @{_parameter.remark,jdbcType=VARCHAR},
+		        #if($_parameter.updateId)UPDATE_ID = @{_parameter.updateId,jdbcType=NUMERIC},#end
+		        #if($_parameter.updator)UPDATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+		        #if($_parameter.updateDate)UPDATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+		    ]]>
+		#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+
+	<delete id="deleteById" parameterType="long" lang="velocity">
+		DELETE FROM
+		<include refid="TABLE_NAME" />
+		WHERE ID = @{_parameter,jdbcType=NUMERIC}
+	</delete>
+	<delete id="deleteByIds">
+		DELETE FROM
+		<include refid="TABLE_NAME" />
+	    WHERE ID IN    
+	        <foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+				#{id,jdbcType=NUMERIC}
+			</foreach>
+	</delete>
+	<select id="selectByHeader"  resultMap="EmergencyPersonResultMap">
+		SELECT * FROM <include refid="TABLE_NAME" />
+		where HEADER=@{_parameter,jdbcType=NUMERIC}
+	</select>
+	<!-- 查询该用户是否已存在于该分组 -->
+	<select id="countByGroupIdAndPersonId" lang="velocity" resultType="long">
+		SELECT COUNT(*)
+		FROM <include refid="TABLE_NAME" /> t
+		WHERE 
+			t.PERSON_ID = @{_parameter.personId,jdbcType=BIGINT}
+		AND
+			t.GROUP_ID = @{_parameter.groupId,jdbcType=BIGINT}
+	</select>
+</mapper>

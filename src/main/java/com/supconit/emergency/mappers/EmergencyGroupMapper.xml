@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.emergency.entities.EmergencyGroup">
+
+	<resultMap type="com.supconit.emergency.entities.EmergencyGroup"
+		id="EmergencyGroupResultMap">
+		<id property="id" column="ID" />
+		<result property="areaId" column="AREA_ID"/>
+		<result property="areaName" column="AREA_NAME"/>
+        <result property="groupCode" column="GROUP_CODE"/>
+        <result property="groupName" column="GROUP_NAME"/>
+        <result property="emergencyType" column="EMERGENCY_TYPE"/>
+        <result property="remark" column="REMARK"/>
+        <result property="createId" column="CREATE_ID"/>
+        <result property="creator" column="CREATOR"/>
+        <result property="createDate" column="CREATE_DATE"/>
+        <result property="updateId" column="UPDATE_ID"/>
+        <result property="updator" column="UPDATOR"/>
+        <result property="updateDate" column="UPDATE_DATE"/>
+        <result property="parentId" column="PARENT_ID" />
+        <result property="parentName" column="parentName" />
+	</resultMap>
+
+
+	<sql id="TABLE_NAME" lang="velocity">EMERGENCY_GROUP</sql>
+	<sql id="SEQUENCE" lang="velocity">
+		SELECT SEQ_<include refid="TABLE_NAME" />.NEXTVAL FROM DUAL
+	</sql>
+	<sql id="SELECT_PRE" lang="velocity">
+	   select son.*,father.GROUP_NAME as parentName		
+		FROM 
+		<include refid="TABLE_NAME" /> son LEFT JOIN <include refid="TABLE_NAME" /> father on son.PARENT_ID = father.ID
+	
+	</sql>
+	<sql id="COUNT_PRE" lang="velocity">
+		SELECT
+		COUNT(*)
+		FROM 
+		<include refid="TABLE_NAME" /> son LEFT JOIN <include refid="TABLE_NAME" /> father on son.PARENT_ID = father.ID
+	
+	</sql>
+
+	<sql id="CONDITION_SQL" lang="velocity">
+		<![CDATA[
+		#where() 
+			 #set($_p = $_parameter.condition)
+			 1=1
+		    #if($_p.id && $_p.id != '')
+				#set($_id = $_p.id)
+				AND son.ID = @{_id}
+			#end
+			#if($_p.groupCode && $_p.groupCode != '')
+				#set($_groupCode = '%' + $_p.groupCode + '%')
+				AND son.GROUP_CODE LIKE @{_groupCode}
+			#end
+			#if($_p.groupName && $_p.groupName != '')
+				#set($_groupName = '%' + $_p.groupName + '%')
+				AND son.GROUP_NAME LIKE @{_groupName}
+			#end
+			#if($_p.parentId && $_p.parentId != '')
+				#set($_parentId = $_p.parentId)
+				AND  son.PARENT_ID = @{_parentId}
+			#end
+		      #if($_p.emergencyType && $_p.emergencyType != 0)
+					AND son.EMERGENCY_TYPE = @{_p.emergencyType,jdbcType=NUMERIC}				
+				#end
+			#if($_p.parentName && $_p.parentName != '')
+				#set($_parentName = '%' + $_p.parentName + '%')
+				AND father.GROUP_NAME LIKE @{_parentName}
+			#end
+			
+		#end
+		]]>	
+	</sql>
+
+	<select id="getById" resultMap="EmergencyGroupResultMap"
+		parameterType="long" lang="velocity">
+		<include refid="SELECT_PRE" />
+		WHERE son.ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+	<select id="findByCode" lang="velocity" resultMap="EmergencyGroupResultMap" parameterType="string">
+		<include refid="SELECT_PRE" />        
+        WHERE son.GROUP_CODE = @{_parameter, jdbcType=VARCHAR}
+	</select>
+	<select id="findByPid" lang="velocity" resultMap="EmergencyGroupResultMap" parameterType="long">
+		<include refid="SELECT_PRE" />        
+        WHERE son.ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+	<select id="findAll" resultMap="EmergencyGroupResultMap" lang="velocity" >
+		<include refid="SELECT_PRE" />        
+	</select>
+	<select id="findByConditions" parameterType="long"  resultMap="EmergencyGroupResultMap" lang="velocity" databaseId="oracle">
+		<include refid="SELECT_PRE"/>
+		where  son.EMERGENCY_TYPE = @{_parameter, jdbcType=NUMERIC}
+		#order($_parameter.condition,"son.ID DESC")
+    </select>
+    <select id="findByConditions" parameterType="long"  resultMap="EmergencyGroupResultMap" lang="velocity" databaseId="sqlserver">
+		<include refid="SELECT_PRE"/>
+		where  son.EMERGENCY_TYPE = @{_parameter.flag, jdbcType=NUMERIC}
+		#order($_parameter.condition,"son.ID DESC")
+    </select>
+		<!-- 按条件查询记录-->
+    <select id="findByCondition"  resultMap="EmergencyGroupResultMap" lang="velocity" databaseId="oracle">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="SELECT_PRE"/>
+		<include refid="CONDITION_SQL"/>
+		#order($_parameter.condition,"son.ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+	<!-- 按条件查询记录-->
+    <select id="findByCondition" parameterType="com.supconit.emergency.entities.EmergencyGroup" resultMap="EmergencyGroupResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+		 son.*,father.GROUP_NAME as parentName		
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"son.ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME" /> son 
+		LEFT JOIN <include refid="TABLE_NAME" /> father on son.PARENT_ID = father.ID
+		<include refid="CONDITION_SQL"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countByCondition" resultType="long" lang="velocity">
+        <include refid="COUNT_PRE"/>
+        <include refid="CONDITION_SQL"/>
+    </select>
+
+
+	<select id="findSubByRoot" parameterType="long" resultMap="EmergencyGroupResultMap" lang="velocity" databaseId="oracle">
+		
+		select * from <include refid="TABLE_NAME" />  connect by PARENT_ID = prior ID start with <if test="parentId != null ">  PARENT_ID = @{_parameter, jdbcType=NUMERIC}</if>
+       
+		
+    </select>
+	<select id="findSubByRoot" parameterType="long" resultMap="EmergencyGroupResultMap" lang="velocity"  databaseId="sqlserver">
+	 WITH A (ID,AREA_ID,AREA_NAME,GROUP_CODE,GROUP_NAME,EMERGENCY_TYPE,REMARK,CREATE_ID,CREATOR,CREATE_DATE,UPDATE_ID,UPDATOR,UPDATE_DATE,PARENT_ID)
+		AS ( SELECT ID,AREA_ID,AREA_NAME,GROUP_CODE,GROUP_NAME,EMERGENCY_TYPE,REMARK,CREATE_ID,CREATOR,CREATE_DATE,UPDATE_ID,UPDATOR,UPDATE_DATE,PARENT_ID
+		FROM <include refid="TABLE_NAME" />  where  PARENT_ID = @{_parameter.parentId, jdbcType=NUMERIC}
+		UNION ALL SELECT B.ID,B.AREA_ID,B.AREA_NAME,B.GROUP_CODE,B.GROUP_NAME,B.EMERGENCY_TYPE,B.REMARK,B.CREATE_ID,B.CREATOR,B.CREATE_DATE,B.UPDATE_ID,B.UPDATOR,B.UPDATE_DATE,B.PARENT_ID
+		FROM <include refid="TABLE_NAME" /> B,A where B.PARENT_ID = A.ID)
+		SELECT * from A order by A.GROUP_CODE
+	
+	</select>   
+
+	<select id="findSubById" parameterType="long" resultMap="EmergencyGroupResultMap" lang="velocity" databaseId="oracle">
+		
+		select id from <include refid="TABLE_NAME" />  connect by PARENT_ID = prior ID start with <if test="parentId != null ">  ID = @{_parameter, jdbcType=NUMERIC}</if>
+       
+		
+    </select>
+	<select id="findSubById" parameterType="long" resultMap="EmergencyGroupResultMap" lang="velocity"  databaseId="sqlserver">
+	 WITH A (ID,AREA_ID,AREA_NAME,GROUP_CODE,GROUP_NAME,EMERGENCY_TYPE,REMARK,CREATE_ID,CREATOR,CREATE_DATE,UPDATE_ID,UPDATOR,UPDATE_DATE,PARENT_ID)
+		AS ( SELECT ID,AREA_ID,AREA_NAME,GROUP_CODE,GROUP_NAME,EMERGENCY_TYPE,REMARK,CREATE_ID,CREATOR,CREATE_DATE,UPDATE_ID,UPDATOR,UPDATE_DATE,PARENT_ID
+		FROM <include refid="TABLE_NAME" />  where  ID = @{_parameter.parentId, jdbcType=NUMERIC} 
+		UNION ALL SELECT B.ID,B.AREA_ID,B.AREA_NAME,B.GROUP_CODE,B.GROUP_NAME,B.EMERGENCY_TYPE,B.REMARK,B.CREATE_ID,B.CREATOR,B.CREATE_DATE,B.UPDATE_ID,B.UPDATOR,B.UPDATE_DATE,B.PARENT_ID
+		FROM <include refid="TABLE_NAME" /> B,A where B.PARENT_ID = A.ID)
+		SELECT * from A order by A.GROUP_CODE
+	
+	</select>   
+
+	<sql id="INSERT_SQL" lang="velocity">
+		 INSERT INTO <include refid="TABLE_NAME"/>(
+        	#if($_databaseId == 'oracle') ID, #end
+	        AREA_ID,
+	        AREA_NAME,
+	        GROUP_CODE,
+	        GROUP_NAME,
+	        EMERGENCY_TYPE,
+	        REMARK,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE,
+	        PARENT_ID
+        ) VALUES (
+        	#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end
+	        @{_parameter.areaId,jdbcType=BIGINT},
+	        @{_parameter.areaName,jdbcType=VARCHAR},
+	        @{_parameter.groupCode,jdbcType=VARCHAR},
+	        @{_parameter.groupName,jdbcType=VARCHAR},
+	        @{_parameter.emergencyType,jdbcType=INTEGER},
+	        @{_parameter.remark,jdbcType=VARCHAR},
+	        @{_parameter.createId,jdbcType=NUMERIC},
+	        @{_parameter.creator,jdbcType=VARCHAR},
+	        @{_parameter.createDate,jdbcType=TIMESTAMP},
+	        @{_parameter.parentId,jdbcType=NUMERIC}
+        )
+	</sql>
+
+	<insert id="insert" parameterType="com.supconit.emergency.entities.EmergencyGroup"
+		keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>
+		<include refid="INSERT_SQL" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.emergency.entities.EmergencyGroup"
+		keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+		<include refid="INSERT_SQL" />
+		<selectKey keyProperty="id" resultType="long" order="AFTER">
+			<include refid="_PUBLIC_V.SELECT_KEY" />
+		</selectKey>
+	</insert>
+
+	<update id="update" parameterType="com.supconit.emergency.entities.EmergencyGroup"
+		lang="velocity">
+		UPDATE
+		<include refid="TABLE_NAME" />
+		#mset()
+			<![CDATA[
+		        #if($_parameter.areaId && $_parameter.areaId !=0)AREA_ID = @{_parameter.areaId,jdbcType=BIGINT},#end
+		        #if($_parameter.areaName && $_parameter.areaName !='')AREA_NAME = @{_parameter.areaName,jdbcType=VARCHAR},#end
+		        #if($_parameter.groupCode && $_parameter.groupCode !='')GROUP_CODE = @{_parameter.groupCode,jdbcType=VARCHAR},#end
+		        #if($_parameter.groupName && $_parameter.groupName !='')GROUP_NAME = @{_parameter.groupName,jdbcType=VARCHAR},#end
+		        #if($_parameter.emergencyType)EMERGENCY_TYPE = @{_parameter.emergencyType,jdbcType=INTEGER},#end
+		        REMARK = @{_parameter.remark,jdbcType=VARCHAR},
+		        #if($_parameter.updateId)UPDATE_ID = @{_parameter.updateId,jdbcType=NUMERIC},#end
+		        #if($_parameter.updator)UPDATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+		        #if($_parameter.updateDate)UPDATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+		    	#if($_parameter.parentId)PARENT_ID = @{_parameter.parentId,jdbcType=NUMERIC},#end
+		        
+		    ]]>
+		#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+
+	<delete id="deleteById" parameterType="long" lang="velocity">
+		DELETE FROM
+		<include refid="TABLE_NAME" />
+		WHERE ID = @{_parameter,jdbcType=NUMERIC}
+	</delete>
+	<delete id="deleteByIds">
+		DELETE FROM
+		<include refid="TABLE_NAME" />
+	    WHERE ID IN    
+	        <foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+				#{id,jdbcType=NUMERIC}
+			</foreach>
+	</delete>
+	<select id="selectByType"  resultMap="EmergencyGroupResultMap">
+		SELECT * FROM <include refid="TABLE_NAME" />
+		where EMERGENCY_TYPE=#{_parameter}
+	</select>
+</mapper>

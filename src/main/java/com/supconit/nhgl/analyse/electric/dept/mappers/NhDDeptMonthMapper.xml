@@ -1,0 +1,576 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptMonth">
+
+	<resultMap type="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptMonth" id="NhDDeptMonthResultMap">     
+        <result property="id" column="ID" />
+        <result property="deptId" column="DEPT_ID" />
+        <result property="itemCode" column="ITEM_CODE" />
+        <result property="monthKey" column="MONTH_KEY" />
+        <result property="peakValue" column="PEAK_VALUE" />
+        <result property="vallyValue" column="VALLY_VALUE" />
+        <result property="commonValue" column="COMMON_VALUE" />
+        <result property="monthDaytimeValue" column="MONTH_DAYTIME_VALUE"/>
+        <result property="monthNightValue" column="MONTH_NIGHT_VALUE"/>
+        <result property="monthWeekenValue" column="MONTH_WEEKEN_VALUE"/>
+        <result property="totalMonthValue" column="TOTAL_MONTH_VALUE"/>
+        <result property="totalYoy" column="TOTAL_YOY"/>
+		<result property="deptName" column="deptName"/>
+		<result property="pid" column="pid" />
+		<result property="tbzl" column="tbzl"/>
+		<result property="itemName" column="itemName"/>
+		<result property="lastMonth" column="lastMonth"/>
+		<result property="untilEle" column="untilEle"/>
+		<result property="area" column="area"/>
+		
+		<result property="tb" column="tb"/>
+		<result property="deptName" column="deptName"/>
+		<result property="parentId" column="parentId"/>
+	</resultMap>
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[#where()
+			1=1
+			#set($_p = $_parameter.condition)
+			#if($_p.itemCodeList.size()>0)
+				AND
+				#repeat( $_p.itemCodeList $_code "," " t.ITEM_CODE IN (" ")" )
+			    	@{_code,jdbcType=VARCHAR}
+				#end
+			#end
+			#if($_p.monthKey && $_p.monthKey != '')
+				AND t.MONTH_KEY = @{_p.monthKey}
+			#end
+			#if($_p.start && $_p.start != '')
+				AND t.MONTH_KEY >= @{_p.start}
+			#end
+			#if($_p.end && $_p.end != '')
+				AND t.MONTH_KEY <= @{_p.end}
+			#end
+			#if($_p.deptIdList.size()>0)
+				AND
+				#repeat( $_p.deptIdList $_idss "," " t.DEPT_ID IN (" ")" )
+			    	@{_idss,jdbcType=NUMERIC}
+				#end
+			#end
+			#if($_p.nhType && $_p.nhType != '')
+				AND t3.NH_TYPE = @{_p.nhType}
+			#end
+			AND T2.PID != 0
+		#end]]>
+	</sql>
+	
+	<select id="getDeptTree" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptMonth" resultMap="NhDDeptMonthResultMap" lang = "velocity">
+		<![CDATA[
+		SELECT
+			t1.id as deptId,
+			t1.PID as pid,
+			t1.name as deptName,
+			#if($_databaseId == 'oracle')
+				nvl(ROUND(SUM (t.TOTAL_MONTH_VALUE),0),0) TOTAL_MONTH_VALUE,
+				CASE  
+					when nvl(ROUND(SUM(t.TOTAL_YOY),0),0) < nvl(ROUND(sum(t.TOTAL_MONTH_VALUE),0),0) then 1
+					when nvl(ROUND(SUM(t.TOTAL_YOY),0),0) = nvl(ROUND(SUM (t.TOTAL_MONTH_VALUE),0),0) then 0
+				else -1 end as tbzl
+			#else
+				ISNULL(ROUND(SUM (t.TOTAL_MONTH_VALUE),0),0) TOTAL_MONTH_VALUE,
+				CASE  
+					when ISNULL(ROUND(SUM(t.TOTAL_YOY),0),0) < ISNULL(ROUND(SUM (t.TOTAL_MONTH_VALUE),0),0) then 1
+					when ISNULL(ROUND(SUM(t.TOTAL_YOY),0),0) = ISNULL(ROUND(SUM (t.TOTAL_MONTH_VALUE),0),0) then 0
+				else -1 end as tbzl
+			#end
+		FROM
+			(SELECT
+				T3.DEPT_ID,
+				t3.TOTAL_MONTH_VALUE,
+				t3.TOTAL_YOY
+			FROM
+				NH_D_DEPT_MONTH T3
+			
+			#where()
+				1=1
+				#if($_parameter.itemCodeList.size()>0)
+					and 
+					#repeat( $_parameter.itemCodeList $_code "," " T3.ITEM_CODE IN (" ")" )
+				    	@{_code,jdbcType=VARCHAR}
+					#end
+				#end
+				#if($_parameter.monthKey && $_parameter.monthKey != '')
+					AND T3.MONTH_KEY = @{_parameter.monthKey,jdbcType=VARCHAR}
+				#end
+			#end
+			) t
+		RIGHT JOIN VIEW_NH_D_DEPT t1 ON t1.id = T .dept_id
+		
+		GROUP BY
+			t1.ID,
+			t1.PID,
+			t1.name
+		order by t1.ID
+			]]>
+	</select>
+	
+	<select id="getDeptElectricMonth" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptMonth" resultMap="NhDDeptMonthResultMap">
+		SELECT
+			t.ITEM_CODE,
+			t2.id,
+			t2.NAME as deptName,
+			t.MONTH_KEY,
+			t.TOTAL_MONTH_VALUE,
+			t.TOTAL_YOY
+		FROM
+			NH_D_DEPT_MONTH t
+		INNER JOIN NH_DEPT t2 ON t.DEPT_ID = t2.id
+		<where>
+			1=1
+			<if test="itemCode != null and itemCode != ''">AND t.ITEM_CODE = #{itemCode}</if>
+			<if test="monthKey != null and monthKey != ''">AND t.MONTH_KEY = #{monthKey}</if>
+		</where>
+	</select>
+	
+	<select id="findByDeptCondition" resultMap="NhDDeptMonthResultMap" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptMonth" lang="velocity" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			t.DEPT_ID as deptId,
+			t.ITEM_CODE,
+			T3.NAME AS itemName,
+			t2.NAME as deptName,
+			t.MONTH_KEY,
+			t.TOTAL_MONTH_VALUE,
+			t.TOTAL_YOY,
+			NVL(T4.TOTAL_MONTH_VALUE,0) as lastMonth,
+			NVL(t.TOTAL_MONTH_VALUE/t2.AREA,0) as untilEle,
+			NVL(t2.AREA,0) AS area
+		FROM
+			NH_D_DEPT_MONTH t
+		LEFT JOIN NH_DEPT t2 ON t.DEPT_ID = t2.id
+		LEFT JOIN NH_ITEM t3 ON t3.STANDARD_CODE = T.ITEM_CODE
+		LEFT JOIN NH_D_DEPT_MONTH t4 
+		ON t4.MONTH_KEY = to_char(add_months(to_date(T.month_key,'yyyy-mm'),-1),'yyyy-mm')
+		AND T.DEPT_ID = T4.DEPT_ID
+		AND t.ITEM_CODE = T4.ITEM_CODE
+		<include refid="condition_sql" /> 
+		#order($_parameter.condition,"t.MONTH_KEY DESC")
+ 		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="findByDeptCondition" resultMap="NhDDeptMonthResultMap" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptMonth" lang="velocity" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			t.DEPT_ID as deptId,
+			t.ITEM_CODE,
+			T3.NAME AS itemName,
+			t2.NAME as deptName,
+			t.MONTH_KEY,
+			t.TOTAL_MONTH_VALUE,
+			t.TOTAL_YOY,
+			ISNULL(T4.TOTAL_MONTH_VALUE,0) as lastMonth,
+			cast((
+				CASE
+				WHEN t2.AREA =0 THEN
+					NULLIF(t.TOTAL_MONTH_VALUE / NULL, 0)
+				ELSE 
+					NULLIF(t.TOTAL_MONTH_VALUE / t2.AREA, 0)
+				END
+			) as Decimal) AS untilEle,
+			ISNULL(t2.AREA,0) AS area
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+ 		#order($_parameter.condition,"t.MONTH_KEY DESC")
+ 		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM
+			NH_D_DEPT_MONTH t
+		LEFT JOIN NH_D_DEPT_MONTH t4 
+		ON t4.MONTH_KEY = LEFT(CONVERT(VARCHAR(10),dateadd(mm,-1,CONVERT(date,t.MONTH_KEY+'-01'))),7)
+		AND T.DEPT_ID = T4.DEPT_ID
+		AND t.ITEM_CODE = T4.ITEM_CODE
+		LEFT JOIN NH_DEPT t2 ON t.DEPT_ID = t2.id
+		LEFT JOIN NH_ITEM t3 ON t3.STANDARD_CODE = T.ITEM_CODE 
+        <include refid="condition_sql" /> 
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="countByCondition" resultType="Long" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptMonth" lang="velocity">
+		SELECT COUNT(*) FROM NH_D_DEPT_MONTH t
+		LEFT JOIN NH_DEPT t2 ON t.DEPT_ID = t2.id
+		LEFT JOIN NH_ITEM t3 ON t3.STANDARD_CODE = T.ITEM_CODE 
+		<include refid="condition_sql" /> 
+	</select>
+	<select id="findByDeptConditionForNhgs" resultMap="NhDDeptMonthResultMap" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptMonth" lang="velocity" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			t.DEPT_ID as deptId,
+			t.ITEM_CODE,
+			T3.NAME AS itemName,
+			t2.NAME as deptName,
+			NVL(ROUND(SUM(t.TOTAL_MONTH_VALUE),0),0) TOTAL_MONTH_VALUE,
+			NVL(ROUND(SUM(t.TOTAL_MONTH_VALUE/t2.AREA),2),0) as untilEle,
+			NVL(ROUND(t2.AREA,0),0) AS area
+		FROM
+			NH_D_DEPT_MONTH t
+		LEFT JOIN NH_DEPT t2 ON t.DEPT_ID = t2.id
+		LEFT JOIN NH_ITEM t3 ON t3.STANDARD_CODE = T.ITEM_CODE
+		<include refid="condition_sql" /> 
+		GROUP BY t.dept_id,t.item_code,t3.name,t2.name,nvl(round(t2.area,0),0)
+		#order($_parameter.condition,"t.ITEM_CODE")
+ 		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="findByDeptConditionForNhgs" resultMap="NhDDeptMonthResultMap" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptMonth" lang="velocity" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			t.DEPT_ID as deptId,
+			t.ITEM_CODE,
+			T3.NAME AS itemName,
+			t2.NAME as deptName,
+			isnull(ROUND(SUM(t.TOTAL_MONTH_VALUE),0),0) TOTAL_MONTH_VALUE,
+			cast((
+				CASE
+				WHEN ISNULL(ROUND(t2.AREA,0),0) =0 THEN
+					NULLIF(ROUND(SUM(t.TOTAL_MONTH_VALUE / NULL),2), 0)
+				ELSE 
+					NULLIF(ROUND(SUM(t.TOTAL_MONTH_VALUE / t2.AREA),2), 0)
+				END
+			) as Decimal) AS untilEle,
+			ISNULL(ROUND(t2.AREA,0),0) AS area
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+ 		#order($_parameter.condition,"t.ITEM_CODE")
+ 		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM
+			NH_D_DEPT_MONTH t
+		LEFT JOIN NH_DEPT t2 ON t.DEPT_ID = t2.id
+		LEFT JOIN NH_ITEM t3 ON t3.STANDARD_CODE = T.ITEM_CODE 
+        <include refid="condition_sql" /> 
+        GROUP BY t.dept_id,t.item_code,t3.name,t2.name,ISNULL(round(t2.area,0),0)
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="countByConditionForNhgs" resultType="Long" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptMonth" lang="velocity">
+		SELECT COUNT(1) FROM (
+		SELECT DISTINCT T.DEPT_ID,T.ITEM_CODE,T3.NAME,T2.NAME
+		FROM NH_D_DEPT_MONTH t
+		LEFT JOIN NH_DEPT t2 ON t.DEPT_ID = t2.id
+		LEFT JOIN NH_ITEM t3 ON t3.STANDARD_CODE = T.ITEM_CODE 
+		<include refid="condition_sql" /> )A
+	</select>
+	
+	<select id="getParentDeptMonthElectricty" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptMonth" 
+		resultMap="NhDDeptMonthResultMap" lang="velocity">
+		<![CDATA[
+		#if($_databaseId == 'oracle')
+		SELECT * from(
+				select 				
+				T1.ID as deptId,
+				T1.NAME as deptName,
+				NVL(A.TOTAL_MONTH_VALUE,0) TOTAL_MONTH_VALUE
+			FROM
+			(
+				SELECT
+					T2.DEPT_ID,
+					nvl(round(sum(t2.TOTAL_MONTH_VALUE),0),0) TOTAL_MONTH_VALUE
+				FROM
+					NH_D_DEPT_MONTH T2
+				#where()
+					1=1
+					#if($_parameter.start)
+						AND T2.MONTH_KEY >= @{_parameter.start}
+					#end
+					#if($_parameter.end)
+						AND T2.MONTH_KEY <= @{_parameter.end}
+					#end
+				#end
+				group by t2.dept_id
+			) A
+		RIGHT JOIN VIEW_NH_D_DEPT t1 ON t1.id = A .dept_id
+			#where()
+				t1.NH_RANK = 1
+			#end
+		ORDER BY 
+			   nvl(A .TOTAL_MONTH_VALUE,0) DESC)
+	    where  ROWNUM <=10
+		#else
+			select
+				TOP 10
+				T1.ID as deptId,
+				T1.NAME as deptName,
+				ISNULL(A.TOTAL_MONTH_VALUE,0) TOTAL_MONTH_VALUE
+			FROM
+			(
+				SELECT
+					T2.DEPT_ID,
+					isnull(round(sum(t2.TOTAL_MONTH_VALUE),0),0) TOTAL_MONTH_VALUE
+				FROM
+					NH_D_DEPT_MONTH T2
+				#where()
+					1=1
+					#if($_parameter.start)
+						AND T2.MONTH_KEY >= @{_parameter.start}
+					#end
+					#if($_parameter.end)
+						AND T2.MONTH_KEY <= @{_parameter.end}
+					#end
+				#end
+				group by t2.dept_id
+			) A
+		RIGHT JOIN VIEW_NH_D_DEPT t1 ON t1.id = A .dept_id
+			#where()
+				t1.NH_RANK = 1
+			#end
+		ORDER BY 
+				isnull(A .TOTAL_MONTH_VALUE,0) DESC
+		#end	
+		]]>	
+	</select>
+	<select id="getDeptList" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptMonth" resultMap="NhDDeptMonthResultMap" lang="velocity">
+		<![CDATA[
+		SELECT
+			A.ID DEPT_ID,
+			A.PID as parentId,
+			A.NAME as deptName,
+			#if($_databaseId=='oracle')
+				NVL(ROUND(SUM (B.TOTAL_MONTH_VALUE),0),0) total,
+				CASE  
+				when NVL(ROUND(SUM(B.TOTAL_YOY),0),0) < NVL(ROUND(SUM (B.TOTAL_MONTH_VALUE),0),0) then 1
+				when NVL(ROUND(SUM(B.TOTAL_YOY),0),0) = NVL(ROUND(SUM (B.TOTAL_MONTH_VALUE),0),0) then 0
+			#else
+				ISNULL(ROUND(SUM (B.TOTAL_MONTH_VALUE),0),0) total,
+				CASE  
+				when ISNULL(ROUND(SUM(B.TOTAL_YOY),0),0) < ISNULL(ROUND(SUM (B.TOTAL_MONTH_VALUE),0),0) then 1
+				when ISNULL(ROUND(SUM(B.TOTAL_YOY),0),0) = ISNULL(ROUND(SUM (B.TOTAL_MONTH_VALUE),0),0) then 0
+			#end
+			else -1 end as tb
+		FROM
+			VIEW_NH_D_DEPT A 
+		LEFT JOIN(
+			SELECT t.* FROM NH_D_DEPT_MONTH t
+			INNER JOIN 
+			#if($_databaseId=='oracle')
+				TABLE(func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR}))
+			#else
+				func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR})
+			#end
+			t2 ON t.ITEM_CODE=t2.standard_code
+			where 1=1
+				#if($_parameter.startTime)
+						AND t.MONTH_KEY  >=@{_parameter.startTime,jdbcType=VARCHAR}
+				#end
+				#if($_parameter.endTime)
+						AND t.MONTH_KEY <=@{_parameter.endTime,jdbcType=VARCHAR}
+				#end
+				#if($_parameter.monthKey && $_parameter.monthKey != '')
+						AND t.MONTH_KEY = @{_parameter.monthKey,jdbcType=VARCHAR}
+				#end
+				)
+		B ON A.ID=B.DEPT_ID
+		GROUP BY
+			A.ID,
+			A.NAME,
+			A.PID
+		ORDER BY A.ID
+			]]>
+	</select>	
+	<select id="getDeptMonthList" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptMonth" resultMap="NhDDeptMonthResultMap" lang="velocity">
+		<![CDATA[
+		SELECT
+			t.MONTH_KEY,sum(t.TOTAL_MONTH_VALUE) total,sum(t.TOTAL_YOY) TOTAL_YOY
+		FROM
+			NH_D_DEPT_MONTH t
+		INNER JOIN 
+		#if($_databaseId=='oracle')
+			TABLE(func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR}))
+		#else
+			func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR})
+		#end
+		t2 ON t.ITEM_CODE=t2.standard_code
+		INNER JOIN VIEW_NH_D_DEPT A ON t.DEPT_ID = A.id
+		where
+			1=1
+			#if($_parameter.startTime)
+					AND t.MONTH_KEY  >=@{_parameter.startTime,jdbcType=VARCHAR}
+			#end
+			#if($_parameter.endTime)
+					AND t.MONTH_KEY <=@{_parameter.endTime,jdbcType=VARCHAR}
+			#end
+			#if($_parameter.deptId)
+			 		and t.DEPT_ID = @{_parameter.deptId,jdbcType=NUMERIC}
+			#else
+					and A.CODE='ROOT'
+			#end
+		GROUP BY t.MONTH_KEY
+		]]>
+	</select>
+	<select id="getDeptDayNight" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptMonth" resultMap="NhDDeptMonthResultMap" lang="velocity">
+		<![CDATA[
+		SELECT
+			ROUND(sum(t.MONTH_DAYTIME_VALUE),0) MONTH_DAYTIME_VALUE,ROUND(sum(t.MONTH_NIGHT_VALUE),0) MONTH_NIGHT_VALUE
+		FROM
+			NH_D_DEPT_MONTH t
+		INNER JOIN 
+		#if($_databaseId=='oracle')
+			TABLE(func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR}))
+		#else
+			func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR})
+		#end
+		t2 ON t.ITEM_CODE=t2.standard_code
+		INNER JOIN VIEW_NH_D_DEPT A ON t.DEPT_ID = A.id
+		where
+			1=1
+			#if($_parameter.startTime)
+					AND t.MONTH_KEY  >=@{_parameter.startTime,jdbcType=VARCHAR}
+			#end
+			#if($_parameter.endTime)
+					AND t.MONTH_KEY <=@{_parameter.endTime,jdbcType=VARCHAR}
+			#end
+			#if($_parameter.deptId)
+			 		and t.DEPT_ID = @{_parameter.deptId,jdbcType=NUMERIC}
+			#else
+					and A.CODE='ROOT'
+			#end
+		]]>
+	</select>	
+	<select id="getUntilDeptElectricty" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptMonth" 
+		resultMap="NhDDeptMonthResultMap" lang="velocity">
+	<![CDATA[
+	#if($_databaseId =='oracle')
+		select * from (
+		SELECT 
+			t1.ID as deptId,
+			t1.NAME as deptName,
+			nvl(ROUND(SUM (a.TOTAL_MONTH_VALUE),0),0) AS TOTAL_MONTH_VALUE,
+			nvl(ROUND(cast(t1.AREA as NUMERIC),0), 0) AS AREA,
+			nvl(ROUND(SUM (a.TOTAL_MONTH_VALUE/cast(t1.AREA as NUMERIC)),2), 0) AS untilEle
+		FROM
+			(SELECT
+					T2.DEPT_ID,
+					t2.TOTAL_MONTH_VALUE
+				FROM
+					NH_D_DEPT_MONTH T2
+				#where()
+					1=1
+					#if($_parameter.start)
+						AND MONTH_KEY >= @{_parameter.start}
+					#end
+					#if($_parameter.end)
+						AND MONTH_KEY <= @{_parameter.end}
+					#end
+				#end
+			) A
+			RIGHT JOIN VIEW_NH_D_DEPT t1 ON t1.id = A .dept_id
+			#where()
+				t1.NH_RANK = 1
+			#end
+		GROUP BY
+			t1.NAME,
+			t1.ID,
+			NVL(ROUND(cast(t1.AREA as NUMERIC),0), 0)
+		ORDER BY
+			nvl(ROUND(SUM (a.TOTAL_MONTH_VALUE/cast(t1.AREA as NUMERIC)),2), 0) DESC)
+		where  ROWNUM <=10
+	#else		
+		SELECT 
+		    TOP 10
+			t1.ID as deptId,
+			t1.NAME as deptName,
+			ISNULL(ROUND(SUM (a.TOTAL_MONTH_VALUE),0),0) AS TOTAL_MONTH_VALUE,
+			ISNULL(ROUND(cast(t1.AREA as NUMERIC),0), 0) AS AREA,
+			ISNULL(ROUND(SUM (a.TOTAL_MONTH_VALUE/cast(t1.AREA as NUMERIC)),2), 0) AS untilEle
+		FROM
+			(SELECT
+					T2.DEPT_ID,
+					t2.TOTAL_MONTH_VALUE
+				FROM
+					NH_D_DEPT_MONTH T2
+				#where()
+					1=1
+					#if($_parameter.start)
+						AND MONTH_KEY >= @{_parameter.start}
+					#end
+					#if($_parameter.end)
+						AND MONTH_KEY <= @{_parameter.end}
+					#end
+				#end
+			) A
+			RIGHT JOIN VIEW_NH_D_DEPT t1 ON t1.id = A .dept_id
+			#where()
+				t1.NH_RANK = 1
+			#end
+		GROUP BY
+			t1.NAME,
+			t1.ID,
+			ISNULL(ROUND(cast(t1.AREA as NUMERIC),0), 0)
+		ORDER BY
+			ISNULL(ROUND(SUM (a.TOTAL_MONTH_VALUE/cast(t1.AREA as NUMERIC)),2), 0) DESC
+	#end
+		]]>	
+	</select>
+	<select id="getDeptSubElectricty" resultMap="NhDDeptMonthResultMap"
+		parameterType="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptMonth" lang="velocity">
+		<![CDATA[
+		SELECT
+			t.STANDARD_CODE ITEM_CODE,
+			t.NAME itemName,
+			#if($_databaseId=='oracle')
+			nvl(
+			(
+				SELECT
+					ROUND(SUM (d.TOTAL_MONTH_VALUE),0)
+				FROM
+					NH_D_DEPT_MONTH d
+				INNER JOIN 
+				#if($_databaseId=='oracle')
+					TABLE(func_getnhitem(1, t.STANDARD_CODE))
+				#else
+					func_getnhitem(1, t.STANDARD_CODE)
+				#end
+				i ON d.ITEM_CODE = i.STANDARD_CODE
+				INNER JOIN 
+					VIEW_NH_D_DEPT A ON A.ID=D.DEPT_ID
+		    where 1=1
+		    	#if($_parameter.startTime)
+						AND d.MONTH_KEY  >=@{_parameter.startTime,jdbcType=VARCHAR}
+				#end
+				#if($_parameter.endTime)
+						AND d.MONTH_KEY <=@{_parameter.endTime,jdbcType=VARCHAR}
+				#end
+				#if($_parameter.deptId)
+				 		and d.DEPT_ID = @{_parameter.deptId,jdbcType=NUMERIC}
+				#else
+						and a.CODE='ROOT'
+				#end
+			),0)
+			#else
+			ISNULL((
+				SELECT
+					ROUND(SUM (d.TOTAL_MONTH_VALUE),0)
+				FROM
+					NH_D_DEPT_MONTH d
+				INNER JOIN 
+				#if($_databaseId=='oracle')
+					TABLE(func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},t.STANDARD_CODE))
+				#else
+					func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},t.STANDARD_CODE)
+				#end
+				i ON d.ITEM_CODE = i.STANDARD_CODE
+				INNER JOIN 
+					VIEW_NH_D_DEPT A ON A.ID=D.DEPT_ID
+		    where 1=1
+				#if($_parameter.startTime)
+						AND d.MONTH_KEY  >=@{_parameter.startTime,jdbcType=VARCHAR}
+				#end
+				#if($_parameter.endTime)
+						AND d.MONTH_KEY <=@{_parameter.endTime,jdbcType=VARCHAR}
+				#end
+				#if($_parameter.deptId)
+				 		and d.DEPT_ID = @{_parameter.deptId,jdbcType=NUMERIC}
+				#else
+						and a.CODE='ROOT'
+				#end
+			),0)
+			#end
+			TOTAL
+		FROM
+			NH_ITEM t
+		WHERE
+			t.NH_TYPE = @{_parameter.nhType,jdbcType=NUMERIC} 
+			AND t.PARENT_CODE=@{_parameter.parentCode,jdbcType=VARCHAR}
+			order by t.STANDARD_CODE
+		]]>
+	</select>		
+</mapper>

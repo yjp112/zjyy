@@ -1,0 +1,21 @@
+<div data-page="new" class="page page-about">
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="navbar-inner">
+                <div class="navbar-left">
+                    <a href="#" class="link back">
+                        <i class="icon icon-c-back only-icon"></i>
+                    </a>
+                </div>
+                <div class="navbar-center">新功能介绍</div>
+                <div class="navbar-right"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-content">
+        <div class="list-block">
+            暂无新功能
+        </div>
+    </div>
+</div>

@@ -1,0 +1,37 @@
+INSERT INTO dbo.IMP_UNIFYTAG (
+	TYPE_NAME,
+	TAGNAME,
+	DESCRIPTION,
+	TAGTYPE_NAME,
+	ISWRITE_NAME,
+	ISALARMTAG_NAME,
+	AREA_NAME,
+	[ON],
+	[OFF],
+	HH,
+	H,
+	L,
+	LL,
+	PRIN,
+	NRIN,
+	IMPORT_NUM
+)
+VALUES
+	(
+		?,
+		?,
+		?,
+		?,
+		?,
+		?,
+		?,
+		?,
+		?,
+		?,
+		?,
+		?,
+		?,
+		?,
+		?,
+		?
+	)

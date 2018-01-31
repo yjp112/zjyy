@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.employee.todo.entities.ExUserTask">
+	<resultMap type="com.supconit.employee.todo.entities.ExUserTask" id="ExUserTaskResultMap">
+		<id property="id" column="ID" />
+		<result property="taskId" column="TASK_ID" />
+		<result property="name" column="NAME" />
+		<result property="activityId" column="ACTIVITY_ID" />
+		<result property="description" column="DESCRIPTION" />
+		<result property="executionId" column="EXECUTION_ID" />
+		<result property="processInstanceId" column="PROCESS_INSTANCE_ID" />
+		<result property="processDefinitionId" column="PROCESS_DEFINITION_ID" />
+		<result property="processDefinitionKey" column="PROCESS_DEFINITION_KEY" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="username" column="USERNAME" />
+		<result property="category" column="CATEGORY" />
+		<result property="formUrl" column="FORM_URL" />
+		<result property="businessKey" column="BUSINESS_KEY" />
+		<result property="processDefinitionName" column="PROCESS_DEFINITION_NAME" />
+		<result property="showTime" column="SHOW_TIME" />
+	</resultMap>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	<sql id="TABLE_NAME">BPM_USER_TASK</sql>
+	<sql id="SELECT_PRE" lang="velocity">
+		SELECT * FROM <include refid="TABLE_NAME"/>
+	</sql>
+	<sql id="COUNT_PRE" lang="velocity">
+		SELECT COUNT(*) FROM <include refid="TABLE_NAME"/>
+	</sql>
+
+	<sql id="SEARCH_CONDITION_SQL" lang="velocity">
+		<![CDATA[
+		#where()
+
+			#if($_parameter.condition.username && $_parameter.condition.username != '')
+				USERNAME = @{_parameter.condition.username,jdbcType=VARCHAR}
+			#end
+			#if($_parameter.condition.taskId && $_parameter.condition.taskId != '')
+				AND TASK_ID = @{_parameter.condition.taskId,jdbcType=VARCHAR}
+			#end
+			#if($_parameter.condition.name && $_parameter.condition.name != '')
+				#set($_NAME = '%' + $_parameter.condition.name + '%')
+				AND NAME LIKE @{_NAME,jdbcType=VARCHAR} ESCAPE '/'
+			#end
+			#if($_parameter.condition.description && $_parameter.condition.description != '')
+				#set($_DESCRIPTION = '%' + $_parameter.condition.description + '%')
+				AND DESCRIPTION LIKE @{_DESCRIPTION,jdbcType=VARCHAR} ESCAPE '/'
+			#end
+		#end
+		]]>
+	</sql>
+
+	<!-- 手机端搜索待办办流程 -->
+	<sql id="SEARCH_USER_TASK_SQL" lang="velocity">
+		<![CDATA[
+			#if($_parameter.processDefinitionKey && $_parameter.processDefinitionKey != '')
+				AND A.PROCESS_DEFINITION_KEY = @{_parameter.processDefinitionKey,jdbcType=VARCHAR}
+			#end
+			#if($_parameter.username && $_parameter.username != '')
+				AND A.USERNAME = @{_parameter.username,jdbcType=VARCHAR}
+			#end
+			#if($_parameter.bpmTaskId && $_parameter.bpmTaskId!=0)
+				AND A.ID < @{_parameter.bpmTaskId,jdbcType=NUMERIC}
+			#end
+			#if($_parameter.taskSearch && $_parameter.taskSearch!='')
+				AND (A.NAME LIKE '%'||RTRIM(@{_parameter.taskSearch,jdbcType=VARCHAR})||'%' ESCAPE '/'
+				OR A.DESCRIPTION  LIKE'%'||RTRIM(@{_parameter.taskSearch,jdbcType=VARCHAR})||'%' ESCAPE '/')
+			#end
+		]]>
+	</sql>
+
+	<select id="findByConditions" lang="velocity" resultMap="ExUserTaskResultMap">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="SELECT_PRE"/>
+		<include refid="SEARCH_CONDITION_SQL"/>
+		#order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	
+	<select id="findByConditions" lang="velocity" resultMap="ExUserTaskResultMap" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT *  
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/>
+		<include refid="SEARCH_CONDITION_SQL"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+
+	<select id="countByConditions" lang="velocity" resultType="long">
+		<include refid="COUNT_PRE"/><include refid="SEARCH_CONDITION_SQL"/>
+	</select>
+
+	<!-- Mobile端按条件查询记录-->
+	<select id="selectUserTasks" parameterType="com.supconit.employee.todo.entities.ExUserTask" resultMap="ExUserTaskResultMap" lang="velocity" databaseId="oracle">
+		SELECT TO_CHAR(C.CREATE_TIME,'MM/DD HH24:MI') SHOW_TIME,C.*
+		FROM (SELECT B.*, ROWNUM AS RW
+		FROM (SELECT A.*
+		FROM BPM_USER_TASK A
+		WHERE A.DESCRIPTION IS NOT NULL
+		AND A.NAME !='诉求单登记'
+		<include refid="SEARCH_USER_TASK_SQL"/>
+		ORDER BY A.ID DESC) B
+		WHERE ROWNUM &lt; 21) C
+		WHERE C.RW >= 0
+	</select>
+
+	<select id="countUserTasks" resultType="long" lang="velocity">
+		SELECT COUNT(1)
+		FROM BPM_USER_TASK A
+		WHERE  A.DESCRIPTION IS NOT NULL
+		AND A.NAME !='诉求单登记'
+		<include refid="SEARCH_USER_TASK_SQL"/>
+	</select>
+</mapper>

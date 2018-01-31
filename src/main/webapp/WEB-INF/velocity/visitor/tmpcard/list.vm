@@ -1,0 +1,150 @@
+#parse("index/_header.vm")
+</head>
+<body>
+	<div class="ui-layout-west" style="border-right:solid 1px #e1e5e6;" id="leftTreeWrap"> 
+		<div class="ui-layout-north">
+		<div class="k-header k-grid-toolbar" style="padding-left:10px;">部门</div>
+		</div>
+    	<div class="ui-layout-center">
+  			<ul id="treeDemo_choose" class="ztree"></ul>
+    	</div>
+	</div>  
+<div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+        <form class="ui-form" id='queryForm' >
+            <input type="hidden" id="departId" name="departId" />
+            <table width="100%">
+                <tr>
+                    <td>
+                        <table class="ui-search-table">
+                            <tr>
+                                <td class="ui-search-name first">员工姓名：</td>
+                                <td class="ui-search-c">
+                                    <input  name="personName" class="k-textbox" type="text">
+                                </td>
+                                <td class="ui-search-name">报修时间：</td>
+                                <td class="ui-search-c" colspan="2" >
+                                    <input  id="startTime"  class="k-textbox"  name="startTime" />
+                                    &nbsp;至&nbsp;
+                                    <input id="endTime"  class="k-textbox"  name="endTime" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="ui-search-name">员工卡号：</td>
+                                <td class="ui-search-c">
+                                    <input  name="cardNo" class="k-textbox" type="text">
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td width="150" valign="top" style="padding-top:8px;">
+                        <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+                        <button type="reset" class="hc_btn" id="resetBtn" onclick="cancelLeftTreeSelected();"><i class="fa fa-refresh"></i>重置</button>
+                    </td>
+                    <td></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div class="ui-layout-center">
+        <div id="visitorTab"></div>
+    </div>
+</div>
+#parse("index/_footer.vm")    
+
+<script type="text/javascript">
+// layout
+var _iframe_layout, _left_layout, _inner_layout;
+$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      },
+      west: {
+        size: 0.18
+      }
+    });
+
+    _left_layout = $("#leftTreeWrap").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      }
+    });
+	
+	_inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var visitorTab = $("#visitorTab").data("kendoGrid");
+              visitorTab.resize();
+          }
+      }
+    })
+
+    // 接待登记
+    quick_datagrid(
+            "#visitorTab",
+            "#queryForm",
+            "$!{rc.contextPath}/visitor/tmpcard/list?flag=true",
+            [
+                {field: "id",hidden: true,sortable:false,width:100},
+//                {field: "deptName",title: "接待人部门",sortable: false,width: 250,headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"}},
+//                {field: "reversationName",title: "接待人姓名",sortable: false,width: 100,headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"}},
+                {field: "personName",title: "员工姓名",sortable: false,width: 100,headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"}},
+                {field: "cardNo",title: "员工卡号",sortable: false,width: 100,headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"}},
+                {field: "tmpCardNo",title: "临时卡号",sortable: false,width: 100,headerAttributes: {"class": "k-grid-equilong"},attributes: {"class": "k-grid-equilong"}},
+//                {field: "creator",title: "登记人",sortable: false,width: 100,headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"}},
+                {field: "createDate",title: "登记时间",sortable: false,width: 150,headerAttributes: {"class": "k-grid-equilong"},attributes: {"class": "k-grid-equilong"}}
+            ],
+            {sortable: {mode: "multiple",allowUnsort: true},resizable:true},
+            {serverSorting: true},
+            [
+                #kendo_datagrid_btns("YGZZ_FKGL_LSKBL")#end
+            ]
+    );
+    commonDate("startTime","endTime","yyyy-MM-dd HH:mm:ss","zh-CN");
+});
+</script>
+<script type="text/javascript">     
+    /* zTree */ 
+    var selectId = "";
+	var selectName = "";
+      var setting = {
+    	data: {
+    		simpleData: {enable: true}
+          },
+          callback: {
+    			onClick: function(event, treeId, treeNode) {
+					$('#departId').val(treeNode.id);
+	    			$('#queryBtn').click();
+    			}
+    		}
+    };
+	var zNodes = [];
+	zNodes.push({id:"10001", pId:"0", name:"中控信息", open:"true"});
+    #foreach($!{treeNode} in $!{treeList})
+        zNodes.push({id:$!{treeNode.id}, pId:$!{treeNode.pid}, name:"$!{treeNode.name}"});     
+    #end
+  	$(document).ready(function(){
+  		$.fn.zTree.init($("#treeDemo_choose"), setting,zNodes);
+  	});
+	function cancelLeftTreeSelected(){
+		$.fn.zTree.init($("#treeDemo_choose"), setting,zNodes);
+	}
+    $('#resetBtn').click(function(){
+        clearDate("startTime", "endTime");
+        $("input[name='cardNo']").val('');
+        $("input[name='personName']").val('');
+        $("input[name='departId']").val('');
+    });
+</script>
+</body>
+</html>

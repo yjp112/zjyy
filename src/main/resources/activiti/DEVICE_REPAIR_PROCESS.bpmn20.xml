@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
+  <process id="DEVICE_REPAIR_PROCESS" name="设备报修流程" isExecutable="true">
+    <documentation>设备报修流程</documentation>
+    <startEvent id="sid-186CA2D0-54AB-4214-9BED-7D61965E987E" activiti:initiator="_initiator" activiti:formUrl="/repair/task/edit"></startEvent>
+    <userTask id="sid-91724587-9B35-44D9-845B-65B9C6F4840A" name="诉求单登记" activiti:assignUsers="${_initiator}" activiti:formUrl="/repair/task/edit?id=${task.id}">
+      <documentation>${task.processInstanceName}</documentation>
+    </userTask>
+    <userTask id="sid-0FAE64D0-40C8-4E2A-9DF2-4AE504FAB41A" name="班组维修" activiti:assignPersons="${task.handlePersonCode}" activiti:formUrl="/repair/task/repair?id=${task.id}">
+      <documentation>${task.processInstanceName}</documentation>
+    </userTask>
+    <endEvent id="sid-F1A544C8-E6F7-452E-B077-D78D6421DD95"></endEvent>
+    <sequenceFlow id="sid-5951FBAF-13E6-4A4B-9D3A-938051A27AB8" sourceRef="sid-186CA2D0-54AB-4214-9BED-7D61965E987E" targetRef="sid-91724587-9B35-44D9-845B-65B9C6F4840A"></sequenceFlow>
+    <sequenceFlow id="SQD_SEND_ID" name="提交" sourceRef="sid-91724587-9B35-44D9-845B-65B9C6F4840A" targetRef="sid-0FAE64D0-40C8-4E2A-9DF2-4AE504FAB41A"></sequenceFlow>
+    <sequenceFlow id="SQD_BACK_ID" name="驳回" sourceRef="sid-0FAE64D0-40C8-4E2A-9DF2-4AE504FAB41A" targetRef="sid-91724587-9B35-44D9-845B-65B9C6F4840A"></sequenceFlow>
+    <sequenceFlow id="SQD_END_ID" name="完成" sourceRef="sid-0FAE64D0-40C8-4E2A-9DF2-4AE504FAB41A" targetRef="sid-F1A544C8-E6F7-452E-B077-D78D6421DD95"></sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_DEVICE_REPAIR_PROCESS">
+    <bpmndi:BPMNPlane bpmnElement="DEVICE_REPAIR_PROCESS" id="BPMNPlane_DEVICE_REPAIR_PROCESS">
+      <bpmndi:BPMNShape bpmnElement="sid-186CA2D0-54AB-4214-9BED-7D61965E987E" id="BPMNShape_sid-186CA2D0-54AB-4214-9BED-7D61965E987E">
+        <omgdc:Bounds height="30.0" width="30.0" x="135.0" y="137.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-91724587-9B35-44D9-845B-65B9C6F4840A" id="BPMNShape_sid-91724587-9B35-44D9-845B-65B9C6F4840A">
+        <omgdc:Bounds height="80.0" width="100.0" x="239.5" y="112.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-0FAE64D0-40C8-4E2A-9DF2-4AE504FAB41A" id="BPMNShape_sid-0FAE64D0-40C8-4E2A-9DF2-4AE504FAB41A">
+        <omgdc:Bounds height="80.0" width="100.0" x="450.0" y="112.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-F1A544C8-E6F7-452E-B077-D78D6421DD95" id="BPMNShape_sid-F1A544C8-E6F7-452E-B077-D78D6421DD95">
+        <omgdc:Bounds height="28.0" width="28.0" x="630.0" y="138.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="SQD_SEND_ID" id="BPMNEdge_SQD_SEND_ID">
+        <omgdi:waypoint x="339.5" y="132.0"></omgdi:waypoint>
+        <omgdi:waypoint x="450.0" y="132.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sid-5951FBAF-13E6-4A4B-9D3A-938051A27AB8" id="BPMNEdge_sid-5951FBAF-13E6-4A4B-9D3A-938051A27AB8">
+        <omgdi:waypoint x="165.0" y="152.0"></omgdi:waypoint>
+        <omgdi:waypoint x="239.5" y="152.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="SQD_BACK_ID" id="BPMNEdge_SQD_BACK_ID">
+        <omgdi:waypoint x="450.0" y="172.0"></omgdi:waypoint>
+        <omgdi:waypoint x="339.5" y="172.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="SQD_END_ID" id="BPMNEdge_SQD_END_ID">
+        <omgdi:waypoint x="550.0" y="152.0"></omgdi:waypoint>
+        <omgdi:waypoint x="630.0" y="152.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

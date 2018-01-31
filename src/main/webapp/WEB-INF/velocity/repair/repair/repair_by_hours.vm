@@ -1,0 +1,225 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<div class="ui-layout-north" style="border-right:solid 1px #e1e5e6;" id="searchLayout">
+<form id="queryForm" class="ui-form">
+    <table width="100%">
+          <tr>
+	         <td >
+	           <table class="ui-search-table" >
+                  <tr>
+                  <td class="ui-search-name first" style="width: 100px;">年度：</td>
+                  <td class="ui-search-c" >
+                  		<input id="repairMonth"  type="text" name="repairMonth"  />
+                  </td>
+            </tr>
+	           </table>
+	         </td>
+            <td width="150" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+            <td></td>
+          </tr>
+        </table>
+</form>
+</div>
+
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<div id="category_charts" style="height:300px">
+    	</div>
+    </div>
+    <div class="ui-layout-center">
+  	  <div id="grid" style="display:none"></div> 
+    </div>
+  </div>
+#parse("index/_footer.vm")  
+<script src="$!{main_static_custom_url}/js/echarts/echarts.js"></script>
+
+<script type="text/javascript">
+var myRateChart = null;
+var flag = 0;
+
+var _iframe_layout, _left_layout, _inner_layout;
+$(document).ready(function(){
+_iframe_layout = $('body').layout({
+  defaults: {
+    resizable: false,
+    closable: false,
+    spacing_open: 5
+  },
+  north: {
+    size: 0.1
+  }
+});
+
+_inner_layout = $("#subMain").layout({
+    defaults: {
+      resizable: false,
+      closable: false,
+      spacing_open: 0
+    },
+    north:{
+    	size: 0.6
+    },
+    center: {
+        onresize_end: function () {
+            var grid = $("#grid").data("kendoGrid");
+            grid.resize();
+        }
+    }
+  });
+  
+$('#resetBtn').click(function(){
+    $("#queryForm :text").val('');  
+  });
+  flag='$!{flag}'
+//列表
+quick_datagrid("#grid", "#queryForm", "$!rc.contextPath/repair/repairReport/repair_by_hours?flag="+flag, [{
+          field: "id",
+          hidden: true
+      }
+      ], 
+  {
+      sortable: {
+          mode: "multiple",
+          allowUnsort: true
+      },
+      pageable:false, 
+      showNumber:false,resizable:true
+      
+  },{
+	  change:generateRateChart
+  }, {
+      serverSorting: true
+  });
+	
+//加载时间控件
+    $("#repairMonth").hcDatePicker({
+    	 		start: "decade",
+    	 		depth: "decade",
+    	        format: "yyyy",
+    	        culture: "zh-CN"
+    	     });
+});
+//加载chart
+function loadEchart(option){
+        require.config({
+        	packages: [
+                {
+                    name: 'echarts',
+                    location: '$!{main_static_custom_url}/js/echarts',
+                    main: 'echarts'
+                }
+            ]
+        });
+        require(
+                [
+                    'echarts',
+                    'echarts/chart/line',
+                    'echarts/chart/bar'
+                ],
+                function(ec) {
+                	//console.log("ec" + ec);
+                    myRateChart = ec.init(document.getElementById('category_charts'));
+                    myRateChart.setOption(option);
+                }
+        )
+    }
+
+    function generateRateChart(grid,g) {
+
+        var value1 = new Array();
+        var value2 = new Array();
+        var value3 = new Array();
+
+        var data = grid.items;
+		var j=0;
+		for(var i=0;i<11;i++){
+			j=0;
+			$.each(data,function(index,o){
+				if(i!=new Date(o.repairMonth).getMonth()){
+					j++;
+					if(j==data.length){
+						value1.push(0);
+						value2.push(0);
+						value3.push(0);
+					}
+				}else{
+		            value1.push(o.workHours);
+		            value2.push(o.avgHours);
+		            value3.push(o.repairTimes);
+				}
+
+	        });
+		}
+        var option = {
+        	title:{
+        		text:'维修工时统计',
+        		x:'center'
+        	},
+		    tooltip : {
+		        trigger: 'axis'
+		    },
+		    legend: {
+		        data:['维修工时','每单平均时长','维修工单数'],
+		        x:'right',
+		    	y:'top'
+		    },
+		    xAxis : [
+		        {
+		            type : 'category',
+		            data : ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月']
+		        }
+		    ],
+		    yAxis : [
+		        {
+		            type : 'value',
+		            name : '工时(小时)',
+		            axisLabel : {
+		                formatter: '{value} '
+		            }
+		        },
+		        {
+		            type : 'value',
+		            name : '工单(张)',
+		            axisLabel : {
+		                formatter: '{value} '
+		            }
+		        }
+		    ],
+		    series : [
+		
+		        {
+		            name:'维修工时',
+		            type:'bar',
+		            data:value1
+		        },
+		        {
+		            name:'每单平均时长',
+		            type:'bar',
+		            data:value2
+		        },
+		        {
+		            name:'维修工单数',
+		            type:'line',
+		            yAxisIndex: 1,
+		            data:value3
+		        }
+		    ]
+        };
+        if(myRateChart==null){
+            if(data.length!=0)
+            	loadEchart(option);//datagrid查询结果为空
+        }else{
+            if(data.length!=0){
+            	myRateChart.setOption(option);
+            }else{
+            	myRateChart.clear();
+            }
+        }
+    }
+</script>
+</body>
+</html>

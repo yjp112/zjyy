@@ -1,0 +1,105 @@
+#parse("index/_header.vm")
+<!-- <style type="text/css">
+span{color:red;}
+</style> -->
+</head>
+<body>		
+	<form id="myform_id" method="post" action="$!{rc.contextPath}/base/dutyGroupPerson/save" class="ui-dialog-form">
+		<input type="hidden" name="id" value="$!{dutyGroupPerson.id}">
+	    <table width="100%">        
+	        <tr>
+	            <td width="20%" class="label">#if($!{viewOnly} != true)<span class="ui-form-required">*</span>#end<label>班组名称：</label></td>
+	            <td width="40%">
+	            	<input type="hidden" class="k-textbox"  id="groupId" name="groupId"  value="$!{dutyGroupPerson.groupId}"  >	            	
+					<span class="k-textbox k-space-right">
+                    	<input readonly type="text" class="k-textbox"  id="groupName" name="groupName" value="$!{dutyGroupPerson.groupName}" >
+						<a href="#" class="k-icon k-i-search" id="groupNames">&nbsp;</a>
+                	</span>	            	
+	            </td>
+	            <td width="10%"></td>
+	        </tr> 
+	        #set($readonlyview='')
+			   #if($!{viewOnly} == true)
+			       #set($readonlyview='readonly')
+			#end		               
+	        <tr>
+	            <td class="label">#if($!{viewOnly} != true)<span class="ui-form-required">*</span>#end<label>姓名：</label></td>
+	            <td>
+	            	<input type="hidden" class="k-textbox" id="personId" name="personId" value="$!{dutyGroupPerson.personId}" >
+	            	<span class="k-textbox k-space-right">
+	            		<input readonly type="text" class="k-textbox" id="personName" name="personName" value="$!{dutyGroupPerson.personName}" >
+	            		<a href="#" class="k-icon k-i-search" id="personNames">&nbsp;</a>
+                	</span>	 
+	            </td>
+	            <td></td>
+	        </tr>  
+	        <tr>
+	            <td class="label">#if($!{viewOnly} != true)<span class="ui-form-required">*</span>#end<label>岗位：</label></td>
+	            <td>
+                    <input type="hidden" name="postDesc" id="postDesc" value="$!dutyGroupPerson.postDesc">
+                      <select style="height:26px;" class="k-textbox" id="postId" name="postId" #if($!{viewOnly} == true) disabled="disabled" #else onchange="change(this)" #end >
+                     <option value="">--请选择-- </option>
+                     #foreach($item in $!list)
+                         <option value="$item.enumValue" #if($!{dutyGroupPerson.postId} == $item.enumValue) selected="selected" #end>$item.enumText</option>
+                     #end
+                 </select>
+	            </td>
+	            <td></td>
+	        </tr>  	        
+	    </table>
+	    
+	    <div class="actions">
+	    #if($!{viewOnly} != true)
+	        <button class="k-primary hc_btn" id="dutyGroupPersonSave" type="submit"><i class="fa fa-save"></i>保 存</button>
+	    #end 
+	        <button class="hc_btn cancel" onclick="close_dialog('dutyGroupPerson_add_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+	    </div> 	
+	    	            
+	</form>
+<script type="text/javascript">
+	$(document).ready(function(){
+		$("#groupNames").click(function() {
+			if("$!viewOnly" != "true")
+            quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/base/dutyGroup/lookup?txtId=groupId&txtName=groupName&dialogId=dutyGroupPerson_add_dlg", 300, 300);
+        });
+		
+		$("#personNames").click(function() {
+			if("$!viewOnly" != "true")
+            quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/choose/personPage?type=1&txtId=personId&txtName=personName&dialogId=dutyGroupPerson_add_dlg&personId=0",1135, 540);
+        });		
+		
+        $("#myform_id").validator({
+            fields:{
+            	groupName: "班组名称:required; length[~20]",
+            	personName: "姓名:required; lenght[~20]",
+                postId: "岗位:required; length[~20];",
+            },
+            valid:function(form){
+                form_btn_submit($("#dutyGroupPersonSave"),form,function(res){
+                    // 关闭窗口
+                    validateCallback(res,"grid","dutyGroupPerson_add_dlg");
+                });
+            }
+        });
+        change();
+        $("form .k-textbox").bind({
+            mouseover: function(e) {
+                if ($(this).hasClass("n-invalid")) {
+                    var msg_box = $(this).siblings(".msg-box").get(0);
+                    $(msg_box).find(".n-error").show();
+                }
+            },
+            mouseout: function(e){
+                if ($(this).hasClass("n-invalid")) {
+                    $(this).siblings(".msg-box").find(".n-error").hide();
+                }
+            }
+        }); 
+  });
+function change(o)
+{
+    $("#postDesc").val($("#postId ").find("option:selected").text());
+}
+</script>
+</body>
+</html>

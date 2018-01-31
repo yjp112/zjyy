@@ -1,0 +1,255 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.base.entities.DutyGroup">
+
+	<resultMap type="com.supconit.base.entities.DutyGroup" id="DutyGroupResultMap">      
+        <result property="id" column="ID" />
+        <result property="groupCode" column="GROUP_CODE" />
+        <result property="groupName" column="GROUP_NAME" />
+        <result property="remark" column="REMARK" />
+        <result property="createId" column="CREATE_ID" />
+        <result property="creator" column="CREATOR" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="updateId" column="UPDATE_ID" />
+        <result property="updator" column="UPDATOR" />
+        <result property="updateDate" column="UPDATE_DATE" />
+        <result property="parentId" column="PARENT_ID" />
+        <result property="parentName" column="parentName" />
+        <result property="depId" column="DEP_ID"/>
+        <result property="depName" column="depName"/>
+	</resultMap>
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+	<sql id="TABLE_NAME" lang="velocity">DUTY_GROUP</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+    <!-- 获取记录列表-->
+	<sql id="select_pre" lang="velocity">
+    	select son.*,father.GROUP_NAME as parentName ,h.NAME as depName
+		FROM 
+		DUTY_GROUP son LEFT JOIN DUTY_GROUP father on son.PARENT_ID = father.ID
+        LEFT JOIN HO_DEPARTMENT h on son.DEP_ID = h.ID
+	</sql>
+	<sql id="count_pre" lang="velocity">
+		SELECT
+		COUNT(*)
+		FROM 
+		DUTY_GROUP son LEFT JOIN DUTY_GROUP father on son.PARENT_ID = father.ID
+	</sql>
+	<insert id="insert" parameterType="com.supconit.base.entities.DutyGroup" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="INSERT_SQL"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    <insert id="insert" parameterType="com.supconit.base.entities.DutyGroup" 
+		keyProperty="id" keyColumn="ID" 		lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>        
+		<include refid="INSERT_SQL" />
+	</insert>	
+    <sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>
+		(#if($_databaseId=='oracle') ID,#end  
+		GROUP_CODE,
+        GROUP_NAME,
+        REMARK,
+        CREATE_ID,
+        CREATOR,
+        CREATE_DATE,
+        UPDATE_ID,
+        UPDATOR,
+        UPDATE_DATE,
+        PARENT_ID,
+        DEP_ID
+        ) VALUES (        
+		#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end
+		@{_parameter.groupCode,jdbcType=VARCHAR},
+        @{_parameter.groupName,jdbcType=VARCHAR},
+        @{_parameter.remark,jdbcType=VARCHAR},
+        @{_parameter.createId,jdbcType=NUMERIC},
+        @{_parameter.creator,jdbcType=VARCHAR},
+        @{_parameter.createDate,jdbcType=DATE},
+        @{_parameter.updateId,jdbcType=NUMERIC},
+        @{_parameter.updator,jdbcType=VARCHAR},
+        @{_parameter.updateDate,jdbcType=DATE},
+        @{_parameter.parentId,jdbcType=NUMERIC},
+        @{_parameter.depId,jdbcType=NUMERIC}
+		)
+	</sql>
+    <!-- 插入记录-->
+	<sql id="insert_sql">
+		INSERT INTO DUTY_GROUP(        
+        GROUP_CODE,
+        GROUP_NAME,
+        REMARK,
+        CREATE_ID,
+        CREATOR,
+        CREATE_DATE,
+        UPDATE_ID,
+        UPDATOR,
+        UPDATE_DATE,
+        PARENT_ID,
+        DEP_ID
+		) VALUES (        
+        #{groupCode,jdbcType=VARCHAR},
+        #{groupName,jdbcType=VARCHAR},
+        #{remark,jdbcType=VARCHAR},
+        #{createId,jdbcType=NUMERIC},
+        #{creator,jdbcType=VARCHAR},
+        #{createDate,jdbcType=DATE},
+        #{updateId,jdbcType=NUMERIC},
+        #{updator,jdbcType=VARCHAR},
+        #{updateDate,jdbcType=DATE},
+        #{parentId,jdbcType=NUMERIC},
+        #{depId,jdbcType=NUMERIC}
+		)
+	</sql>
+
+	<select id="getById" resultMap="DutyGroupResultMap" parameterType="Long">
+		<include refid="select_pre" />        
+        WHERE son.ID = #{id}
+	</select>
+	
+	<select id="findByCode" resultMap="DutyGroupResultMap" parameterType="string">
+		select son.*,father.GROUP_NAME as parentName ,h.NAME as depName
+		FROM 
+		DUTY_GROUP son LEFT JOIN DUTY_GROUP father on son.PARENT_ID = father.ID
+        LEFT JOIN HO_DEPARTMENT h on son.DEP_ID = h.ID       
+        WHERE son.GROUP_CODE = #{groupCode}
+	</select>
+	
+	<select id="findAll" resultMap="DutyGroupResultMap" parameterType="string">
+		select son.*,father.GROUP_NAME as parentName ,h.NAME as depName
+		FROM 
+		DUTY_GROUP son LEFT JOIN DUTY_GROUP father on son.PARENT_ID = father.ID
+        LEFT JOIN HO_DEPARTMENT h on son.DEP_ID = h.ID ORDER BY son.GROUP_CODE ASC       
+	</select>
+		
+	<select id="findSubNoRecursion" resultMap="DutyGroupResultMap" parameterType="Long">
+		select son.*,father.GROUP_NAME as parentName ,h.NAME as depName
+		FROM 
+		DUTY_GROUP son LEFT JOIN DUTY_GROUP father on son.PARENT_ID = father.ID
+        LEFT JOIN HO_DEPARTMENT h on son.DEP_ID = h.ID        
+        WHERE son.PARENT_ID = #{parentId}
+	</select>
+	
+	<select id="findSubByRoot" resultMap="DutyGroupResultMap" parameterType="long">
+	    WITH A (ID,GROUP_CODE,GROUP_NAME,REMARK,CREATE_ID,CREATOR,CREATE_DATE,UPDATE_ID,UPDATOR,UPDATE_DATE,PARENT_ID,DEP_ID)
+		AS ( SELECT ID,GROUP_CODE,GROUP_NAME,REMARK,CREATE_ID,CREATOR,CREATE_DATE,UPDATE_ID,UPDATOR,UPDATE_DATE,PARENT_ID,DEP_ID
+		FROM DUTY_GROUP  where PARENT_ID =  #{groupId}
+		UNION ALL SELECT B.ID,B.GROUP_CODE,B.GROUP_NAME,B.REMARK,B.CREATE_ID,B.CREATOR,B.CREATE_DATE,B.UPDATE_ID,B.UPDATOR,B.UPDATE_DATE,B.PARENT_ID,B.DEP_ID
+		FROM DUTY_GROUP B,A where A.ID = B.PARENT_ID)
+		SELECT * from A order by A.GROUP_CODE
+	</select>
+	
+	<select id="findSubById" resultMap="DutyGroupResultMap" parameterType="long">
+	    WITH A (ID,GROUP_CODE,GROUP_NAME,REMARK,CREATE_ID,CREATOR,CREATE_DATE,UPDATE_ID,UPDATOR,UPDATE_DATE,PARENT_ID,DEP_ID)
+		AS ( SELECT ID,GROUP_CODE,GROUP_NAME,REMARK,CREATE_ID,CREATOR,CREATE_DATE,UPDATE_ID,UPDATOR,UPDATE_DATE,PARENT_ID,DEP_ID
+		FROM DUTY_GROUP  where ID =  #{groupId}
+		UNION ALL SELECT B.ID,B.GROUP_CODE,B.GROUP_NAME,B.REMARK,B.CREATE_ID,B.CREATOR,B.CREATE_DATE,B.UPDATE_ID,B.UPDATOR,B.UPDATE_DATE,B.PARENT_ID,B.DEP_ID
+		FROM DUTY_GROUP B,A where A.ID = B.PARENT_ID)
+		SELECT * from A order by A.GROUP_CODE
+	</select>
+	
+	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.base.entities.DutyGroup">
+		UPDATE	DUTY_GROUP
+		<set>
+        <if test="groupCode != null">GROUP_CODE = #{groupCode,jdbcType=VARCHAR},</if>
+        <if test="groupName != null">GROUP_NAME = #{groupName,jdbcType=VARCHAR},</if>
+        <if test="remark != null">REMARK = #{remark,jdbcType=VARCHAR},</if>
+        <if test="createId != null">CREATE_ID = #{createId,jdbcType=NUMERIC},</if>
+        <if test="creator != null">CREATOR = #{creator,jdbcType=VARCHAR},</if>
+        <if test="createDate != null">CREATE_DATE = #{createDate,jdbcType=DATE},</if>
+        <if test="updateId != null">UPDATE_ID = #{updateId,jdbcType=NUMERIC},</if>
+        <if test="updator != null">UPDATOR = #{updator,jdbcType=VARCHAR},</if>
+        <if test="updateDate != null">UPDATE_DATE = #{updateDate,jdbcType=DATE},</if>
+        <if test="parentId != null">PARENT_ID = #{parentId,jdbcType=NUMERIC},</if>
+        <if test="depId != null">DEP_ID = #{depId,jdbcType=NUMERIC},</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+    <!-- 通过 ID 获取对象-->
+	<delete id="deleteById" parameterType="Long">
+		DELETE FROM DUTY_GROUP WHERE ID = #{id}
+	</delete>
+	<sql id="condition_sql" lang="velocity">
+	<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			1=1 		
+			#if($_p.id)
+				#set($_id = $_p.id)
+				AND son.ID = @{_id,jdbcType=BIGINT}
+			#end
+			#if($_p.groupCode && $_p.groupCode != '')
+				#set($_groupCode = '%' + $_p.groupCode + '%')
+				AND son.GROUP_CODE like @{_groupCode,jdbcType=VARCHAR}
+			#end
+			#if($_p.groupName && $_p.groupName != '')
+				#set($_groupName = '%' + $_p.groupName + '%')
+				AND son.GROUP_NAME like @{_groupName,jdbcType=VARCHAR}
+			#end
+			#if($_p.remark && $_p.remark != '')
+				#set($_remark = '%' + $_p.remark + '%')
+				AND son.REMARK like like @{_remark,jdbcType=VARCHAR}
+			#end
+			#if($_p.parentId)
+				#set($_parentId = $_p.parentId)
+				AND son.DEP_ID = @{_id,jdbcType=BIGINT}
+			#end
+			#if($_p.depId)
+				#set($_depId = $_p.depId)
+				AND son.DEP_ID = @{_depId,jdbcType=BIGINT}
+			#end
+			#if($_p.parentName && $_p.parentName != '')
+				#set($_parentName = '%' + $_p.parentName + '%')
+				AND father.GROUP_NAME like like @{_parentName,jdbcType=VARCHAR}
+			#end
+		 #end
+			]]>
+	</sql>
+    
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.base.entities.DutyGroup" resultMap="DutyGroupResultMap" lang="velocity" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre" />
+		<include refid="condition_sql" />
+		#order($_parameter.condition,"son.ID ASC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+	<select id="findByCondition" parameterType="com.supconit.base.entities.DutyGroup" resultMap="DutyGroupResultMap" lang="velocity" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		select son.*,father.GROUP_NAME as parentName ,h.NAME as depName
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"son.ID ASC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM 
+		DUTY_GROUP son LEFT JOIN DUTY_GROUP father on son.PARENT_ID = father.ID
+        LEFT JOIN HO_DEPARTMENT h on son.DEP_ID = h.ID
+		<include refid="condition_sql" />
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+
+    <select id="countByCondition" parameterType="com.supconit.base.entities.DutyGroup" resultType="long" lang="velocity">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+
+    <!-- 发现数据-->
+    <select id="findByGroudIds" resultMap="DutyGroupResultMap">
+        select * FROM DUTY_GROUP WHERE PARENT_ID in (SELECT id FROM DUTY_GROUP WHERE PARENT_ID=0)
+    </select>
+    <!-- 删除多条记录-->
+	<delete id="deleteByIds">
+        DELETE FROM DUTY_GROUP WHERE ID in 
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+
+	</delete>
+
+</mapper>

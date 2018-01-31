@@ -1,0 +1,12 @@
+<html>
+<head>
+<script src="$!{main_static_hc_url}/framework/js/jquery.min.js" type="text/javascript"></script>
+<script src="$!{platform_static_url}/zrender/esl/esl.js" type="text/javascript"></script>
+<script src="$!rc.contextPath/bpm/monitor/render?processInstanceId=$!processInstanceId" type="text/javascript"></script>
+</head>
+<body>
+<div id="_bpm_monitor_pic" style="width:1800px;height: 600px">
+
+</div>
+</body>
+</html>

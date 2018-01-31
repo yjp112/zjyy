@@ -1,0 +1,340 @@
+  <style>
+  body #centerMain {
+	overflow: hidden !important;
+	}
+  </style>
+  <script type="text/javascript" src="$!{nhgl_static_custom_url}/js/tabs.min.js"> </script>
+
+  <SCRIPT type="text/javascript">
+	$(document).ready(function(){
+
+		showProgress("span_dept");
+		showProgress("span_dept_list",38);
+		showProgress("span_area");
+		showProgress("span_area_list",38);
+		$('#qy_accordion_dept').accordion({
+            "handle": ".handle",
+            "panel": ".panel"
+       });
+	   $('#qy_accordion_area').accordion({
+            "handle": ".handle",
+            "panel": ".panel"
+       });
+        var d = new Date();
+		var nowYear = d.getFullYear();
+		if(nowYear == $!year)
+			$("#noNowYear").css("display","none");
+		else
+			$("#noNowYear").css("display","block");
+	   var standardCode = '$!{standardCode}';
+		if(standardCode != ''){
+    		$("a[name='sub']").each(function(){
+        		$(this).removeClass();
+        	});
+			$("#code"+standardCode).attr("class","current");
+		}
+		var flag = '$!{flag}';
+		if(flag == 2)
+			$('#tab-containers').tabs({
+				defaultTab: 'li:nth-child(2)'
+			});
+		else
+			$('#tab-containers').tabs();
+		if('1'==flag)
+		{
+			$("#name1").text("所有部门 白天总用能量");
+			$("#name2").text("所有部门 夜间总用能量");
+		}else{
+			$("#name1").text("所有区域 白天总用能量");
+			$("#name2").text("所有区域 夜间总用能量");
+		}			
+		var areaId='$!{areaId}';
+		var deptId='$!{deptId}';
+		if(areaId!=''){
+			if($("#"+areaId).parent().is("#qy_accordion_area")){
+				$("#qy_accordion_area #"+areaId+" .accordion-opener").click();
+			}else{
+				$("#qy_accordion_area #"+areaId).parent().parent("li").addClass("current");
+				$("#qy_accordion_area #"+areaId).parent().removeAttr("style");
+				$("#qy_accordion_area #"+areaId).parent().addClass("open");
+				$("#qy_accordion_area #"+areaId+" a").click();
+				$("#qy_accordion_area #"+areaId).addClass("current");
+			}
+		}
+		if(deptId!=''){
+			if($("#"+deptId).parent().is("#qy_accordion_dept")){
+				$("#qy_accordion_dept #"+deptId+" .accordion-opener").click();
+			}else{
+				$("#qy_accordion_dept #"+deptId).parent().parent("li").addClass("current");
+				$("#qy_accordion_dept #"+deptId).parent().removeAttr("style");
+				$("#qy_accordion_dept #"+deptId).parent().addClass("open");
+				$("#qy_accordion_dept #"+deptId+" a").click();
+				$("#qy_accordion_dept #"+deptId).addClass("current")
+			}
+		}
+		
+		$("ul.panel li").click(function(){
+			$(".panel li").removeClass("current");
+			$(this).addClass("current");
+		});			
+		if(areaId=='' && deptId==''){
+			$("#tabBlock").load('$!{rc.contextPath}/nhgl/analyse/energy/hoilday/allYear?year=$!{year}&standardCode=$!{standardCode}&flag='+flag);
+		}
+	});
+  </SCRIPT>
+  
+<div class="nh-header">
+	<span class="nh-tab-name">能量</span>
+	<span class="nh-menu-name">#crumbs("$!menu.code",1)</span>
+	<div class="nh-count">
+    		<div class="count-item count-item-rise" id="rudD">
+			<div class="item-data">
+				<span class="data-num fInt" id="dayTimeTotal"></span>
+				<span>同比去年</span>
+					<span class="data-trend" id="percentD"></span>
+			</div>
+			<div class="item-ratio">
+				<div class="item-ratio-i"></div>
+			</div>
+			<div class="item-info">
+				<span class="info-date" id="sTime1"></span>
+				<span class="info-name" id="name1">所有部门 白天总用能量</span>
+			</div>
+		</div>
+    		<div class="count-item count-item-rise" id="rudN">
+			<div class="item-data">
+				<span class="data-num fInt" id="nightTotal"></span>
+				<span>同比去年</span>
+					<span class="data-trend" id="percentN"></span>
+			</div>
+			<div class="item-ratio">
+				<div class="item-ratio-i"></div>
+			</div>
+			<div class="item-info">
+				<span class="info-date" id="sTime2"></span>
+				<span class="info-name" id="name2">所有部门 夜间总用能量</span>
+			</div>
+		</div>	
+	</div>	
+</div>	
+<div id="tab-containers" class="nh-box ui-tab ui-tab-h">
+	##切换时需要更新地址
+	<input id="areaId" type="hidden"/>
+	<input id="deptId" type="hidden"/>
+	<input id="allId" type="hidden"/>
+	<input id="isp" type="hidden"/>
+	<input id="name" type="hidden"/>
+	<input id="number" type="hidden"/>
+	<input id="flag" type="hidden" value="$!{flag}"/>
+	<ul class='ui-tab-items ui-tab-items-h'>
+       <li class='ui-tab-item'><a href="#tabDept" onclick="changeTab('$!year','1','0','$!eleDay.totalDayValue','$!eleDay.percent')"><span class="ui-tab-area"></span>部门</a></li>
+       <li class='ui-tab-item'><a href="#tabArea" onclick="changeTab('$!year','2','1','$!eleDay.totalDayValue','$!eleDay.percent')"><span class="ui-tab-type"></span>区域</a></li>
+	</ul>
+  	<div  class="ui-tab-panels" style="overflow:auto">
+		<div id="tabDept" class="ui-tab-panel">
+			<ul id="qy_accordion_dept" class="accordion">
+			#foreach($me in $list)
+				#if($me.parentId == $rootDId)
+					<li id="$!me.deptId">
+						#if($me.tb==1)
+							<h3 class="handle handle-rise" onclick="toTab('$!{year}','$!me.deptName','$!me.deptId','','1','$!me.total','$!me.percent')">
+						#elseif($me.tb==0)
+							<h3 class="handle handle-unchanged" onclick="toTab('$!{year}','$!me.deptName','$!me.deptId','','1','$!me.total','$!me.percent')">
+						#else
+							<h3 class="handle handle-decline" onclick="toTab('$!{year}','$!me.deptName','$!me.deptId','','1','$!me.total','$!me.percent')">
+						#end
+							    <span class="handle-name" name="nameCss" title="$!me.deptName">$!me.deptName</span>
+        						<span class="handle-num fInt">$!me.total</span>
+        						<span class="handle-bar" name="span_dept" num="$!me.total"></span>
+							</h3>
+							<ul class="panel">
+								#foreach($cm in $list)
+									#if($!me.deptId == $!cm.parentId)
+										#if($cm.tb==1)
+											<li id='$!cm.deptId' onclick="toTab('$!{year}','$!cm.deptName','$!cm.deptId','','1','$!cm.total','$!cm.percent')" class="pitem-rise">
+										#elseif($cm.tb==0)
+											<li id='$!cm.deptId' onclick="toTab('$!{year}','$!cm.deptName','$!cm.deptId','','1','$!cm.total','$!cm.percent')" class="pitem-unchanged">
+										#else
+											<li id='$!cm.deptId' onclick="toTab('$!{year}','$!cm.deptName','$!cm.deptId','','1','$!cm.total','$!cm.percent')" class="pitem-decline">
+										#end
+												<a class="pitem-link" href="javascript:;">
+        											<span class="pitem-name" name="nameCss" title="$!cm.deptName">$!cm.deptName</span>
+                            						<span class="pitem-num fInt">
+														$!cm.total
+													</span>
+                            						<span class="pitem-bar" name="span_dept_list" num="$!cm.total"></span>
+												</a>
+											</li>
+									#end
+								#end
+							</ul>
+						</li>
+					#end
+				#end
+			</ul>
+		</div>
+		<div id="tabArea" class="ui-tab-panel" >
+			<ul id="qy_accordion_area" class="accordion">
+			#foreach($me in $glist)
+				#if($me.parentId == $rootAId)
+					<li name="subli" id="$me.areaId" isp="1">
+						#if($me.tb==1)
+							<h3 class="handle handle-rise" onclick="toTab('$!{year}','$!me.areaName','$!me.areaId','1','2','$!me.total','$!me.percent')">
+						#elseif($me.tb==0)
+							<h3 class="handle handle-unchanged" onclick="toTab('$!{year}','$!me.areaName','$!me.areaId','1','2','$!me.total','$!me.percent')">
+						#else
+							<h3 class="handle handle-decline" onclick="toTab('$!{year}','$!me.areaName','$!me.areaId','1','2','$!me.total','$!me.percent')">
+						#end
+							    <span class="handle-name" name="nameCss" title="$!me.areaName">$!me.areaName</span>
+        						<span class="handle-num fInt">$!me.total</span>
+        						<span class="handle-bar" name="span_area" num="$!me.total"></span>
+							</h3>
+							<ul class="panel">
+								#foreach($cm in $glist)
+									#if($!me.areaId == $!cm.parentId)
+										#if($cm.tb==1)
+											<li name="subli" isp="" id="$cm.areaId" onclick="toTab('$!{year}','$!cm.areaName','$!cm.areaId','','2','$!cm.total','$!cm.percent')" class="pitem-rise">
+										#elseif($cm.tb==0)
+											<li name="subli" isp="" id="$cm.areaId" onclick="toTab('$!{year}','$!cm.areaName','$!cm.areaId','','2','$!cm.total','$!cm.percent')" class="pitem-unchanged">
+										#else
+											<li name="subli" isp="" id="$cm.areaId" onclick="toTab('$!{year}','$!cm.areaName','$!cm.areaId','','2','$!cm.total','$!cm.percent')" class="pitem-decline">
+										#end
+												<a class="pitem-link" href="javascript:;">
+        											<span class="pitem-name" name="nameCss" title="$!cm.areaName">$!cm.areaName</span>
+                            						<span class="pitem-num fInt">
+														$!cm.total
+													</span>
+                            						<span class="pitem-bar" name="span_area_list" num="$!cm.total"></span>
+												</a>
+											</li>
+									#end
+								#end
+							</ul>
+						</li>
+					#end
+				#end
+			</ul>
+		</div>
+	</div>
+</div>
+<!-- 图表和表格区域 -->
+<div class="nh-content">
+	<div class="nh-nd">
+		<div id="dateTime" class="nh-nd-date">
+			<label>起止日期：</label>
+			<ul class="nh-option">
+				#set($numberYear = $!{year})
+				<li><a href="javascript:;" id="lastYearlia" onclick="subTime('','-1')"><span id="lastYear">#set($numberYear = $numberYear - 1) $numberYear</span>年</a></li>
+				<li><a href="javascript:;" id="yearlia" onclick="subTime('','0')" class="current"><span id="year">$year</span>年</a></li>
+				<li><a name = "time" id="noNowYear" href="javascript:subTime('','')">今年</a></li>
+			</ul>
+		</div>
+		<div class="nh-nd-entry">
+			<label>分项能耗：</label>
+			<ul class="nh-option">
+				<li><a href="#" name="sub" id="" class="current" onclick="subTime('','0')">全部</a></li>
+				##这里使用循环遍历出分项
+				#foreach($s in $slist)
+					#if($s.parentCode == '0')
+						<li><a href="#" name="sub" id="code$!{s.standardCode}" onclick="subTime('$!{s.standardCode}','0')">$s.name</a></li>
+					#end
+				#end
+			</ul>
+		</div>
+	</div>
+	<div id="tabBlock" class="nh-ct">
+		
+	</div>
+</div>  
+<script type="text/javascript">
+	var code='$!code';
+	if(code!='fzjc'){
+		T.nhInit();
+	}
+	//重新load右边的tab
+	function toTab(year,deptName,id,isp,p,eleTotal,percent)
+	{	
+		if(p=='1'){
+			$("#deptId").val(id);
+		}else{
+			$("#areaId").val(id);
+		}
+		var standardCode = "";
+		$("a[name='sub']").each(function(){
+    		var aStyle = $(this).attr("class");
+    		//如果样式为current，则表示被选中
+    		if(aStyle == "current")
+    			standardCode = $(this).attr("id");
+    	});
+		standardCode = standardCode.substring(4,standardCode.length);
+		var dname=deptName;
+		if(deptName.length>8)
+    		deptName = deptName.substring(0,8)+"...";
+    	$("#name1").text(deptName+" 白天总用能量");
+    	$("#name2").text(deptName+" 夜间总用能量");
+		$("#allId").attr("value",id);
+		$("#name").attr("value",deptName);
+		$("#number").attr("value",p);
+		$("#tabBlock").load('$!{rc.contextPath}/nhgl/analyse/energy/hoilday/allYear?year='+year+'&deptName='+encodeURIComponent(dname)+'&id='+id+'&flag='+p+'&standardCode='+standardCode);
+	}
+	
+	//切换tab
+	function changeTab(year,flag,isp,total,percent)
+	{
+		$(".ui-tab-panels li").removeClass("current");
+		$(".ui-tab-panels li ul").removeClass("open");
+		$(".ui-tab-panels li ul").attr("style","display:none");
+		var standardCode = "";
+		$("a[name='sub']").each(function(){
+    		var aStyle = $(this).attr("class");
+    		//如果样式为current，则表示被选中
+    		if(aStyle == "current")
+    			standardCode = $(this).attr("id");
+    	});
+		standardCode = standardCode.substring(4,standardCode.length);
+		$("#flag").attr("value",flag);
+    	if('1'==flag)
+    	{	
+    		$("#areaId").val('');
+			$("#name1").text("所有部门 白天总用能量");
+			$("#name2").text("所有部门 夜间总用能量");
+    		$("#tabBlock").load('$!{rc.contextPath}/nhgl/analyse/energy/hoilday/allYear?flag=1&year='+year+'&standardCode='+standardCode);
+    	}else{
+    		$("#deptId").val('');
+			$("#name1").text("所有区域 白天总用能量");
+			$("#name2").text("所有区域 夜间总用能量");
+    	    $("#tabBlock").load('$!{rc.contextPath}/nhgl/analyse/energy/hoilday/allYear?flag=2&year='+year+'&standardCode='+standardCode);
+    	  }
+	}
+	function subTime(standardCode,num){
+		var year = 0;
+		if(num=='' && standardCode==''){
+		 	var d = new Date();
+			var nowYear = d.getFullYear();
+			year=nowYear;
+		}else{
+			year = $!{year} + parseInt(num);
+		}
+		if(standardCode==''&& num!='0'){
+			$("a[name='sub']").each(function(){
+	    		var aStyle = $(this).attr("class");
+	    		//如果样式为current，则表示被选中
+	    		if(aStyle == "current")
+	    			standardCode = $(this).attr("id");
+	    	});
+			standardCode = standardCode.substring(4,standardCode.length);
+		}
+		var areaId=$("#areaId").val();
+		var deptId=$("#deptId").val();
+		var id=$("#allId").val();
+		var name=$("#name").val();
+		var flag =$("#flag").val();
+		var url = '$!{rc.contextPath}/nhgl/analyse/energy/hoilday/index?year='+year;
+			url = url + '&standardCode='+standardCode;
+		if(flag != "")
+			url = url + '&flag=' + flag;
+		var menuCode = '$!menu.code'
+		url = url+'&areaId='+areaId+'&deptId='+deptId + '&menuCode='+encodeURIComponent(menuCode)+'&code='+encodeURIComponent(code);
+		$("#chart_content_id").load(url);
+	}
+</script>

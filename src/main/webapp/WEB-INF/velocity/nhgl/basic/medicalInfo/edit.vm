@@ -1,0 +1,35 @@
+<form class="ui-form" id="park_manage_add_form" action="$!{rc.contextPath}/nhgl/basic/medicalInfo/save" method="post">
+	<input type="hidden" name="id" value="$!medical.id"/>
+	<fieldset>
+		<div class="ui-form-item">
+            <label class="ui-label"><span class="ui-form-required">*</span>月份：</label>
+            <input id="monthKey" style="width:160px" type="text" name="monthKey"  data-rule="月份:required" class="ui-input ui-input-small  Wdate"  onclick="WdatePicker({dateFmt:'yyyy-MM',maxDate:'%y-%M-%d'})" value="$!medical.monthKey"/>
+		</div>
+		<div class="ui-form-item" >
+			<label class="ui-label" ><span class="ui-form-required">*</span>门诊量：</label>
+			<input class="ui-input" type="text" data-rule="门诊量:required;int;" data-rule-int="[/^[1-9]\d*$/, '请输入大于0整数']" name="outpatient" value="$!medical.outpatient">
+		</div>
+		<div class="ui-form-item" >
+			<label class="ui-label" ><span class="ui-form-required">*</span>住院量：</label>
+			<input class="ui-input" type="text" data-rule="住院量:required;int;" data-rule-int="[/^[1-9]\d*$/, '请输入大于0整数']" name="inpatient" value="$!medical.inpatient">
+		</div>
+		<div class="ui-form-item" >
+			<label class="ui-label" ><span class="ui-form-required">*</span>手术量：</label>
+			<input class="ui-input" type="text" data-rule="手术量:required;int;" data-rule-int="[/^[1-9]\d*$/, '请输入大于0整数']" name="operation" value="$!medical.operation">
+		</div>
+		<div class="ui-form-item" >
+			<label class="ui-label" ><span class="ui-form-required">*</span>设备运行台数：</label>
+			<input class="ui-input" type="text" data-rule="设备运行台数:required;int;" maxlength="11" data-rule-int="[/^[1-9]\d*$/, '请输入大于0整数']" name="runDevice" value="$!medical.runDevice">
+		</div>
+		<div class="ui-form-item" >
+			<label class="ui-label" ><span class="ui-form-required">*</span>平均温度：</label>
+			<input class="ui-input" type="text" data-rule="平均温度:required;float;" data-rule-float="[/^(-?\d+)(\.\d+)?$/, '请输入平均温度']" name="avgTemperataure" value="$!medical.avgTemperataure">
+		</div>
+	</fieldset>
+</form>
+<script>
+	function clearManagePerson(){
+      	 $("#managerPersonId").val("");	
+    	 $("#managerPersonName").val("");	
+       }
+</script>

@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.employee.todo.entities.BpmApprovalRecord">
+	<resultMap type="com.supconit.employee.todo.entities.BpmApprovalRecord" id="bpmApprovalRecordResultMap">
+		<id property="id" column="ID" />
+		<result property="taskId" column="TASK_ID" />
+		<result property="activityName" column="ACTIVITY_NAME" />
+		<result property="activityId" column="ACTIVITY_ID" />
+		<result property="description" column="DESCRIPTION" />
+		<result property="executionId" column="EXECUTION_ID" />
+		<result property="processInstanceId" column="PROCESS_INSTANCE_ID" />
+		<result property="processDefinitionId" column="PROCESS_DEFINITION_ID" />
+		<result property="processDefinitionKey" column="PROCESS_DEFINITION_KEY" />
+		<result property="username" column="USERNAME" />
+		<result property="userId" column="USER_ID" />
+		<result property="userTaskId" column="USER_TASK_ID" />
+		<result property="operateName" column="OPERATE_NAME" />
+		<result property="handleTime" column="HANDLE_TIME" />
+		<result property="handleComment" column="HANDLE_COMMENT" />
+		<result property="saves" column="SAVES" />
+		<result property="generateTime" column="GENERATE_TIME" />
+		<result property="transitionIds" column="TRANSITION_IDS" />
+		<result property="formUrl" column="FORM_URL" />
+		<result property="businessKey" column="BUSINESS_KEY" />
+		<result property="processDefinitionName" column="PROCESS_DEFINITION_NAME" />
+		<result property="showTime" column="SHOW_TIME" />
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">BPM_APPROVAL_RECORD</sql>
+	
+	<sql id="select_pre" lang="velocity">
+		SELECT
+			a.*
+		FROM  <include refid="TABLE_NAME"/> a
+	</sql>
+	
+	<sql id="count_pre" lang="velocity">SELECT COUNT(*) FROM <include refid="TABLE_NAME"/> a </sql>
+
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			a.DESCRIPTION IS NOT NULL
+			AND
+			a.USERNAME = @{_p.username,jdbcType=VARCHAR}
+			#if($_p.activityName && $_p.activityName != '')
+				#set($_activityName = '%' + $_p.activityName + '%')
+				AND a.ACTIVITY_NAME LIKE @{_activityName} ESCAPE '/' 
+			#end
+			#if($_p.description && $_p.description != '')
+				#set($_description = '%' + $_p.description + '%')
+				AND a.DESCRIPTION LIKE @{_description} ESCAPE '/' 
+			#end
+		#end
+		]]>	
+    </sql>
+
+	<!-- 手机端搜索已办流程 -->
+	<sql id="SEARCH_HISTORY_SQL" lang="velocity">
+		<![CDATA[
+			#if($_parameter.processDefinitionKey && $_parameter.processDefinitionKey != '')
+				AND A.PROCESS_DEFINITION_KEY = @{_parameter.processDefinitionKey,jdbcType=VARCHAR}
+			#end
+			#if($_parameter.username && $_parameter.username != '')
+				AND A.USERNAME = @{_parameter.username,jdbcType=VARCHAR}
+				AND A.BUSINESS_KEY NOT IN
+				(SELECT BPM.BUSINESS_KEY
+					FROM BPM_USER_TASK BPM
+					WHERE BPM.USERNAME = @{_parameter.username,jdbcType=VARCHAR})
+			#end
+			#if($_parameter.bpmHistoryId && $_parameter.bpmHistoryId!=0)
+				AND A.ID < @{_parameter.bpmHistoryId,jdbcType=NUMERIC}
+			#end
+			#if($_parameter.historySearch && $_parameter.historySearch!='')
+				AND (A.ACTIVITY_NAME LIKE '%'||RTRIM(@{_parameter.historySearch,jdbcType=VARCHAR})||'%' ESCAPE '/'
+				OR A.DESCRIPTION LIKE '%'||RTRIM(@{_parameter.historySearch,jdbcType=VARCHAR})||'%' ESCAPE '/')
+			#end
+		]]>
+	</sql>
+
+	<sql id="SELECT_APPROVAL_RECORD" lang="velocity">
+		<![CDATA[
+			#if($_parameter.processInstanceId && $_parameter.processInstanceId != '')
+				AND PROCESS_INSTANCE_ID = @{_parameter.processInstanceId,jdbcType=VARCHAR}
+			#end
+		]]>
+	</sql>
+    	
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.employee.todo.entities.BpmApprovalRecord" resultMap="bpmApprovalRecordResultMap" lang="velocity" databaseId="oracle">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre"/>
+		<include refid="condition_sql"/>
+		#order($_parameter.condition,"a.ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.employee.todo.entities.BpmApprovalRecord" resultMap="bpmApprovalRecordResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			a.*
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"a.ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/> a
+		<include refid="condition_sql"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countByConditions" resultType="long" lang="velocity">
+        <include refid="count_pre"/>
+        <include refid="condition_sql"/>
+    </select>
+
+	<!-- Mobile端按条件查询记录-->
+	<select id="selectHistoryBpms" parameterType="com.supconit.employee.todo.entities.BpmApprovalRecord" resultMap="bpmApprovalRecordResultMap" lang="velocity" databaseId="oracle">
+		SELECT TO_CHAR(E.HANDLE_TIME,'MM/DD HH24:MI') SHOW_TIME,E.*
+			FROM (SELECT D.*, ROWNUM AS RW
+				FROM (SELECT C.*
+					FROM BPM_APPROVAL_RECORD C
+					WHERE C.TASK_ID IN
+					(SELECT MAX(B.TASK_ID)
+						FROM BPM_APPROVAL_RECORD B
+						WHERE B.BUSINESS_KEY IN
+						(SELECT A.BUSINESS_KEY
+							FROM BPM_APPROVAL_RECORD A
+							WHERE  A.DESCRIPTION IS NOT NULL
+							<include refid="SEARCH_HISTORY_SQL"/>
+							GROUP BY A.BUSINESS_KEY)
+						GROUP BY B.BUSINESS_KEY)
+					<![CDATA[
+						#if($_parameter.historySearch && $_parameter.historySearch!='')
+							AND (C.ACTIVITY_NAME LIKE '%'||RTRIM(@{_parameter.historySearch,jdbcType=VARCHAR})||'%' ESCAPE '/'
+							OR C.DESCRIPTION LIKE '%'||RTRIM(@{_parameter.historySearch,jdbcType=VARCHAR})||'%' ESCAPE '/')
+						#end
+					]]>
+				ORDER BY C.ID DESC) D
+			WHERE ROWNUM &lt; 21) E
+		WHERE E.RW >= 0
+	</select>
+
+	<select id="countHistoryBpms" resultType="long" lang="velocity">
+		SELECT COUNT(1)
+		FROM BPM_APPROVAL_RECORD C
+		WHERE C.TASK_ID IN
+			(SELECT MAX(B.TASK_ID)
+			FROM BPM_APPROVAL_RECORD B
+			WHERE B.BUSINESS_KEY IN
+				(SELECT A.BUSINESS_KEY
+				FROM BPM_APPROVAL_RECORD A
+					WHERE  A.DESCRIPTION IS NOT NULL
+					<include refid="SEARCH_HISTORY_SQL"/>
+				GROUP BY A.BUSINESS_KEY)
+			GROUP BY B.BUSINESS_KEY)
+		<![CDATA[
+			#if($_parameter.historySearch && $_parameter.historySearch!='')
+				AND (C.ACTIVITY_NAME LIKE '%'||RTRIM(@{_parameter.historySearch,jdbcType=VARCHAR})||'%' ESCAPE '/'
+				OR C.DESCRIPTION LIKE '%'||RTRIM(@{_parameter.historySearch,jdbcType=VARCHAR})||'%' ESCAPE '/')
+			#end
+		]]>
+	</select>
+
+	<select id="selectApprovalRecords" parameterType="com.supconit.employee.todo.entities.BpmApprovalRecord" resultMap="bpmApprovalRecordResultMap" lang="velocity" databaseId="oracle">
+		SELECT *
+		FROM (SELECT A.USER_TASK_ID,
+		TO_CHAR(A.HANDLE_TIME, 'MM/DD HH24:MI') SHOW_TIME,
+		A.ACTIVITY_NAME,
+		A.USERNAME,
+		DECODE(A.HANDLE_COMMENT, '', '无', A.HANDLE_COMMENT) HANDLE_COMMENT
+		FROM BPM_APPROVAL_RECORD A
+		WHERE A.TASK_ID IS NOT NULL
+		<include refid="SELECT_APPROVAL_RECORD"/>
+		UNION ALL
+		select B.ID USER_TASK_ID,
+		'' SHOW_TIME,
+		B.NAME ACTIVITY_NAME,
+		B.USERNAME,
+		'' HANDLE_COMMENT
+		from BPM_USER_TASK B
+		WHERE B.TASK_ID IS NOT NULL
+		<include refid="SELECT_APPROVAL_RECORD"/>) T
+		ORDER BY T.USER_TASK_ID DESC
+	</select>
+</mapper>

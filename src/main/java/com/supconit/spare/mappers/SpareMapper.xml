@@ -1,0 +1,542 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconicom/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.spare.entities.Spare">
+	<resultMap type="com.supconit.spare.entities.Spare" id="SpareResultMap">
+		<result property="id" column="ID" />
+        <result property="spareCode" column="SPARE_CODE" />
+        <result property="spareName" column="SPARE_NAME" />
+        <result property="spareCategoryId" column="SPARE_CATEGORY_ID" />
+        <result property="spec" column="SPEC" />
+        <result property="model" column="MODEL" />
+        <result property="price" column="PRICE" />
+        <result property="weight" column="WEIGHT" />
+        <result property="unit" column="UNIT" />
+        <result property="meterial" column="METERIAL" />
+        <result property="supplierId" column="SUPPLIER_ID" />
+        <result property="isShelfLife" column="IS_SHELF_LIFE" />
+        <result property="shelfLife" column="SHELF_LIFE" />
+        <result property="alarmDay" column="ALARM_DAY" />
+        <result property="upperQty" column="UPPER_QTY" />
+        <result property="safeQty" column="SAFE_QTY" />
+        <result property="lowerQty" column="LOWER_QTY" />
+        <result property="spareDesc" column="SPARE_DESC" />
+        <result property="createId" column="CREATE_ID" />
+        <result property="creator" column="CREATOR" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="updateId" column="UPDATE_ID" />
+        <result property="updator" column="UPDATOR" />
+        <result property="updateDate" column="UPDATE_DATE" />
+        
+        <result property="spareCategoryName" column="spareCategoryName" />
+        <result property="supplierName" column="supplierName" />
+        <result property="stockOutDetailId" column="stockOutDetailId" />
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">SPARE</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	<sql id="select_pre" lang="velocity">
+		SELECT
+			ID,
+	        SPARE_CODE,
+	        SPARE_NAME,
+	        SPARE_CATEGORY_ID,
+	        SPEC,
+	        MODEL,
+	        PRICE,
+	        WEIGHT,
+	        UNIT,
+	        METERIAL,
+	        SUPPLIER_ID,
+	        IS_SHELF_LIFE,
+	        SHELF_LIFE,
+	        ALARM_DAY,
+	        UPPER_QTY,
+	        SAFE_QTY,
+	        LOWER_QTY,
+	        SPARE_DESC,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE,
+	        UPDATE_ID,
+	        UPDATOR,
+	        UPDATE_DATE,		
+	        (select CATEGORY_NAME from SPARE_CATEGORY t1 where t1.id=SPARE_CATEGORY_ID)spareCategoryName,
+	        (SELECT FULL_NAME from SUPPLIER t2 where t2.id=SUPPLIER_ID)supplierName
+		FROM  <include refid="TABLE_NAME"/> 
+	</sql>
+	
+	<sql id="count_pre" lang="velocity">SELECT COUNT(*) FROM <include refid="TABLE_NAME"/>  </sql>
+	
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+		#where()
+		     #set($_p = $_parameter.condition)
+		    #if($_p.id && $_p.id != '')
+				#set($_id = $_p.id)
+				AND ID = @{_id}
+			#end
+			
+			#if($_p.spareCode && $_p.spareCode != '')
+				#set($_spareCode = '%' + $_p.spareCode + '%')
+				AND SPARE_CODE LIKE @{_spareCode}
+			#end
+			#if($_p.spareName && $_p.spareName != '')
+				#set($_spareName = '%' + $_p.spareName + '%')
+				AND SPARE_NAME LIKE @{_spareName}
+			#end
+			#if($_p.spareCategoryId && $_p.spareCategoryId != '')
+				#set($_spareCategoryId = $_p.spareCategoryId)
+				AND  SPARE_CATEGORY_ID = @{_spareCategoryId}
+			#end
+		
+			#if($_p.spareCategoryIds && $_p.spareCategoryIds.size() > 0 )
+				#set($_spareCategoryIds =$_p.spareCategoryIds)
+				 AND
+				#repeat( $_spareCategoryIds $id "," " SPARE_CATEGORY_ID IN (" ")" )
+		    		@{id,jdbcType=NUMERIC}
+				#end
+				
+			#end
+			#if($_p.spec && $_p.spec != '')
+				#set($_spec = '%' + $_p.spec + '%')
+				AND SPEC LIKE @{_spec}
+			#end
+			#if($_p.model && $_p.model != '')
+				#set($_model = '%' + $_p.model + '%')
+				AND MODEL LIKE @{_model}
+			#end
+			#if($_p.price && $_p.price != '')
+				#set($_price = $_p.price)
+				AND PRICE  = @{_price}
+			#end
+			
+			#if($_p.weight && $_p.weight != '')
+				#set($_weight = '%' + $_p.weight + '%')
+				AND WEIGHT LIKE @{_weight}
+			#end
+			#if($_p.unit && $_p.unit != '')
+				#set($_unit = '%' + $_p.unit + '%')
+				AND UNIT LIKE @{_unit}
+			#end
+			#if($_p.meterial && $_p.meterial != '')
+				#set($_meterial = '%' + $_p.meterial + '%')
+				AND METERIAL LIKE @{_meterial}
+			#end
+			#if($_p.supplierId && $_p.supplierId != '')
+				#set($_supplierId = $_p.supplierId)
+				AND SUPPLIER_ID = @{_supplierId}
+			#end
+			
+			#if($_p.isShelfLife && $_p.isShelfLife != '')
+				#set($_isShelfLife = $_p.isShelfLife)
+				AND IS_SHELF_LIFE  = @{_isShelfLife}
+			#end
+			#if($_p.shelfLife && $_p.shelfLife != '')
+				#set($_shelfLife = '%' + $_p.shelfLife + '%')
+				AND SHELF_LIFE LIKE @{_shelfLife}
+			#end
+			#if($_p.alarmDay && $_p.alarmDay != '')
+				#set($_alarmDay = $_p.alarmDay)
+				AND ALARM_DAY = @{_alarmDay}
+			#end
+			#if($_p.upperQty && $_p.upperQty != '')
+				#set($_upperQty = $_p.upperQty)
+				AND UPPER_QTY  = @{_upperQty}
+			#end
+			#if($_p.safeQty && $_p.safeQty != '')
+				#set($_safeQty = $_p.safeQty)
+				AND SAFE_QTY LIKE @{_safeQty}
+			#end
+			#if($_p.lowerQty && $_p.lowerQty != '')
+				#set($_lowerQty = $_p.lowerQty)
+				AND LOWER_QTY  = @{_lowerQty}
+			#end
+			#if($_p.spareDesc && $_p.spareDesc != '')
+				#set($_spareDesc = '%' + $_p.spareDesc + '%')
+				AND SPARE_DESC LIKE @{_spareDesc}
+			#end
+			#if($_p.createId && $_p.createId != '')
+				#set($_createId = $_p.createId)
+				AND CREATE_ID  = @{_createId}
+			#end
+			#if($_p.creator && $_p.creator != '')
+				#set($_creator = '%' + $_p.creator + '%')
+				AND CREATOR LIKE @{_creator}
+			#end
+			#if($_p.createDate && $_p.createDate != '')
+				#set($_createDate = $_p.createDate)
+				AND CREATE_DATE = @{_createDate}
+			#end
+			#if($_p.updateId && $_p.updateId != '')
+				#set($_updateId = $_p.updateId)
+				AND UPDATE_ID  = @{_updateId}
+			#end
+			#if($_p.updator && $_p.updator != '')
+				#set($_updator = '%' + $_p.updator + '%')
+				AND UPDATOR LIKE @{_updator}
+			#end
+		#end
+		]]>	
+    </sql>
+	
+    <!-- 插入记录-->
+    <sql id="insert_sql" lang="velocity">
+        INSERT INTO <include refid="TABLE_NAME"/>(
+        	#if($_databaseId == 'oracle') ID, #end
+	        SPARE_CODE,
+	        SPARE_NAME,
+	        SPARE_CATEGORY_ID,
+	        SPEC,
+	        MODEL,
+	        PRICE,
+	        WEIGHT,
+	        UNIT,
+	        METERIAL,
+	        SUPPLIER_ID,
+	        IS_SHELF_LIFE,
+	        ALARM_DAY,
+	        UPPER_QTY,
+	        SAFE_QTY,
+	        LOWER_QTY,
+	        SPARE_DESC,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE,
+	        UPDATE_ID,
+	        UPDATOR,
+	        UPDATE_DATE
+        ) VALUES (
+        	#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end
+	        @{_parameter.spareCode,jdbcType=VARCHAR},
+	        @{_parameter.spareName,jdbcType=VARCHAR},
+	        @{_parameter.spareCategoryId,jdbcType=NUMERIC},
+	        @{_parameter.spec,jdbcType=VARCHAR},
+	        @{_parameter.model,jdbcType=VARCHAR},
+	        @{_parameter.price,jdbcType=DECIMAL},
+	        @{_parameter.weight,jdbcType=VARCHAR},
+	        @{_parameter.unit,jdbcType=VARCHAR},
+	        @{_parameter.meterial,jdbcType=VARCHAR},
+	        @{_parameter.supplierId,jdbcType=VARCHAR},
+	        @{_parameter.isShelfLife,jdbcType=NUMERIC},
+	        @{_parameter.alarmDay,jdbcType=NUMERIC},
+	        @{_parameter.upperQty,jdbcType=NUMERIC},
+	        @{_parameter.safeQty,jdbcType=NUMERIC},
+	        @{_parameter.lowerQty,jdbcType=NUMERIC},
+	        @{_parameter.spareDesc,jdbcType=VARCHAR},
+	        @{_parameter.createId,jdbcType=NUMERIC},
+	        @{_parameter.creator,jdbcType=VARCHAR},
+	        @{_parameter.createDate,jdbcType=TIMESTAMP},
+	        @{_parameter.updateId,jdbcType=NUMERIC},
+	        @{_parameter.updator,jdbcType=VARCHAR},
+	        @{_parameter.updateDate,jdbcType=TIMESTAMP}
+        )
+    </sql>
+    
+    <insert id="insert" parameterType="com.supconit.spare.entities.Spare" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="insert_sql" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.spare.entities.Spare" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    
+	<!-- 更新记录-->
+	<update id="update"  parameterType="com.supconit.spare.entities.Spare" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+			#mset()
+				<![CDATA[
+			        #if($_parameter.spareCode && $_parameter.spareCode !='')SPARE_CODE = @{_parameter.spareCode,jdbcType=VARCHAR},#end
+			        #if($_parameter.spareName && $_parameter.spareName !='')SPARE_NAME = @{_parameter.spareName,jdbcType=VARCHAR},#end
+			        #if($_parameter.categoryCode && $_parameter.categoryCode !='')CATEGORY_CODE = @{_parameter.categoryCode,jdbcType=VARCHAR},#end
+			        #if($_parameter.categoryName && $_parameter.categoryName !='')CATEGORY_NAME = @{_parameter.categoryName,jdbcType=VARCHAR},#end
+			        #if($_parameter.spareCategoryId)SPARE_CATEGORY_ID = @{_parameter.spareCategoryId,jdbcType=NUMERIC},#end
+			        SPEC = @{_parameter.spec,jdbcType=VARCHAR},
+			        MODEL = @{_parameter.model,jdbcType=VARCHAR},
+			        PRICE = @{_parameter.price,jdbcType=DECIMAL},
+			        #if($_parameter.weight)WEIGHT = @{_parameter.weight,jdbcType=VARCHAR},#end
+			        UNIT = @{_parameter.unit,jdbcType=VARCHAR},
+			        METERIAL = @{_parameter.meterial,jdbcType=VARCHAR},
+			        SUPPLIER_ID = @{_parameter.supplierId,jdbcType=VARCHAR},
+			        #if($_parameter.isShelfLife)IS_SHELF_LIFE = @{_parameter.isShelfLife,jdbcType=NUMERIC},#end
+			        #if($_parameter.shelfLife)SHELF_LIFE = @{_parameter.shelfLife,jdbcType=NVARCHAR},#end
+			        #if($_parameter.alarmDay)ALARM_DAY = @{_parameter.alarmDay,jdbcType=NUMERIC},#end
+			        UPPER_QTY = @{_parameter.upperQty,jdbcType=NUMERIC},
+			        SAFE_QTY = @{_parameter.safeQty,jdbcType=NUMERIC},
+			        LOWER_QTY = @{_parameter.lowerQty,jdbcType=NUMERIC},
+			        #if($_parameter.spareDesc)SPARE_DESC = @{_parameter.spareDesc,jdbcType=VARCHAR},#end
+			  		#if($_parameter.createId)CREATE_ID = @{_parameter.createId,jdbcType=NUMERIC},#end
+			        #if($_parameter.updator)CREATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateDate)CREATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+			        #if($_parameter.updateId)UPDATE_ID = @{_parameter.updateId,jdbcType=NUMERIC},#end
+			        #if($_parameter.updator)UPDATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateDate)UPDATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+			  		
+			    ]]>
+			#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+	
+	<update id="updateSelective"  parameterType="com.supconit.spare.entities.Spare" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+			#mset()
+				<![CDATA[
+			        #if($_parameter.categoryCode && $_parameter.categoryCode !='')CATEGORY_CODE = @{_parameter.categoryCode,jdbcType=VARCHAR},#end
+			        #if($_parameter.categoryName && $_parameter.categoryName !='')CATEGORY_NAME = @{_parameter.categoryName,jdbcType=VARCHAR},#end
+			        #if($_parameter.spareCategoryId)SPARE_CATEGORY_ID = @{_parameter.spareCategoryId,jdbcType=NUMERIC},#end
+			        #if($_parameter.spec)SPEC = @{_parameter.spec,jdbcType=VARCHAR},#end
+			        #if($_parameter.model)MODEL = @{_parameter.model,jdbcType=VARCHAR},#end
+			        #if($_parameter.price)PRICE = @{_parameter.price,jdbcType=DECIMAL},#end
+			        #if($_parameter.weight)WEIGHT = @{_parameter.weight,jdbcType=VARCHAR},#end
+			        #if($_parameter.unit)UNIT = @{_parameter.unit,jdbcType=VARCHAR},#end
+			        #if($_parameter.meterial)METERIAL = @{_parameter.meterial,jdbcType=VARCHAR},#end
+			        #if($_parameter.supplierId)SUPPLIER_ID = @{_parameter.supplierId,jdbcType=VARCHAR},#end
+			        #if($_parameter.isShelfLife)IS_SHELF_LIFE = @{_parameter.isShelfLife,jdbcType=NUMERIC},#end
+			        #if($_parameter.shelfLife)SHELF_LIFE = @{_parameter.shelfLife,jdbcType=NVARCHAR},#end
+			        #if($_parameter.alarmDay)ALARM_DAY = @{_parameter.alarmDay,jdbcType=NUMERIC},#end
+			        #if($_parameter.upperQty)UPPER_QTY = @{_parameter.upperQty,jdbcType=NUMERIC},#end
+			        #if($_parameter.safeQty)SAFE_QTY = @{_parameter.safeQty,jdbcType=NUMERIC},#end
+			        #if($_parameter.lowerQty)LOWER_QTY = @{_parameter.lowerQty,jdbcType=NUMERIC},#end
+			        #if($_parameter.spareDesc)SPARE_DESC = @{_parameter.spareDesc,jdbcType=VARCHAR},#end
+			  		#if($_parameter.createId)CREATE_ID = @{_parameter.createId,jdbcType=NUMERIC},#end
+			        #if($_parameter.updator)CREATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateDate)CREATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+			        #if($_parameter.updateId)UPDATE_ID = @{_parameter.updateId,jdbcType=NUMERIC},#end
+			        #if($_parameter.updator)UPDATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateDate)UPDATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+			  		
+			    ]]>
+			#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+	
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.spare.entities.Spare" resultMap="SpareResultMap" lang="velocity" databaseId="oracle">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre"/>
+		<include refid="condition_sql"/>
+		#order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.spare.entities.Spare" resultMap="SpareResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			ID,
+	        SPARE_CODE,
+	        SPARE_NAME,
+	        SPARE_CATEGORY_ID,
+	        SPEC,
+	        MODEL,
+	        PRICE,
+	        WEIGHT,
+	        UNIT,
+	        METERIAL,
+	        SUPPLIER_ID,
+	        IS_SHELF_LIFE,
+	        SHELF_LIFE,
+	        ALARM_DAY,
+	        UPPER_QTY,
+	        SAFE_QTY,
+	        LOWER_QTY,
+	        SPARE_DESC,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE,
+	        UPDATE_ID,
+	        UPDATOR,
+	        UPDATE_DATE,		
+	        (select CATEGORY_NAME from SPARE_CATEGORY t1 where t1.id=SPARE_CATEGORY_ID)spareCategoryName,
+	        (SELECT FULL_NAME from SUPPLIER t2 where t2.id=SUPPLIER_ID)supplierName
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/> 
+		<include refid="condition_sql"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countByConditions" resultType="long" lang="velocity">
+        <include refid="count_pre"/>
+        <include refid="condition_sql"/>
+    </select>
+    
+    <select id="countBySpareCode" parameterType="com.supconit.spare.entities.Spare"  resultType="long" lang="velocity">
+        <include refid="count_pre"/>
+        WHERE SPARE_CODE = @{_parameter.spareCode,jdbcType=VARCHAR}
+    </select>
+    <delete id="deleteByIds">
+		DELETE FROM
+		<include refid="TABLE_NAME" />
+	    WHERE ID IN    
+	        <foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+				#{id,jdbcType=NUMERIC}
+			</foreach>
+	</delete>
+	
+	 <select id="countSpareIdUsed" parameterType="long"  resultType="long" lang="velocity">
+       select sum(total) from(
+		select count(t1.SPARE_ID) total from STOCK_IN_DETAIL t1 where t1.SPARE_ID=${_parameter}
+		UNION 
+		select count(t2.SPARE_ID) total from PRICE_CHANGE t2 where t2.SPARE_ID=${_parameter}) t
+	 </select>
+    <select id="getById" resultMap="SpareResultMap" parameterType="long" lang="velocity">
+		<include refid="select_pre"/>
+		WHERE ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+	
+	<delete id="deleteById" parameterType="long" lang="velocity"> 
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</delete>
+	
+	<!-- 归还备件  start -->
+		<sql id="selectStock_pre" lang="velocity">
+			SELECT
+				sod.ID stockOutDetailId,
+				s.ID,
+		        s.SPARE_CODE,
+		        s.SPARE_NAME,
+		        s.SPARE_CATEGORY_ID,
+		        s.SPEC,
+		        s.MODEL,
+		        s.PRICE,
+		        s.WEIGHT,
+		        s.UNIT,
+		        s.METERIAL,
+		        s.SUPPLIER_ID,
+		        s.IS_SHELF_LIFE,
+		        s.SHELF_LIFE,
+		        s.ALARM_DAY,
+		        s.UPPER_QTY,
+		        s.SAFE_QTY,
+		        s.LOWER_QTY,
+		        s.SPARE_DESC,
+		        s.CREATE_ID,
+		        s.CREATOR,
+		        s.CREATE_DATE,
+		        s.UPDATE_ID,
+		        s.UPDATOR,
+		        s.UPDATE_DATE,		
+		        (select CATEGORY_NAME from SPARE_CATEGORY t1 where t1.id=SPARE_CATEGORY_ID)spareCategoryName,
+		        (SELECT FULL_NAME from SUPPLIER t2 where t2.id=SUPPLIER_ID)supplierName
+			FROM  STOCK_OUT_DETAIL sod left join <include refid="TABLE_NAME"/> s
+			on sod.SPARE_ID = s.ID
+			
+		</sql>
+		
+		<sql id="countStock_pre" lang="velocity">SELECT COUNT(*) FROM STOCK_OUT_DETAIL sod left join <include refid="TABLE_NAME"/> s on sod.SPARE_ID = s.ID</sql>
+
+		<!-- 手机端搜索设备 -->
+		<sql id="SEARCH_SPARE_SQL" lang="velocity">
+			<![CDATA[
+				#if($_parameter.spareCategoryId && $_parameter.spareCategoryId!=0)
+					AND A.SPARE_CATEGORY_ID = @{_parameter.spareCategoryId,jdbcType=NUMERIC}
+				#end
+				#if($_parameter.spareCodeId && $_parameter.spareCodeId!=0)
+					AND A.ID > @{_parameter.spareCodeId,jdbcType=NUMERIC}
+				#end
+				#if($_parameter.spareSearch && $_parameter.spareSearch!='')
+					AND (A.SPARE_NAME LIKE '%'||RTRIM(@{_parameter.spareSearch,jdbcType=VARCHAR})||'%' ESCAPE '/'
+					OR A.SPARE_CODE LIKE '%'||RTRIM(@{_parameter.spareSearch,jdbcType=VARCHAR})||'%' ESCAPE '/')
+				#end
+			]]>
+		</sql>
+		<!-- 按条件查询记录-->
+	    <select id="findStockByConditions" parameterType="com.supconit.spare.entities.Spare" resultMap="SpareResultMap" lang="velocity" databaseId="oracle">
+	        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+			<include refid="selectStock_pre"/>
+			<include refid="conditionStock_sql"/>
+			#order($_parameter.condition,"s.ID DESC")
+			<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	    </select>
+	    
+		<!-- 按条件查询记录-->
+	    <select id="findStockByConditions" parameterType="com.supconit.spare.entities.Spare" resultMap="SpareResultMap" lang="velocity" databaseId="sqlserver">
+	        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+			SELECT
+				sod.ID stockOutDetailId,
+				s.ID,
+		        s.SPARE_CODE,
+		        s.SPARE_NAME,
+		        s.SPARE_CATEGORY_ID,
+		        s.SPEC,
+		        s.MODEL,
+		        s.PRICE,
+		        s.WEIGHT,
+		        s.UNIT,
+		        s.METERIAL,
+		        s.SUPPLIER_ID,
+		        s.IS_SHELF_LIFE,
+		        s.SHELF_LIFE,
+		        s.ALARM_DAY,
+		        s.UPPER_QTY,
+		        s.SAFE_QTY,
+		        s.LOWER_QTY,
+		        s.SPARE_DESC,
+		        s.CREATE_ID,
+		        s.CREATOR,
+		        s.CREATE_DATE,
+		        s.UPDATE_ID,
+		        s.UPDATOR,
+		        s.UPDATE_DATE,		
+		        (select CATEGORY_NAME from SPARE_CATEGORY t1 where t1.id=SPARE_CATEGORY_ID)spareCategoryName,
+		        (SELECT FULL_NAME from SUPPLIER t2 where t2.id=SUPPLIER_ID)supplierName
+			<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+			#order($_parameter.condition,"s.ID DESC")
+			<include refid="_PUBLIC_V.AS_ROW_NUM" />
+			FROM  STOCK_OUT_DETAIL sod left join <include refid="TABLE_NAME"/> s
+			on sod.SPARE_ID = s.ID
+			<include refid="conditionStock_sql"/>
+			<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	    </select>
+	
+	    <select id="countStockByConditions" resultType="long" lang="velocity">
+	        <include refid="countStock_pre"/>
+	        <include refid="conditionStock_sql"/>
+	    </select>
+	    
+	    <sql id="conditionStock_sql" lang="velocity">
+		<![CDATA[
+		#where()
+		     #set($_p = $_parameter.condition)
+			#if($_p.spareCode && $_p.spareCode != '')
+				#set($_spareCode = '%' + $_p.spareCode + '%')
+				AND s.SPARE_CODE LIKE @{_spareCode}
+			#end
+			#if($_p.spareName && $_p.spareName != '')
+				#set($_spareName = '%' + $_p.spareName + '%')
+				AND s.SPARE_NAME LIKE @{_spareName}
+			#end
+			#if($_p.stockOutId && $_p.stockOutId != '')
+				#set($_stockOutId = $_p.stockOutId)
+				AND  sod.STOCK_OUT_ID = @{_stockOutId}
+			#end
+		#end
+		]]>	
+    </sql>
+	<!-- 归还备件  end -->
+	<!-- 手机端 -->
+	<select id="selectSpares" parameterType="com.supconit.spare.entities.Spare" resultMap="SpareResultMap" lang="velocity" databaseId="oracle">
+		SELECT C.*
+		FROM (SELECT B.*, ROWNUM AS RW
+		FROM (SELECT A.*,S.CATEGORY_NAME spareCategoryName
+		FROM SPARE A,SPARE_CATEGORY S
+		WHERE A.SPARE_CODE != 'ROOT'
+		AND A.SPARE_CATEGORY_ID=S.ID
+		<include refid="SEARCH_SPARE_SQL"/>
+		ORDER BY A.ID) B
+		WHERE ROWNUM &lt; 26) C
+		WHERE C.RW >= 0
+	</select>
+
+	<select id="countSpares" parameterType="com.supconit.spare.entities.Spare" resultType="long" lang="velocity">
+		SELECT COUNT(1)
+		FROM SPARE A
+		WHERE A.SPARE_CODE != 'ROOT'
+		<include refid="SEARCH_SPARE_SQL"/>
+	</select>
+</mapper>

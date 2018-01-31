@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconicom/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.ywgl.patrol.entities.PatrolPerson">
+    
+ <resultMap type="com.supconit.ywgl.patrol.entities.PatrolPerson" id="PatrolPersonResultMap">
+       <result property="id" column="ID"/>
+       <result property="personCode" column="PERSON_CODE"/>
+       <result property="personName" column="PERSON_NAME"/>
+       <result property="personTel" column="PERSON_TEL"/>
+       <result property="remark" column="REMARK"/>
+   </resultMap>
+   <sql id="TABLE_NAME" lang="velocity">PATROL_PERSON</sql>
+   <sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+   <sql id="select_pre" lang="velocity">
+     select
+      A.ID,
+      A.PERSON_CODE,
+      A.PERSON_NAME,
+      A.PERSON_TEL,
+      A.REMARK
+      FROM  <include refid="TABLE_NAME" /> A        
+   </sql>
+   
+ 	<select id="findAll"  resultMap="PatrolPersonResultMap" lang="velocity">
+		 <include refid="select_pre" />	
+	</select>
+	
+</mapper>

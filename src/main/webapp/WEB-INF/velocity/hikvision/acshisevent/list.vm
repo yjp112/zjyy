@@ -1,0 +1,135 @@
+#parse("index/_header.vm")
+
+<body>
+	<div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+       <form class="ui-form" id='queryForm'>
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+                <tr>
+                  <td class="ui-search-name first">刷卡时间：</td>
+                  <td class="ui-search-c">
+					<input  id="startDate"  class="k-textbox"  name="startDate" value="#date_format($!startDate,'yyyy-MM-dd HH:mm:ss')"  />
+						至
+					<input id="endDate"  class="k-textbox"  name="endDate" value="#date_format($!endDate,'yyyy-MM-dd HH:mm:ss')"/>
+                  </td>
+                  <td class="ui-search-name">卡号：</td>
+                  <td class="ui-search-c">
+                     <input class="k-textbox" type="text" name="cardNums" value="$!{cardNums}" maxlength="50">
+                  </td>
+				  <td class="ui-search-name first">事件类型：</td>
+                  <td class="ui-search-c">
+				       <select name="eventType" class="k-textbox">
+		       			    <option value="">--请选择--</option>
+		       			    ${eventTypes}
+						</select>
+				  </td>
+                </tr>
+              </table>
+            </td>
+            <td width="180" valign="top" style="padding-top:4px;">
+              <button type="submit"  class="hc_btn k-primary"  id="queryBtn" ><i class="fa fa-search"></i>查询</button>
+              <button type="reset"  class="hc_btn"  id="resetBtn" ><i class="fa fa-refresh"></i>重置</button>
+            </td>
+            <td></td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+#parse("index/_footer.vm") 
+
+<script type="text/javascript">
+  var _iframe_layout, _inner_layout;
+	$(document).ready(function(){
+	    _iframe_layout = $('body').layout({
+	      defaults: {
+	        resizable: false,
+	        closable: false,
+	        spacing_open: 5
+	      },
+	      west: {
+	        size: 0.18
+	      }
+	    });
+	    _inner_layout = $("#subMain").layout({
+	      defaults: {
+	        resizable: false,
+	        closable: false,
+	        spacing_open: 0
+	      },
+	      center: {
+	          onresize_end: function () {
+	              var grid = $("#grid").data("kendoGrid");
+	              grid.resize();
+	          }
+	      }
+      });
+	
+    $('#resetBtn').click(function(){
+		clearDate("startDate", "endDate");
+    	$("input[name='eventType']").val("");
+		$("#queryForm :text").val("");  
+    });
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/hikvision/acsHisEvent/list?r=" + new Date(), [{
+              field: "id",
+              hidden: true
+          }, {
+              field: "cardNo",
+              title: "卡号",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+    		  attributes: {"class": "k-grid-equilong"},
+              width: 150
+          }, {
+              field: "personName",
+              title: "人员",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+    		  attributes: {"class": "k-grid-text"},
+              width: 100
+          }, {
+              field: "eventDate",
+              title: "刷卡时间",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+    		  attributes: {"class": "k-grid-equilong"},
+              width: 150
+          }, {
+              field: "doorName",
+              title: "门禁点",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+    		  attributes: {"class": "k-grid-text"},
+              width: 150
+          },{
+              field: "eventName",
+              title: "事件描述",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+    		  attributes: {"class": "k-grid-text"},
+              width: 200
+          }], 
+      {
+    	  resizable:true,
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          }
+      }, {
+          serverSorting: true
+      },[
+
+      ]);
+		
+    });
+	commonDate("startDate","endDate","yyyy-MM-dd HH:mm:ss","zh-CN");
+</script>
+</body>
+</html>

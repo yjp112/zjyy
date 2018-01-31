@@ -1,0 +1,161 @@
+<style>
+	a.ui-input-remove,
+	a.ui-input-icon {
+		right:3px;
+	}
+</style>
+<div class="ui-layout-center" id="subMain">
+	<div class="ui-layout-center">
+		<table id="pagerTable" class="fn-hide"></table>
+	</div>
+	<div class="ui-layout-north">
+		<div class="ui-module-name">#crumbs("$!menu.code",1)</div>
+    		<form id="queryForm" class="ui-form ui-form-search fn-clear">
+    			<input name="locationId" id="locationId" value="" type="hidden"/>
+    			<div class="ui-form-search-left">
+    				<div class="ui-form-item">
+    					<label class="ui-label">设备编码：</label>
+    					<input class="ui-input" type="text" id="deviceCode" name="deviceCode" value="$!condition.deviceCode">
+    				</div>
+					<div class="ui-form-item">
+    					<label class="ui-label">电表编码：</label>
+    					<input class="ui-input" type="text" id="electricCode" name="electricCode" value="$!condition.electricCode">
+    				</div>
+					<div class="ui-form-item">
+    					<label class="ui-label">电表名称：</label>
+    					<input class="ui-input" type="text" id="electricName" name="electricName" value="$!condition.electricName">
+    				</div>
+					<div class="ui-form-item">
+    					<label class="ui-label">分项：</label>
+    					<input class="ui-input ui-input-choose" type="text" id="subName"  emptyFunc="clearManageSubName" name="subName" value="$!condition.subName" onclick="getSubCode()">
+						<input class="ui-input" type="hidden" id="subCode" name="subCode" value="$!condition.subCode">
+    				</div>
+    			</div>
+    			<div class="ui-form-search-right">			
+    				<button type="submit" class="btn btn-primary" id="queryBtn"><i class="iconfont icon-search"></i> 查&nbsp;询</button>
+    			</div>	
+    		</form>
+		</div>
+	</div>
+</div>
+<!--<div class="ui-layout-north">
+	#bread_crumbs("NHGL_TASK_TYPE")
+</div>
+-->
+<div class="ui-layout-west">
+	<div id="taskCatagory_box" class="ui-box">
+		<div class="ztree-header">
+    		<div class="ztree-title">地理区域</div>
+    	</div>
+		<div class="ui-box-container">
+			<ul id="treedc" class="ztree"></ul>
+		</div>
+	</div>
+</div>
+
+    <script type="text/javascript">
+	var setting = {
+ 		 check: {
+				enable: false
+			},
+		data: {
+			simpleData: {
+				enable: true
+			}
+		},
+		callback: {
+			onClick: onClick
+		}
+  	 };
+   	 var zNodes = [];
+	 #foreach($!{treeNode} in $!{areaList})
+		zNodes.push({id:"$!{treeNode.id}", pId:"$!{treeNode.parentId}", name:"$!{treeNode.areaName}"});     
+	#end
+	 function onClick(event, treeId, treeNode, clickFlag) {
+	 	$("#locationId").attr("value",treeNode.id);
+		$("#queryBtn").click();
+	 }
+	$(document).ready(function(){
+		
+		if(T.innerLayout&&!T.innerLayout.destroyed){
+			T.innerLayout.destroy();
+		}
+		T.innerLayout = $("#centerMain").layout({
+        defaults : {
+            resizable : false,
+            closable : false,
+            spacing_open : 5
+        },
+        west : {
+            size : 250,
+            resizable : true,
+            resizerTip : "移动改变大小",
+            closable : true,
+            togglerTip_open : "隐藏",
+            togglerTip_closed : "打开"
+        },
+        onresize_end : function(){
+            $("#taskCatagory_box").box("resize");
+        }
+    	});//_inner_layout
+    	_content_layouts.push(T.innerLayout);
+		_center_main_layout=$("#subMain").layout({
+			defaults:{
+				resizabel:false,
+				closable: false,
+				spacing_open:5
+			},
+			onresize_end:function(){
+				$("#pagerTable").datagridResize({width:_center_main_layout.state.center.innerWidth,height:_center_main_layout.state.center.innerHeight});
+			}
+		});
+		
+		$("#taskCatagory_box").box({
+        	width : function(){return T.innerLayout.state.west.innerWidth;},
+        	height : function(){return T.innerLayout.state.west.innerHeight-26;}
+    	});
+			$.fn.zTree.init($("#treedc"), setting, zNodes);
+			var height = $(window).height();
+            //列表
+			var pagerTable=$("#pagerTable").datagrid({
+			url:'$!{rc.contextPath}/nhgl/basic/deviceMeter/pager',
+			dataType: "json",
+			method: "POST",
+			singleSelected : true,
+			striped : false,
+			height:  _center_main_layout.center.state.innerHeight,
+			width :  _center_main_layout.center.state.innerWidth,
+			showOrderNumber : true,
+			useRp : true,
+			usepager: true,
+    		rpOptions: [10, 20, 40, 50],
+    		pageSize: 20,
+    		searchFormId:"queryForm",
+    		searchCallback:function(datagrid){},
+    		onSuccess:function(table,grid){
+    			if(!grid)return ;
+    		},
+    		colModel:[
+			 {display: "ID", name: "id",hide:true }, 
+			 {display: "序号"},
+			 {display: "电表编码", name: "electricCode",width:150},
+             {display: "电表名称", name: "electricName", width: 150}, 
+             {display: "测量设备编码", name: "deviceCode", width: 150},
+			 {display: "测量设备名称", name: "deviceName", width: 150},
+			 {display: "测量设备位置", name: "locationName", width: 150},
+			 {display: "测量使用部门", name: "useDepartMent", width: 150},
+			 {display: "关联时间", name: "linkTime", width: 150},
+			 {display: "是否有效", name: "isValid", width: 150},
+			 {display: "失效时间", name: "invalidDate", width: 150}
+    		],
+			buttons : [
+				#data_grid_buttons("NHGL_SBDB")#end
+			]
+			});
+    });
+   function clearManageSubName(){
+   		$("#subCode").val("");
+		$("#subName").val("");
+   }
+    </script>
+

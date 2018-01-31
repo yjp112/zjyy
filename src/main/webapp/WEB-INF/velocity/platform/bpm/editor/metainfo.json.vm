@@ -1,0 +1,87 @@
+{ 
+"name" : "$!{name}",
+"key" : "$!{key}",
+"description" : "$!{description}",
+"model" : {
+	"id" : "process_model_$!{key}",
+	"resourceId" : "resource_$!{key}",
+	"properties" : {
+		"key" : "$!{key}",
+		"name" : "$!{name}",
+		"documentation" : "$!{description}",
+		"process_id" : "$!{key}",
+		"process_author" : "$!{author}",
+		"process_version" : "",
+		"process_namespace" : "http://www.activiti.org/processdef",
+		"executionlisteners" : ""
+	},
+	"stencil" : {
+		"id" : "BPMNDiagram"
+	},
+	"childShapes" : [ {
+		"resourceId" : "sid-186CA2D0-54AB-4214-9BED-7D61965E987E",
+		"properties" : {
+			"overrideid" : "",
+			"name" : "",
+			"documentation" : "",
+			"formproperties" : "",
+			"initiator" : "_initiator",
+			"executionlisteners" : ""
+		},
+		"stencil" : {
+			"id" : "StartNoneEvent"
+		},
+		"childShapes" : [],
+		"outgoing" : [],
+		"bounds" : {
+			"lowerRight" : {
+				"x" : 194.5,
+				"y" : 167
+			},
+			"upperLeft" : {
+				"x" : 164.5,
+				"y" : 137
+			}
+		},
+		"dockers" : []
+	}, {
+		"resourceId" : "sid-F3182D0B-09ED-4AE2-A6CE-5CF440B49435",
+		"properties" : {
+			"overrideid" : "",
+			"name" : "",
+			"documentation" : "",
+			"executionlisteners" : ""
+		},
+		"stencil" : {
+			"id" : "EndNoneEvent"
+		},
+		"childShapes" : [],
+		"outgoing" : [],
+		"bounds" : {
+			"lowerRight" : {
+				"x" : 643,
+				"y" : 166
+			},
+			"upperLeft" : {
+				"x" : 615,
+				"y" : 138
+			}
+		},
+		"dockers" : []
+	} ],
+	"bounds" : {
+		"lowerRight" : {
+			"x" : 1485,
+			"y" : 1050
+		},
+		"upperLeft" : {
+			"x" : 0,
+			"y" : 0
+		}
+	},
+	"stencilset" : {
+		"url" : "../stencilsets/bpmn2.0/bpmn2.0.json",
+		"namespace" : "http://b3mn.org/stencilset/bpmn2.0#"
+	},
+	"ssextensions" : []
+}}

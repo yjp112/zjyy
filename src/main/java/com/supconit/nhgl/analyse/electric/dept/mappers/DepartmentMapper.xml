@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.analyse.electric.dept.entities.Department">
+
+	<resultMap type="com.supconit.nhgl.analyse.electric.dept.entities.Department" id="DepartmentResultMap">     
+        <result property="id" column="ID" />
+        <result property="code" column="CODE" />
+        <result property="name" column="NAME" />
+        <result property="description" column="DESCRIPTION" />
+        <result property="companyCode" column="COMPANY_CODE" />
+        <result property="pId" column="PID" />
+        <result property="lef" column="LFT" />
+        <result property="rgt" column="RGT" />
+
+	</resultMap>
+	
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+	<sql id="select_pre">
+		SELECT ID,CODE,NAME,DESCRIPTION,COMPANY_CODE,PID,LFT,RGT FROM HO_DEPARTMENT
+	</sql>
+	<sql id="condition" lang="velocity">
+		#where()
+			#if($_parameter.code)
+				AND CODE =@{_parameter.code,jdbcType=VARCHAR}
+			#end
+			#if($_parameter.pId)
+				AND PID =@{_parameter.pId,jdbcType=NUMERIC}
+			#end
+		#end
+	</sql>
+	
+	<select id="findByCon" resultMap="DepartmentResultMap" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.Department" lang="velocity" >
+		<include refid="select_pre" />        
+       	<include refid="condition"/>
+	</select>
+	
+	<select id="findByConEle" resultMap="DepartmentResultMap" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.Department" lang="velocity">
+		SELECT DISTINCT
+			HD.ID,
+			CODE,
+			NAME,
+			DESCRIPTION,
+			COMPANY_CODE,
+			PID,
+			LFT,
+			RGT
+		FROM
+		 HO_DEPARTMENT HD 
+		<include refid="condition"/>
+		and hd.id is not null
+	</select>
+	
+	<select id="findByConWater" resultMap="DepartmentResultMap" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.Department" lang="velocity">
+		SELECT DISTINCT
+			HD.ID,
+			CODE,
+			NAME,
+			DESCRIPTION,
+			COMPANY_CODE,
+			PID,
+			LFT,
+			RGT
+		FROM
+		 HO_DEPARTMENT HD 
+		<include refid="condition"/>
+		and hd.id is not null
+	</select>
+	
+	<select id="findByConGas" resultMap="DepartmentResultMap" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.Department" lang="velocity">
+		SELECT DISTINCT
+			HD.ID,
+			CODE,
+			NAME,
+			DESCRIPTION,
+			COMPANY_CODE,
+			PID,
+			LFT,
+			RGT
+		FROM
+		HO_DEPARTMENT HD 
+		<include refid="condition"/>
+		and hd.id is not null
+	</select>
+	
+	<select id="findByConEnergy" resultMap="DepartmentResultMap" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.Department" lang="velocity">
+		SELECT DISTINCT
+			HD.ID,
+			CODE,
+			NAME,
+			DESCRIPTION,
+			COMPANY_CODE,
+			PID,
+			LFT,
+			RGT
+		FROM
+		HO_DEPARTMENT HD 
+		<include refid="condition"/>
+		and hd.id is not null
+	</select>
+	
+	<select id="findById" resultMap="DepartmentResultMap" parameterType="Long">
+		<include refid="select_pre" />
+		where id=#{id} 
+	</select>
+	<select id="findAllChildren" resultMap="DepartmentResultMap" parameterType="Long">
+	    with tt(id) as(
+	     SELECT ID FROM ho_department  WHERE id=#{id}
+	      UNION ALL 
+	    select a.id from ho_department a ,tt b where a.pid=b.id
+	    )
+	    select id from tt
+	</select>
+	<select id="findAllChildrenIds" resultType="Long" parameterType="Long">
+	    with tt(id) as(
+	     SELECT ID FROM ho_department  WHERE id=#{id}
+	      UNION ALL 
+	    select a.id from ho_department a ,tt b where a.pid=b.id
+	    )
+	    select id from tt
+	</select>
+</mapper>

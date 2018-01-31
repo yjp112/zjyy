@@ -1,0 +1,96 @@
+<div class="ui-layout-center" id="subMain">
+	<table id="pagerTable" class="fn-hide"></table>
+</div>
+<div class="ui-layout-north">
+	<div class="ui-module-name">#crumbs("$!menu.code",1)</div>
+	<form id="queryForm" class="ui-form ui-form-search fn-clear">
+		<div class="ui-form-search-left">
+			<div class="ui-form-item">
+				<label class="ui-label">能量表名称：</label>
+				<input class="ui-input" type="text" id="deviceName" name="deviceName"">
+			</div>
+			<div class="ui-form-item">
+				<label class="ui-label">部门名称：</label>
+				<input class="ui-input" type="text" id="deptName" name="deptName">
+			</div>
+		</div>
+		<div class="ui-form-search-right">			
+			<button type="submit" class="btn btn-primary" id="queryBtn"><i class="iconfont icon-search"></i> 查&nbsp;询</button>
+		</div>	
+	</form>
+</div>
+    <script type="text/javascript">
+	$(document).ready(function(){
+		T.nhInit();
+		T.tabLayout = $("#chart_content_id").layout({
+			defaults : {
+				resizable : false,
+				closable : false,
+				spacing_open : 5
+			},
+			onresize_end : function(){
+				$("#queryForm").datagridResize({width:T.tabLayout.state.center.innerWidth,height:T.tabLayout.state.center.innerHeight});
+			}
+		});		
+            //列表
+			var pagerTable=$("#pagerTable").datagrid({
+			url:'$!{rc.contextPath}/nhgl/basic/energyDept/pager',
+			dataType: "json",
+			method: "POST",
+			singleSelected : true,
+			striped : false,
+			height:  T.tabLayout.center.state.innerHeight,
+			width :  T.tabLayout.center.state.innerWidth,
+			showOrderNumber : true,
+			useRp : true,
+			usepager: true,
+    		rpOptions: [10, 20, 40, 50],
+    		pageSize: 20,
+    		searchFormId:"queryForm",
+    		searchCallback:function(datagrid){},
+    		onSuccess:function(table,grid){
+    			if(!grid)return ;
+    		},
+    		colModel:[
+			 {display: "ID", name: "id",hide:true }, 
+			 {display: "序号"},
+             {display: "能量表名称", name: "deviceName", width: 150}, 
+             {display: "部门名称", name: "deptName", width: 150},
+			 {display: "分摊系数", name: "ftxs", width: 150}
+    		],
+			buttons : [
+				{name: '新增', bclass: 'icon-plus', onpress : add},
+            	{name: '修改', bclass: 'icon-pencil', onpress : edit},
+            	{name: '删除', bclass: 'icon-remove', onpress : remove}
+			]
+			});
+				function add(com, grid,datagrid) {
+		 $.dialogs.normalDialog("energyDept_add_dlg", 
+			"$!{rc.contextPath}/nhgl/basic/energyDept/add",
+			 function(dlg,btn){ $.forms.submits("#document_edit_form",
+			  function(){ $("#pagerTable").flexReload(); 
+			  dlg.close(); return true; }, btn); return false; 
+			  },480,200,"新增"); 
+            };
+            
+        function edit(com, grid,datagrid) {
+		//console.info(datagrid.getSelectedRows()[0]["id"]);
+ 			if(datagrid.getSelectedRows() == 0){ $.message("没有选择要修改的项目信息", 
+ 			$.message.TYPE_ERROR, 4, false, true); return false; }
+ 			 $.dialogs.normalDialog("energyDept_edit_dlg", 
+ 			 "$!{rc.contextPath}/nhgl/basic/energyDept/edit?id=" + datagrid.getSelectedRows()[0]["id"], 
+ 			 function(dlg,btn){ $.forms.submits("#document_edit_form", 
+ 			 function(){ $("#pagerTable").flexReload(); 
+ 			 dlg.close(); return true; }, btn); return false; },480,200,"修改"); 
+            };
+        function remove(com, grid,datagrid){ 
+         	if(datagrid.getSelectedRows() == 0){ 
+			$.message("没有选择要删除项目", $.message.TYPE_ERROR, 4, false, true); return false; }
+			 if(!confirm("确定要删除吗？"))return false; $.forms.linkRunning(com); 
+			 $.post("$!{rc.contextPath}/nhgl/basic/energyDept/del",
+			 {"id" : datagrid.getSelectedRows()[0]["id"]},function(res)
+			 { $.forms.linkEnabled(com); $.forms.handleMessage(res,function()
+			 {$("#pagerTable").flexReload();}); }); };			
+    });
+    </script>
+

@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.base.entities.Attachment">
+
+	<resultMap type="com.supconit.base.entities.Attachment" id="AttachmentResultMap">      
+        <result property="id" column="ID" />
+        <result property="fId" column="F_ID" />
+        <result property="modelType" column="MODEL_TYPE" />
+        <result property="fileType" column="FILE_TYPE" />
+        <result property="fileName" column="FILE_NAME" />
+        <result property="fileSize" column="FILE_SIZE" />
+        <result property="storePath" column="STORE_PATH" />
+        <result property="remark" column="REMARK" />
+	</resultMap>
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+	<sql id="TABLE_NAME" lang="velocity">ATTACHMENT</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>	
+    <!-- 获取记录列表-->
+	<sql id="select_pre">
+    select 
+        ID,
+        F_ID,
+        MODEL_TYPE,
+        FILE_TYPE,
+        FILE_NAME,
+        FILE_SIZE,
+        STORE_PATH,
+        REMARK		
+		FROM
+		ATTACHMENT
+	</sql>
+	<sql id="count_pre">
+		SELECT
+		COUNT(*)
+		FROM
+		ATTACHMENT
+	</sql>
+	
+	 <insert id="insert" parameterType="com.supconit.base.entities.Attachment" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="insert_sql" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.base.entities.Attachment" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+	<sql id="insert_sql" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>(
+		    #if($_databaseId=='oracle') ID,#end
+	        F_ID,
+	        MODEL_TYPE,
+	        FILE_TYPE,
+	        FILE_NAME,
+	        FILE_SIZE,
+	        STORE_PATH,
+	        REMARK
+		) VALUES (        
+		    #if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end	
+	        @{_parameter.fId,jdbcType=NUMERIC},
+	        @{_parameter.modelType,jdbcType=VARCHAR},
+	        @{_parameter.fileType,jdbcType=VARCHAR},
+	        @{_parameter.fileName,jdbcType=VARCHAR},
+	        @{_parameter.fileSize,jdbcType=NUMERIC},
+	        @{_parameter.storePath,jdbcType=VARCHAR},
+	        @{_parameter.remark,jdbcType=VARCHAR}
+		)	
+	</sql>	         		
+
+	<select id="getById" resultMap="AttachmentResultMap" parameterType="Long">
+		<include refid="select_pre" />        
+        WHERE ID = #{id}
+	</select>
+    <select id="findByFid" resultMap="AttachmentResultMap" parameterType="com.supconit.base.entities.Attachment">
+		<include refid="select_pre" />        
+        WHERE F_ID = #{fId} and MODEL_TYPE = #{modelType} 
+	</select>
+	
+	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.base.entities.Attachment">
+		UPDATE	ATTACHMENT
+		<set>
+        <if test="fId != null">F_ID = #{fId,jdbcType=NUMERIC},</if>
+        <if test="modelType != null">MODEL_TYPE = #{modelType,jdbcType=VARCHAR},</if>
+        <if test="fileType != null">FILE_TYPE = #{fileType,jdbcType=VARCHAR},</if>
+        <if test="fileName != null">FILE_NAME = #{fileName,jdbcType=VARCHAR},</if>
+        <if test="fileSize != null">FILE_SIZE = #{fileSize,jdbcType=NUMERIC},</if>
+        <if test="storePath != null">STORE_PATH = #{storePath,jdbcType=VARCHAR},</if>
+        <if test="remark != null">REMARK = #{remark,jdbcType=VARCHAR},</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+    <!-- 通过 ID 获取对象-->
+	<delete id="deleteById" parameterType="Long">
+		DELETE FROM ATTACHMENT WHERE ID = #{id}
+	</delete>
+	<sql id="condition_sql">
+		<where>
+        <if test="id != null "> ID = #{id} and </if>
+        <if test="fId != null "> F_ID = #{fId} and </if>
+        <if test="modelType != null and modelType != ''">	MODEL_TYPE like '%'+#{modelType}+'%' and </if>
+        <if test="fileType != null and fileType != ''">	FILE_TYPE like '%'+#{fileType}+'%' and </if>
+        <if test="fileName != null and fileName != ''">	FILE_NAME like '%'+#{fileName}+'%' and </if>
+        <if test="fileSize != null "> FILE_SIZE = #{fileSize} and </if>
+        <if test="storePath != null and storePath != ''">	STORE_PATH like '%'+#{storePath}+'%' and </if>
+        1=1 
+		</where>
+	</sql>
+    
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.base.entities.Attachment" resultMap="AttachmentResultMap">
+		<include refid="select_pre" />
+		<include refid="condition_sql" />
+		ORDER BY ID DESC
+	</select>	
+
+    <select id="countByCondition" parameterType="com.supconit.base.entities.Attachment" resultType="long">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+    
+    <!-- 删除多条记录-->
+	<delete id="deleteByIds">
+        DELETE FROM ATTACHMENT WHERE ID in 
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+
+	</delete>
+	<delete id="deleteByObj" parameterType="com.supconit.base.entities.Attachment">
+		DELETE FROM ATTACHMENT WHERE F_ID = #{fId} AND  MODEL_TYPE = #{modelType}
+	</delete>
+</mapper>

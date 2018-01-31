@@ -1,0 +1,100 @@
+#parse("index/_header.vm")
+</head>
+<body>
+	<div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+       <form class="ui-form" id='queryForm'>
+		<input class="k-textbox" type="hidden" name="personId" value="$!{personId}">
+		<input class="k-textbox" type="hidden" name="eventDate" value="$!{eventDate}">
+        <table width="100%">
+          <tr>
+            <td width="180" valign="top" style="display:none;padding-top:4px;">
+              <button type="submit"  class="hc_btn k-primary"  id="queryBtn" ><i class="fa fa-search"></i>查询</button>
+            </td>
+            <td></td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+#parse("index/_footer.vm") 
+
+<script type="text/javascript">
+  var _iframe_layout, _inner_layout;
+	$(document).ready(function(){
+	    _iframe_layout = $('body').layout({
+	      defaults: {
+	        resizable: false,
+	        closable: false,
+	        spacing_open: 5
+	      },
+	      west: {
+	        size: 0.18
+	      }
+	    });
+	    _inner_layout = $("#subMain").layout({
+	      defaults: {
+	        resizable: false,
+	        closable: false,
+	        spacing_open: 0
+	      },
+	      center: {
+	          onresize_end: function () {
+	              var grid = $("#grid").data("kendoGrid");
+	              grid.resize();
+	          }
+	      }
+      });
+	
+    $('#resetBtn').click(function(){
+		clearDate("startDate", "endDate");
+    	$("input[name='eventType']").val("");
+		$("#queryForm :text").val("");  
+    });
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/employee/timeCard/list?r=" + new Date(), [{
+              field: "id",
+              hidden: true
+          }, {
+              field: "personName",
+              title: "人员",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+    		  attributes: {"class": "k-grid-text"},
+              width: 100
+          }, {
+              field: "eventTimes",
+              title: "刷卡时间",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+    		  attributes: {"class": "k-grid-equilong"},
+              width: 150
+          }, {
+              field: "deviceName",
+              title: "门禁点",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+    		  attributes: {"class": "k-grid-text"},
+              width: 150
+          }
+		  ], 
+      {
+    	  resizable:true,
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          }
+      }, {
+          serverSorting: true
+      },[
+
+      ]);
+		
+    });
+	commonDate("startDate","endDate","yyyy-MM-dd HH:mm:ss","zh-CN");
+</script>
+</body>
+</html>

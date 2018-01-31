@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.jobschedule.entities.ScheduleLog">
+
+	<resultMap type="com.supconit.jobschedule.entities.ScheduleLog"
+		id="ScheduleLogResultMap">
+		<id property="id" column="ID" />
+		<result property="scheduleId" column="SCHEDULE_ID" />
+		<result property="startTime" column="START_TIME" />
+		<result property="endTime" column="END_TIME" />
+		<result property="excuteTime" column="EXCUTE_TIME" />
+		<result property="success" column="SUCCESS" />
+		<result property="errorMsg" column="ERROR_MSG" />
+
+		<result property="jobSubject" column="JOB_SUBJECT" />
+		<result property="jobName" column="JOB_NAME" />
+		<result property="groupName" column="GROUP_NAME" />
+		<result property="beanOrClass" column="BEAN_OR_CLASS" />
+		<result property="targetObject" column="TARGET_OBJECT" />
+		<result property="targetMethod" column="TARGET_METHOD" />
+		<result property="targetArguments" column="TARGET_ARGUMENTS" />
+		<result property="cronExpression" column="CRON_EXPRESSION" />
+		<result property="startDate" column="START_DATE" />
+		<result property="nextDate" column="NEXT_DATE" />
+		<result property="endDate" column="END_DATE" />
+		<result property="ignoreError" column="IGNORE_ERROR" />
+		<result property="concurrent" column="CONCURRENT" />
+		<result property="description" column="DESCRIPTION" />
+		<result property="status" column="STATUS" />
+	</resultMap>
+
+
+	<sql id="TABLE_NAME" lang="velocity">SCHEDULE_LOG</sql>
+	<sql id="SEQUENCE" lang="velocity">
+		SELECT SEQ_<include refid="TABLE_NAME" />.NEXTVAL FROM DUAL
+	</sql>
+	<sql id="SELECT_PRE" lang="velocity">
+		select t1.*,t2.JOB_SUBJECT,t2.JOB_NAME,t2.GROUP_NAME,t2.BEAN_OR_CLASS,t2.TARGET_OBJECT,t2.TARGET_METHOD,t2.CRON_EXPRESSION,t2.START_DATE,t2.NEXT_DATE,t2.END_DATE,t2.IGNORE_ERROR,t2.CONCURRENT,t2.DESCRIPTION,t2.STATUS
+		FROM schedule_log t1 LEFT JOIN schedule_job t2 on t1.schedule_id=t2.id
+	</sql>
+	<sql id="COUNT_PRE" lang="velocity">
+		SELECT COUNT(1) FROM
+		<include refid="TABLE_NAME" />
+	</sql>
+
+	<sql id="SEARCH_CONDITION_SQL" lang="velocity">
+		<![CDATA[
+		#where()
+				#if($_parameter.condition.jobName && $_parameter.condition.jobName != '')
+					AND t2.JOB_NAME 
+										#set($_jobName = '%' + $_parameter.condition.jobName + '%')
+						LIKE @{_jobName,jdbcType=VARCHAR}				
+				
+				#end
+				#if($_parameter.condition.startTime && $_parameter.condition.startTime != '')
+					AND t1.START_TIME>=@{_parameter.condition.startTime,jdbcType=TIMESTAMP}
+				#end
+				#if($_parameter.condition.endTime && $_parameter.condition.endTime != '')
+					AND t1.END_TIME<=@{_parameter.condition.endTime,jdbcType=TIMESTAMP} 
+				#end
+				#if($_parameter.condition.success && $_parameter.condition.success != '')
+					AND t1.SUCCESS= @{_parameter.condition.success,jdbcType=VARCHAR}
+				#end
+		#end
+		]]>
+	</sql>
+
+	<select id="getById" resultMap="ScheduleLogResultMap"
+		parameterType="long" lang="velocity">
+		select t1.*,t2.JOB_SUBJECT,t2.JOB_NAME,t2.GROUP_NAME,t2.BEAN_OR_CLASS,t2.TARGET_OBJECT,t2.TARGET_METHOD,t2.CRON_EXPRESSION,t2.START_DATE,t2.NEXT_DATE,t2.END_DATE,t2.IGNORE_ERROR,t2.CONCURRENT,t2.DESCRIPTION,t2.STATUS 
+		from schedule_log t1 LEFT JOIN schedule_job t2 on t1.schedule_id=t2.id
+		WHERE t1.ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+
+	<select id="selectPager" lang="velocity" resultMap="ScheduleLogResultMap"  databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE" />
+		<include refid="SELECT_PRE" />
+		<include refid="SEARCH_CONDITION_SQL" />
+		#order($_parameter.condition,"t1.ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER" />
+	</select>
+
+	<select id="selectPager" lang="velocity" resultMap="ScheduleLogResultMap"
+		databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE" />
+		select t1.*,t2.JOB_SUBJECT,t2.JOB_NAME,t2.GROUP_NAME,t2.BEAN_OR_CLASS,t2.TARGET_OBJECT,t2.TARGET_METHOD,t2.CRON_EXPRESSION,t2.START_DATE,t2.NEXT_DATE,t2.END_DATE,t2.IGNORE_ERROR,t2.CONCURRENT,t2.DESCRIPTION,t2.STATUS 
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" />
+		#order($_parameter.condition,"t1.START_TIME DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM schedule_log t1 LEFT JOIN schedule_job t2 on t1.schedule_id=t2.id
+		<include refid="SEARCH_CONDITION_SQL" />
+		<include refid="_PUBLIC_V.PAGER_AFTER" />
+	</select>
+
+	<select id="countPager" lang="velocity" resultType="long">
+		select count(*) from schedule_log t1 LEFT JOIN schedule_job t2 on t1.schedule_id=t2.id
+		<include refid="SEARCH_CONDITION_SQL" />
+	</select>
+
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO
+		<include refid="TABLE_NAME" />
+		(
+		#if($_databaseId == 'oracle') ID,#end
+		SCHEDULE_ID
+		,TARGET_ARGUMENTS
+		,START_TIME
+		,END_TIME
+		,EXCUTE_TIME
+		,SUCCESS
+		,ERROR_MSG
+		) VALUES (
+		#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end
+		@{_parameter.scheduleId,jdbcType=NUMERIC}
+		,@{_parameter.targetArguments,jdbcType=VARCHAR}
+		,@{_parameter.startTime,jdbcType=TIMESTAMP}
+		,@{_parameter.endTime,jdbcType=TIMESTAMP}
+		,@{_parameter.excuteTime,jdbcType=VARCHAR}
+		,@{_parameter.success,jdbcType=VARCHAR}
+		,@{_parameter.errorMsg,jdbcType=VARCHAR}
+		)
+	</sql>
+
+	<insert id="insert" parameterType="com.supconit.jobschedule.entities.ScheduleLog"
+		keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>
+		<include refid="INSERT_SQL" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.jobschedule.entities.ScheduleLog"
+		keyProperty="id" keyColumn="ID" lang="velocity">
+		<include refid="INSERT_SQL" />
+		<selectKey keyProperty="id" resultType="long" order="AFTER">
+			<include refid="_PUBLIC_V.SELECT_KEY" />
+		</selectKey>
+	</insert>
+
+	<update id="update" parameterType="com.supconit.jobschedule.entities.ScheduleLog"
+		lang="velocity">
+		UPDATE
+		<include refid="TABLE_NAME" />
+		#mset()
+		<![CDATA[
+																							#if($_parameter.scheduleId)SCHEDULE_ID = @{_parameter.scheduleId,jdbcType=NUMERIC},#end
+																#if($_parameter.targetArguments)TARGET_ARGUMENTS = @{_parameter.targetArguments,jdbcType=VARCHAR},#end
+																#if($_parameter.startTime)START_TIME = @{_parameter.startTime,jdbcType=TIMESTAMP},#end
+																#if($_parameter.endTime)END_TIME = @{_parameter.endTime,jdbcType=TIMESTAMP},#end
+																#if($_parameter.excuteTime)EXCUTE_TIME = @{_parameter.excuteTime,jdbcType=VARCHAR},#end
+																#if($_parameter.success)SUCCESS = @{_parameter.success,jdbcType=VARCHAR},#end
+																#if($_parameter.errorMsg)ERROR_MSG = @{_parameter.errorMsg,jdbcType=VARCHAR},#end
+									]]>
+		#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+	<update id="updateErrorStatus">
+		update schedule_log set success='N',error_msg='程序有可能异常中断' where success='I'
+	</update>
+
+	<delete id="deleteById" parameterType="long" lang="velocity">
+		DELETE FROM
+		<include refid="TABLE_NAME" />
+		WHERE ID = @{_parameter,jdbcType=NUMERIC}
+	</delete>
+	<delete id="deleteByIds">
+		DELETE FROM
+		<include refid="TABLE_NAME" />
+	    WHERE ID IN    
+	        <foreach item="id" index="index" collection="list" open="(" separator="," close=")">
+				#{id,jdbcType=NUMERIC}
+			</foreach>
+	</delete>
+
+</mapper>

@@ -1,0 +1,245 @@
+#parse("index/_header.vm")
+<style>
+	.k-picker-wrap.k-state-default{
+		height: 24px;
+	}
+	.k-input.n-invalid{height: 18px;}
+	.ui-dialog-form td label,.ui-dialog-form td.label{color:#0c82c4;}
+	input.k-textbox,input.k-textbox[readonly],textarea.k-textbox.k-textarea,select.k-textbox {border:1px solid #c4deed;/* background:#e2f3fd; */}
+	span.k-textbox[readonly]{border:1px solid #c4deed;}
+	span.k-textbox .k-textbox{border:none;}
+	.k-datepicker,.k-datepicker input.k-input {border:1px solid #c4deed;/* background:#e2f3fd; */}
+	.k-datepicker .k-picker-wrap{border:none;/* background:none; */}
+	.k-datepicker .k-select{border-color:#c4deed;}
+</style>
+</head>
+<body style="padding-bottom:40px;">
+<form id="myform_id" method="post" action="$!{rc.contextPath}/visitor/reservation/save" class="ui-layout-center ui-dialog-form">
+    <input type="hidden" name="id" value="$!{reservationVisitor.id}"/>
+    <table width="100%" style="margin-left:-20px;">
+        <tr>
+            <td width="13%" class="label"><label>接待人员：</label></td>
+            <td width="20%" > 
+				<span class="k-textbox k-space-right" onclick="choosePersons(1,'personId','receptorName','visitor_add_dlg','','deptId','deptName','tel')">
+					<input type="hidden" id="personId" name="receptorID" value="$!{receptor.id}" class="ui-input"/>
+					<input type="text" id="receptorName" name="receptorName" #if(($!viewOnly)) value="$!{receptor.name}" #end value="$!{receptor.name}" class="k-textbox ui-input-choose" />		
+					<a href="#" class="k-icon k-i-search">&nbsp;</a>
+                </span>
+			</td>
+			<td width="13%" class="label"><label>部门：</label></td>
+            <td width="20%">
+				<input type="hidden" class="k-textbox" readonly id="deptId" name="deptNameId" value="$!{receptor.deptId}">
+				<input type="text" class="k-textbox" readonly id="deptName" title="$!{receptor.deptName}" value="$!{receptor.deptName}">
+			</td>
+			<td width="13%" class="label"><label>联系方式：</label></td>
+            <td width="20%" ><input readonly type="text" id="tel" value="$!{receptor.personTelephone}" class="k-textbox"/></td>	
+        </tr>
+        <tr>	
+			<td class="label"><span class="ui-form-required">*</span>来访客人：</td>
+			<td ><input type="text"   name="visitorList[0].visitorName" class="k-textbox" value="$!{reservationVisitor.visitor.visitorName}"></td>
+            <td class="label">访客单位：</td>
+            <td><input  type="text"   name="visitorList[0].visitorUnit" class="k-textbox" value="$!{reservationVisitor.visitor.visitorUnit}"/></td>
+            <td class="label">访客电话：</td>
+            <td><input  type="text" name="visitorList[0].visitorPhone" class="k-textbox" value="$!{reservationVisitor.visitor.visitorPhone}"/></td>     
+		</tr>
+        <tr>
+			<td class="label"><span class="ui-form-required">*</span>来访人数：</td>
+            <td><input  type="text" name="expectVisitors" class="k-textbox" value="$!{reservationVisitor.expectVisitors}"/></td>     
+            <td class="label">车辆数：</td>
+            <td><input  type="text" name="visitCars" value="$!{reservationVisitor.visitCars}" class="k-textbox" /></td>
+            <td class="label">车牌号：</td>
+            <td><input  type="text" name="visitCarNos" value="$!{reservationVisitor.visitCarNos}" class="k-textbox" /></td>
+		</tr>	
+		<tr>
+		    <td class="label"><span class="ui-form-required">*</span>来访时间：</td>
+			<td >
+				 <input id="visitTime" name="visitTime" class="k-textbox" value="#date_format($!{reservationVisitor.visitTime},'yyyy-MM-dd')" onchange="addDays()">
+			</td>
+            <td class="label"><span class="ui-form-required">*</span>来访天数：</td>
+            <td><input id="visitDays"  type="text" name="visitDays" value="$!{reservationVisitor.visitDays}" class="k-textbox" onblur="addDays()"/></td>
+			<td class="label">预计离开时间：</td>
+            <td><input readonly type="text" name="expectLeaveTime" value="#date_format($!{reservationVisitor.expectLeaveTime},'yyyy-MM-dd')" class="k-textbox" id="planLeaveDate" /></td>
+			
+			
+        </tr>
+        <tr>
+			<td  class="label"><label>来访事由：</label></td>
+                <td>
+					<select id="visitorReason_id" name="visitReason" class="k-textbox">
+                        #foreach($enumDetail in $!visitorTypeList)
+                            <option value="$!enumDetail.enumValue" #if($!enumDetail.enumValue ==$!{reservationVisitor.visitReason}) selected="selected" #end>$!enumDetail.enumText</option>
+                        #end
+					</select>
+            </td>
+		</tr>
+		<tr>
+            <td class="label">备注：</td>
+            <td colspan="5"><textarea  id="textAreaId" style="height:100px"class="k-textbox k-textarea"  name="remark" data-rule="length[~100];">$!{reservationVisitor.remark}</textarea></td>
+		</tr>
+		<tr>
+            <td  class="label"><label>登记人：</label></td>
+            <td>  
+				 <input type="hidden" name="createId" value="$!{reservationVisitor.createId}"/>
+                 <input type="text" class="k-textbox" name="creator" value="$!{reservationVisitor.creator}" readonly="readonly">
+            </td>
+			<td  class="label"><label>登记时间：</label></td>
+            <td >
+				<input type="text" class="k-textbox" id="createDate" name="createDate" value="#date_format($!{reservationVisitor.createDate})" readonly="readonly">
+			</td>
+		</tr>
+		
+    </table>
+    <div class="actions">
+        <button class="k-primary hc_btn" id="save_button_id" type="submit"><i class="fa fa-save"></i>保 存</button>
+        <button class="hc_btn cancel" onclick="close_dialog('visitor_add_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+    </div>
+	
+<input type="hidden" name="number" value="$!reservationVisitor.visitorList.size()" id="number" />
+</form>
+
+<script type="text/javascript">
+$("input[name='visitorList[0].visitorName']").kendoAutoComplete({
+    placeholder:"",
+    dataTextField:"nameText",
+    minLength:2,
+    filter: "contains",
+    dataSource: {
+        serverFiltering: true,
+        transport: {
+            read: {
+                dataType: "json",
+                url: "$!rc.contextPath/visitor/reservation/autoCompletePersonList",
+                data: {
+                    nameText: function(){
+                        return $("input[name='visitorList[0].visitorName']").data("kendoAutoComplete").value();
+                    }
+                }
+            }
+        }
+    }, template:function(e){
+        if(e.visitorName)
+        	if(!e.visitorUnit){
+				if(!e.visitorPhone){
+					return "<span>"+ e.visitorName+"</span>"
+				}else{
+					return "<span>"+ e.visitorName+","+" "+","+e.visitorPhone+"</span>"
+				}
+        	}else{
+				if(!e.visitorPhone){
+					return "<span>"+ e.visitorName+","+e.visitorUnit+"</span>"
+				}else{
+					return "<span>"+ e.visitorName+","+e.visitorUnit+","+e.visitorPhone+"</span>"
+				}
+        		
+        	}
+        else return "";
+    },
+    select:function(e){
+        var dataItem = this.dataItem(e.item.index());
+        $(":input[name='visitorList[0].visitorName']").val(dataItem.visitorName||"");
+        $(":input[name='visitorList[0].visitorUnit']").val(dataItem.visitorUnit||"");
+        $(":input[name='visitorList[0].visitorPhone']").val(dataItem.visitorPhone||"");
+    },
+    close:function(e){
+        var autocomplete = $("input[name='visitorList[0].visitorName']").data("kendoAutoComplete");
+        var nameText =  autocomplete.value();
+        if(nameText.indexOf("/") != -1){
+            var autocomplete = $("input[name='visitorList[0].visitorName']").data("kendoAutoComplete");
+            autocomplete.value(nameText.split("/")[0]);
+            // $("input[name='contactTel']").val(nameText.split("/")[1])
+        }
+    }
+}).data("kendoAutoComplete");
+
+
+	//日期加天数得到新的日期
+	function addDays(){
+	    var date = $("#visitTime").val();
+	    var days = $("#visitDays").val()-1;
+	    if( !isZzs(days))
+			{
+				$("#visitDays").val("");
+				$("#planLeaveDate").val("");
+				return;
+			}else if(date==""){
+				return;
+			}    
+	    var nd = new Date(date.replace(/-/g,"/"));
+	    nd = nd.valueOf();
+		nd = nd + days*24*60*60*1000;
+		nd = new Date(nd);
+		var y = nd.getFullYear();
+		var m = nd.getMonth()+1;
+		var d = nd.getDate();
+		if(m<10) m = "0"+m;
+		if(d<10) d = "0"+d;
+	    var curDate = y+"-"+m+"-"+d;
+	    $("#planLeaveDate").val(curDate);
+	}
+	//将val写入value
+	function writes(o){
+		$(o).attr("value",$(o).val());
+	}
+	var id;
+	function a(id){
+	   var id = id;
+	}
+	   
+
+		##校验访客姓名长度、姓名长度不能大于10
+		function validVisitorName()
+    	{    
+    	}
+		##校验访客单位名称长度 单位长度不能大于15
+		function validVisitorUnit()
+    	{   /* debugger;
+    		var visitorUnit = $("input[name$='.visitorUnit']");   
+    		$.each(visitorUnit,function(i,item){
+    			if("" == $(item).val() || $(item).val().length>15)
+    			{
+    				$(item).val("");
+    			}
+    		});*/
+    	}
+		
+	
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+              defaults: {
+                resizable: true,
+                closable: false,
+                spacing_open: 5
+              }
+            });	
+	  var date = $("#visitTime").val();
+	  var days = $("#visitDays").val();
+	  if(date!=''&days!=''){
+		   addDays();	
+		}	
+		
+        $("#myform_id").validator({
+            fields:{
+            	"visitorList[0].visitorName":"来访客人:required;length[~6];",
+				visitTime:"来访时间:required;",
+				expectVisitors:"来访人数:required;length[~5]; digits",
+				visitDays:"来访天数:required;length[~5]; digits",
+				visitCars:"车辆数:length[~5]; digits",
+				visitCarNos:"车牌号:length[~65];",
+				"visitorList[0].visitorUnit":"访客单位:length[~16];",
+    		    remark:"备注:length[~65];"
+            },
+            valid: function (form) {
+               form_btn_submit($("#save_button_id"), form, function (res) {
+                  validateCallback(res, "grid", "visitor_add_dlg");
+               });
+          }
+			
+        });
+	    commonSingleDateWithout("visitTime","yyyy-MM-dd","zh-CN");
+     });
+	 #if($!viewOnly)
+	        setAllReadonly();
+	     #end
+</script>
+</body>
+</html>

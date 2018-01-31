@@ -1,0 +1,208 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.analyse.electric.entities.StatisticalPropDay">
+
+	<resultMap type="com.supconit.nhgl.analyse.electric.entities.StatisticalPropDay" id="StatisticalPropDayResultMap">     
+        <result property="id" column="ID" />
+        <result property="dayOfWeekKey" column="DAY_OF_WEEK_KEY" />
+        <result property="dayOfWeekValue1" column="DAY_OF_WEEK_VALUE_1" />
+        <result property="dayOfWeekValue2" column="DAY_OF_WEEK_VALUE_2" />
+        <result property="dayOfMonthKey" column="DAY_OF_MONTH_KEY" />
+        <result property="dayOfMonthValue1" column="DAY_OF_MONTH_VALUE_1" />
+        <result property="dayOfMonthValue2" column="DAY_OF_MONTH_VALUE_2" />
+        <result property="monthKey" column="MONTH_KEY" />
+        <result property="monthValue1" column="MONTH_VALUE_1" />
+        <result property="monthValue2" column="MONTH_VALUE_2" />
+        <result property="yearKey" column="YEAR_KEY" />
+        <result property="yearValue1" column="YEAR_VALUE_1" />
+        <result property="yearValue2" column="YEAR_VALUE_2" />
+        <result property="quarterKey" column="QUARTER_KEY" />
+        <result property="quarterValue1" column="QUARTER_VALUE_1" />
+        <result property="quarterValue2" column="QUARTER_VALUE_2" />
+        <result property="flag" column="FLAG" />
+        <result property="falgValue" column="FLAG_VALUE" />
+        <result property="weekOfYearKey" column="WEEK_OF_YEAR_KEY" />
+        <result property="weekOfYearValue1" column="WEEK_OF_YEAR_VALUE_1" />
+        <result property="weekOfYearValue2" column="WEEK_OF_YEAR_VALUE_2" />
+ 		<result property="start" column="start" />
+ 		<result property="endTime" column="endTime" />
+ 		<result property="startTime" column="startTime" />
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">NH_STATISTICAL_PROP_DAY</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+	
+	<!-- 获取日期对应的周数 -->
+	<sql id="select_pre" lang="velocity">
+	<![CDATA[
+		select WEEK_OF_YEAR_VALUE_1 from NH_STATISTICAL_PROP_DAY where 
+			MONTH_KEY =@{ _parameter.start,jdbcType=VARCHAR }
+			GROUP BY WEEK_OF_YEAR_VALUE_1
+		]]>
+	</sql>
+	
+	<sql id="select_electric_hoilday_last" lang="velocity">
+	<![CDATA[
+	select FLAG_VALUE from NH_STATISTICAL_PROP_DAY 
+		#where()
+			#if($_parameter.yearKey)
+				YEAR_KEY = @{ _parameter.yearKey,jdbcType=VARCHAR } 
+			#end
+			#if($_parameter.flag)
+				and	FLAG = @{ _parameter.flag,jdbcType=VARCHAR } 
+			#end
+		#end
+		GROUP BY FLAG_VALUE
+	]]>
+	</sql>
+	
+	<sql id="select_day" lang="velocity">
+	<![CDATA[
+		select DAY_OF_WEEK_KEY,DAY_OF_MONTH_KEY as start from NH_STATISTICAL_PROP_DAY where 
+			WEEK_OF_YEAR_VALUE_1 = @{ _parameter.weekOfYearValue1,jdbcType=VARCHAR }
+			 and
+			YEAR_KEY=@{ _parameter.yearKey,jdbcType=VARCHAR } 
+			order by DAY_OF_WEEK_KEY
+		]]>
+	</sql>
+	
+	<select id="findByHoildayLast"  resultMap="StatisticalPropDayResultMap" parameterType="com.supconit.nhgl.analyse.electric.entities.StatisticalPropDay" lang="velocity">
+		<include refid="select_electric_hoilday_last"/>
+		
+	</select>
+	
+	<select id="findByCon" resultMap="StatisticalPropDayResultMap" parameterType="com.supconit.nhgl.analyse.electric.entities.StatisticalPropDay" lang="velocity">
+		<include refid="select_pre" /> 
+	</select>
+	
+	<select id="findByDay" resultMap="StatisticalPropDayResultMap" parameterType="com.supconit.nhgl.analyse.electric.entities.StatisticalPropDay" lang="velocity">
+		<include refid="select_day" />        
+	</select>
+	<select id="getMaxDateSta" resultMap="StatisticalPropDayResultMap" parameterType="com.supconit.nhgl.analyse.electric.entities.StatisticalPropDay" lang="velocity">
+		<include refid="maxDate" />  
+	</select>
+	<sql id="maxDate" lang="velocity">
+	<![CDATA[
+		SELECT MAX(DAY_OF_MONTH_KEY) AS DAY_OF_MONTH_KEY FROM NH_STATISTICAL_PROP_DAY
+	]]>
+	</sql>
+	<sql id="getTime" lang="velocity">
+		<![CDATA[
+			select max(DAY_OF_MONTH_KEY) as endTime,MIN(DAY_OF_MONTH_KEY) as startTime 
+				from NH_STATISTICAL_PROP_DAY where 
+					WEEK_OF_YEAR_VALUE_1 IN(
+						select WEEK_OF_YEAR_VALUE_1 from NH_STATISTICAL_PROP_DAY 
+						#where()
+							#if($_parameter.start)
+								MONTH_KEY = @{ _parameter.start,jdbcType=VARCHAR }
+							#end
+						#end
+						
+						GROUP BY WEEK_OF_YEAR_VALUE_1
+					)
+		]]>
+	</sql>
+	<select id="getWeekTime" resultMap="StatisticalPropDayResultMap" 
+		parameterType="com.supconit.nhgl.analyse.electric.entities.StatisticalPropDay" lang="velocity">
+		<include refid="getTime" />  
+	</select>
+	
+	<insert id="insertSpd" parameterType="java.util.List" keyProperty="id"
+		keyColumn="ID" databaseId="sqlserver">
+		<include refid="insert_sql" />
+		<!-- 获取记录主键 microsoft sql server -->
+		<selectKey keyProperty="id" resultType="Long" order="AFTER">
+			select
+			@@identity
+		</selectKey>
+	</insert>
+
+	<!-- 插入记录 -->
+	<sql id="insert_sql">
+		insert into <include refid="TABLE_NAME"/>(
+		DAY_OF_WEEK_KEY,
+		DAY_OF_WEEK_VALUE_1,
+		DAY_OF_MONTH_KEY,
+		DAY_OF_MONTH_VALUE_1,
+		MONTH_KEY,
+		MONTH_VALUE_1,
+		YEAR_KEY,
+		YEAR_VALUE_1,
+		QUARTER_KEY,
+		QUARTER_VALUE_1,
+		FLAG,
+		FLAG_VALUE,
+		WEEK_OF_YEAR_KEY,
+		WEEK_OF_YEAR_VALUE_1
+		)values
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(
+			#{item.dayOfWeekKey},
+			#{item.dayOfWeekValue1},
+			#{item.dayOfMonthKey},
+			#{item.dayOfMonthValue1},
+			#{item.monthKey},
+			#{item.monthValue1},
+			#{item.yearKey},
+			#{item.yearValue1},
+			#{item.quarterKey},
+			#{item.quarterValue1},
+			#{item.flag},
+			#{item.falgValue},
+			#{item.weekOfYearKey},
+			#{item.weekOfYearValue1}
+			)
+		</foreach>
+	</sql>
+	
+    <!-- 插入记录-->
+    <insert id="insertSpd" parameterType="java.util.List"  databaseId="oracle">
+       INSERT INTO <include refid="TABLE_NAME"/>(  
+        ID,     
+        DAY_OF_WEEK_KEY,
+		DAY_OF_WEEK_VALUE_1,
+		DAY_OF_MONTH_KEY,
+		DAY_OF_MONTH_VALUE_1,
+		MONTH_KEY,
+		MONTH_VALUE_1,
+		YEAR_KEY,
+		YEAR_VALUE_1,
+		QUARTER_KEY,
+		QUARTER_VALUE_1,
+		FLAG,
+		FLAG_VALUE,
+		WEEK_OF_YEAR_KEY,
+		WEEK_OF_YEAR_VALUE_1
+		) 
+       SELECT SEQ_NH_STATISTICAL_PROP_DAY.NEXTVAL,A.* from(
+		
+        <foreach collection="list" item="item" index="index"
+			separator="UNION">
+		SELECT
+        	#{item.dayOfWeekKey,jdbcType=NUMERIC},
+			#{item.dayOfWeekValue1,jdbcType=VARCHAR},
+			to_date(#{item.dayOfMonthKey},'yyyy-MM-dd'),
+			#{item.dayOfMonthValue1,jdbcType=VARCHAR},
+			#{item.monthKey,jdbcType=VARCHAR},
+			#{item.monthValue1,jdbcType=VARCHAR},
+			#{item.yearKey,jdbcType=NUMERIC},
+			#{item.yearValue1,jdbcType=VARCHAR},
+			#{item.quarterKey,jdbcType=VARCHAR},
+			#{item.quarterValue1,jdbcType=VARCHAR},
+			#{item.flag,jdbcType=NUMERIC},
+			#{item.falgValue,jdbcType=VARCHAR},
+			#{item.weekOfYearKey,jdbcType=NUMERIC},
+			#{item.weekOfYearValue1}		
+		FROM dual 	
+     	</foreach>
+     	) A
+	</insert>
+</mapper>

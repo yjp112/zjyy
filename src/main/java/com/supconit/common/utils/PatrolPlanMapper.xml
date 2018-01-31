@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconicom/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.patrol.entities.PatrolPlan">
+    
+ 
+   <sql id="TABLE_NAME" lang="velocity">PATROL_PLAN</sql>
+   <sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+   
+   
+ 	<select id="findPlanCuont"  resultType="long" lang="velocity"> 
+		select count(*) from <include refid="TABLE_NAME"/> A
+		INNER  JOIN PATROL_LINE_POINT  C on A.LINE_ID=C.LINE_ID
+		 where A.PERSON_ID=@{_parameter.personId,jdbcType=NUMERIC} and
+		 A.START_DATE > @{_parameter.startDate,jdbcType=NUMERIC}
+		 <![CDATA[ and
+			 A.END_DATE < @{_parameter.endDate,jdbcType=TIMESTAMP}
+		 ]]>
+	</select>
+	
+</mapper>

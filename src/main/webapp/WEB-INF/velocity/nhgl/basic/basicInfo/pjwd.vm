@@ -1,0 +1,279 @@
+  <script type="text/javascript">
+  $(document).ready(function(){
+  	var option999;
+	option999 = {
+		
+		title : {
+        	        text: '$!{year}'+'年平均温度及用电使用情况',
+        	        x:'100'
+        	    },
+        tooltip : {
+	        trigger: 'axis',
+			formatter:function(params,ticket)
+			{
+				var str="";
+				for(var i=0;i<params.length;i++){
+					str = str + params[i][0]+" : "+params[i][2];
+					if(params[i][0] == "用电量")
+						str = str + " "+electric+"</br>";
+					else
+						str = str + " " + "°C</br>";
+				}
+				return str;
+				
+			}
+	    },
+		legend: {
+			x : 'right',
+	        y : 'top',
+            data:['用电量','平均温度']
+        },
+        xAxis : [
+            {
+                type : 'category',
+                data : ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月']
+            }
+        ],
+        yAxis : [
+			{
+                type : 'value',
+                name : '平均温度',
+                axisLabel : {
+                    formatter: '{value} °C'
+                }
+            },
+            {
+                type : 'value',
+                name : '用电量',
+                axisLabel : {
+                    formatter: '{value} kWh'
+                }
+            }
+            
+        ],
+        series : [
+    		{
+                name:'用电量',
+                type:'bar',
+				yAxisIndex: 1,
+                data:'$!mapElectric.dataPjwd'.split(',')
+            },
+            {
+                name:'平均温度',
+                type:'line',
+                data:'$!mapElectric.dataPjwdSubjectAmount'.split(',')
+            }
+            
+        ]
+    };
+	initEcharts("mix999",option999,function onclickWeek(chart){chart.on('click', eConsole999);});
+  });
+  function eConsole999(param) {
+		$("#subPjwdButton").attr("style","display: block;");
+		var value = param.value;
+		if(value == '0')
+			return;
+		var first = param.name;
+		var year = $("#year").val();
+		var start = $("#start").val();
+		first = first.substring(0,first.length-1);
+		if(first < 10)
+			start = year + "-0" + first;
+		else
+			start = year + "-" + first;
+		var url = '';
+		url = '$!{rc.contextPath}/basic/basicInfoXin/dayByMonth?start='+start;
+		chartMonthPjwd(url,start);
+	
+  	}
+  function chartMonthPjwd(url,start){
+  	var title = "";
+    if(start.length == 4)
+    	title = start+'年平均温度及用电使用情况';
+    else if(start.length == 7)
+    	title = start.substring(0,4)+"年"+start.substring(5,7)+'月平均温度及用电使用情况';
+	$.ajax({
+           type: "POST",
+           url: url,
+           data: "code=999",
+           success: function(data){
+		   		var option10 = {
+            		grid:{x:'120px'},
+            		title : {
+                    	        text: title,
+                    	        x:'100'
+                    	    },
+                    tooltip : {
+            	        trigger: 'axis',
+            			formatter:function(params,ticket)
+            			{
+            				var str="";
+            				for(var i=0;i<params.length;i++){
+            					str = str + params[i][0]+" : "+params[i][2];
+            					if(params[i][0] == "用电量")
+            						str = str + " "+electric+"</br>";
+            					else
+            						str = str + " " + "度</br>";
+            				}
+            				return str;
+            				
+            			}
+            	    },
+            		legend: {
+            			x : 'right',
+            	        y : 'top',
+                        data:['用电量','平均温度']
+                    },
+                    xAxis : [
+                        {
+                            type : 'category',
+                            data : data.dateString.split(',')
+                        }
+                    ],
+                    yAxis : [
+            			{
+                            type : 'value',
+                            name : '平均温度',
+                            axisLabel : {
+                                formatter: '{value} 度'
+                            }
+                        },
+                        {
+                            type : 'value',
+                            name : '用电量',
+                            axisLabel : {
+                                formatter: '{value} kWh'
+                            }
+                        }
+                        
+                    ],
+                    series : [
+                		{
+                            name:'用电量',
+                            type:'bar',
+            				yAxisIndex: 1,
+                            data:data.data.split(',')
+                        },
+                        {
+                            name:'平均温度',
+                            type:'line',
+                            data:data.dataSubjectAmount.split(',')
+                        }
+                    ]
+                };
+				if(start.length > 4)
+					initEcharts("mix999",option10,function onclickWeek(chart){chart.on('click', eConsole9991);});
+				else
+					initEcharts("mix999",option10,function onclickWeek(chart){chart.on('click', eConsole999);});
+				$("#pjwdMonth").attr("value",start);
+		   }
+        });
+  }
+  function eConsole9991(param) {
+    	var value = param.value;
+    	if(value == '0')
+    		return;
+    	var first = param.name;
+    	var start = $("#pjwdMonth").val();
+    	if(first < 10)
+    		start = start + "-0" + first;
+    	else
+    		start = start + "-" + first;
+		var title = start.substring(0,4)+"年"+start.substring(5,7)+"月"+start.substring(8,10)+'日平均温度及用电使用情况';
+    	var url = "";
+    	url = '$!{rc.contextPath}/basic/basicInfoXin/hourByDay?start='+start;
+    	$.ajax({
+           type: "POST",
+           url: url,
+           data: "code=999",
+           success: function(data){
+    	   		var option9991 = {
+            		grid:{x:'120px'},
+            		title : {
+                    	        text: title,
+                    	        x:'100'
+                    	    },
+                    tooltip : {
+            	        trigger: 'axis',
+            			formatter:function(params,ticket)
+            			{
+            				var str="";
+            				for(var i=0;i<params.length;i++){
+            					str = str + params[i][0]+" : "+params[i][2];
+            					if(params[i][0] == "用电量")
+            						str = str + " "+electric+"</br>";
+            					else
+            						str = str + " " + "度</br>";
+            				}
+            				return str;
+            				
+            			}
+            	    },
+            		legend: {
+            			x : 'right',
+            	        y : 'top',
+                        data:['用电量','平均温度']
+                    },
+                    xAxis : [
+                        {
+                            type : 'category',
+                            data : data.dataHour.split(',')
+                        }
+                    ],
+                    yAxis : [
+            			{
+                            type : 'value',
+                            name : '平均温度',
+                            axisLabel : {
+                                formatter: '{value} 度'
+                            }
+                        },
+                        {
+                            type : 'value',
+                            name : '用电量',
+                            axisLabel : {
+                                formatter: '{value} kWh'
+                            }
+                        }
+                        
+                    ],
+                    series : [
+                		{
+                            name:'用电量',
+                            type:'bar',
+            				yAxisIndex: 1,
+                            data:data.data.split(',')
+                        },
+                        {
+                            name:'平均温度',
+                            type:'line',
+                            data:data.dataSubjectAmount.split(',')
+                        }
+                    ]
+                };
+    			initEcharts("mix999",option9991);
+    			$("#pjwdMonth").attr("value",start);
+    	   }
+        });
+		
+	}
+  function replyPjwd(){
+    	var start = $("#pjwdMonth").val();
+		
+    	if(start.length > 4)
+    		start = start.substring(0,start.length-3);
+    	var url = "";
+    	if(start.length > 4){
+    		$("#pjwdMonth").attr("value",start);
+			url = '$!{rc.contextPath}/basic/basicInfoXin/dayByMonth?start='+start;
+    		chartMonthPjwd(url,start);
+    	}
+    	else{
+			$("#subPjwdButton").attr("style","display: none;");
+			$("#pjwdMonth").attr("value",start);
+			url = '$!{rc.contextPath}/basic/basicInfoXin/monthByYear?start='+start;
+    		chartMonthPjwd(url,start);
+    	}
+    }
+  </script> 
+   

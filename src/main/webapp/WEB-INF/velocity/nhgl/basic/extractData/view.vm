@@ -1,0 +1,6 @@
+<form class="ui-form" id="jobschedule_schedule_job_view_form">
+<pre><code style="color: #FFF;">
+  $!{scheduleLog.errorMsg}
+</code>
+</pre>
+</form>

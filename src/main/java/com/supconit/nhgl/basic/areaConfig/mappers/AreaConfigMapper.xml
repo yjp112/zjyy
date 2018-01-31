@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.basic.areaConfig.entities.AreaConfig">
+
+	<resultMap type="com.supconit.nhgl.basic.areaConfig.entities.AreaConfig" id="AreaConfigResultMap">      
+       <result property="id" column="ID"/>
+       <result property="deviceId" column="DEVICE_ID"/>
+       <result property="areaId" column="AREA_ID"/>
+       <result property="ftxs" column="FTXS"/>
+       <result property="bitNo" column="BIT_NO"/>
+       <result property="isSum" column="IS_SUM"/>
+       <result property="ruleFlag" column="RULE_FLAG"/>
+       <result property="nhType" column="NH_TYPE"/>
+       <result property="description" column="DESCRIPTION"/>
+       <result property="description1" column="DESCRIPTION1"/>
+       <result property="memo" column="MEMO"/>
+       <result property="areaName" column="AREA_NAME"/>
+       <result property="areaCode" column="AREA_CODE"/>
+       <result property="deviceName" column="DEVICE_NAME"/>
+       <result property="deviceCode" column="DEVICE_CODE"/>
+       <result property="extended1" column="EXTENDED1"/>
+       <result property="locationName" column="LOCATION_NAME"/>
+       <result property="hpId" column="HPID"/>
+       <result property="serviceArea" column="serviceArea"/>
+       <result property="sumDevice" column="sumDevice"/>
+	</resultMap>
+	
+	<select id="findAreaConfigByNhType" parameterType="com.supconit.nhgl.basic.areaConfig.entities.AreaConfig" resultMap="AreaConfigResultMap" lang="velocity">
+		SELECT
+			a2.AREA_CODE,
+			a2.FULL_LEVEL_NAME as AREA_NAME,
+			a1.IS_SUM,
+			a1.BIT_NO,
+			d.DEVICE_NAME,
+			a1.FTXS,
+			a1.RULE_FLAG,
+			a1.NH_TYPE,
+			a1.MEMO
+		FROM
+			NH_AREA_CONFIG a1
+		LEFT JOIN NH_AREA a2 ON a1.AREA_ID = a2.id
+		LEFT JOIN DEVICE d ON a1.BIT_NO = d.HPID
+		where a1.NH_TYPE = @{_parameter.nhType}
+	    order by a1.AREA_ID asc, a1.BIT_NO asc  
+	</select>
+	
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+	<sql id="TABLE_NAME" lang="velocity">NH_AREA_CONFIG</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>	
+	 <sql id="findFirstForWith" lang="velocity">
+		WITH AREA(ID,PARENT_ID,area_code,AREA_NAME,FULL_LEVEL_NAME,SORT,lvl) AS(
+		SELECT A.ID,A.PARENT_ID,A.AREA_CODE,A.AREA_NAME,A.FULL_LEVEL_NAME,A.SORT,1 lvl FROM NH_AREA A WHERE 
+		#if($_parameter.condition.areaId==0)
+			A.PARENT_ID=@{_parameter.condition.areaId}
+		#else
+		 	A.ID=@{_parameter.condition.areaId}
+	 	#end 
+		UNION ALL
+		SELECT B.ID,B.PARENT_ID,B.AREA_CODE,B.AREA_NAME,B.FULL_LEVEL_NAME,B.SORT,area.lvl+1 lvl FROM NH_AREA B INNER JOIN AREA ON B.PARENT_ID=AREA.ID
+	 	)
+	</sql>
+	
+	 <sql id="select_pre" lang="velocity">
+		SELECT max(t.id) ID,t.area_id,t2.area_code,t2.FULL_LEVEL_NAME as area_name,
+		CASE when t.IS_SUM=1 then '是' else '否 ' end  isSumValue,
+		 #if($_databaseId=='oracle') 
+        	func_nharea_bitno_join(@{_parameter.condition.nhType},t.AREA_ID) DESCRIPTION,
+        #else 
+        	dbo.func_nharea_bitno_join(@{_parameter.condition.nhType},t.AREA_ID) DESCRIPTION,
+        #end
+		max(t.memo) memo
+		FROM NH_AREA_CONFIG t 
+		INNER JOIN AREA t2 ON t.AREA_ID = t2.ID
+		LEFT JOIN DEVICE d ON t.DEVICE_ID = d.ID
+	</sql>
+	
+	<sql id="condition_sql" lang="velocity">
+	<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			1=1 		
+			#if($_p.nhType)
+				#set($_nhType = $_p.nhType)
+				AND t.NH_TYPE = @{_nhType,jdbcType=BIGINT}
+			#end
+			#if($_p.areaCode && $_p.areaCode != '')
+				#set($_areaCode = '%' + $_p.areaCode + '%')
+				AND t2.AREA_CODE LIKE @{_areaCode,jdbcType=VARCHAR}
+			#end
+			#if($_p.areaName && $_p.areaName != '')
+				#set($_areaName = '%' + $_p.areaName + '%')
+				AND t2.AREA_NAME LIKE @{_areaName,jdbcType=VARCHAR}
+			#end
+			#if($_p.bitNo && $_p.bitNo != '')
+				#set($_bitNo = '%' + $_p.bitNo + '%')
+				AND t.BIT_NO LIKE @{_bitNo,jdbcType=VARCHAR}
+			#end
+			#if($_p.deviceCode && $_p.deviceCode != '')
+				#set($_deviceCode = '%' + $_p.deviceCode + '%')
+				AND d.DEVICE_CODE LIKE @{_deviceCode,jdbcType=VARCHAR}
+			#end	
+			#if($_p.deviceName && $_p.deviceName != '')
+				#set($_deviceName = '%' + $_p.deviceName + '%')
+				AND d.DEVICE_NAME LIKE @{_deviceName,jdbcType=VARCHAR}
+			#end
+			GROUP BY t.area_id,t2.area_code,t2.FULL_LEVEL_NAME,t.IS_SUM 	
+		#end
+		]]>
+	</sql>
+	
+	<select id="findByCondition" parameterType="com.supconit.nhgl.basic.areaConfig.entities.AreaConfig" resultMap="AreaConfigResultMap" lang="velocity" databaseId="oracle">
+		<include refid="findFirstForWith"/> 
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre"/>
+		<include refid="condition_sql"/>
+		#order($_parameter.condition,"max(t2.lvl) asc,max(t2.sort) asc")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	
+	<select id="findByCondition" parameterType="com.supconit.nhgl.basic.areaConfig.entities.AreaConfig" resultMap="AreaConfigResultMap" lang="velocity" databaseId="sqlserver">
+		<include refid="findFirstForWith"/> 
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT max(t.id) ID,t.area_id,t2.area_code,t2.FULL_LEVEL_NAME as area_name,
+		CASE when t.IS_SUM=1 then '是' else '否 ' end  isSumValue,
+		dbo.func_nharea_bitno_join(@{_parameter.condition.nhType},t.AREA_ID) DESCRIPTION,max(t.memo) memo
+   		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+ 		#order($_parameter.condition,"t.area_id DESC")
+ 		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM NH_AREA_CONFIG t 
+		INNER JOIN AREA t2 ON t.AREA_ID = t2.ID
+		LEFT JOIN DEVICE d ON t.DEVICE_ID = d.ID
+	   <include refid="condition_sql"/>
+	   <include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="countByCondition" parameterType="com.supconit.nhgl.basic.areaConfig.entities.AreaConfig" resultType="long" lang="velocity">
+		<include refid="findFirstForWith"/> 
+		SELECT count(*) co from(
+			<include refid="select_pre" />
+		    <include refid="condition_sql" />
+	    ) s
+	</select>
+	
+	
+	
+	
+	<select id="findByAreaIdAndRule" parameterType="com.supconit.nhgl.basic.areaConfig.entities.AreaConfig" resultMap="AreaConfigResultMap" lang="velocity">
+      select
+      		t1.ID,
+	        t1.DEVICE_ID,
+	        t1.FTXS,
+	        t1.BIT_NO,
+	        t2.DEVICE_NAME,
+	        t2.DEVICE_CODE,
+	        t2.EXTENDED1,
+	        t2.LOCATION_NAME
+        FROM NH_AREA_CONFIG t1
+        LEFT JOIN DEVICE t2 ON t1.DEVICE_ID = t2.ID
+        where t1.AREA_ID = @{areaId} and t1.RULE_FLAG=@{ruleFlag} and t1.NH_TYPE=@{nhType}
+    </select>
+	
+	<select id="getByCondition" parameterType="com.supconit.nhgl.basic.areaConfig.entities.AreaConfig" resultMap="AreaConfigResultMap" lang="velocity">
+     select
+      #if($_databaseId=='oracle') 
+        	func_nharea_bitno_join (@{_parameter.nhType}, @{_parameter.areaId}) DESCRIPTION,
+        #else 
+        	dbo.func_nharea_bitno_join (@{_parameter.nhType}, @{_parameter.areaId}) DESCRIPTION,
+        #end
+	        t1.*,
+	        t2.AREA_NAME,
+	        t2.AREA_CODE
+        FROM NH_AREA_CONFIG t1
+        LEFT JOIN NH_AREA t2 ON t1.AREA_ID = t2.ID where t1.ID = @{_parameter.id}
+    </select>
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>
+		(
+		#if($_databaseId=='oracle') ID,#end   
+		DEVICE_ID,
+        AREA_ID,
+        FTXS,
+        BIT_NO,
+        IS_SUM,
+        RULE_FLAG,
+        NH_TYPE,
+        DESCRIPTION,
+        MEMO
+        ) VALUES (        
+		 #if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end
+			@{_parameter.deviceId,jdbcType=NUMERIC},
+			@{_parameter.areaId,jdbcType=NUMERIC},
+			@{_parameter.ftxs,jdbcType=NUMERIC},
+			@{_parameter.bitNo,jdbcType=VARCHAR},
+			@{_parameter.isSum,jdbcType=NUMERIC},
+			@{_parameter.ruleFlag,jdbcType=NUMERIC},
+			@{_parameter.nhType,jdbcType=NUMERIC},
+			@{_parameter.description,jdbcType=VARCHAR},
+			@{_parameter.memo,jdbcType=VARCHAR}
+		)
+	</sql>
+	 <insert  id="insert" parameterType="com.supconit.nhgl.basic.areaConfig.entities.AreaConfig" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="INSERT_SQL" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.nhgl.basic.areaConfig.entities.AreaConfig" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="INSERT_SQL"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    <delete id="deleteByAreaId" parameterType="map">
+		DELETE FROM NH_AREA_CONFIG WHERE AREA_ID = #{areaId} 
+		and NH_TYPE=#{nhType}
+	</delete>
+	<select id="countFindAll" parameterType="com.supconit.nhgl.basic.areaConfig.entities.AreaConfig" resultType="int"  lang="velocity">
+		SELECT count(1) from NH_AREA_CONFIG where AREA_ID=@{_parameter.areaId} and  NH_TYPE = @{_parameter.nhType}
+	</select>
+	<select id="getByAreaId" parameterType="long" resultType="long"  lang="velocity">
+		SELECT count(1) from NH_AREA_CONFIG where AREA_ID=@{_parameter,jdbcType=NUMERIC}
+	</select>
+	
+	<select id="findAllDevicesWithOutRoot" resultMap="AreaConfigResultMap" lang="velocity">
+		SELECT ID DEVICE_ID,HPID from DEVICE where ID>0
+	</select>
+	
+	<select id="findAllArea" resultMap="AreaConfigResultMap" lang="velocity">
+		SELECT ID AREA_ID,AREA_CODE,FULL_LEVEL_NAME AREA_NAME from NH_AREA
+	</select>
+	<select id="findUnusedDevice" parameterType="com.supconit.nhgl.basic.areaConfig.entities.AreaConfig" resultMap="AreaConfigResultMap" lang="velocity" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		select d.*,a.area_name serviceArea from 
+		(select extended1  from device 
+			minus
+		 select bit_no from nh_area_config 
+		where nh_type=@{_parameter.condition.nhType} and rule_flag=1 group by bit_no ) t1
+		LEFT JOIN DEVICE d ON t1.extended1 = d.extended1
+		left join device_category dc on d.CATEGORY_ID=dc.id
+		left join nh_area a on d.service_area_id=a.id
+		where dc.category_code=@{_parameter.condition.categoryCode,jdbcType=VARCHAR}
+		#order($_parameter.condition,"d.id")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="findUnusedDevice" parameterType="com.supconit.nhgl.basic.areaConfig.entities.AreaConfig" resultMap="AreaConfigResultMap" lang="velocity" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		select d.*,a.area_name serviceArea 
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"d.id")
+ 		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		from 
+		(select extended1  from device 
+			except
+		 select bit_no from nh_area_config 
+		where nh_type=@{_parameter.condition.nhType} and rule_flag=1 group by bit_no ) t1
+		LEFT JOIN DEVICE d ON t1.extended1 = d.extended1
+		left join device_category dc on d.CATEGORY_ID=dc.id
+		left join nh_area a on d.service_area_id=a.id
+		where dc.category_code=@{_parameter.condition.categoryCode,jdbcType=VARCHAR}
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="countUnusedDevice" parameterType="com.supconit.nhgl.basic.areaConfig.entities.AreaConfig" resultType="long" lang="velocity" databaseId="sqlserver">
+		select count(1)
+		from 
+		(select extended1  from device 
+			except
+		 select bit_no from nh_area_config 
+		where nh_type=@{_parameter.condition.nhType} and rule_flag=1 group by bit_no ) t1
+		LEFT JOIN DEVICE d ON t1.extended1 = d.extended1
+		left join device_category dc on d.CATEGORY_ID=dc.id
+		where dc.category_code=@{_parameter.condition.categoryCode,jdbcType=VARCHAR}
+	</select>
+	<select id="countUnusedDevice" parameterType="com.supconit.nhgl.basic.areaConfig.entities.AreaConfig" resultType="long" lang="velocity" databaseId="oracle">
+		select count(1)
+		from 
+		(select extended1  from device 
+			minus
+		 select bit_no from nh_area_config 
+		where nh_type=@{_parameter.condition.nhType} and rule_flag=1 group by bit_no ) t1
+		LEFT JOIN DEVICE d ON t1.extended1 = d.extended1
+		left join device_category dc on d.CATEGORY_ID=dc.id
+		where dc.category_code=@{_parameter.condition.categoryCode,jdbcType=VARCHAR}
+	</select>
+	<select id="findErrorIsSum" parameterType="String" resultMap="AreaConfigResultMap">
+        select count(BIT_NO) sumDevice,area_id,is_sum 
+		from Nh_area_Config t where nh_type=#{nhType}
+		group by area_id,is_sum
+    </select>
+	<select id="findRepeatDevice" parameterType="com.supconit.nhgl.basic.areaConfig.entities.AreaConfig" resultMap="AreaConfigResultMap" lang="velocity" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+      select d.device_code,d.device_name,a.area_name serviceArea from 
+      (select
+	        t1.BIT_NO
+        FROM NH_area_CONFIG t1
+        where 
+        	 t1.RULE_FLAG=1
+        	and t1.NH_TYPE=@{_parameter.condition.nhType}) a1
+      inner join
+      (select
+	        t1.BIT_NO
+        FROM NH_area_CONFIG t1
+        where 
+        	 t1.RULE_FLAG=0
+        	and t1.NH_TYPE=@{_parameter.condition.nhType}) a2
+       on a1.bit_no=a2.bit_no
+       left join device d on d.EXTENDED1=a1.bit_no
+       left join nh_area a on d.service_area_id=a.id
+		#order($_parameter.condition,"a1.bit_no")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="findRepeatDevice" parameterType="com.supconit.nhgl.basic.areaConfig.entities.AreaConfig" resultMap="AreaConfigResultMap" lang="velocity" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		select d.device_code,d.device_name,a.area_name serviceArea
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"a1.bit_no")
+ 		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		from 
+		(select
+	        t1.BIT_NO
+        FROM NH_area_CONFIG t1
+        where 
+        	 t1.RULE_FLAG=1
+        	and t1.NH_TYPE=@{_parameter.condition.nhType}) a1
+      inner join
+      (select
+	        t1.BIT_NO
+        FROM NH_area_CONFIG t1
+        where 
+        	 t1.RULE_FLAG=0
+        	and t1.NH_TYPE=@{_parameter.condition.nhType}) a2
+       on a1.bit_no=a2.bit_no
+       left join device d on d.EXTENDED1=a1.bit_no
+       left join nh_area a on d.service_area_id=a.id
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="countRepeatDevice" parameterType="com.supconit.nhgl.basic.areaConfig.entities.AreaConfig" resultType="long" lang="velocity" databaseId="sqlserver">
+		select count(1)
+		(select
+	        t1.BIT_NO
+        FROM NH_area_CONFIG t1
+        where t1.RULE_FLAG=1
+        	and t1.NH_TYPE=@{_parameter.condition.nhType}) a1
+      inner join
+      (select
+	        t1.BIT_NO
+        FROM NH_area_CONFIG t1
+        where  t1.RULE_FLAG=0
+        	and t1.NH_TYPE=@{_parameter.condition.nhType}) a2
+       on a1.bit_no=a2.bit_no
+       left join device d on d.EXTENDED1=a1.bit_no
+	</select>
+	<select id="findErrorFtxs" parameterType="com.supconit.nhgl.basic.areaConfig.entities.AreaConfig" resultMap="AreaConfigResultMap" lang="velocity" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+        select d.device_code,d.device_name,a1.area_name serviceArea
+        from 
+		  (select
+	        t1.BIT_NO,area_id
+        FROM NH_area_CONFIG t1
+        where
+         t1.RULE_FLAG=1
+        and t1.NH_TYPE=@{_parameter.condition.nhType}
+        group by bit_no,area_id
+        having sum(ftxs)!=1) a 
+        left join device d on a.bit_no=d.extended1
+        left join nh_area a1 on d.service_area_id=a1.id
+		#order($_parameter.condition,"a.bit_no")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="findErrorFtxs" parameterType="com.supconit.nhgl.basic.areaConfig.entities.AreaConfig" resultMap="AreaConfigResultMap" lang="velocity" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		select d.device_code,d.device_name,a1.area_name serviceArea
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"a.bit_no")
+ 		<include refid="_PUBLIC_V.AS_ROW_NUM" /> from
+		(select
+	        t1.BIT_NO,area_id
+        FROM NH_area_CONFIG t1
+        where  
+         t1.RULE_FLAG=1
+        and t1.NH_TYPE=@{_parameter.condition.nhType}
+        group by bit_no,area_id
+        having sum(ftxs)!=1) a 
+        left join device d on a.bit_no=d.extended1
+        left join nh_area a1 on d.service_area_id=a1.id
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="countErrorFtxs" parameterType="com.supconit.nhgl.basic.areaConfig.entities.AreaConfig" resultType="long" lang="velocity" databaseId="sqlserver">
+		select count(1)
+		from
+		(select
+	        t1.BIT_NO,area_id
+        FROM NH_DEPT_CONFIG t1
+        where 
+          t1.RULE_FLAG=1
+        and t1.NH_TYPE=@{_parameter.condition.nhType}
+        group by bit_no,area_id
+        having sum(ftxs)!=1) a 
+        left join device d on a.bit_no=d.extended1
+	</select> 	  
+	
+	<delete id="deleteByAreaIdAndNhtype">
+        DELETE FROM NH_AREA_CONFIG WHERE NH_TYPE = #{nhType} and AREA_ID in 
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<delete id="deleteAll">
+        DELETE FROM NH_AREA_CONFIG
+	</delete>
+	
+	<select id="findDevicesMapWithOutRoot" resultMap="AreaConfigResultMap" lang="velocity">
+		SELECT 
+			t.HPID,
+			d.CATEGORY_CODE nhTypeValue
+		from DEVICE t 
+		left join DEVICE_CATEGORY d ON t.CATEGORY_ID = d.ID
+		where t.ID>0
+	</select>
+	
+	  		
+</mapper>

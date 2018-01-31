@@ -1,0 +1,1000 @@
+#parse("index/_header.vm")
+<link href="$!{main_static_custom_url}/js/uploadify/uploadify.css" rel="stylesheet">
+<script src="$!{main_static_custom_url}/js/uploadify/jquery.uploadify-3.1.min.js"></script>
+</head>
+<body>
+<form id="task_edit_form_id" method="post" action="" class="ui-layout-center ui-dialog-form">
+    <input type="hidden"  name="id" value="$!{task.id}">
+    <input type="hidden"  name="status" value="$!{task.status}">
+    <!--BPM -->
+    <input type="hidden" name="_bpm_param" value="$!{_bpm_param}"/>
+    <input type="hidden" name="_bpm_ts_id" value=""/>
+	<input type="hidden" name="bpm_ts_id" value=""/>
+    <input type="hidden" name="_bpm_enabled" value="true"/>
+    
+<div class="actions">
+           #if(!$!viewOnly)
+                #if($!{task.status}==0)
+                <button class="k-primary hc_btn" id="form_save_id"  type="submit"><i class="fa fa-save"></i>保存</button>
+                <button type="submit" class="k-primary hc_btn" id="form_send_id" onclick="doSubmit('form_send_id')"><i class="fa fa-database"></i>提交</button>
+                #end
+                <button class="k-primary hc_btn" type="button"  onclick="window.location.href='$!{rc.contextPath}/repair/process/list?menuCode=NBGL_SBWX_GYSB';"><i class="fa fa-reply"></i>返回</button>
+           #else
+           <button class="k-primary hc_btn" type="button"  onclick="window.location.href='$!{rc.contextPath}/repair/process/list?menuCode=NBGL_SBWX_GYSB';"><i class="fa fa-reply"></i>返回</button>
+           #end
+</div>
+
+<div class="ui-composer">
+	<div class="ui-co-area">
+	    <div class="co-area-list">
+	        <ul>
+	            <li class="level-1"><a href="#index1"><span>1</span>诉求单信息</a></li>
+	            <li class="level-1"><a href="#index2">
+	                <span>2</span>维修单信息</a>
+	                <ul>
+	                    <li class="level-2"><a href="#index2-1"><span>2.1</span>人工信息</a>
+	                    <li class="level-2"><a href="#index2-2"><span>2.2</span>耗材信息</a>
+	                    <li class="level-2"><a href="#index2-3"><span>2.3</span>附件信息</a>
+	                </ul>
+	            </li>
+	            <li class="level-1"><a href="#index3"><span>3</span>维修评价</a></li>
+	        </ul>
+	    </div>
+	    ##<a href="#index4" class="level-flow">流转意见</a>
+	    <a href="javascript:;" class="backtop" title="回到顶部"></a>
+	</div>
+	
+	<div class="ui-co-seg">
+		<div id="tab-container">
+			<div class="container" id="index1">
+				<div class="container-title title1">
+				<span class="seg-num">1</span>
+				诉求单信息
+				</div>
+				<div class="container-content" style="height:400px;">
+			        <table width="100%">
+				        <tr>				        
+				            <td  width="13%" class="label" ><span class="ui-form-required">*</span><label>诉求单号：</label></td>
+				            <td width="35%">
+				                <input type="text" class="k-textbox" name="taskCode" value="$!{task.taskCode}" >
+				            </td>
+				            <td width="13%"  class="label"><label>紧急程度：</label></td>
+				            <td width="35%">
+				                <select id="emergency_id" name="urgency" class="k-textbox" style="height:26px;" >
+				                    #foreach($enumDetail in $!urgencyList)
+				                        <option value="$!enumDetail.enumValue" #if($!enumDetail.enumValue ==$!{task.urgency})selected="selected" #end>$!enumDetail.enumText</option>
+				                    #end
+				                </select>
+				            </td>   
+				            <td></td>
+				        </tr>
+				        <tr>
+				            <td class="label"><label>事件分类：</label></td>
+				            <td>
+				                   <span class="k-textbox k-space-right" onclick="chooseRepairEvtCategory2('categoryId','categoryName','','expectFinishTime','emergency_id')" >
+					               	<input readonly type="text" class="k-textbox #if(!$!{viewOnly}) ui-input-choose #end"  id="categoryName" name="categoryName" value="$!{task.categoryName}" />
+					               	<a href="#" class="k-icon k-i-search">&nbsp;</a>
+					            	</span>
+					               <input class="k-textbox" type="hidden" id="categoryId" name="categoryId" value="$!{task.categoryId}"/>
+				                
+				            </td>
+				            <td class="label" ><label>地理区域：</label></td>
+				            <td >
+					               <span class="k-textbox k-space-right" onclick="chooseGeoarea1('areaId','areaName','')" >
+					               	<input readonly type="text" class="k-textbox #if(!$!{viewOnly}) ui-input-choose #end"  id="areaName" name="areaName" value="$!{task.areaName}" readonly="readonly"/>
+					               	<a href="#" class="k-icon k-i-search">&nbsp;</a>
+					            	</span>
+					               <input class="k-textbox" type="hidden" id="areaId" name="areaId" value="$!{task.areaId}"/>
+				            </td>
+				            
+				            <td></td>
+				        </tr>
+				        <tr>
+				            <td  class="label"><label>报修人：</label></td>
+				            <td ><input type="text" class="k-textbox" name="contact" value="$!{task.contact}" ></td>
+				            <td  class="label"><label>报修部门：</label></td>
+				            <td >
+									<span id="dept_choose_id" class="k-textbox k-space-right" onclick="chooseDept('deptId_id','deptName_id','','')" >
+										<input type="hidden" id="deptId_id" name="repairDeptId" value="$!{task.repairDeptId}">
+										<input type="text" class="k-textbox"  id="deptName_id" name="repairDeptName" value="$!{task.repairDeptName}" readonly="readonly" title="$!{task.repairDeptName}">
+										<a href="#" class="k-icon k-i-search">&nbsp;</a>
+									</span>
+				            </td> 
+				            <td></td>
+				        </tr>
+				        <tr>
+				            <td  class="label"><label>报修人电话：</label></td>
+				            <td >
+				                <input  type="text" class="k-textbox" name="contactTel" id="contactTel"  value="$!{task.contactTel}"
+				                       data-rule="联系电话: required;length[~20];bxrdh;"   data-rule-bxrdh="[/^\d{3,10}(\/|-)?\d+$/,'请输入号码']">
+				            </td>  
+				            <td class="label" ><label>诉求来源：</label></td>
+				            <td >
+				                <select  id="taskSource_id" name="taskSource" class="k-textbox" style="height:26px;">
+				                    #foreach($enumDetail in $!taskSourceList)
+				                        <option value="$!enumDetail.enumValue" #if($!enumDetail.enumValue ==$!{task.taskSource}) selected="selected" #end>$!enumDetail.enumText</option>
+				                    #end
+				                </select>
+				            </td>
+				            
+							<td></td>
+				        </tr>
+				        <tr> 
+				            <td  class="label"><label>报修时间：</label></td>
+				            <td ><input type="text" class="k-textbox" id="repairDate" name="repairDate" value="#date_format($!{task.repairDate})"></td>
+				        	
+				            <td  class="label"><label>要求完成时间：</label></td>
+				            <td ><input type="text" class="k-textbox" id="expectFinishTime" name="expectFinishTime" value="#date_format($!{task.expectFinishTime})" readonly="readonly">
+				            </td>
+				            <td></td>
+				        </tr>
+				
+				        <tr>
+				            <td class="label"><label>诉求详情：</label></td>
+				            <td colspan="3"><textarea   style="height:100px;" wrap="physical" id="descripton" name="descripton" class="k-textbox">#html_escape($!{task.descripton})</textarea></td>
+				        	<td></td>
+				        </tr>
+				       
+				        <tr>
+				            <td  class="label"><label>登记人：</label></td>
+				            <td >
+				                <input type="hidden" name="createId" value="$!{task.createId}"/>
+				                <input type="text" class="k-textbox" name="creator" value="$!{task.creator}" readonly="readonly">
+				            </td>
+				            <td  class="label"><label>登记时间：</label></td>
+				            <td ><input type="text" class="k-textbox" id="createDate" name="createDate" value="#date_format($!{task.createDate})" readonly="readonly"></td>
+				        	<td></td>
+				        </tr>
+			    	</table>
+				</div>
+			</div>		     
+
+     
+     		<div class="container" id="index2">
+     			<div class="container-title title2">
+     			<span class="seg-num">2</span>
+     			维修单信息
+     			</div>
+##     			<div class="container-content" style="height:460px">
+     			<div class="container-content" style="height:200px">
+					<table width="100%">
+				        <tr>
+				           <td  width="13%" class="label" ><span class="ui-form-required">*</span><label>维修单号：</label></td>
+				           <td width="35%">
+				                <input type="text" class="k-textbox" name="repairCode" value="$!{task.repairCode}" readonly="readonly">
+				           </td>
+				           <td class="label"><span class="ui-form-required">*</span><label>故障设备：</label></td>
+				           <td>
+				                   <span class="k-textbox k-space-right"   onclick="chooseDevices(1,'deviceId','deviceName','')" >
+					               	<input readonly type="text" class="k-textbox #if(!$!{viewOnly}) ui-input-choose #end"  id="deviceName" name="deviceName" value="$!{task.deviceName}" />
+					               	<a href="#" class="k-icon k-i-search">&nbsp;</a>
+					            	</span>
+					               <input class="k-textbox" type="hidden" id="deviceId" name="deviceId" value="$!{task.deviceId}"/>    
+				            </td>
+				            <td></td>
+				        </tr>
+				        <tr>
+				            <td width="13%" class="label" ><label>主管工程师：</label></td>
+				            <td width="35%">
+				                <span class="k-textbox k-space-right"   onclick="chooseRepairEvtPerson()" >
+					               	<input readonly type="text" class="k-textbox #if(!$!{viewOnly}) ui-input-choose #end"  id="engineerName" name="engineerName" value="$!{task.engineerName}" />
+					               	<a href="#" class="k-icon k-i-search">&nbsp;</a>
+				            	</span>
+				               <input class="k-textbox" type="hidden" id="engineerId" name="engineerId" value="$!{task.engineerId}"/>  
+				            </td>
+
+				        	<td width="13%" class="label" ><label>维修班组：</label></td>
+				            <td width="35%">
+					               <input readonly type="text" class="k-textbox"  id="repairGroupName" name="repairGroupName" value="$!{task.repairGroupName}" />
+					               <input class="k-textbox" type="hidden" id="repairGroupId" name="repairGroupId" value="$!{task.repairGroupId}"/>
+				            </td>
+				            <td></td>
+				        </tr>
+				        <tr>
+				            <td class="label" ><label>维修班组长：</label></td>
+				            <td >
+				            <span class="k-textbox k-space-right"   onclick="chooseGroupEmpPersons()" >
+					               <input readonly type="text" class="k-textbox"  id="groupEmpName" name="groupEmpName" value="$!{task.groupEmpName}" />
+					        <a href="#" class="k-icon k-i-search">&nbsp;</a>
+				            </span>
+					        <input readonly="readonly"  class="k-textbox" type="hidden" id="groupEmpId" name="groupEmpId" value="$!{task.groupEmpId}"/>
+					        
+				            </td>
+##				            <td class="label"><label>现场负责人：</label></td>
+##				            <td>
+##				                   <span class="k-textbox k-space-right"   onclick="chooseGroupPersons('repairPersonId','repairPersonName','','','','')" >
+##					               	<input readonly type="text" class="k-textbox #if(!$!{viewOnly}) ui-input-choose #end"  id="repairPersonName" name="repairPersonName" value="$!{task.repairPersonName}" />
+##					               	<a href="#" class="k-icon k-i-search">&nbsp;</a>
+##					            	</span>
+##					               <input class="k-textbox" type="hidden" id="repairPersonId" name="repairPersonId" value="$!{task.repairPersonId}"/>    
+##				            </td>
+				            <td class="label" ><label>维修模式：</label></td>
+				            <td >
+					                #foreach($!rMode in $!repairModeList)
+								       <input type="radio" name="repairMode" value="$!{rMode.enumValue}" #if($!{rMode.enumValue}==$!{task.repairMode}) checked #end >$!{rMode.enumText}							
+								    #end
+				            </td>
+				            <td></td>
+				        </tr>
+				         <tr>
+
+##				            <td class="label"><label>是否抢修：</label></td>
+##				            <td>
+##				                   #foreach($!rWorry in $!repairWorryList)
+##								       <input type="radio" name="repairWorry" value="$!{rWorry.enumValue}" #if($!{rWorry.enumValue}==$!{task.repairWorry}) checked #end >$!{rWorry.enumText}							
+##								   #end
+##				            </td>
+				            <td></td>
+				        </tr>
+				       
+##				        <tr>
+##				            <td class="label"><label>实际完成时间：</label></td>
+##				            <td><input type="text" class="k-textbox" id="actualFinishTime" name="actualFinishTime" value="#date_format($!{task.actualFinishTime})"></td> 
+##				            <td class="label"><label>节约成本(元)：</label></td>
+##				            <td><input type="text" class="k-textbox"  id="costSaving" name="costSaving" value="$!{task.costSaving}" /></td>
+##				            <td></td>
+##				        </tr>
+				        <tr>
+				            <td class="label"><label>处理结果：</label></td>
+				            <td colspan="3"><textarea style="height:60px;" wrap="physical" id="result" name="result" class="k-textbox" >#html_escape($!{task.result})</textarea></td>
+				        	<td></td>
+				        </tr>
+##				        <tr>
+##				            <td class="label"><label>真因分析：</label></td>
+##				            <td colspan="3"><textarea style="height:60px;" wrap="physical" id="cause" name="cause" class="k-textbox" >#html_escape($!{task.cause})</textarea></td>
+##				        	<td></td>
+##				        </tr> 
+##				        <tr>
+##				            <td class="label" ><label>原因归类：</label></td>
+##				            <td >
+##				                <select id="causeType" name="causeType" class="k-textbox" style="height:26px;">
+##				                    #foreach($enumDetail in $!causeTypeList)
+##				                        <option value="$!enumDetail.enumValue" #if($!enumDetail.enumValue ==$!{task.causeType}) selected="selected" #end>$!enumDetail.enumText</option>
+##				                    #end
+##				                </select>
+##				            </td>
+##				            <td class="label" ><label>故障时长(小时)：</label></td>
+##				            <td >
+##					               <input  type="text" class="k-textbox"  id="stopHours" name="stopHours" value="$!{task.stopHours}" />
+##				            </td>
+##				        	<td></td>
+##				        </tr>
+##				        <tr>
+##				            <td class="label"><label>改善建议：</label></td>
+##				            <td colspan="3"><textarea style="height:60px;" wrap="physical" id="propose" name="propose" class="k-textbox" >#html_escape($!{task.propose})</textarea></td>
+##				        	<td></td>
+##				        </tr>
+				    </table>
+				</div>
+				
+				<div class="container-inner" id="index2-1">
+					<div class="container-inner-title">
+					<span class="seg-num">2.1</span>
+					人工信息
+					</div>
+					<div class="container-inner-content">
+					     <table id='worker_tableId' class="ui-table">
+					        <thead>
+					        <tr>
+					            <th style="width:30px;">序号</th>
+					            <th style="width:80px;">人员类别</th>
+					            <th style="width:100px;">维修人员</th>
+					            <th style="width:180px;">公司名称</th>
+					            <th style="width:60px;" >工种</th>
+					            <th style="width:250px;">项目描述</th>
+					            <th style="width:80px;">工时(小时)</th>
+					            <th style="width:60px;">费用(元)</th>
+					            <th width="10"> #if(!$viewOnly)<a href="#" class="fa fa-plus worker_addRow"></a>#end</th>
+					        </tr>
+					        </thead>
+					        <tbody>
+					            #if($!workerList && $!workerList.size()>0 )
+					                #set($index=0)
+					                #foreach($!worker in $!workerList)
+					                <tr>
+					                    <td style="text-align: center;"><span class="rowNumber">$velocityCount</span>
+					                    <input type="hidden" name="workerList[$!index].id" value="$!worker.id"/>
+					                    </td>
+					                    <td> 
+						                    <select name="workerList[$index].workerMode" class="k-textbox" onchange="extendClearWorkerFunc(this)"  #if($viewOnly) disabled="disabled" #end>
+							                    <option value="" >请选择</option>
+							                    #foreach($enumDetail in $!repairModeList)
+							                        <option value="$!enumDetail.enumValue" #if($!enumDetail.enumValue ==$!worker.workerMode) selected="selected" #end>$!enumDetail.enumText</option>
+							                    #end
+						                    </select>
+					                    </td>
+					                    <td>
+					                       <span class="k-textbox k-space-right" style="width:100px;">
+					                           <input  type="text" class="k-textbox"  name="workerList[$!index].workerName" value="$!worker.workerName"/>
+					                            #if(!$!viewOnly) <a href="#" class="k-icon k-i-search" name="workerName">&nbsp;</a> #end
+					                        </span>
+					                        <input  type="hidden"  name="workerList[$!index].workerId" value="$!{worker.workerId}"/>   
+					                    </td>
+					                    <td>
+					                        <input   type="text" class="k-textbox"  name="workerList[$!index].unit" value="$!worker.unit"/>
+					                    </td>
+					                    <td>
+					                        <select class="k-textbox" name="workerList[$index].workerType"  #if($viewOnly) disabled="disabled" #end>
+					                            #foreach($enumDetail in $!repairWorkList)
+							                        <option value="$!enumDetail.enumValue" #if($!enumDetail.enumValue ==$!worker.workerType) selected="selected" #end>$!enumDetail.enumText</option>
+							                    #end
+					                        </select>
+					                    </td>
+					                    <td><input  type="text" class="k-textbox"  name="workerList[$!index].description" value="$!worker.description" /></td> 
+					                    <td><input  type="text" class="k-textbox"  name="workerList[$!index].workHours" value="$!worker.workHours" onkeyup="isNumDouble(this);" /></td>
+					                    <td><input  type="text" class="k-textbox" name="workerList[$!index].money" value="$!worker.money" onkeyup="isNumDouble(this);" /></td>
+					                    <td> #if(!$viewOnly)<i class="fa fa-remove worker_delRow"></i>#end</td>
+					                </tr>
+					                    #set($index = $!index +1)
+					                #end
+					            #else
+									#if(!$viewOnly)
+					                #foreach($row in [0..0])
+					                    #set($index=0)
+					                <tr>
+					                    <td style="text-align: center;"><span class="rowNumber">1</span>
+					                    </td>
+					                    <td> 
+						                    <select name="workerList[$index].workerMode" class="k-textbox"  onchange="extendClearWorkerFunc(this)"  #if($viewOnly) disabled="disabled" #end>
+							                    <option value="" >请选择</option>
+							                    #foreach($enumDetail in $!repairModeList)
+							                        <option value="$!enumDetail.enumValue" #if($!enumDetail.enumValue ==$!worker.workerMode) selected="selected" #end>$!enumDetail.enumText</option>
+							                    #end
+						                    </select>
+					                    </td>
+					                    <td>
+					                        <span class="k-textbox k-space-right" style="width:100px;">
+					                           <input  type="text" class="k-textbox"  name="workerList[$!index].workerName" value="$!worker.workerName"/>
+					                            #if(!$!viewOnly) <a href="#" class="k-icon k-i-search" name="workerName">&nbsp;</a> #end
+					                        </span>
+					                        <input  type="hidden"  name="workerList[$!index].workerId" value="$!{worker.workerId}"/>
+					                    </td>
+					                    <td>
+					                        <input  type="text" class="k-textbox"  name="workerList[$!index].unit" value="$!worker.unit"/>
+					                    </td>
+					                    <td>
+					                        <select class="k-textbox" name="workerList[$index].workerType"  #if($viewOnly) disabled="disabled" #end>
+					                            #foreach($enumDetail in $!repairWorkList)
+							                        <option value="$!enumDetail.enumValue" #if($!enumDetail.enumValue ==$!worker.workerType) selected="selected" #end>$!enumDetail.enumText</option>
+							                    #end
+					                        </select>
+					                    </td>
+					                    <td><input  type="text" class="k-textbox"  name="workerList[$!index].description" value="$!worker.description" /></td> 
+					                    <td><input  type="text" class="k-textbox"  name="workerList[$!index].workHours" value="$!worker.workHours" onkeyup="isNumDouble(this);" /></td>
+					                    <td><input  type="text" class="k-textbox" name="workerList[$!index].money" value="$!worker.money" onkeyup="isNumDouble(this);" /></td>
+					                    <td> #if(!$viewOnly)<i class="fa fa-remove worker_delRow"></i>#end</td>
+					                </tr>
+					                    #set($index = $!index +1)
+					                #end
+					                #end
+					            #end
+					                <tr>
+					                    <td style="text-align: center;">合计</td>
+					                    <td></td>
+					                    <td></td>
+					                    <td></td>
+					                    <td></td>
+					                    <td></td>
+					                    <td></td>
+					                    <td><input type="text" readonly id="total_money_id" class="k-textbox"/></td>
+					                    <td></td>
+					                </tr>
+					        </tbody>
+					    </table>
+					</div>
+				</div>
+				
+				<div class="container-inner" id="index2-2">
+					<div class="container-inner-title">
+					<span class="seg-num">2.2</span>
+					耗材信息
+					</div>
+					<div class="container-inner-content">
+					     <table id='spare_tableIds' class="ui-table ">
+					        <thead>
+					        <tr>
+					            <th style="width:30px;">序号</th>
+					            <th >配件类型</th>
+					            <th style="width:100px;">配件编号</th>
+					            <th style="width:120px;">配件名称</th>
+					            <th>规格型号</th>
+					           <!--    <th>申购时间</th>
+					            <th>到货时间</th>-->
+					            <th>数量(个)</th>
+					            <th>金额(元)</th>
+					            <th>备注</th>
+					            <th width="10"> #if(!$viewOnly)<a href="#" class="fa fa-plus spare_addRow"></i></a>#end</th>
+					        </tr>
+					        </thead>
+					        <tbody>
+					            #if($!spareList && $!spareList.size()>0)
+					                #set($index = 0)
+					                #foreach($!spare in $!spareList)
+					                <tr>
+					                    <td style="text-align: center;"><span class="rowNumber">$velocityCount</span></td>
+					                    <td>
+					                        <select class="k-textbox" name="spareList[$index].spareType" onchange="extendClearSpareFunc(this)"  #if($viewOnly) disabled="disabled" #end>
+					                            <option value="" >请选择</option>
+					                            <option value="0" #if($!spare.spareType =="0")selected #end>耗材</option>
+					                            <option value="1" #if($!spare.spareType =="1")selected #end>随机备件</option>
+					                        </select>
+					                    </td>
+					                    <td>
+					                        <input type="hidden" name="spareList[$!index].id" value="$!spare.id"/>
+					                        <input type="hidden" name="spareList[$!index].spareId" value="$!spare.spareId"/>
+					                        <span class="k-textbox k-space-right" style="width:100px;">
+					                            <input type="text" id="spareCode" name="spareList[$!index].spareCode" 
+					                                   value="$!spare.spareCode"  />
+					                            #if(!$!viewOnly) <a href="#" class="k-icon k-i-search" name="spareCode">&nbsp;</a> #end
+					                        </span>
+					                    </td>    
+					                    <td><input type="text" class="k-textbox" id="spareName" name="spareList[$!index].spareName" value="$!spare.spareName"  style="width:110px;"/></td>
+					                    <td><input type="text" class="k-textbox" name="spareList[$!index].spareSpec" value="$!spare.spareSpec"/></td>
+					                  <!--    <td><input type="text" class="k-textbox" name="spareList[$!index].stockTime" value="$!spare.stockTime"/></td>
+					                    <td><input type="text" class="k-textbox" name="spareList[$!index].comeTime" value="$!spare.comeTime"/></td>-->
+					                    <td><input  type="text" class="k-textbox" name="spareList[$!index].qty" value="$!spare.qty"  onkeyup="isNum(this);"/></td>
+					                    <td><input  type="text" class="k-textbox" name="spareList[$!index].money" value="$!spare.money" onkeyup="isNumDouble(this);"/></td>
+					                    <td><input  type="text" class="k-textbox" name="spareList[$!index].remark" value="$!spare.remark" /></td>
+					                    <td> #if(!$viewOnly)<i class="fa fa-remove spare_delRow"></i>#end</td>
+					                </tr>
+					                    #set($index =$index + 1)
+					                #end
+					            #else
+					                #foreach($row in [0..0])
+					                    #set($index = 0)
+					                <tr>
+					                   <td style="text-align: center;"><span class="rowNumber">1</span></td>
+					                   <td>
+					                        <select class="k-textbox" name="spareList[$index].spareType" onchange="extendClearSpareFunc(this)"  #if($viewOnly) disabled="disabled" #end>
+					                            <option value="" >请选择</option>
+					                            <option value="0" #if($!spare.spareType =="0")selected #end>耗材</option>
+					                            <option value="1" #if($!spare.spareType =="1")selected #end>随机备件</option>
+					                        </select>
+					                    </td>
+					                    <td>
+					                        <input type="hidden" name="spareList[$!index].id" value="$!spare.id"/>
+					                        <input type="hidden"  id="spareId" name="spareList[$!index].spareId" value="$!spare.spareId"/>
+					                                    <span class="k-textbox k-space-right" style="width:100px;">
+					                                        <input type="text" id="spareCode" name="spareList[$!index].spareCode" 
+					                                               value="$!spare.spareCode"  />
+					                                        #if(!$!viewOnly) <a href="#" class="k-icon k-i-search" name="spareCode">&nbsp;</a> #end
+					                                    </span>
+					                    </td>
+					                    <td><input type="text" class="k-textbox" id="spareName" name="spareList[$!index].spareName" value="$!spare.spareName"  style="width:110px;"/></td>
+					                    <td><input type="text" class="k-textbox" id="spareSpec" name="spareList[$!index].spareSpec" value="$!spare.spareSpec"/></td>
+					                <!-- <td><input type="text" class="k-textbox" name="spareList[$!index].stockTime" value="$!spare.stockTime"/></td>
+					                    <td><input type="text" class="k-textbox" name="spareList[$!index].comeTime" value="$!spare.comeTime"/></td>  -->
+					                    <td><input  type="text" class="k-textbox" name="spareList[$!index].qty" value="$!spare.qty"  onkeyup="isNum(this);"/></td>
+					                    <td><input  type="text" class="k-textbox" name="spareList[$!index].money" value="$!spare.money" onkeyup="isNumDouble(this);"/></td>
+					                    <td><input  type="text" class="k-textbox" name="spareList[$!index].remark" value="$!spare.remark" /></td>
+					                    <td> #if(!$viewOnly)<i class="fa fa-remove spare_delRow"></i>#end</td>
+					                </tr>
+					                    #set($index =$index + 1)
+					                #end
+					            #end
+					               <tr>
+					                    <td style="text-align: center;">合计</td>
+					                    <td></td>
+					                    <td></td>
+					                    <td></td>
+					                    <td></td>
+					                    <td></td>
+					                    <td><input type="text" readonly id="total_money_id" class="k-textbox"/></td>
+					                    <td></td>
+					                    <td></td>
+					                </tr>
+					        </tbody>
+					    </table>
+					</div>
+				</div>
+				
+				<div class="container-inner" id="index2-3">
+					<div class="container-inner-title">
+					<span class="seg-num">2.3</span>
+					附件信息</div>
+					<div class="container-inner-content">
+					     <table  class="ui-table"  width="100%" cellpadding="0" cellspacing="0" border="1" id="images_table_id">
+						 	<div id="filehidden"></div>
+							<thead>
+								<tr>
+								    <th align="left" width="40%">附件名称</th>
+								    <th align="left" width="20%" >附件类型</th>
+								    <th align="left" width="20%" >附件大小</th>
+								    <th align="left" width="20%" >操作</th>
+								</tr>
+							</thead>
+							<tbody>
+							#set($index=1)
+							#foreach($!{attach} in $!{listAttachments}) 
+							   <tr id='alreadyfile$!{index}'>
+							        <td ><a id="showImageId_$velocityCount" 	href="${rc.contextPath}/device/attachment/download?fileName=$!{attach.fileName}&path=$!{attach.storePath}"> $!{attach.fileName}</a></td>
+							        <td > $!{attach.fileType}&nbsp; </td>
+							        <td >$!{attach.fileSize}KB</td>
+							    	<td  name="tdControl"><a href="#" onclick="removealreadyfile('$!{index}','$!{attach.id}')">移除</a></td>
+							    </tr>
+							#set($index=$index+1)
+							#end
+							</tbody>
+						</table>
+						<div class="head" style="border:1px solid #ccc;border-top:none">
+							<input type="file" name="file"  id="file_upload"/>
+							<div class="tip"><span>(*请不要上传超过$!{fileLength}MB的文件)</span></div> 
+						</div> 
+					</div>
+				</div>
+     		</div>
+
+			<div class="container" id="index3">
+     			<div class="container-title title3">
+     			<span class="seg-num">3</span>
+     			维修评价
+     			</div>
+     			<div class="container-content" style="height:100px;">
+            		<table class="ui-table">
+		                <tr>
+		                    <input type="hidden" name="grade1" id="grade1" >
+		                    <input type="hidden" name="grade2" id="grade2" >
+		                    <input type="hidden" name="grade3" id="grade3" >
+		                    <td class="label"><label>维修效率：</label></td>
+		                    <td class="inputText">
+		                        <ul class="ui-grade" id="grade11"></ul>
+		                    </td>
+		                    <td class="label"><label>维修质量：</label></td>
+		                    <td class="inputText">
+		                        <ul class="ui-grade" id="grade22">
+		                    </td>
+		                    <td class="label"><label>满意度：</label></td>
+		                    <td class="inputText">
+		                        <ul class="ui-grade" id="grade33">
+		                    </td>
+		                </tr>
+		            </table>
+				</div>
+     		</div>
+			
+    </div>
+</div>
+
+</form>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+	    /* $("#tab-container").hcTabStrip({
+            animation: {
+                // fade-out current tab over 1000 milliseconds
+                close: {
+                    duration: 200,
+                    effects: "fadeOut"
+                },
+               // fade-in new tab over 500 milliseconds
+               open: {
+                   duration: 200,
+                   effects: "fadeIn"
+               }
+           }
+        }); */
+	 
+		 _iframe_layout = $('body').layout({
+		      defaults: {
+		        resizable: true,
+		        closable: false,
+		        spacing_open: 5
+		      }
+	    });
+		
+        var link = $(".co-area-list").find("li>a");
+        link.removeClass("current").eq(0).addClass("current");
+        
+        $(".ui-co-fold").click(function () {
+            var that = $(this);
+            if (that.hasClass("ui-co-foldup")) {
+                that.removeClass("ui-co-foldup").addClass("ui-co-folddown");
+                that.parent().addClass("ui-co-tit1").siblings(".ui-co-cont").hide();
+            } else {
+                that.removeClass("ui-co-folddown").addClass("ui-co-foldup");
+                that.parent().removeClass("ui-co-tit1").siblings(".ui-co-cont").show();
+            }
+        });
+        
+        $(".level-1 a").click(function () {
+            var that = $(this);
+            if (!that.hasClass("current")) {
+                $(".level-1 a").removeClass("current");
+                that.addClass("current");
+            }
+        });
+        
+        $(".backtop").click(function () {
+            $(".ui-layout-center").scrollTop(0);
+            var link = $(".co-area-list").find("li>a");
+            link.removeClass("current").eq(0).addClass("current");
+        });
+
+        
+        
+        
+        
+		var grade1 ='$!task.grade1';
+        var grade2 ='$!task.grade2';
+        var grade3 ='$!task.grade3';
+        if(grade1){
+            var $grade1 = $("#grade11").grade({
+                star:5,
+                currentGrade:Number(grade1)
+            });
+           
+        }else{
+        	var $grade1 = $("#grade11").grade({
+                star:5,
+                currentGrade:5
+            });
+        }
+        if(grade2){
+            var $grade2 = $("#grade22").grade({
+                star:5,
+                currentGrade:Number(grade2)
+            });   
+        }else{
+        	var $grade2 = $("#grade22").grade({
+                star:5,
+                currentGrade:5
+            });
+        }
+        if(grade3){
+            var $grade3 = $("#grade33").grade({
+                star:5,
+                currentGrade:Number(grade3)
+            }); 
+        }else{
+        	var $grade3 = $("#grade33").grade({
+                star:5,
+                currentGrade:5
+            });
+        }
+		
+		$("#form_save_id").click(function () {
+			#if(!$!task.id)
+	      	  existTaskCode();
+	    	  existRepairCode;
+	      	#end
+	        $("input[name='_bpm_enabled']", $("#task_edit_form_id")).val(true);
+	        $("#task_edit_form_id").attr("action", "$!rc.contextPath/repair/process/save");
+	        currentBt = "form_save_id";
+	    });
+
+		$("#form_delete_id").click(function () {
+	        $("input[name='_bpm_enabled']", $("#task_edit_form_id")).val(true);
+	        $("#task_edit_form_id").attr("action", "$!rc.contextPath/repair/process/deleteProcessInstance");
+	        currentBt = "form_delete_id";
+	    });
+		
+        $("#task_edit_form_id").validator({
+	            fields: {
+	            	deviceName:"故障设备:required"
+	            },
+	            valid: function (form) {
+	            	var grade1 = $grade1.getGrade();
+	                var grade2 = $grade2.getGrade();
+	                var grade3 = $grade3.getGrade();
+	                $("#grade1").val(grade1);
+	                $("#grade2").val(grade2);
+	                $("#grade3").val(grade3);
+	            	form_btn_submit($("#"+currentBt),form,function(res){
+	            		validateCallback(res,"grid","");
+	                });
+	            }
+        });
+        
+        
+        
+        
+    });
+	commonSingleDate("repairDate","yyyy-MM-dd HH:mm:ss","zh-CN");
+    commonSingleDate("expectFinishTime","yyyy-MM-dd HH:mm:ss","zh-CN");
+    commonSingleDate("actualFinishTime","yyyy-MM-dd HH:mm:ss","zh-CN");
+
+	var currentBt = "form_save_id";
+    function doSubmit(bpmId) {
+    	#if(!$!task.id)
+      	  existTaskCode();
+    	  existRepairCode;
+      	#end
+    	currentBt =bpmId;
+        $("input[name='status']").val(2);
+        $("#task_edit_form_id").attr("action", "$!rc.contextPath/repair/process/save");
+        return true;
+    }
+    
+    function chooseRepairEvtPerson() {
+    	var categoryId = $("#categoryId").val();
+    	var areaId = $("#areaId").val();
+    	if(isEmpty(categoryId)){
+    		alert("请先选择事件分类!");
+    		return;
+    	}
+    	if(isEmpty(areaId)){
+    		alert("请先选择地理区域!");
+    		return;
+    	}
+    	chooseRepairPerson(1,categoryId,areaId,'engineerId','engineerName','','repairGroupId','repairGroupName');
+    }
+    
+    function chooseGroupEmpPersons() {
+    	var groupId = $("#repairGroupId").val();
+    	if(isEmpty(groupId)){
+    		alert("请先选择维修班组!");
+    		return;
+    	}
+    	chooseGroupPersons('groupEmpId','groupEmpName','','','',groupId);
+    }
+</script>
+<script type="text/javascript">
+    /* 备件相关js */
+    var $tr ;
+    var $workerTable = $("#worker_tableId");
+    var $spareTable = $("#spare_tableIds");
+    $(function () {
+    	$(".spare_addRow").btnAddRow({rowNumColumn: "rowNumber"}, function () {
+    		spareMoney();
+        });
+        $(".spare_delRow").btnDelRow(function () {
+        	spareMoney();
+        });
+        $(".worker_addRow").btnAddRow({rowNumColumn: "rowNumber"}, function () {
+        	workerMoney();
+        });
+        $(".worker_delRow").btnDelRow(function () {
+        	workerMoney();
+        });
+        
+        $("#worker_tableId").on("change", "input[name$='.money']", function () {
+        	workerMoney();
+        })
+        
+        $("#spare_tableIds").on("change", "input[name$='.money']", function () {
+        	spareMoney();
+        })
+        
+        
+        $("#worker_tableId").on("click", "a[name ='workerName']", function () {
+              $tr= $(this).parents("tr");
+              quick_dialog("selectDiloag", "选择人员","$!{rc.contextPath}/choose/personPage?type=1&txtId=workerId&txtName=workerName",1000,520);
+        })
+        
+        $("#spare_tableIds").on("click", "a[name ='spareCode']", function () {
+              $tr= $(this).parents("tr");
+              var type = $("select[name$='.spareType']",$tr).val();
+              if(type==''){
+            	  alert("请选择配件类型!");
+            	  return;
+              }
+              if(type==0){
+                 quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/spare/spare/lookup?txtId=spareCode&txtName=spareName", 900, 500);
+                 return;
+              }
+              if(type==1){
+            	  var deviceId =  $("#deviceId").val();
+            	  if(deviceId==''){
+            		  alert("请先选择故障设备!");
+            		  return;
+            	  }
+                  quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/base/deviceSpareIn/lookup?txtId=spareCode&txtName=spareName&deviceId="+deviceId, 900, 500);
+                  return;
+              }
+        })
+
+        #if('$!viewOnly')
+            $('#worker_tableId tr').each(function (i, tr) {
+                $('th:last', tr).remove();
+                $('td:last', tr).remove();
+            });
+            $('#spare_tableIds tr').each(function (i, tr) {
+                $('th:last', tr).remove();
+                $('td:last', tr).remove();
+            });
+            $(".addRow").unbind("click");
+            $(".delRow").unbind("click");
+        #end
+        
+        workerMoney();
+        spareMoney();
+        
+    });
+    
+    function workerMoney() {
+        var t = 0.00;
+        $.each($("input[name$='.money']", $("#worker_tableId")), function (i, n) {
+            var a = $.trim($(n).val());
+            t = t + a * 1.0;
+        });
+        $("#total_money_id", $("#worker_tableId")).val(formatMoney(t));
+    }
+    
+    function spareMoney() {
+        var t = 0.00;
+        $.each($("input[name$='.money']", $("#spare_tableIds")), function (i, n) {
+            var a = $.trim($(n).val());
+            t = t + a * 1.0;
+        });
+        $("#total_money_id", $("#spare_tableIds")).val(formatMoney(t));
+    }
+    
+    function workerCheckedCallback(dataRow) {
+        $("input[name$='.workerId']",$tr).val(dataRow.id);
+        $("input[name$='.workerName']",$tr).val(dataRow.name);
+        $("input[name$='.unit']",$tr).val(dataRow.deptName);
+        $("input[name$='.description']",$tr).val("");
+        $("input[name$='.workHours']",$tr).val("");
+        $("input[name$='.money']",$tr).val("");
+    }
+    function workerCheckedClearCallback(dataRow) {
+        $("input[name$='.workerId']",$tr).val("");
+        $("input[name$='.workerName']",$tr).val("");
+        $("input[name$='.unit']",$tr).val("");
+        $("input[name$='.description']",$tr).val("");
+        $("input[name$='.workHours']",$tr).val("");
+        $("input[name$='.money']",$tr).val("");
+    }
+
+    function spareCheckedCallback(dataRow) {
+        $("input[name$='.spareId']",$tr).val(dataRow.id);
+        $("input[name$='.spareName']",$tr).val(dataRow.spareName);
+        $("input[name$='.spareCode']",$tr).val(dataRow.spareCode);
+        $("input[name$='.spareSpec']",$tr).val(dataRow.spec);
+        $("input[name$='.qty']",$tr).focus();
+        $("input[name$='.qty']",$tr).blur();
+        $("input[name$='.qty']",$tr).val(1);
+        $("input[name$='.qty']",$tr).change();
+
+    }
+    function spareCheckedClearCallback(dataRow) {
+        $("input[name$='.spareId']",$tr).val("");
+        $("input[name$='.spareName']",$tr).val("");
+        $("input[name$='.spareCode']",$tr).val("");
+        $("input[name$='.spareSpec']",$tr).val("");
+        $("input[name$='.qty']",$tr).val("");
+        $("input[name$='.money']",$tr).val("");
+        $("input[name$='.qty']",$tr).focus();
+        $("input[name$='.qty']",$tr).blur();
+        $("input[name$='.qty']",$tr).change();
+    }
+    
+    function deviceSpareCheckedCallback(dataRow) {
+        $("input[name$='.spareId']",$tr).val(dataRow.id);
+        $("input[name$='.spareName']",$tr).val(dataRow.spareName);
+        $("input[name$='.spareSpec']",$tr).val(dataRow.spareSpac);
+        $("input[name$='.qty']",$tr).focus();
+        $("input[name$='.qty']",$tr).blur();
+        $("input[name$='.qty']",$tr).val(1);
+        $("input[name$='.qty']",$tr).change();
+
+    }
+    function deviceSpareCheckedClearCallback() {
+        $("input[name$='.spareId']",$tr).val("");
+        $("input[name$='.spareName']",$tr).val("");
+        $("input[name$='.spareCode']",$tr).val("");
+        $("input[name$='.spareSpec']",$tr).val("");
+        $("input[name$='.qty']",$tr).val("");
+        $("input[name$='.money']",$tr).val("");
+        $("input[name$='.qty']",$tr).focus();
+        $("input[name$='.qty']",$tr).blur();
+        $("input[name$='.qty']",$tr).change();
+    }
+    
+    function extendClearWorkerFunc(o){
+        if(o){
+            $item_tr = $(o).parents("tr");
+        }
+        $("input[name$='.workerId']",$item_tr).val("");
+        $("input[name$='.workerName']",$item_tr).val("");
+        $("input[name$='.unit']",$item_tr).val("");
+        $("input[name$='.description']",$item_tr).val("");
+        $("input[name$='.workHours']",$item_tr).val("");
+        $("input[name$='.money']",$item_tr).val("");
+    }
+    
+    function extendClearSpareFunc(o){
+        if(o){
+            $item_tr = $(o).parents("tr");
+        }
+        $("input[name$='.spareId']",$item_tr).val("");
+        $("input[name$='.spareName']",$item_tr).val("");
+        $("input[name$='.spareCode']",$item_tr).val("");
+        $("input[name$='.spareSpec']",$item_tr).val("");
+        $("input[name$='.qty']",$item_tr).val("");
+        $("input[name$='.money']",$item_tr).val("");
+        $("input[name$='.qty']",$item_tr).focus();
+        $("input[name$='.qty']",$item_tr).blur();
+        $("input[name$='.qty']",$item_tr).change();
+        
+    }
+    
+</script>
+<script type="text/javascript"> 
+//文件上传
+var index = 1000;
+$(function(){
+	
+	$('#file_upload').uploadify({
+	    'buttonText' : '浏览',                
+		'buttonClass' : 'k-primary fileUploadBtn',
+		'queueID': 'context',
+		'multi' : true,                        
+		'fileSizeLimit':'$!{fileLength}MB',              
+		'fileObjName' : 'file', 
+		'cancelImg' : '$!{main_static_custom_url}/js/uploadify/cancel.png',
+        'swf'       : '$!{main_static_custom_url}/js/uploadify/uploadify.swf',
+        'uploader'  : '${rc.contextPath}/fileupload/fileup',
+        'removeCompleted': true,
+        'removeTimeout':'1',
+       
+		 onUploadSuccess:function(file,data,response){
+              if(response){  
+            	  	var obj = eval('(' + data + ')');
+	  				var filedisplay ="<tr id='alreadyfile"+index+"'><td>"+obj.orignalname+"</td><td>"+obj.postfix+"</td><td>"+obj.filesize+"KB</td><td><a href='#'  onclick=removefile('"+index+"')>移除</a></td></tr>";
+	  				var filehidden ="<input type='hidden' name='fileorignal' value='"+obj.orignalname+"' id='fileorignal"+index+"'/><input type='hidden' name='filename' value='"+obj.filename+"' id='filename"+index+"'/>";
+	  				$("#images_table_id").append(filedisplay);
+	  				$("#filehidden").append(filehidden);
+	  				index++;
+					//将需要提交的以hidden的方式写入表单并提交
+					  //alert(obj.filePath)
+				
+              }else{
+    		  	 alert("文件上传失败！");
+              }
+  		},
+  		onUploadComplete:function(file){
+			
+		} 
+	});
+})
+
+function removefile(ind){
+	$("#attachment"+ind).remove();
+	$("#fileorignal"+ind).remove();
+	$("#filename"+ind).remove();
+	$("#alreadyfile"+ind).remove();
+}
+function existTaskCode(){
+	var taskCode = $("input[name='taskCode']").val();
+	$.ajax({
+        url :"$!{rc.contextPath}/choose/serialNumber?tableName=TASK",
+        type:"get",
+        async:false,
+        success : function(data) {
+        	if(taskCode != data){
+        		alert("诉求单号："+taskCode+"已被占用,替换为："+data)
+        		$("input[name='taskCode']").val(data);
+        	}        
+        }
+    });
+}
+
+function existRepairCode(){
+	var repairCode = $("input[name='repairCode']").val();
+	$.ajax({
+        url :"$!{rc.contextPath}/choose/serialNumber?tableName=REPAIR",
+        type:"get",
+        async:false,
+        success : function(data) {
+        	if(repairCode != data){
+        		alert("维修单号："+repairCode+"已被占用,替换为："+data)
+        		$("input[name='repairCode']").val(data);
+        	}        
+        }
+    });
+}
+function removealreadyfile(index,fileid){
+		$("#alreadyfile"+index).remove();
+		var delfile ="<input type='hidden' name='delfiles' value='"+fileid+"'/>";
+	    $("#filehidden").append(delfile);
+	}
+	//查看模式
+	#if($!{viewOnly})
+		setAllReadonly("dialog");
+		$("#file_upload").hide();
+		$("td[name='tdControl']").html("移除");
+	#end
+</script>
+</body>
+</html>

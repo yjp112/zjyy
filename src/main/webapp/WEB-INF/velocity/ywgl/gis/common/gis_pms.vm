@@ -1,0 +1,47 @@
+<ul class="floor-list" style="font-size:16px;color:#2cff16;">
+<li style="color:#000;">总车位：<span id="allLots" style="color:#000;"></span></li>
+<li style="color:#000;margin-top:10px;">空车位：<span id="noLots" style="color:#000;"></span></li>
+<li style="color:#000;margin-top:10px;">报警点：<span id="alarmLots" style="color:#000;"></span></li>
+<li style="color:#000;margin-top:10px;">故障点：<span id="faultLots" style="color:#000;"></span></li>
+</ul>
+
+<script type="text/javascript">
+$(document).ready(function () {
+	    if(gs_pzlayer['ceng_cheku']=='cheku'){
+	    	 document.getElementById('tips').style.display="";
+	    	 readLot();
+	         setInterval(readLot,60000);	
+	    }
+	    if(gs_pzlayer['ceng_duanluqi']=='duanluqi'){
+	    	 readBreaker();
+	         setInterval(readBreaker,60000);	
+	    }
+	    if(gs_pzlayer['ceng_waiji']=='waiji'){
+	    	 readVRV();
+	         setInterval(readVRV,60000);	
+	    }
+ });  
+
+function readLot(){
+    var param={'t':new Date().getTime()};
+    $.post("$!rc.contextPath/parking/readLot",param,function (data) {
+    		 $('#allLots').text(data.allLots);
+    		 $('#noLots').text(data.noLots);
+    		 $('#alarmLots').text(data.alarmLots);
+    		 $('#faultLots').text(data.faultLots);
+	         refreshCarparkStatus();				        
+     });				    
+ }  
+function readBreaker(){
+    var param={'t':new Date().getTime()};
+    $.post("$!rc.contextPath/breaker/readStatus",param,function (data) {
+	         refreshCarparkStatus();				        
+     });				    
+ }
+function readVRV(){
+    var param={'t':new Date().getTime()};
+    $.post("$!rc.contextPath/breaker/readVRVStatus",param,function (data) {
+	         refreshCarparkStatus();				        
+     });				    
+ } 
+</script>

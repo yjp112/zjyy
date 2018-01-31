@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.spare.entities.InventoryDetail">
+	<resultMap type="com.supconit.spare.entities.InventoryDetail" id="InventoryDetailResultMap">
+        <result property="id" column="ID" />
+        <result property="inventoryId" column="INVENTORY_ID" />
+        <result property="spareId" column="SPARE_ID" />
+        <result property="accountQty" column="ACCOUNT_QTY" />
+        <result property="inventoryQty" column="INVENTORY_QTY" />
+        <result property="descripton" column="DESCRIPTON" />
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">INVENTORY_DETAIL</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+    <!-- 插入记录-->
+    <insert id="insert" parameterType="java.util.List"  databaseId="oracle">
+       INSERT INTO <include refid="TABLE_NAME"/>(  
+        ID,     
+        INVENTORY_ID,
+        SPARE_ID,
+        ACCOUNT_QTY,
+        INVENTORY_QTY,
+        DESCRIPTON
+		) 
+       SELECT SEQ_INVENTORY_DETAIL.NEXTVAL,A.* from(
+		
+        <foreach collection="list" item="item" index="index"
+			separator="UNION">
+		SELECT
+        #{item.inventoryId,jdbcType=NUMERIC},
+        #{item.spareId,jdbcType=NUMERIC},
+        #{item.accountQty,jdbcType=NUMERIC},
+        #{item.inventoryQty,jdbcType=NUMERIC},
+        #{item.descripton,jdbcType=VARCHAR}		
+		FROM dual 	
+     	</foreach>
+     	) A
+	</insert>
+	
+	<insert id="insert" parameterType="java.util.List"  databaseId="sqlserver">
+        INSERT INTO <include refid="TABLE_NAME"/>(        
+        INVENTORY_ID,
+        SPARE_ID,
+        ACCOUNT_QTY,
+        INVENTORY_QTY,
+        DESCRIPTON
+		) VALUES        
+        <foreach collection="list" item="item" separator="," >  
+		(
+        #{item.inventoryId,jdbcType=NUMERIC},
+        #{item.spareId,jdbcType=NUMERIC},
+        #{item.accountQty,jdbcType=NUMERIC},
+        #{item.inventoryQty,jdbcType=NUMERIC},
+        #{item.descripton,jdbcType=VARCHAR}		
+		)	
+     	</foreach>
+    </insert>
+	<delete id="deleteByInventoryId" parameterType="long" lang="velocity"> 
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE INVENTORY_ID = @{_parameter.id,jdbcType=NUMERIC}
+	</delete>
+	
+</mapper>

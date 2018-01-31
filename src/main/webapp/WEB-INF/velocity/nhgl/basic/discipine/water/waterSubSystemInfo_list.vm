@@ -1,0 +1,172 @@
+<div class="ui-layout-center" id="subMain">
+	<div class="ui-layout-center">
+		<table id="subSystemInfo_datalist" class="fn-hide"></table>
+	</div>
+	<div class="ui-layout-north">
+		<div class="ui-module-name">
+			<label id="menuName">#crumbs("$!menu.code",1)</label>
+		</div>
+		<form id="subSystemInfo_list_search" class="ui-form ui-form-search fn-clear">
+		    <input type="hidden" id="parentId"  value="" name="parentId"/>
+		    <input type="hidden" id="parentName" value="" name="parentName"/>	
+			<div class="ui-form-search-left">
+				<div class="ui-form-item">
+					<label class="ui-label">标准编码：</label>
+					<input class="ui-input" type="text" name="standardCode">
+				</div>
+				<div class="ui-form-item">
+					<label class="ui-label">分项编码：</label>
+					<input class="ui-input" type="text" name="code">
+				</div>
+				<div class="ui-form-item">
+					<label class="ui-label">分项名称：</label>
+					<input class="ui-input" type="text" name="name">
+				</div>
+			</div>
+			<div class="ui-form-search-right">
+				<button type="submit" id="subButton" class="btn btn-primary"><i class="iconfont icon-search"></i> 查&nbsp;询</button>
+			</div>
+		</form>
+	</div>
+</div>
+<div class="ui-layout-west">
+    <div id="subSystemInfolist_box" class="ui-box">
+		<div class="ztree-header">
+			<div class="ztree-title">分项树</div>
+		</div>
+		<div class="ui-box-container">
+			<ul id="subSystemInfolist_tree" class="ztree"></ul>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+    var parentId='';
+    var parentName='';
+	$(document).ready(function(){
+##		if(T.innerLayout&&!T.innerLayout.destroyed){
+##			T.innerLayout.destroy();
+##		}
+		T.nhInit();
+		 T.tabLayout = $("#chart_content_id").layout({
+        defaults : {
+            resizable : false,
+            closable : false,
+            spacing_open : 5
+        },
+        west : {
+            size : 250,
+            resizable : true,
+            resizerTip : "移动改变大小",
+            closable : true,
+            togglerTip_open : "隐藏",
+            togglerTip_closed : "打开"
+        },
+        onresize_end : function(){
+            $("#subSystemInfolist_box").box("resize");
+        }
+    });
+    	_content_layouts.push(T.innerLayout);
+		_inner_layout=$("#subMain").layout({
+			defaults:{
+				resizabel:false,
+				closable: false,
+				spacing_open:5
+			},
+			onresize_end:function(){
+				$("#subSystemInfo_datalist").datagridResize({width:_inner_layout.state.center.innerWidth,height:_inner_layout.state.center.innerHeight});
+			}
+		});
+		$("#subSystemInfolist_box").box({
+        	width : function(){return T.tabLayout.state.west.innerWidth;},
+        	height : function(){return T.tabLayout.state.west.innerHeight-26;}
+    	});
+    	##ztree
+    	refleshTree()
+		var subSystemInfo_datagrid=$("#subSystemInfo_datalist").datagrid({
+			url:'$!{rc.contextPath}/nhgl/basic/discipine/water/page',
+			dataType: "json",
+			method: "GET",
+			singleSelected : true,
+			striped : false,
+			height:  _inner_layout.center.state.innerHeight,
+			width :  _inner_layout.center.state.innerWidth,
+			showOrderNumber : true,
+			useRp : true,
+			usepager: true,
+    		rpOptions: [10, 20, 40, 50],
+    		pageSize: 20,
+    		searchFormId:"subSystemInfo_list_search",
+    		searchCallback:function(datagrid){},
+    		onSuccess:function(table,grid){
+    			if(!grid)return ;
+    		},
+    		colModel:[
+    			{"display":"序号"},
+    			{display: "分项编码", name: "code",onclick:function(row,a){
+    				$.dialogs.normalDialog("subSystemInfo_view_dlg","$!{rc.contextPath}/nhgl/basic/discipine/water/edit?viewOnly=true&id="+row.id,function(dlg,btn){
+    					return false;
+    				},680,250,"查看",null,false,"关闭")
+    			}},
+    			{display: "标准编码",name:"standardCode"},
+	            {display: "分项名称", name: "name"},
+	            {display: "备注说明", name: "remark"}
+    		],
+    		buttons : [
+    		 	{name: '新增', bclass: 'icon-plus', onpress : add},
+            	{name: '修改', bclass: 'icon-pencil', onpress : edit},
+            	{name: '删除', bclass: 'icon-remove', onpress : remove}
+	        ]
+		});
+		function add(com, grid,datagrid) {
+		 $.dialogs.normalDialog("subSystemInfo_add_dlg", 
+			"$!{rc.contextPath}/nhgl/basic/discipine/water/edit?parentName="+parentName+"&parentId="+parentId,
+			 function(dlg,btn){ $.forms.submits("#subSystemInfo_edit_form",
+			  function(){ $("#subSystemInfo_datalist").flexReload(); 
+			  refleshTree(); dlg.close(); return true; }, btn); return false; 
+			  },680,250,"新增"); 
+            };
+            
+        function edit(com, grid,datagrid) {
+ 			if(datagrid.getSelectedRows() == 0){ $.message("没有选择要修改的项目信息", 
+ 			$.message.TYPE_ERROR, 4, false, true); return false; }
+ 			 $.dialogs.normalDialog("subSystemInfo_edit_dlg", 
+ 			 "$!{rc.contextPath}/nhgl/basic/discipine/water/edit?id=" + datagrid.getSelectedRows()[0]["id"], 
+ 			 function(dlg,btn){ $.forms.submits("#subSystemInfo_edit_form", 
+ 			 function(){ $("#subSystemInfo_datalist").flexReload(); 
+ 			 refleshTree();dlg.close(); return true; }, btn); return false; },680,250,"修改"); 
+            };
+        function remove(com, grid,datagrid){ 
+         	if(datagrid.getSelectedRows() == 0){ 
+			$.message("没有选择要删除项目", $.message.TYPE_ERROR, 4, false, true); return false; }
+			 if(!confirm("确定要删除吗？"))return false; $.forms.linkRunning(com); 
+			 $.post("$!{rc.contextPath}/nhgl/basic/discipine/water/delete",
+			 {"id" : datagrid.getSelectedRows()[0]["id"]},function(res)
+			 { $.forms.linkEnabled(com); $.forms.handleMessage(res,function()
+			 {$("#subSystemInfo_datalist").flexReload(); refleshTree();}); }); };
+	});
+	function refleshTree(){
+  	 $.getJSON('$!{rc.contextPath}/nhgl/basic/discipine/water/loadtree',function(data){
+   		var nzNodes = [];
+    	var nsetting = {
+        	data: {
+   				simpleData: {enable: true}
+        	}, 
+        	callback: {
+            	onClick : function(event, treeId, treeNode) {
+                	$('#parentId').val(treeNode.id);
+                	parentId=encodeURI(treeNode.id);
+                	parentName=encodeURI(treeNode.name);
+				 	$('#subButton').click();
+            	}
+        	}
+    	};
+   		$.each(data,function(index,row){
+   			nzNodes.push({id:row.standardCode,pId:row.parentId,name:row.name});
+##  			console.log(index+':'+row.code+':');
+   		});
+   		$.fn.zTree.init($("#subSystemInfolist_tree"), nsetting, nzNodes);
+    	var ntreeObj = $.fn.zTree.getZTreeObj("subSystemInfolist_tree");
+    	ntreeObj.expandAll(true);
+   	});
+   	}
+</script> 

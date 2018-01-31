@@ -1,0 +1,61 @@
+<script type="text/javascript">
+
+var ids =[];
+#foreach($ID in $!{ids})
+	ids.push($!{ID});
+#end
+    var setting = {
+
+        data: {
+            simpleData: {
+                enable: true
+            }
+        },
+        view : {
+			fontCss : function(treeId, treeNode){
+				for(var i=0;i<ids.length;i++){
+					if(treeNode.id == ids[i]){
+						
+						return {
+							color : "rgb(83, 84, 84)",
+							background: "none",
+					  		border: "none"
+						};
+					}
+				}
+			}
+		},
+		callback: {
+				onClick: onClick
+			}
+
+    };
+
+    var zNodes = [];
+    #foreach($!{treeNode} in $!{treeList})
+     zNodes.push({id:"$!{treeNode.id}", pId:"$!{treeNode.parentId}", name: "$!{treeNode.areaName}"});
+    #end
+    function onClick(event, treeId, treeNode, clickFlag) {
+    	for(var i=0;i<ids.length;i++){
+			if(treeNode.id == ids[i]){
+				
+				 return false;
+			}
+		}
+        $("#$!{txtId}").val(treeNode.id);
+    	$("#$!{txtName}").val(treeNode.name);
+    	closeDialog();
+   	
+    }	
+    $(document).ready(function(){
+        //ztree
+		//console.info("#$!{txtName}");
+        $.fn.zTree.init($("#ngAreaTree"), setting,zNodes).expandAll(true);
+    });
+
+</script>
+
+<div class="tree">
+    <ul id="ngAreaTree" class="ztree"></ul>
+</div>
+

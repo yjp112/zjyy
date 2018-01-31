@@ -1,0 +1,109 @@
+#if($_type)#else#set($_type="edit")#end
+<style type="text/css">
+    #plat_menu_select_container{
+    	z-index:9999;
+    	background:#FFF;
+    	width:260px;
+    	height:200px;
+    	overflow:auto;
+    	background:#f0f6e4;
+    	border:1px solid #617775;
+    	margin-top:22px;
+    	display:none; 
+    	position: relative;
+    	left:180px;
+    }
+.ui-form-item-textarea-large {
+  height: 356px;
+  width: 604px;
+}
+.ui-form-item .ui-textarea-large {
+  float: left;
+  width: 462px;
+  height: 350px;
+  padding: 2px 7px;
+  line-height: 18px;
+  border: 1px solid #c0d0d9;
+  border-top-color: #90acbc;
+  color: #7c7c7c;
+  overflow: auto;
+  resize: none;
+}
+</style>
+<form class="ui-form" id="platform_auth_operate_$!{_type}_form" method="post" action="$!{rc.contextPath}/platform/authorization/operate/$!{_type}">
+	<input type="hidden" name="operate.id" value="$!{operate.id}"/>
+	<fieldset>
+		<div class="ui-form-item ">
+			<label class="ui-label" for=""><span class="ui-form-required">*</span>操作编码：</label>
+			<input class="ui-input" type="text" name="operate.code" value="$!{operate.code}" data-rule="操作编码:required;" />
+		</div>
+		<div class="ui-form-item ">
+			<label class="ui-label" for=""><span class="ui-form-required">*</span>操作名称：</label>
+			<input class="ui-input" type="text" name="operate.name" value="$!{operate.name}" data-rule="操作名称:required;" />
+		</div>
+		<div class="ui-form-item ">
+			<label class="ui-label" for=""><span class="ui-form-required">*</span>所属菜单：</label>
+			<input type="hidden" name="operate.menuId" value="$!{operate.menu.id}" />
+			<input readonly="readonly" class="ui-input ui-readonly" type="text" name="operate.menu.name" value="$!{operate.menu.name}" data-rule="所属菜单:required;" />
+			<a href="javascript:void(0)" class="ui-input-icon" onclick="plat_menu_select()"><i class="iconfont icon-folder-open-alt"></i></a>
+			<div id="plat_menu_select_container" class="menuContent">
+				<ul id="plat_menu_select" class="ztree"></ul>
+			</div>
+		</div>
+ 		<div class="ui-form-item ">
+			<label class="ui-label" for=""><span class="ui-form-required">*</span>显示按键：</label>
+			<select class="ui-select" name="operate.listButton" value="$!{portlet.loadType}">
+				<option value="1" #if($operate.listButton=='true') selected="selected" #end>是</option>
+				<option value="0" #if($operate.listButton=='false') selected="selected" #end>否</option>
+			</select>
+		</div>
+ 		<div class="ui-form-item ">
+			<label class="ui-label" for="">按键图标：</label>
+			<input class="ui-input" type="text" name="operate.icon" value="$!{operate.icon}" />
+		</div>
+  		<div class="ui-form-item ">
+			<label class="ui-label" for="">排序值：</label>
+			<input class="ui-input" type="text" name="operate.sortValue" value="$!{operate.sortValue}" />
+		</div>
+ 		<div class="ui-form-item ui-form-item-textarea-large colspan2">
+      		<label class="ui-label" for="">操作代码：</label>
+      		<textarea class="ui-textarea-large" name="operate.onclick">$!{operate.onclick}</textarea>
+		</div>
+		<div class="ui-form-item ui-form-item-textarea colspan2">
+			<label class="ui-label" for="" style="height:50px">控制URL：<br />(一行一个)</label>
+	  		<textarea class="ui-textarea" name="operate.resources">$!{operate.resources}</textarea>
+		</div>
+		<div class="ui-form-item ui-form-item-textarea colspan2">
+      		<label class="ui-label" for="">备注：</label>
+      		<textarea class="ui-textarea" name="operate.description">$!{operate.description}</textarea>
+		</div>
+	</fieldset>
+</form>
+<script type="text/javascript">
+	$(document).ready(function(){
+		var setting = {
+			callback: {
+				onClick : function(event, treeId, treeNode) {
+					$("#platform_auth_operate_$!{_type}_form input[name='operate.menuId']").val(treeNode.id);
+					$("#platform_auth_operate_$!{_type}_form input[name='operate.menu.name']").val(treeNode.name);
+					hideMenu();
+				}
+			}
+		};
+		var nodes = $!{menuJson};
+		var menu_tree = $.fn.zTree.init($("#plat_menu_select"), setting, nodes);
+	});
+	function plat_menu_select(){
+		$("#plat_menu_select_container").show();
+		$("body").bind("mousedown", onBodyDown);
+	}
+	function hideMenu() {
+		$("#plat_menu_select_container").hide();
+		$("body").unbind("mousedown", onBodyDown);
+	}
+	function onBodyDown(event) {
+		if (!(event.target.id == "plat_menu_select_btn" || event.target.id == "plat_menu_select_container" || $(event.target).parents("#plat_menu_select_container").length>0)) {
+			hideMenu();
+		}
+	}
+</script>

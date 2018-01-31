@@ -1,0 +1,23 @@
+<div data-page="qrcode" class="page">
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="navbar-inner">
+                <div class="navbar-left">
+                    <a href="#" class="link back">
+                        <i class="icon icon-c-back only-icon"></i>
+                    </a>
+                </div>
+                <div class="navbar-center">二维码</div>
+                <div class="navbar-right"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-content">
+        <div class="list-block">
+            <div class="qrcode">
+                <img src="/jcds/mobile/images/qrcode.png" alt="中控运维平台"/>
+            </div>
+        </div>
+    </div>
+</div>

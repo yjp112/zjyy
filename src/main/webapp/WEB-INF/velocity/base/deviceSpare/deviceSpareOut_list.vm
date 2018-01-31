@@ -1,0 +1,152 @@
+#parse("index/_header.vm")
+<style>
+.ui-composer { width: 80%;}
+.ui-table input.k-textbox{  width: 100% !important;  border: none;}
+</style>
+</head>
+<body>
+<form id="queryForm" class="ui-dialog-form">
+    <input type="hidden" name="id" id="id" value="$!{device.id}" />
+    <input type="hidden" name="deviceId" id="deviceId" value="$!{device.deviceId}" />
+    <div class="actions">
+		<a  class="hc_btn k-primary" id="resetBtn" onclick="reply()"><i class="fa fa-reply"></i>返回</a>
+	</div>
+    <div class="ui-layout-center ui-largeform">
+		<div class="ui-composer">
+			<div class="ui-co-seg" data-role="anchor" id="index1" style="margin-bottom: 20px;">
+            <div id="tab-container">
+			<div class="container" id="index1">
+			<div class="container-title title1">
+				<span class="seg-num">1</span> 随机备件基本信息
+			</div>
+   			<div style="height:150px">
+	            <table width="100%">
+	                <tr>
+	                    <td class="ui-search-name first" align="right">部门：</td>
+	                    <td class="ui-search-c">
+	##                                <span class="k-textbox k-space-right" onclick="chooseDept('deptId','deptName','','')">
+							<input type="text" readonly id="deptName" name="deptName" value="$!{device.deptName}" class="k-textbox" />
+	##									<a href="#" class="k-icon k-i-search">&nbsp;</a>
+	##								</span>
+	                    <input type="hidden" name="deptId" id="deptId" value="$!{device.deptId}"/>
+	                    </td>
+	                    <td class="ui-search-name"  align="right">入库人：</td>
+	                    <td class="ui-search-c">
+						<input type="text" readonly id="creator" name="creator" value="$!{device.creator}" class="k-textbox" />
+	                    <input type="hidden" id="createId" name="createId" value=" $!{device.createId}"/>
+	                    </td>
+	                    <td class="ui-search-name first"  align="right">入库时间：</td>
+	                    <td class="ui-search-c">
+	                     <input type="text" readonly  name="createDate" id="createDate" value="#date_format($!{device.createDate},'yyyy-MM-dd')" class="k-textbox" />
+	                    </td>
+	                </tr>
+	                <tr>
+	                    <td class="ui-search-name first"  align="right">保管员：</td>
+	                    <td class="ui-search-c">
+	                     <input type="text"readonly  name="storeMan" value=" $!{device.storeMan}" class="k-textbox" />
+	                    </td>
+	                    <td class="ui-search-name"  align="right">资产管理员：</td>
+	                    <td class="ui-search-c">
+	                    <input type="text"readonly  name="assetmanager" value="$!{device.assetmanager}" class="k-textbox" />
+	                    </td>
+	                    <td class="ui-search-name first"  align="right">验收时间：</td>
+	                    <td class="ui-search-c">
+	                     <input type="text" readonly  id="checkDate" name="checkDate" id="checkDate" value="#date_format($!{device.checkDate},'yyyy-MM-dd')" class="k-textbox" />
+	                    </td>
+	                </tr>
+	                <tr>
+	                    <td class="ui-search-name first"  align="right">设备名称：</td>
+	                    <td class="ui-search-c">
+	                     <input type="text" name="deviceName"  id="deviceName" readonly value="$!{device.deviceName}" class="k-textbox" />
+	                    </td>
+	                    <td class="ui-search-name first"  align="right">生产厂商：</td>
+	                    <td class="ui-search-c">
+	                     <input type="text" readonly name="supplierName" value="$!{device.supplierName}" class="k-textbox" />
+	                    </td>
+	                    
+	                </tr>
+            	</table>
+        	 </div>
+        	  <div class="container-inner" id="index2-1">
+				<div class="container-inner-title">
+					<span class="seg-num">1.1</span>
+					随机备件详情
+				</div>
+				<div class="container-inner-content">
+				<table class="ui-table" id="addTable">
+		        	<thead> <tr>
+		            <th style="width: 30px;text-align: center;">序号</th>
+		            <th style="width:110px" class="k-header input-text">备件名称</th>
+		            <th style="width:120px" class="k-header input-text">备件规格/型号</th>
+		            <th style="width:100px" class="k-header input-text">备件厂商</th> 
+		            <th style="width:100px" class="k-header input-text">用途</th>
+		            <th style="width:60px"  class="k-header input-num">价格(元)</th>
+		            <th style="width:60px" class="k-header input-num">总量</th>
+		            <th style="width:60px" class="k-header input-num">余量</th>
+		            <th style="width:75px" class="k-header input-num">取用数量</th>
+		            <th style="width:100px" class="k-header input-text">取用人</th>
+		            <th style="width:110px;text-align:center !important" class="k-header input-text">取用日期</th>
+		            <th style="width:100px" class="k-header input-text">确认人</th>
+		            <th style="width:100px" class="k-header input-text">备注</th>
+		        </tr> </thead>
+		        <tbody>
+					#set($index=0)
+					#set($sy = 0)
+				    #foreach($list in $!dsdlst)
+						#set($index = $velocityCount-1)
+						#set($sy = $velocityCount)
+						#set($rp=$list.deviceSpareOutList.size()+1)
+					 <tr>
+		                <td class="input-equilong" rowspan="$rp">$velocityCount</td>
+		                <td rowspan="$rp"><input style="width:80px;"type="text" name="dsdlst[$index].spareName" id="spareName-$index" value="$!{list.spareName}" class="k-textbox input-text"/></td>
+		                <td rowspan="$rp"><input style="width:100px;" type="text" name="dsdlst[$index].spareSpac" id="spareSpac-$index" value="$!{list.spareSpac}"  class="k-textbox input-text"/></td>
+		                <td rowspan="$rp"><input style="width:80px;" type="text" name="dsdlst[$index].spareMaker" id="spareMaker-$index" value="$!{list.spareMaker}" class="k-textbox input-text"/></td>
+		                <td rowspan="$rp"><input style="width:100px;"type="text" name="dsdlst[$index].purpose" id="purpose-$index" value="$!{list.purpose}"  class="k-textbox input-text"/></td>
+		                <td rowspan="$rp"><input style="width:100px;"type="text" name="dsdlst[$index].price" id="price-$index" value="$!{list.price}" class="k-textbox input-num fNum2" onblur="priceAccount(this,'0')"/></td>
+ 		                <td rowspan="$rp"><input style="width:100px;"type="text" name="dsdlst[$index].total" value="$!{list.total}"  id="total-$index" class="k-textbox input-num fInt" onblur="priceAccount(this,'1')"/></td>
+ 		                <td rowspan="$rp"><input style="width:100px;"type="text" name="dsdlst[$index].remainder" value="$!{list.remainder}"  id="remainder-$index" class="k-textbox input-num fInt" onblur="priceAccount(this,'1')"/></td>
+ 		                #if($rp==1)
+ 		                <td><input type="text" style="width:100px;"class="k-textbox input-num fInt" /></td>
+		                <td><input type="text" style="width:100px;"class="k-textbox input-text"/></td>
+		                <td><input type="text" style="width:100px;"class="k-textbox input-text"/></td>
+		                <td><input type="text" style="width:100px;"class="k-textbox input-text"/></td>
+		                <td><input type="text" style="width:100px;"class="k-textbox input-text"/></td>
+		             	#end
+		            </tr>
+ 		            #foreach($slst in $list.deviceSpareOutList)
+ 		              <tr>
+ 		                <td><input type="text" style="width:100px;"name="slst[$index].getSum" value="$!{slst.getSum}"  id="getSum-$index" class="k-textbox input-num fInt" onblur="priceAccount(this,'1')"/></td>
+		                <td><input type="text" style="width:100px;"name="slst[$index].getor" id="getor-$index" value="$!{slst.getor}"  class="k-textbox input-text"/></td>
+		                <td><input type="text" style="width:100px;  text-align: center !important;"name="slst[$index].getDate" id="getDate-$index" value="#date_format($!{slst.getDate},'yyyy-MM-dd')"  class="k-textbox input-text"/></td>
+		                <td><input type="text" style="width:100px;"name="slst[$index].affirmor" id="affirmor-$index" value="$!{slst.affirmor}"  class="k-textbox input-text"/></td>
+		                <td><input type="text" style="width:100px;"name="slst[$index].remark" id="remark-$index" value="$!{slst.remark}"  class="k-textbox input-text"/></td>
+		              </tr>
+	                #end		            
+				 #end	
+		        </tbody>
+				</table>
+				</div>
+			</div>
+		  </div>
+		  </div>
+	  </div>
+   </div>
+   </div>
+</form>
+#parse("index/_footer.vm")
+<script type="text/javascript">
+ setAllReadonly();
+var _iframe_layout, _left_layout, _inner_layout;
+$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+        defaults: {
+            resizable: false,
+            closable: false,
+            spacing_open: 5
+        }
+    });
+});
+function reply(){
+    window.location.href= "$!{rc.contextPath}/base/deviceSpareIn/list";
+}
+</script>

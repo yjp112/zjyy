@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.nhgl.basic.meterConfig.electic.entities.ConfigManager">
+	<resultMap type="com.supconit.nhgl.basic.meterConfig.electic.entities.ConfigManager" id="ConfigManagerResultMap">
+		<result property="id" column="ID" />
+        <result property="typeCode" column="TYPE_CODE" />
+        <result property="typeName" column="TYPE_NAME" />
+        <result property="code" column="CODE" />
+        <result property="name" column="NAME" />
+        <result property="configValue" column="CONFIG_VALUE" />
+        <result property="remark" column="REMARK" />
+        <result property="flag" column="FLAG" />
+        <result property="order" column="ORDER" />
+	</resultMap>
+	<select id="getConfigInfo" resultMap="ConfigManagerResultMap"  lang="velocity">
+		SELECT * from NH_CONFIG_MANAGE 
+	</select>
+	<select id="getConfigValue" parameterType="com.supconit.nhgl.basic.meterConfig.electic.entities.ConfigManager" resultMap="ConfigManagerResultMap"  lang="velocity">
+		SELECT NAME,CONFIG_VALUE from NH_CONFIG_MANAGE WHERE TYPE_CODE = @{_parameter.typeCode}
+	</select>
+	<select id="findValidByCode" parameterType="String" resultMap="ConfigManagerResultMap"  lang="velocity">
+		SELECT NAME,CONFIG_VALUE,FLAG from NH_CONFIG_MANAGE WHERE flag=1 and TYPE_CODE = @{_parameter.typeCode}
+	</select>
+	<select id="findByCode" parameterType="String" resultMap="ConfigManagerResultMap"  lang="velocity">
+		SELECT NAME,CONFIG_VALUE,FLAG from NH_CONFIG_MANAGE WHERE Code = @{_parameter.code}
+	</select>
+	<update id="updateCm" parameterType="com.supconit.nhgl.basic.meterConfig.electic.entities.ConfigManager" lang="velocity">
+		update NH_CONFIG_MANAGE 
+			set 
+				#if($_parameter.configValue)
+					CONFIG_VALUE =@{_parameter.configValue,jdbcType=VARCHAR},
+				#end
+				#if($_parameter.flag)
+					FLAG =@{_parameter.flag,jdbcType=NUMERIC}
+				#end
+			#where()
+				#if($_parameter.id)
+					ID =@{_parameter.id,jdbcType=NUMERIC}
+				#end 
+			#end
+	</update>
+</mapper>

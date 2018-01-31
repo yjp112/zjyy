@@ -1,0 +1,465 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.basic.otherCategory.entity.OtherCategory">
+	<resultMap type="com.supconit.nhgl.basic.otherCategory.entity.OtherCategory" id="otherCategoryResultMap">
+		<result property="id" column="ID"/>
+		<result property="code" column="CODE"/>
+		<result property="name" column="NAME"/>
+		<result property="nhType" column="NH_TYPE"/>
+		<result property="parentId" column="PARENT_ID"/>
+		<result property="parentName" column="PARENT_NAME"/>
+		<result property="fullLevelName" column="FULL_LEVEL_NAME"/>
+		<result property="sort" column="SORT"/>
+		<result property="remark" column="REMARK"/>
+		<result property="createId" column="CREATE_ID"/>
+        <result property="creator" column="CREATOR"/>
+        <result property="createDate" column="CREATE_DATE"/>
+        <result property="updateId" column="UPDATE_ID"/>
+        <result property="updator" column="UPDATOR"/>
+        <result property="updateDate" column="UPDATE_DATE"/>
+		<result property="persons" column="PERSONS"/>
+		<result property="area" column="AREA"/>
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">NH_CATEGORY</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+    <!-- 获取记录列表-->
+	<sql id="select_pre" lang="velocity">
+    SELECT 
+			a.ID,
+			a.CODE,
+			a.NAME,
+			a.NH_TYPE,
+			a.PARENT_ID,
+			a.FULL_LEVEL_NAME,
+			a.SORT,
+			a.REMARK,
+			a.CREATE_ID,
+			a.CREATOR,
+			a.CREATE_DATE,
+			a.UPDATE_ID,
+			a.UPDATOR,
+			a.UPDATE_DATE,
+			a.PERSONS,
+			a.AREA
+	FROM <include refid="TABLE_NAME"/> a
+	</sql>
+	<sql id="select_pre2">
+    select 
+        	a.ID,
+			a.CODE,
+			a.NAME,
+			a.NH_TYPE,
+			a.PARENT_ID,
+			a.FULL_LEVEL_NAME,
+			a.SORT,
+			a.REMARK,
+			a.CREATE_ID,
+			a.CREATOR,
+			a.CREATE_DATE,
+			a.UPDATE_ID,
+			a.UPDATOR,
+			a.UPDATE_DATE,
+			a.PERSONS,
+			a.AREA,
+        #if($_databaseId=='oracle') 
+        	nvl(b.NAME,'其他分类') PARENT_NAME
+        #else 
+        	ISNULL(b.NAME,'其他分类') PARENT_NAME 
+        #end
+		FROM
+		<include refid="TABLE_NAME"/> a
+		left join <include refid="TABLE_NAME"/> b
+		on a.PARENT_ID = b.ID
+	</sql>
+	<select id="findByCodes_g" parameterType="hashmap" resultMap="otherCategoryResultMap">
+		SELECT A.ID
+		FROM <include refid="TABLE_NAME"/> A
+		WHERE 
+		A.CODE IN 
+        <foreach item="item" index="index" collection="codes" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+	</select>
+	
+	<sql id="condition" lang="velocity">
+		#where()
+			#if($_parameter.code)
+				AND CODE =@{_parameter.code,jdbcType=VARCHAR}
+			#end
+			#if($_parameter.parentId)
+				AND PARENT_ID =@{_parameter.parentId,jdbcType=NUMERIC}
+			#end
+			AND A.ID = C.PARENT_ID OR A.ID = C.ID  
+		#end
+	</sql>
+	<select id="findByCon" resultMap="otherCategoryResultMap" parameterType="com.supconit.nhgl.basic.otherCategory.entity.OtherCategory" lang="velocity">
+		WITH C AS (
+			SELECT G.ID,PARENT_ID FROM <include refid="TABLE_NAME"/> G
+			WHERE G.ID IN (SELECT DISTINCT(LOCATION_ID) FROM DEVICE)
+		)
+		SELECT  DISTINCT A.*,A.FULL_LEVEL_NAME FROM <include refid="TABLE_NAME"/> A,C
+       	<include refid="condition"/>
+	</select>
+	<sql id="select_full_pre">
+    SELECT son.*,father.NAME AS parentName FROM <include refid="TABLE_NAME"/> son LEFT JOIN <include refid="TABLE_NAME"/> father
+	ON son.Parent_Id = father.ID
+	</sql>
+	<sql id="count_pre" lang="velocity">
+		SELECT
+		COUNT(*)
+		FROM
+		<include refid="TABLE_NAME"/>
+	</sql>
+	<insert id="insert" parameterType="com.supconit.nhgl.basic.otherCategory.entity.OtherCategory" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="INSERT_SQL"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    <insert id="insert" parameterType="com.supconit.nhgl.basic.otherCategory.entity.OtherCategory" 
+		keyProperty="id" keyColumn="ID" 		lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>        
+		<include refid="INSERT_SQL" />
+	</insert>
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>
+		(#if($_databaseId=='oracle') ID,#end
+		CODE,
+        NAME,
+        NH_TYPE,
+        PARENT_ID,
+        FULL_LEVEL_NAME,
+        SORT,
+        REMARK,
+        PERSONS,
+		AREA,
+        CREATE_ID,
+        CREATOR,
+        CREATE_DATE,
+        UPDATE_ID,
+        UPDATOR,
+        UPDATE_DATE
+        ) VALUES (        
+		#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end
+		@{_parameter.code,jdbcType=VARCHAR},
+        @{_parameter.name,jdbcType=VARCHAR},
+        @{_parameter.nhType,jdbcType=NUMERIC},
+        @{_parameter.parentId,jdbcType=NUMERIC},
+        @{_parameter.fullLevelName,jdbcType=VARCHAR},
+        @{_parameter.sort,jdbcType=NUMERIC},
+        @{_parameter.remark,jdbcType=VARCHAR},
+        @{_parameter.persons,jdbcType=VARCHAR},
+        @{_parameter.area,jdbcType=NUMERIC},
+        @{_parameter.createId,jdbcType=NUMERIC},
+        @{_parameter.creator,jdbcType=VARCHAR},
+        @{_parameter.createDate,jdbcType=TIMESTAMP},
+        @{_parameter.updateId,jdbcType=NUMERIC},
+        @{_parameter.updator,jdbcType=VARCHAR},
+        @{_parameter.updateDate,jdbcType=DATE}		
+		)
+		</sql>
+    <!-- 插入记录-->
+	<sql id="insert_sql">
+		INSERT INTO <include refid="TABLE_NAME"/>(        
+        CODE,
+        NAME,
+        NH_TYPE,
+        PARENT_ID,
+        FULL_LEVEL_NAME,
+        SORT,
+        REMARK,
+        PERSONS,
+		AREA,
+        CREATE_ID,
+        CREATOR,
+        CREATE_DATE,
+        UPDATE_ID,
+        UPDATOR,
+        UPDATE_DATE
+		) VALUES (        
+        #{code,jdbcType=VARCHAR},
+        #{name,jdbcType=VARCHAR},
+        #{nhType,jdbcType=VARCHAR},
+        #{parentId,jdbcType=NUMERIC},
+        #{fullLevelName,jdbcType=VARCHAR},
+        #{sort,jdbcType=NUMERIC},
+        #{remark,jdbcType=VARCHAR},
+        #{persons,jdbcType=VARCHAR},
+        #{area,jdbcType=NUMERIC},
+        #{createId,jdbcType=NUMERIC},
+        #{creator,jdbcType=VARCHAR},
+        #{createDate,jdbcType=TIMESTAMP},
+        #{updateId,jdbcType=NUMERIC},
+        #{updator,jdbcType=VARCHAR},
+        #{updateDate,jdbcType=DATE}		
+		)
+	</sql>
+
+	<select id="getById" resultMap="otherCategoryResultMap" parameterType="Long">
+		<include refid="select_full_pre" />        
+        WHERE son.ID = #{id}
+	</select>
+	
+	
+	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.nhgl.basic.otherCategory.entity.OtherCategory">
+		UPDATE	<include refid="TABLE_NAME"/>
+		<set>
+        <if test="code != null">CODE = #{code,jdbcType=VARCHAR},</if>
+        <if test="name != null">NAME = #{name,jdbcType=VARCHAR},</if>
+        <if test="nhType != null">NH_TYPE = #{nhType,jdbcType=NUMERIC},</if>
+        <if test="parentId != null">PARENT_ID = #{parentId,jdbcType=NUMERIC},</if>
+        <if test="fullLevelName != null">FULL_LEVEL_NAME = #{fullLevelName,jdbcType=VARCHAR},</if>
+        <if test="sort != null">SORT = #{sort,jdbcType=NUMERIC},</if>
+        REMARK = #{remark,jdbcType=VARCHAR},
+        PERSONS = #{persons,jdbcType=VARCHAR},
+        AREA = #{area,jdbcType=NUMERIC},
+        <if test="updateId != null">UPDATE_ID = #{updateId,jdbcType=NUMERIC},</if>
+        <if test="updator != null">UPDATOR = #{updator,jdbcType=VARCHAR},</if>
+        <if test="updateDate != null">UPDATE_DATE = #{updateDate,jdbcType=DATE},</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+	
+	<sql id="condition_sql" lang="velocity">
+	<![CDATA[
+		#where()
+				#set($_p = $_parameter.condition)
+				1=1
+				#if($_p.code && $_p.code!='')
+					#set($_code='%' +$_p.code+ '%')
+					and a.CODE LIKE @{_code,jdbcType=VARCHAR}
+				#end
+				#if($_p.name && $_p.name!='')
+					#set($_name='%' +$_p.name+ '%')
+					and a.NAME LIKE @{_name,jdbcType=VARCHAR}
+				#end
+				#if($_p.nhType && $_p.nhType!='')
+					#set($_nhType=$_p.nhType)
+					and a.NH_TYPE = @{_nhType,jdbcType=NUMERIC}
+				#end
+				#if($_p.parentId)
+					#set($_parentId = $_p.parentId)
+					AND a.PARENT_ID= @{_parentId,jdbcType=BIGINT}
+				#end
+				#if($_p.fullLevelName && $_p.fullLevelName!='')
+					#set($_fullLevelName='%' +$_p.fullLevelName+ '%')
+					and a.FULL_LEVEL_NAME LIKE @{fullLevelName,jdbcType=VARCHAR}
+				#end	
+				#if($_p.sort )
+					#set($_sort  = $_p.sort )
+					AND a.SORT= @{_sort ,jdbcType=NUMERIC}
+				#end
+				#if($_p.subOtherCategoryList && $_p.subOtherCategoryList.size()>0)	
+					#set($_subOtherCategoryList =$_p.subOtherCategoryList)
+					and 
+					#repeat( $_subOtherCategoryList $subs "," " a.ID IN (" ")" )
+					    @{subs,jdbcType=BIGINT}
+					#end	
+				#end
+				#if($_p.remark && $_p.remark!='')
+					#set($_remark='%' +$_p.remark+ '%')
+					and REMARK LIKE @{_remark,jdbcType=VARCHAR}
+				#end
+	    #end
+		]]>	
+	</sql>
+    
+    <!-- 按条件查询记录-->
+	<select id="findByConditions" parameterType="com.supconit.nhgl.basic.otherCategory.entity.OtherCategory" resultMap="otherCategoryResultMap" lang="velocity" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre" />
+		<include refid="condition_sql" />
+		#order($_parameter.condition,"CREATE_DATE DESC")
+ 		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+	<select id="findByConditions" parameterType="com.supconit.nhgl.basic.otherCategory.entity.OtherCategory" resultMap="otherCategoryResultMap" lang="velocity" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT 
+			a.ID,
+			a.CODE,
+			a.NAME,
+			a.NH_TYPE,
+			a.PARENT_ID,
+			a.FULL_LEVEL_NAME,
+			a.SORT,
+			a.REMARK,
+			a.CREATE_ID,
+			a.CREATOR,
+			a.CREATE_DATE,
+			a.UPDATE_ID,
+			a.UPDATOR,
+			a.UPDATE_DATE,
+			a.PERSONS,
+			a.AREA
+			<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+	 		#order($_parameter.condition,"a.CREATE_DATE DESC")
+	 		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		from <include refid="TABLE_NAME"/> a
+		<include refid="condition_sql" />
+ 		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+
+    <select id="countByConditions" parameterType="com.supconit.nhgl.basic.otherCategory.entity.OtherCategory" resultType="long" lang="velocity">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+	
+	<select id="findAll" resultMap="otherCategoryResultMap" >
+		SELECT 
+			a.ID,
+			a.CODE,
+			a.NAME,
+			a.NH_TYPE,
+			a.PARENT_ID,
+			a.FULL_LEVEL_NAME,
+			a.SORT,
+			a.REMARK,
+			a.CREATE_ID,
+			a.CREATOR,
+			a.CREATE_DATE,
+			a.UPDATE_ID,
+			a.UPDATOR,
+			a.UPDATE_DATE,
+			a.PERSONS,
+			a.AREA
+		from <include refid="TABLE_NAME"/> a
+			where 1=1
+	</select>
+	
+	<select id="findByRoot" resultMap="otherCategoryResultMap" parameterType="long">
+	  WITH A (ID,CODE,NAME,NH_TYPE,PARENT_ID,FULL_LEVEL_NAME,SORT,REMARK,PERSONS, AREA,CREATE_ID,CREATOR,CREATE_DATE,UPDATE_ID,UPDATOR,UPDATE_DATE)
+		AS ( SELECT ID,CODE,NAME,NH_TYPE,PARENT_ID,FULL_LEVEL_NAME,SORT,REMARK,PERSONS, AREA,CREATE_ID,CREATOR,CREATE_DATE,UPDATE_ID,UPDATOR,UPDATE_DATE
+		 	 FROM <include refid="TABLE_NAME"/>  where PARENT_ID =  #{id}
+		UNION ALL SELECT B.ID,B.CODE,B.NAME,B.NH_TYPE,B.PARENT_ID,B.FULL_LEVEL_NAME,B.SORT,B.REMARK,B.PERSONS, B.AREA,B.CREATE_ID,B.CREATOR,B.CREATE_DATE,B.UPDATE_ID,B.UPDATOR,B.UPDATE_DATE
+				 FROM <include refid="TABLE_NAME"/> B,A where A.ID = B.PARENT_ID)
+		 SELECT * from A order by A.SORT
+	</select>
+	
+	<select id="findById" resultMap="otherCategoryResultMap" parameterType="long">
+	  WITH A (ID,CODE,NAME,NH_TYPE,PARENT_ID,FULL_LEVEL_NAME,SORT,REMARK,PERSONS, AREA,CREATE_ID,CREATOR,CREATE_DATE,UPDATE_ID,UPDATOR,UPDATE_DATE)
+		AS ( SELECT ID,CODE,NAME,NH_TYPE,PARENT_ID,FULL_LEVEL_NAME,SORT,REMARK,PERSONS, AREA,CREATE_ID,CREATOR,CREATE_DATE,UPDATE_ID,UPDATOR,UPDATE_DATE
+		 	 FROM <include refid="TABLE_NAME"/>  where ID =  #{id}
+		UNION ALL SELECT B.ID,B.CODE,B.NAME,B.NH_TYPE,B.PARENT_ID,B.FULL_LEVEL_NAME,B.SORT,B.REMARK,B.PERSONS, B.AREA,B.CREATE_ID,B.CREATOR,B.CREATE_DATE,B.UPDATE_ID,B.UPDATOR,B.UPDATE_DATE
+				 FROM <include refid="TABLE_NAME"/> B,A where A.ID = B.PARENT_ID)
+		 SELECT * from A order by A.SORT ASC
+	</select>
+	
+	<select id="findByCode" resultMap="otherCategoryResultMap" parameterType="string">
+		<include refid="select_full_pre" />
+		where son.CODE = #{code}
+	</select>
+	
+	
+	<select id="findByName" resultMap="otherCategoryResultMap" parameterType="com.supconit.nhgl.basic.otherCategory.entity.OtherCategory">
+		select *from <include refid="TABLE_NAME"/> where (id=#{parentId} or parent_id=#{parentId}) and NAME=#{name}
+	</select>
+	
+	<select id="findByParentId" resultMap="otherCategoryResultMap" parameterType="long">
+		SELECT 
+			a.ID,
+			a.CODE,
+			a.NAME,
+			a.NH_TYPE,
+			a.PARENT_ID,
+			a.FULL_LEVEL_NAME,
+			a.SORT,
+			a.REMARK,
+			a.CREATE_ID,
+			a.CREATOR,
+			a.CREATE_DATE,
+			a.UPDATE_ID,
+			a.UPDATOR,
+			a.UPDATE_DATE,
+			a.PERSONS,
+			a.AREA
+		from <include refid="TABLE_NAME"/> a
+		where a.PARENT_ID = #{parentId} order by a.SORT asc
+	</select>
+    
+    <select id="findBuildsGis3D" resultMap="otherCategoryResultMap" resultType="com.supconit.nhgl.basic.otherCategory.entity.OtherCategory">
+        SELECT * FROM <include refid="TABLE_NAME"/> g WHERE g.PARENT_ID=0 AND g.CODE !='F' AND g.CODE !='G' order by g.SORT asc
+	</select>
+	<select id="findFloorByParentId" resultMap="otherCategoryResultMap" resultType="com.supconit.nhgl.basic.otherCategory.entity.OtherCategory">
+        SELECT * FROM <include refid="TABLE_NAME"/> g WHERE g.PARENT_ID=#{id} order by g.SORT asc
+	</select>
+    <select id="findAllFullName"  resultMap="otherCategoryResultMap">
+        SELECT CODE,FULL_LEVEL_NAME FROM <include refid="TABLE_NAME"/>  order by SORT
+	</select>
+	<!-- 按设备类别查询楼 gis-->
+    <select id="findLouByCategory_g" parameterType="hashmap" resultMap="otherCategoryResultMap">
+		SELECT DISTINCT GP.ID,GP.SORT
+		FROM DEVICE D,G_SYSTEM_RULE DC,<include refid="TABLE_NAME"/> G,<include refid="TABLE_NAME"/> GP
+		WHERE D.G_SYSTEM_RULE_ID=DC.ID AND G.ID =D.LOCATION_ID AND G.PARENT_ID =GP.ID
+ 		
+		AND #{categoryCode} LIKE '%,'+convert(VARCHAR,DC.id)+',%'
+ 		
+		GROUP BY GP.ID,GP.SORT
+		ORDER BY GP.SORT
+	</select>	
+	<!-- 按设备类别查询层 gis-->
+	<select id="findCengByCategory_g" parameterType="hashmap" resultMap="otherCategoryResultMap">
+		SELECT DISTINCT G.ID,G.PARENT_ID,G.SORT
+		FROM DEVICE D,G_SYSTEM_RULE DC,<include refid="TABLE_NAME"/> G
+		WHERE D.G_SYSTEM_RULE_ID=DC.ID AND G.ID = D.LOCATION_ID
+ 		
+		AND #{categoryCode} LIKE '%,'+convert(VARCHAR,DC.id)+',%'
+ 		
+		ORDER BY G.SORT	
+	</select>
+	<!-- 递归查询子类别gis-->
+	<select id="findChildIds_g" parameterType="hashmap" resultType="long">
+		WITH TT(ID) AS ( 
+		SELECT ID FROM DEVICE_CATEGORY  WHERE CATEGORY_CODE=#{categoryCode}
+	    UNION ALL 
+		SELECT A.ID FROM DEVICE_CATEGORY A,TT B WHERE A.PARENT_ID = B.ID
+		) 
+		SELECT 	ID  FROM TT   	
+	</select> 
+	 
+	<!-- 递归查询子类别-->
+	<select id="findChildIds" parameterType="long" resultType="long">
+		WITH TT(ID) AS ( 
+		SELECT ID FROM <include refid="TABLE_NAME"/>   WHERE ID =#{id}
+	    UNION ALL 
+		SELECT A.ID FROM <include refid="TABLE_NAME"/> A,TT B WHERE A.PARENT_ID = B.ID
+		) 
+		SELECT 	ID  FROM TT   	
+	</select> 
+	<!-- 按报警楼层 gis-->
+	<select id="findAlarmFloor_g" parameterType="hashmap" resultMap="otherCategoryResultMap">
+	    SELECT DISTINCT G.ID
+	    FROM DEVICE D,<include refid="TABLE_NAME"/> G,DEVICE_CATEGORY DC
+		WHERE D.LOCATION_ID = G.ID AND D.CATEGORY_ID =DC.ID 
+		<if test="parentId != null"> 
+		AND G.PARENT_ID =#{parentId} 
+		</if>
+		AND ( 
+		    CHARINDEX( ',ceng_'+DC.CATEGORY_CODE+',' ,#{tuCeng} ) >0
+			OR DC.ID IN(SELECT CHILD.ID FROM  DEVICE_CATEGORY P,DEVICE_CATEGORY CHILD
+						WHERE CHARINDEX( ',ceng_'+P.CATEGORY_CODE+',' ,#{tuCeng} ) >0
+						AND CHILD.PARENT_ID = P.ID
+						)<!-- 消防图层包含烟感温感等子类别 -->
+			)
+		AND D.HPID IN (
+			SELECT A.OBJECTID FROM M_REALALARM A WHERE A.ALARMSTATE!=2
+	    )
+	</select> 
+    <!-- 删除多条记录-->
+	<delete id="deleteByIds">
+        DELETE FROM <include refid="TABLE_NAME"/> WHERE ID in 
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<!-- DElETE -->
+	<delete id="deleteById" parameterType="long">
+		delete from <include refid="TABLE_NAME"/> where  ID = #{id}
+	</delete>
+	
+</mapper>

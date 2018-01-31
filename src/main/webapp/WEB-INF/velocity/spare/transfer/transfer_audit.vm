@@ -1,0 +1,290 @@
+<script type="text/javascript">
+    function doSubmit(type,flowId,bpmEnabled) {
+        if(flowId){
+	        $("input[name='_bpm_ts_id']").val(flowId);
+        }
+        if(bpmEnabled){
+	        $("input[name='_bpm_enabled']").val(bpmEnabled);
+        }
+        var ctn = "$!rc.contextPath/spare/transfer/"+type;
+        $("#transer_form_id").attr("action", ctn);
+        //$("#transer_form_id").submit();
+        return true;
+    }
+</script>
+	<form id="transer_form_id"  method="post" action="$!{rc.contextPath}/spare/transfer/save" class="ui-form">
+		<input type="hidden" name="id" value="$!{stockOut.id}">
+        <div class="ui-box ui-box-close">
+          <div class="ui-box-container">
+              <div class="ui-box-content">
+                	<input type="hidden" name="_bpm_param" value="$!{_bpm_param}"/>
+	                <input type="hidden" name="_bpm_ts_id" value=""/>
+	                <input type="hidden" name="_bpm_enabled" value="false"/>
+	                #foreach($ts in $!_bpm_transitions)
+	                    <button type="submit" class="btn btn-small" onclick="doSubmit('processDone','$!ts.id',true)">
+	                   	#if($!ts.id.contains("reject"))
+	                   	<i class="iconfont icon-reply"></i>
+						#else
+	                    <i class="iconfont icon-submit"></i>
+						#end 
+	                    $!ts.name</button>
+	                #end
+                <button class="btn btn-small" type="submit" onclick="doSubmit('processSave');"><i class="iconfont icon-save"></i>保存</button>
+                <a class="btn btn-small" onclick="loadMain('$!{rc.contextPath}/spare/transfer/go');"><i class="iconfont icon-reply"></i>返回</a>
+              </div>
+          </div>
+        </div>
+
+    <div class="ui-box">
+      <div class="ui-box-head">
+        <div class="ui-box-head-center">
+          <span class="ui-box-head-title">调拨基本信息</span>
+          <a class="btn btn-small ui-box-toggle" href="#" data-trigger="collapse" data-target="#collapse1">
+          <i class="iconfont icon-caret-up"></i></a>
+        </div>
+      </div>
+      <div class="ui-box-container" id="collapse1">
+        <div class="ui-box-content">          
+	      <div class="ui-form-item">
+	        <label class="ui-label" for="" ><span class="ui-form-required">*</span>调拨单号</label>
+	         <input readonly class="ui-input" type="text"  name="transferCode" value="$!{transfer.transferCode}"  />
+	      </div>
+	      <div class="ui-form-item">
+	        <label class="ui-label" for="" ><span class="ui-form-required">*</span>调拨人</label>
+			<input type="hidden" id="transferPersonId" name="transferPersonId" value="$!{transfer.transferPersonId}"  />
+			<input readonly class="ui-input" type="text" id="transferPersonName" name="transferPersonName" value="$!{transfer.transferPersonName}" onclick="choosePerson('transferPersonId','transferPersonName')" />
+	        <span class="ui-form-icon"><i class="iconfont icon-file-alt"></i></span>
+		 </div>
+	      <div class="ui-form-item">
+	        <label class="ui-label" for="" ><span class="ui-form-required">*</span>调拨日期</label>
+			<input type="text" name="transferTime"  class="ui-input Wdate"  onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" value="#date_format($!{transfer.transferTime},'yyyy-MM-dd HH:mm:ss')"  size=22 />						  
+		 </div>
+	      <div class="ui-form-item">
+	        <label class="ui-label" for="" ><span class="ui-form-required">*</span>调入仓库</label>
+		    <select class="ui-select" name="inWarehouseId">
+		    	<option value="">--请选择--</option>
+		    	${inWarehouseOptions}
+		    </select>		 
+		  </div>
+	      <div class="ui-form-item block">
+	  		<label class="ui-label" for="" ><span class="ui-form-required">*</span>调出仓库</label>
+			<select class="ui-select" name="outWarehouseId" id="outWarehouseId">
+				<option value="">--请选择--</option>
+				${outWarehouseOptions}
+			</select>
+	      </div>
+	      <div class="ui-form-item colspan2 block">
+	        <label class="ui-label" for="" >调拨摘要</label>
+			<textarea  id="textAreaId" class="k-textbox k-textarea" type="text" name="descripton">$!{transfer.descripton}</textarea>
+	      </div>
+            </div>
+          </div>
+        </div>
+
+
+
+    <div class="ui-box">
+      <div class="ui-box-head">
+        <div class="ui-box-head-center">
+          <span class="ui-box-head-title">调拨明细信息</span>
+          <a class="btn btn-small ui-box-toggle" href="#" data-trigger="collapse" data-target="#collapse2">
+          <i class="iconfont icon-caret-up"></i></a>
+        </div>
+      </div>
+      <div class="ui-box-container" id="collapse2">
+        <div class="ui-box-content">          
+	    <table id='tableId' class="ui-table">
+	        <thead>
+				<tr>
+					<th width="30">序号</th>
+					<th>备件名称</th>
+					<th>备件编码</th>
+					<th>备件规格</th>
+					<th>备件型号</th>
+					<th>库存数量</th>
+					<th>调拨数量</th>
+					<th width="30"><a href="#" class="btn addRow"><i class="iconfont icon-plus"></i></a></th>
+				</tr>
+	        </thead>
+<tbody>
+	#set($index=0)
+	#foreach($list in $!transfer.transferDetailList)
+		<tr>   
+			<td><span class="rowNumber">$index+1</span></td>
+	        <td>
+	        	<input type="hidden" name="transferDetailList[$index].spareId" value="$!{list.spareId}" />
+	        	<input type="text" name="transferDetailList[$index].spareName" value="$!{list.spareName}" class="ui-input ui-input-small"/>
+	        </td>                   
+	        <td><input readonly type="text" name="transferDetailList[$index].spareCode" value="$!{list.spareCode}" class="ui-input ui-input-small"/></td>                   
+	        <td><input readonly type="text" name="transferDetailList[$index].spec" value="$!{list.spec}" class="ui-input ui-input-small"/></td>                   
+	        <td><input readonly type="text" name="transferDetailList[$index].model" value="$!{list.model}" class="ui-input ui-input-small"/></td>                   
+	        <td><input readonly type="text" name="transferDetailList[$index].availableQty" value="$!{list.availableQty}" class='ui-input ui-input-small number2'/></td>                   
+	        <td><input type="text" name="transferDetailList[$index].quantity" value="$!{list.quantity}" class='ui-input ui-input-small number2'/></td>                   
+            <td><i class="iconfont icon-remove-sign delRow"></i></td>
+		</tr>
+		#set($index=$index+1)
+	#end
+	#if($index==0)
+		<tr>   
+			<td><span class="rowNumber">1</span></td>
+	        <td>
+	        	<input type="hidden" name="transferDetailList[$index].spareId" value="$!{list.spareId}" />
+	        	<input type="text" name="transferDetailList[$index].spareName" value="$!{list.spareName}" class="ui-input ui-input-small"/>
+	        </td>                   
+	        <td><input readonly type="text" name="transferDetailList[$index].spareCode" value="$!{list.spareCode}" class="ui-input ui-input-small"/></td>                   
+	        <td><input readonly type="text" name="transferDetailList[$index].spec" value="$!{list.spec}" class="ui-input ui-input-small"/></td>                   
+	        <td><input readonly type="text" name="transferDetailList[$index].model" value="$!{list.model}" class="ui-input ui-input-small"/></td>                   
+	        <td><input readonly type="text" name="transferDetailList[$index].availableQty" value="$!{list.availableQty}" class='ui-input ui-input-small number2'/></td>                   
+	        <td><input type="text" name="transferDetailList[$index].quantity" value="$!{list.quantity}" class='ui-input ui-input-small number2'/></td>                   
+            <td><i class="iconfont icon-remove-sign delRow"></i></td>
+		</tr>
+	#end
+        <tr>
+			<td>合计</td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td><input readonly id='sumQty' type="text" name="sumQty" class="ui-input ui-input-small"/></td>
+			<td></td>
+        </tr>
+</tbody>
+</table>
+            </div>
+          </div>
+        </div>
+	</form>
+	<script type="text/javascript" src="$!{rc.contextPath}/js/ywgl.js"></script>
+	<script type="text/javascript">
+	 function rebuildTable(tableId,dataRows){
+	    var notMatchedRows=dataRows.notMatched;
+	    var matchedRows=dataRows.matched;
+	    $(notMatchedRows).each(function(i,v){
+	    	$('#'+tableId).find('input[value='+v.spareId+']').parents('tr').remove();
+	    });
+	    $(matchedRows).each(function(i,v){
+	    	var tr=$('#'+tableId).find('input[value='+v.spareId+']').parents('tr');
+			$("input,textarea",$(t)).each(function(i,v){
+				if($(v).attr("name")!=""){
+					var shortName=newName.split('\.')[1];
+					if(v[shortName]){
+						$(v).val(v[shortName]);
+					}
+				}
+			});
+	    });
+	 }
+	 $(document).ready(function(){
+ 	    $('#outWarehouseId').change(function(){
+ 	        if($(this).val()==''){
+ 	           return false;
+ 	        }
+ 	        var params={};
+ 	        params.warehouseId=$(this).val();
+ 	        params.spareIds=[];
+ 	        $("input[name$='.spareId']",$('#tableId')).each(function(i,v){
+ 	          if($(v).val()!=''){
+	 	          params.spareIds.push($(v).val());
+ 	          }
+ 	        });
+ 	        if(params.spareIds.length<=0){
+ 	          return false;
+ 	        }
+            $.ajax({
+                type: "post",
+                cache:false,
+                url: '$!{rc.contextPath}/spare/transfer/loadSpare',
+                data: params,
+                success: function (response) {
+						rebuildTable('tableId',response);
+						caculate();
+            		}
+            	});     
+	    });
+        $('#transer_form_id').valid({
+          rules: {
+			transferCode: ['not_empty',{max_length: 20}],
+			transferTime: ['not_empty'],
+			transferPersonName: ['not_empty'],
+			outWarehouseId: ['not_empty'],
+			inWarehouseId: ['not_empty'],
+			descripton: [{max_length: 20}]
+          },onSuccess: function(response, validator, $form) {
+		  	validateCallback(response);
+		  	return false;
+		  }
+        });		
+        caculate();
+	    $(".addRow").btnAddRow({rowNumColumn:"rowNumber"},function(){
+	    	caculate();
+	    });
+	    $(".delRow").btnDelRow(function(){
+	    	caculate();
+	    });		 
+	 });
+    function spareCheckedCallback(dataRows,$tr){
+      var dataRow=dataRows[0];
+      $("input[name$='.spareId']",$tr).val(dataRow.spareId);  
+      $("input[name$='.spareName']",$tr).val(dataRow.spareName);  
+      $("input[name$='.spareCode']",$tr).val(dataRow.spareCode);  
+      $("input[name$='.model']",$tr).val(dataRow.model);  
+      $("input[name$='.spec']",$tr).val(dataRow.spec);  
+      $("input[name$='.availableQty']",$tr).val(dataRow.availableQty);  
+    }
+    
+    function caculate(){
+	$("input[name$='.spareName']").click(function(){
+	    var $tr=$(this).parents("tr");
+	    var warehouseId=$('#outWarehouseId').val();
+	    dialog({
+	        content: "load:$!{rc.contextPath}/spare/stock/lookup?warehouseId="+warehouseId+"&t="+new Date().getTime(),
+	        title: '选择',
+	        lock: false,
+	        width: 1200,
+	        height: 600,
+			ok : function(){
+			  return okClick($tr)
+			  //return this.content.okClick($tr)
+			},
+			okVal :'确定'
+	    });
+	}); 
+     var $table=$('#tableId');
+     var $sumQty=$('#sumQty');
+     
+     var $allQty=$("input[name$='.quantity']",$table);
+     $('tr:gt(0):not(:last)',$table).each(function(i,tr){
+         var $qty=$("input[name$='.quantity']",this);
+         var $availableQty=$("input[name$='.availableQty']",this);
+         $($qty).change(function(){
+            var v1=sum($allQty);
+            $sumQty.val(v1);
+         });                
+     });
+            var v1=sum($allQty);
+            $sumQty.val(v1);
+    }
+    
+    function sum(arr){
+      var s=0;
+      $(arr).each(function(i,item){
+           var val=$.trim($(item).val());
+	       s=s+val*1.0
+      })
+      return formatMoney(s);   
+    }
+    
+    function compare($a,$b){
+     var a=$.trim($a.val());
+     var b=$.trim($b.val());
+     try{
+      a=a.parseDouble();
+	  b=b.parseDouble();    
+     }catch(err){
+      alert(err)
+     }
+     return a-b;
+    }
+	</script>
+	</form>	

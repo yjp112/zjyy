@@ -1,0 +1,36 @@
+        <form class="ui-form">
+          <fieldset>
+            <div class="ui-form-item">
+              <label class="ui-label" for="" >设备名称</label>
+              <input class="ui-input" type="text" readonly="readonly" value="$!{realAlarm.showAlarmObject}">
+            </div>
+            <div class="ui-form-item">
+              <label class="ui-label" for="" >所属区域</label>
+              <input class="ui-input" type="text" readonly="readonly" value="$!{realAlarm.showAreaStr}">
+            </div>
+            <div class="ui-form-item">
+              <label class="ui-label" for="" >报警值</label>
+			  <input class="ui-input" type="text" readonly="readonly" value="$!{realAlarm.alarmData}">
+            </div>
+            <div class="ui-form-item">
+              <label class="ui-label" for="" >报警描述</label>
+              <input class="ui-input" type="text" readonly="readonly" value="$!{realAlarm.alarmRemark}">
+            </div>
+            <div class="ui-form-item">
+              <label class="ui-label" for="" >报警状态</label>
+              <input class="ui-input" type="text" readonly="readonly" #if($realAlarm.alarmState == 1) value="正在报警" #end #if($realAlarm.alarmState == 2) value="已恢复" #end #if($realAlarm.alarmState == 3) value="已消失" #end >
+            </div>
+            <div class="ui-form-item">
+              <label class="ui-label" for="" >报警时间</label>
+			  <input class="ui-input" type="text" readonly="readonly" value="$!{realAlarm.alarmTime}">
+            </div>
+
+            <div class="ui-form-item">
+              <label class="ui-label" for="" >恢复时间</label>
+              <input class="ui-input" type="text" readonly="readonly" value="$!{realAlarm.lastAlarmTime}" >
+            </div>
+
+
+
+          </fieldset>
+        </form>

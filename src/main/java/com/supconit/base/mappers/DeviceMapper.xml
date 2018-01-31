@@ -1,0 +1,2126 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.base.entities.Device">
+    <resultMap type="com.supconit.base.entities.DeviceTree" id="DeviceTreeResultMap">
+        <result property="id" column="ID" />
+        <result property="parentId" column="PARENT_ID" />
+        <result property="lft" column="LFT" />
+        <result property="rgt" column="RGT" />
+        <result property="deviceCode" column="DEVICE_CODE" />
+        <result property="deviceName" column="DEVICE_NAME" />
+        <result property="deviceSpec" column="DEVICE_SPEC" />
+        <result property="categoryId" column="CATEGORY_ID" />
+        <result property="categoryName" column="CATEGORY_NAME" />
+        <result property="locationId" column="LOCATION_ID" />
+        <result property="locationName" column="LOCATION_NAME" />
+        <result property="enableDate" column="ENABLE_DATE" />
+        <result property="manageDepartmentId" column="MANAGE_DEPARTMENT_ID" />
+        <result property="manageDepartmentName" column="MANAGE_DEPARTMENT_NAME" />
+        <result property="managePersonIds" column="MANAGE_PERSON_IDS" />
+        <result property="managePersonName" column="MANAGE_PERSON_NAME" />
+        <result property="useDepartmentId" column="USE_DEPARTMENT_ID" />
+        <result property="useDepartmentName" column="USE_DEPARTMENT_NAME" />
+        <result property="assetsCode" column="ASSETS_CODE" />
+        <result property="assetsCost" column="ASSETS_COST" />
+        <result property="barcode" column="BARCODE" />
+        <result property="maitainCycle" column="MAITAIN_CYCLE" />
+        <result property="status" column="STATUS" />
+        <result property="statusName" column="STATUS_NAME" />
+        <result property="deviceType" column="DEVICE_TYPE" />
+    </resultMap>
+	<resultMap type="com.supconit.base.entities.Device" id="DeviceResultMap">      
+        <result property="id" column="ID" />
+        <result property="parentId" column="PARENT_ID" />
+        <result property="deviceCode" column="DEVICE_CODE" />
+        <result property="deviceName" column="DEVICE_NAME" />
+        <result property="deviceSpec" column="DEVICE_SPEC" />
+        <result property="categoryId" column="CATEGORY_ID" />
+        <result property="locationId" column="LOCATION_ID" />
+        <result property="locationName" column="LOCATION_NAME" />
+        <result property="useDepartmentId" column="USE_DEPARTMENT_ID" />
+        <result property="manageDepartmentId" column="MANAGE_DEPARTMENT_ID" />
+        <result property="managePersonIds" column="MANAGE_PERSON_IDS" />
+        <result property="managePersonName" column="MANAGE_PERSON_NAME" />
+        <result property="supplierId" column="SUPPLIER_ID" />
+        <result property="maitainCycle" column="MAITAIN_CYCLE" />
+        <result property="timeAfterMaintain" column="TIME_AFTER_MAINTAIN" />
+        <result property="totalRunningTime" column="TOTAL_RUNNING_TIME" />
+        <result property="specialStatus" column="SPECIAL_STATUS" />
+        <result property="barcode" column="BARCODE" />
+        <result property="prduceDate" column="PRDUCE_DATE" />
+        <result property="assetsCode" column="ASSETS_CODE" />
+        <result property="enableDate" column="ENABLE_DATE" />
+        <result property="status" column="STATUS" />
+        <result property="assetsCost" column="ASSETS_COST" />
+        <result property="assetsResidual" column="ASSETS_RESIDUAL" />
+        <result property="depreciationAlgorithm" column="DEPRECIATION_ALGORITHM" />
+        <result property="depreciationRate" column="DEPRECIATION_RATE" />
+        <result property="depreciationYears" column="DEPRECIATION_YEARS" />
+        <result property="mapDisplay" column="MAP_DISPLAY" />
+        <result property="createId" column="CREATE_ID" />
+        <result property="creator" column="CREATOR" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="updateId" column="UPDATE_ID" />
+        <result property="updator" column="UPDATOR" />
+        <result property="updateDate" column="UPDATE_DATE" />
+        <result property="hpid" column="HPID" />
+        <result property="discipinesCode" column="DISCIPINES_CODE"/>
+        <result property="energyCode" column="ENERGY_CODE"/>
+        <result property="extended1" column="EXTENDED1"/>
+        <result property="extended2" column="EXTENDED2"/>
+		<result property="serviceArea" column="SERVICE_AREA"/>
+		<result property="serviceAreaId" column="SERVICE_AREA_ID"/>
+		
+        <result property="lastTotal" column="LAST_TOTAL" />
+        <result property="total" column="TOTAL" />
+        <result property="incremental" column="INCREMENTAL" />
+        <result property="collectTime" column="COLLECT_TIME" />
+        <result property="electricCategoryId" column="electricCategoryId" />
+        <result property="waterCategoryId" column="waterCategoryId" />
+        <result property="gasCategoryId" column="gasCategoryId" />
+	
+        <result property="categoryName" column="CATEGORY_NAME" />
+        <result property="statusName" column="STATUS_NAME" />
+        <result property="useDepartmentName" column="USE_DEPARTMENT_NAME" />
+        <result property="manageDepartmentName" column="MANAGE_DEPARTMENT_NAME" />
+        <result property="supplierName" column="SUPPLIER_NAME" />
+        <result property="useYears" column="USE_YEARS" />
+		<result property="openCloseStatus" column="OPEN_CLOSE_STATUS" />
+        <result property="imgPath" column="IMG_PATH" />
+        <result property="runningTime" column="RUNNING_TIME" />
+        <result property="gSystemRuleName" column="G_SYSTEM_RULE_NAME" />
+        <result property="gSystemRuleId" column="G_SYSTEM_RULE_ID" />
+		<result property="threeDimdisplay" column="THREE_DIM_DISPLAY" />
+        <result property="springEl" column="SPRING_EL" />
+        <result property="contractNo" column="CONTRACT_NO" />
+        <result property="deviceType" column="DEVICE_TYPE" />
+        <result property="repairType" column="REPAIR_TYPE" />
+        <result property="deviceCount" column="DEVICE_COUNT" />
+        <result property="alarmDeviceCount" column="ALARM_DEVICE_COUNT" />
+        <collection 
+        property="subDeviceList" javaType="com.supconit.base.entities.SubDevice">
+        <result property="id" column="d_ID" />
+        <result property="deviceId" column="d_DEVICE_ID" />
+        <result property="num" column="d_NUM" />
+        <result property="remark" column="d_REMARK" />
+        </collection>
+        <collection 
+        property="extendPropertyList" javaType="com.supconit.base.entities.DeviceExtendProperty">
+        <result property="id" column="p_ID" />
+        <result property="deviceId" column="p_DEVICE_ID" />
+        <result property="propertyId" column="p_PROPERTY_ID" />
+        <result property="propertyValue" column="p_PROPERTY_VALUE" />
+        </collection>
+	</resultMap>
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+	<sql id="column_device_sys">
+		A.ID,
+		A.DEVICE_CODE,
+		A.DEVICE_NAME,
+		A.DEVICE_SPEC,
+		A.CATEGORY_ID,
+		A.PARENT_ID,
+		A.LOCATION_ID,
+		(select gab.FULL_LEVEL_NAME from GEO_AREA gab where gab.id=A.LOCATION_ID) LOCATION_NAME,
+		A.USE_DEPARTMENT_ID,
+		A.MANAGE_DEPARTMENT_ID,
+		A.MANAGE_PERSON_IDS,
+		A.MANAGE_PERSON_NAME,
+		A.SUPPLIER_ID,
+		A.MAITAIN_CYCLE,
+		A.TIME_AFTER_MAINTAIN,
+		A.TOTAL_RUNNING_TIME,
+		A.SPECIAL_STATUS,
+		A.BARCODE,
+		A.PRDUCE_DATE,
+		A.ASSETS_CODE,
+		A.ENABLE_DATE,
+		A.STATUS,
+		A.ASSETS_COST,
+		A.ASSETS_RESIDUAL,
+		A.DEPRECIATION_ALGORITHM,
+		A.DEPRECIATION_RATE,
+		A.DEPRECIATION_YEARS,
+		A.MAP_DISPLAY,
+		A.CREATE_ID,
+		A.CREATOR,
+		A.CREATE_DATE,
+		A.UPDATE_ID,
+		A.UPDATOR,
+		A.UPDATE_DATE,
+		A.HPID,
+		A.DISCIPINES_CODE,
+		A.EXTENDED1,
+		A.CONTRACT_NO,
+		A.DEVICE_TYPE
+	</sql>
+	 <!-- 获取记录列表-->
+	<sql id="select_pre_sys">
+	    select 
+		<include refid="column_device_sys" />,
+		sub.NAME SUB_NAME,
+		sub.CODE SUB_CODE,
+		ISNULL(ele.TOTAL-ele.INCREMENTAL,0) LAST_TOTAL,
+	    ele.TOTAL,
+	    ele.INCREMENTAL,
+	    ele.COLLECT_TIME
+		FROM
+		NH_ELECTRIC_METER ele        
+        INNER JOIN DEVICE A
+        ON A.EXTENDED1 = ele.bit_no
+        INNER JOIN DEVICE_CATEGORY DC
+        ON A.CATEGORY_ID = DC.ID AND DC.CATEGORY_CODE = #{categoryCode}
+        LEFT JOIN NH_SUB_SYSTEM_INFO sub
+        ON A.DISCIPINES_CODE = sub.STANDARD_CODE
+	</sql>
+	<sql id="count_pre_sys">
+		SELECT
+		COUNT(1)
+		FROM
+		NH_ELECTRIC_METER ele        
+        INNER JOIN DEVICE A
+        ON A.EXTENDED1 = ele.bit_no
+        INNER JOIN DEVICE_CATEGORY DC
+        ON A.CATEGORY_ID = DC.ID AND DC.CATEGORY_CODE = #{categoryCode}
+        LEFT JOIN NH_SUB_SYSTEM_INFO sub
+        ON A.DISCIPINES_CODE = sub.STANDARD_CODE
+	</sql>
+	<select id="findById_sys" parameterType="long" resultMap="DeviceResultMap">
+        select
+        <include refid="column_device_sys" />,
+        sub.NAME SUB_NAME,
+        sub.CODE SUB_CODE,
+		ISNULL(ele.TOTAL-ele.INCREMENTAL,0) LAST_TOTAL,
+	    ele.TOTAL,
+	    ele.INCREMENTAL,
+	    ele.COLLECT_TIME
+		FROM
+		dbo.DEVICE A
+        LEFT JOIN NH_SUB_SYSTEM_INFO sub
+        ON A.DISCIPINES_CODE = sub.STANDARD_CODE
+        LEFT JOIN NH_ELECTRIC_METER ele
+        ON A.EXTENDED1 = ele.bit_no
+        where a.ID = #{id}
+    </select>
+	<sql id="condition_sql_sys">
+		<where>   
+        <if test="id != null  "> A.ID = #{id} and </if>
+        <if test="deviceCode != null and deviceCode != ''">	A.DEVICE_CODE like '%'+#{deviceCode}+'%' and </if>
+        <if test="deviceName != null and deviceName != ''">	A.DEVICE_NAME like '%'+#{deviceName}+'%' and </if>
+        <if test="deviceSpec != null and deviceSpec != ''">	A.DEVICE_SPEC like '%'+#{deviceSpec}+'%' and </if>
+        <if test="contractNo != null and contractNo != ''">	A.CONTRACT_NO like '%'+#{contractNo}+'%' and </if>
+        <!--if test="categoryId != null  "> A.CATEGORY_ID = #{categoryId} and </if>
+        <if test="locationId != null  "> A.LOCATION_ID = #{locationId} and </if-->
+        <if test="locationId != null and lstLocationId != null and lstLocationId.size()>0"> 
+        A.LOCATION_ID IN 
+        <foreach item="item" index="index" collection="lstLocationId" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and
+        </if>   
+        <if test="categoryId != null ">  A.CATEGORY_ID =#{categoryId} and </if>
+        <if test="useDepartmentId != null  "> A.USE_DEPARTMENT_ID = #{useDepartmentId} and </if>
+        <if test="manageDepartmentId != null  "> A.MANAGE_DEPARTMENT_ID = #{manageDepartmentId} and </if>
+        <if test="managePersonIds != null and managePersonIds != ''">	A.MANAGE_PERSON_IDS like '%'+#{managePersonIds}+'%' and </if>
+        <if test="managePersonName != null and managePersonName != ''">	A.MANAGE_PERSON_NAME like '%'+#{managePersonName}+'%' and </if>
+        <if test="supplierId != null  "> A.SUPPLIER_ID = #{supplierId} and </if>
+        <if test="maitainCycle != null  "> A.MAITAIN_CYCLE = #{maitainCycle} and </if>
+        <if test="timeAfterMaintain != null  "> A.TIME_AFTER_MAINTAIN = #{timeAfterMaintain} and </if>
+        <if test="totalRunningTime != null  "> A.TOTAL_RUNNING_TIME = #{totalRunningTime} and </if>
+        <if test="specialStatus != null  "> A.SPECIAL_STATUS = #{specialStatus} and </if>
+        <if test="barcode != null and barcode != ''">	A.BARCODE like '%'+#{barcode}+'%' and </if>
+        <if test="assetsCode != null and assetsCode != ''">	A.ASSETS_CODE like '%'+#{assetsCode}+'%' and </if>
+        <if test="prduceDate != null ">	A.PRDUCE_DATE = '#{prduceDate}' and  </if>
+        <if test="enableDate != null ">	A.ENABLE_DATE = '#{enableDate}' and  </if>
+        <if test="status != null  "> A.STATUS = #{status} and </if>
+        <if test="assetsCost != null  "> A.ASSETS_COST = #{assetsCost} and </if>
+        <if test="assetsResidual != null  "> A.ASSETS_RESIDUAL = #{assetsResidual} and </if>
+        <if test="depreciationAlgorithm != null  "> A.DEPRECIATION_ALGORITHM = #{depreciationAlgorithm} and </if>
+        <if test="depreciationRate != null  "> A.DEPRECIATION_RATE = #{depreciationRate} and </if>
+        <if test="depreciationYears != null  "> A.DEPRECIATION_YEARS = #{depreciationYears} and </if>
+        <if test="mapDisplay != null  "> A.MAP_DISPLAY = #{mapDisplay} and </if>
+        <if test="createId != null  "> A.CREATE_ID = #{createId} and </if>
+        <if test="creator != null and creator != ''">	A.CREATOR like '%'+#{creator}+'%' and </if>
+        <if test="createDate != null ">	A.CREATE_DATE = #{createDate} and  </if>
+        <if test="updateId != null  "> A.UPDATE_ID = #{updateId} and </if>
+        <if test="updator != null and updator != ''">	A.UPDATOR like '%'+#{updator}+'%' and </if>
+        <if test="updateDate != null ">	A.UPDATE_DATE = #{updateDate} and  </if>
+        <if test="startTime!=null">ele.COLLECT_TIME >=#{startTime} and</if>
+        <if test="endTime !=null">ele.COLLECT_TIME &lt;dateadd(day,1,#{endTime}) and</if>
+        (<if test="subCode!=null and subCode!='' ">sub.STANDARD_CODE=#{subCode} or</if>
+        <if test="subCode!=null and subCode!='' ">sub.PARENT_ID=#{subCode} and</if>
+        1=1)
+		</where>
+	</sql>
+	 <sql id="select_electric_pre_sys">
+        select
+        <include refid="column_device_sys" />,
+        dept.NAME as useDepartmentName,
+		deptm.NAME as managerDepartmentName,
+        sub.NAME SUB_NAME,
+        sub.CODE SUB_CODE,
+        ISNULL(ele.TOTAL-ele.INCREMENTAL,0) LAST_TOTAL,
+        ele.TOTAL,
+        ele.INCREMENTAL,
+        ele.COLLECT_TIME
+        FROM
+        NH_ELECTRIC_METER ele
+        INNER JOIN DEVICE A
+        ON A.EXTENDED1 = ele.bit_no
+        <if test="subCode!=null and subCode!='' ">
+            and A.DISCIPINES_CODE like #{subCode}+'%'
+        </if>
+        INNER JOIN DEVICE_CATEGORY DC
+        ON A.CATEGORY_ID = DC.ID AND DC.CATEGORY_CODE = #{categoryCode}
+        LEFT JOIN HO_DEPARTMENT dept ON dept.ID=A.USE_DEPARTMENT_ID
+        LEFT JOIN HO_DEPARTMENT deptm ON deptm.ID=A.MANAGE_DEPARTMENT_ID
+        LEFT JOIN NH_SUB_SYSTEM_INFO sub
+        ON A.DISCIPINES_CODE = sub.STANDARD_CODE
+    </sql>
+	<!-- 除水电气外的设备 -->
+	<sql id="condition_noweq_sql_sys">
+		<where>
+			A.ID NOT IN (SELECT DEVICE_ID FROM NH_DEVICE_METER) AND
+			<if test="locationId != null"> A.LOCATION_ID = #{locationId} and </if>
+			<if test="useDepartmentId != null "> A.USE_DEPARTMENT_ID = #{useDepartmentId} and </if>
+			<if test="deviceCode != null and deviceCode != ''">A.DEVICE_CODE like '%'+#{deviceCode}+'%' and </if>
+			<if test="deviceName != null and deviceName != ''">A.DEVICE_NAME like '%'+#{deviceName}+'%' and </if>
+			<if test="specialStatus != null "> A.SPECIAL_STATUS = #{specialStatus} and </if>
+			<!-- 获取不是水电气的设备 start -->
+			<if test="electricCategoryId != null">DC.CATEGORY_CODE != #{electricCategoryCode} and</if>
+			<if test="waterCategoryId != null">DC.CATEGORY_CODE != #{waterCategoryCode} and</if>
+			<if test="gasCategoryId != null">DC.CATEGORY_CODE != #{gasCategoryCode} and</if>
+			<!-- 获取不是水电气的设备 end -->
+			<if test="deviceIds != null and deviceIds.size()>0">
+				A.ID not in
+				<foreach item="item" index="index" collection="deviceIds" open="(" separator="," close=")">
+		            #{item}
+		        </foreach>
+		        and
+	        </if>
+			1=1
+		</where>
+	</sql>
+	<sql id="condition_elec_sql_sys">
+		<where>
+			<if test="deviceCode != null and deviceCode != ''">A.DEVICE_CODE like '%'+#{deviceCode}+'%' and </if>
+			<if test="deviceName != null and deviceName != ''">A.DEVICE_NAME like '%'+#{deviceName}+'%' and </if>
+			<if test="categoryId != null">A.CATEGORY_ID = #{categoryId} and</if><!-- 获取电的设备 -->
+			<if test="categoryCode != null">A.CATEGORY_ID IN (SELECT ID FROM DEVICE_CATEGORY WHERE CATEGORY_CODE = #{categoryCode}) and</if><!-- 获取水表，气表的设备 -->
+			<if test="deviceIds != null and deviceIds.size()>0">
+				A.ID not in
+				<foreach item="item" index="index" collection="deviceIds" open="(" separator="," close=")">
+		            #{item}
+		        </foreach>
+		        and
+	        </if>
+			1=1
+		</where>
+	</sql>
+	 <sql id="condition_electric_sql_sys">
+        <where>   
+        <if test="id != null  "> A.ID = #{id} and </if>
+        <if test="deviceCode != null and deviceCode != ''">	A.DEVICE_CODE like '%'+#{deviceCode}+'%' and </if>
+        <if test="deviceName != null and deviceName != ''">	A.DEVICE_NAME like '%'+#{deviceName}+'%' and </if>
+        <if test="deviceSpec != null and deviceSpec != ''">	A.DEVICE_SPEC like '%'+#{deviceSpec}+'%' and </if>
+        <!--if test="categoryId != null  "> A.CATEGORY_ID = #{categoryId} and </if>
+        <if test="locationId != null  "> A.LOCATION_ID = #{locationId} and </if-->
+        <if test="locationId != null and lstLocationId != null and lstLocationId.size()>0"> 
+        A.LOCATION_ID IN 
+        <foreach item="item" index="index" collection="lstLocationId" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and
+        </if>   
+        <if test="categoryId != null ">  A.CATEGORY_ID =#{categoryId} and </if>
+        <if test="useDepartmentId != null  "> A.USE_DEPARTMENT_ID = #{useDepartmentId} and </if>
+        <if test="manageDepartmentId != null  "> A.MANAGE_DEPARTMENT_ID = #{manageDepartmentId} and </if>
+        <if test="managePersonIds != null and managePersonIds != ''">	A.MANAGE_PERSON_IDS like '%'+#{managePersonIds}+'%' and </if>
+        <if test="managePersonName != null and managePersonName != ''">	A.MANAGE_PERSON_NAME like '%'+#{managePersonName}+'%' and </if>
+        <if test="supplierId != null  "> A.SUPPLIER_ID = #{supplierId} and </if>
+        <if test="maitainCycle != null  "> A.MAITAIN_CYCLE = #{maitainCycle} and </if>
+        <if test="timeAfterMaintain != null  "> A.TIME_AFTER_MAINTAIN = #{timeAfterMaintain} and </if>
+        <if test="totalRunningTime != null  "> A.TOTAL_RUNNING_TIME = #{totalRunningTime} and </if>
+        <if test="specialStatus != null  "> A.SPECIAL_STATUS = #{specialStatus} and </if>
+        <if test="barcode != null and barcode != ''">	A.BARCODE like '%'+#{barcode}+'%' and </if>
+        <if test="assetsCode != null and assetsCode != ''">	A.ASSETS_CODE like '%'+#{assetsCode}+'%' and </if>
+        <if test="prduceDate != null ">	A.PRDUCE_DATE = '#{prduceDate}' and  </if>
+        <if test="enableDate != null ">	A.ENABLE_DATE = '#{enableDate}' and  </if>
+        <if test="status != null  "> A.STATUS = #{status} and </if>
+        <if test="assetsCost != null  "> A.ASSETS_COST = #{assetsCost} and </if>
+        <if test="assetsResidual != null  "> A.ASSETS_RESIDUAL = #{assetsResidual} and </if>
+        <if test="depreciationAlgorithm != null  "> A.DEPRECIATION_ALGORITHM = #{depreciationAlgorithm} and </if>
+        <if test="depreciationRate != null  "> A.DEPRECIATION_RATE = #{depreciationRate} and </if>
+        <if test="depreciationYears != null  "> A.DEPRECIATION_YEARS = #{depreciationYears} and </if>
+        <if test="mapDisplay != null  "> A.MAP_DISPLAY = #{mapDisplay} and </if>
+        <if test="createId != null  "> A.CREATE_ID = #{createId} and </if>
+        <if test="creator != null and creator != ''">	A.CREATOR like '%'+#{creator}+'%' and </if>
+        <if test="createDate != null ">	A.CREATE_DATE = #{createDate} and  </if>
+        <if test="updateId != null  "> A.UPDATE_ID = #{updateId} and </if>
+        <if test="updator != null and updator != ''">	A.UPDATOR like '%'+#{updator}+'%' and </if>
+        <if test="updateDate != null ">	A.UPDATE_DATE = #{updateDate} and  </if>
+        <if test="startTime!=null">ele.COLLECT_TIME >=#{startTime} and</if>
+        <if test="endTime !=null">ele.COLLECT_TIME &lt;dateadd(day,1,#{endTime}) and</if>
+        1=1
+		</where>
+    </sql>
+	 <!-- 按条件查询记录-->
+	<select id="findByCondition_sys" parameterType="com.supconit.base.entities.Device" resultMap="DeviceResultMap">
+        <include refid="select_electric_pre_sys" />
+        <include refid="condition_electric_sql_sys"/>
+
+		ORDER BY  ELE.ID
+	</select>
+	<select id="findListByCondition_sys" parameterType="com.supconit.base.entities.Device" resultMap="DeviceResultMap">
+		SELECT 
+			A.ID,
+			A.DEVICE_CODE,
+			A.DEVICE_NAME,
+			(select gab.FULL_LEVEL_NAME from GEO_AREA gab where gab.id=A.LOCATION_ID) LOCATION_NAME,
+			C.NAME AS useDepartmentName,
+			D.NAME AS managerDepartmentName
+		FROM DEVICE A
+		LEFT JOIN DEVICE_CATEGORY DC ON A.CATEGORY_ID=DC.ID
+		LEFT JOIN GEO_AREA B ON A.LOCATION_ID=B.ID
+		LEFT JOIN HO_DEPARTMENT C ON A.USE_DEPARTMENT_ID = C.ID
+		LEFT JOIN HO_DEPARTMENT D ON A.MANAGE_DEPARTMENT_ID = D.ID
+		<include refid="condition_noweq_sql_sys"/>
+		ORDER BY A.ID
+	</select>
+	<select id="findListElectricByCondition_sys" parameterType="com.supconit.base.entities.Device" resultMap="DeviceResultMap">
+		SELECT 
+			A.ID,
+			A.DEVICE_CODE,
+			A.DEVICE_NAME,
+			(select gab.FULL_LEVEL_NAME from GEO_AREA gab where gab.id=A.LOCATION_ID) LOCATION_NAME,
+			C.NAME AS useDepartmentName,
+			D.NAME AS managerDepartmentName
+		FROM DEVICE A
+		LEFT JOIN GEO_AREA B ON A.LOCATION_ID=B.ID
+		LEFT JOIN HO_DEPARTMENT C ON A.USE_DEPARTMENT_ID = C.ID
+		LEFT JOIN HO_DEPARTMENT D ON A.MANAGE_DEPARTMENT_ID = D.ID
+		<include refid="condition_elec_sql_sys"/>
+		ORDER BY A.ID
+	</select>
+	<select id="findDeptElectricByCondition_sys" parameterType="com.supconit.base.entities.Device" resultMap="DeviceResultMap">
+		SELECT 
+			A.ID,
+			A.DEVICE_CODE,
+			A.DEVICE_NAME,
+			A.LOCATION_NAME,
+			C.NAME AS useDepartmentName,
+			D.NAME AS managerDepartmentName
+		FROM NH_ELECTRIC_METER_DEVICE EMD
+		LEFT JOIN DEVICE A ON A.ID = EMD.DEVICE_ID
+		LEFT JOIN HO_DEPARTMENT C ON A.USE_DEPARTMENT_ID = C.ID
+		LEFT JOIN HO_DEPARTMENT D ON A.MANAGE_DEPARTMENT_ID = D.ID
+		<include refid="condition_elec_sql_sys"/>
+		ORDER BY A.ID
+	</select>
+	<select id="findDeptGasByCondition_sys" parameterType="com.supconit.base.entities.Device" resultMap="DeviceResultMap">
+		SELECT 
+			A.ID,
+			A.DEVICE_CODE,
+			A.DEVICE_NAME,
+			(select gab.FULL_LEVEL_NAME from GEO_AREA gab where gab.id=A.LOCATION_ID) LOCATION_NAME,
+			C.NAME AS useDepartmentName,
+			D.NAME AS managerDepartmentName
+		FROM NH_GAS_METER_DEVICE EMD
+		LEFT JOIN DEVICE A ON A.ID = EMD.DEVICE_ID
+		LEFT JOIN HO_DEPARTMENT C ON A.USE_DEPARTMENT_ID = C.ID
+		LEFT JOIN HO_DEPARTMENT D ON A.MANAGE_DEPARTMENT_ID = D.ID
+		<include refid="condition_elec_sql_sys"/>
+		ORDER BY A.ID
+	</select>
+	
+	<select id="findDeptWaterByCondition_sys" parameterType="com.supconit.base.entities.Device" resultMap="DeviceResultMap">
+		SELECT 
+			A.ID,
+			A.DEVICE_CODE,
+			A.DEVICE_NAME,
+			(select gab.FULL_LEVEL_NAME from GEO_AREA gab where gab.id=A.LOCATION_ID) LOCATION_NAME,
+			C.NAME AS useDepartmentName,
+			D.NAME AS managerDepartmentName
+		FROM NH_WATER_METER_DEVICE EMD
+		LEFT JOIN DEVICE A ON A.ID = EMD.DEVICE_ID
+		LEFT JOIN HO_DEPARTMENT C ON A.USE_DEPARTMENT_ID = C.ID
+		LEFT JOIN HO_DEPARTMENT D ON A.MANAGE_DEPARTMENT_ID = D.ID
+		<include refid="condition_elec_sql_sys"/>
+		ORDER BY A.ID
+	</select>
+	
+	<select id="findDeptEnergyByCondition_sys" parameterType="com.supconit.base.entities.Device" resultMap="DeviceResultMap">
+		SELECT 
+			A.ID,
+			A.DEVICE_CODE,
+			A.DEVICE_NAME,
+			(select gab.FULL_LEVEL_NAME from GEO_AREA gab where gab.id=A.LOCATION_ID) LOCATION_NAME,
+			C.NAME AS useDepartmentName,
+			D.NAME AS managerDepartmentName
+		FROM NH_ENERGY_METER_DEVICE EMD
+		LEFT JOIN DEVICE A ON A.ID = EMD.DEVICE_ID
+		LEFT JOIN HO_DEPARTMENT C ON A.USE_DEPARTMENT_ID = C.ID
+		LEFT JOIN HO_DEPARTMENT D ON A.MANAGE_DEPARTMENT_ID = D.ID
+		<include refid="condition_elec_sql_sys"/>
+		ORDER BY A.ID
+	</select>
+	
+	<select id="countListByCondition_sys" parameterType="com.supconit.base.entities.Device" resultType="long">
+		SELECT count(*) FROM DEVICE A
+		<include refid="condition_noweq_sql_sys"/>
+	</select>
+	
+	<select id="countDeptElectricByCondition_sys" parameterType="com.supconit.base.entities.Device" resultType="long">
+		SELECT 
+			count(*)
+		FROM NH_ELECTRIC_METER_DEVICE EMD
+		LEFT JOIN DEVICE A ON A.ID=EMD.DEVICE_ID
+		<include refid="condition_elec_sql_sys"/>
+	</select>
+	
+	<select id="countDeptWaterByCondition_sys" parameterType="com.supconit.base.entities.Device" resultType="long">
+		SELECT 
+			count(*)
+		FROM NH_WATER_METER_DEVICE EMD
+		LEFT JOIN DEVICE A ON A.ID=EMD.DEVICE_ID
+		<include refid="condition_elec_sql_sys"/>
+	</select>
+	
+	<select id="countDeptGasByCondition_sys" parameterType="com.supconit.base.entities.Device" resultType="long">
+		SELECT 
+			count(*)
+		FROM NH_GAS_METER_DEVICE EMD
+		LEFT JOIN DEVICE A ON A.ID=EMD.DEVICE_ID
+		<include refid="condition_elec_sql_sys"/>
+	</select>
+	
+	<select id="countDeptEnergyByCondition_sys" parameterType="com.supconit.base.entities.Device" resultType="long">
+		SELECT 
+			count(*)
+		FROM NH_ENERGY_METER_DEVICE EMD
+		LEFT JOIN DEVICE A ON A.ID=EMD.DEVICE_ID
+		<include refid="condition_elec_sql_sys"/>
+	</select>
+	
+	<select id="findByBitNo_sys" parameterType="java.lang.String" resultMap="DeviceResultMap">
+		select ID from DEVICE where EXTENDED1 = #{bitNo}
+	</select>   
+    <sql id="count_electric_pre_sys">
+        select count(1)
+        FROM
+        NH_ELECTRIC_METER ele
+        INNER JOIN DEVICE A
+        ON A.EXTENDED1 = ele.bit_no
+        <if test="subCode!=null and subCode!='' ">
+            and A.DISCIPINES_CODE like #{subCode}+'%'
+        </if>
+        INNER JOIN DEVICE_CATEGORY DC
+        ON A.CATEGORY_ID = DC.ID AND DC.CATEGORY_CODE = #{categoryCode}
+        LEFT JOIN NH_SUB_SYSTEM_INFO sub
+        ON A.DISCIPINES_CODE = sub.STANDARD_CODE
+    </sql>
+    <select id="countByCondition_sys" parameterType="com.supconit.base.entities.Device" resultType="long">
+		<include refid="count_electric_pre_sys" />
+		<include refid="condition_electric_sql_sys" />
+	</select>
+	<!-- 电表按条件查询记录 start-->
+	<select id="findByConditionPower_sys" parameterType="com.supconit.base.entities.Device" resultMap="DeviceResultMap">
+		select
+        <include refid="column_device_sys" />
+        ,dpu.NAME USE_DEPARTMENT_NAME,sub.NAME SUB_NAME
+        from DEVICE A 
+        INNER JOIN DEVICE_CATEGORY DC
+        ON A.CATEGORY_ID = DC.ID AND DC.CATEGORY_CODE = #{barcode}
+        LEFT JOIN HO_DEPARTMENT dpu
+        ON A.USE_DEPARTMENT_ID = dpu.ID 
+        LEFT JOIN NH_SUB_SYSTEM_INFO sub
+        ON A.DISCIPINES_CODE = sub.STANDARD_CODE
+		<include refid="condition_sql_power_sys" />
+		order by a.id
+	</select>
+	<select id="countByConditionPower_sys" parameterType="com.supconit.base.entities.Device" resultType="long">
+		SELECT
+		COUNT(*)
+		FROM
+		dbo.DEVICE A
+		INNER JOIN DEVICE_CATEGORY DC
+        ON A.CATEGORY_ID = DC.ID AND DC.CATEGORY_CODE = #{barcode}
+		<include refid="condition_sql_power_sys" />
+	</select>
+	<sql id="condition_sql_power_sys">
+		WHERE 
+        <if test="deviceCode != null and deviceCode != ''">	A.DEVICE_CODE like '%'+#{deviceCode}+'%' and </if>
+        <if test="deviceName != null and deviceName != ''">	A.DEVICE_NAME like '%'+#{deviceName}+'%' and </if>
+        <if test="extended1 != null and extended1 != ''">	A.EXTENDED1 like '%'+#{extended1}+'%' and </if>
+        <!--if test="categoryId != null  "> A.CATEGORY_ID = #{categoryId} and </if>
+        <if test="locationId != null  "> A.LOCATION_ID = #{locationId} and </if-->
+        <if test="locationId != null and lstLocationId != null and lstLocationId.size()>0"> 
+        A.LOCATION_ID IN 
+        <foreach item="item" index="index" collection="lstLocationId" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and
+        </if> 
+         
+        <if test="discipinesCode != null and discipinesCode != ''">	A.DISCIPINES_CODE = #{discipinesCode} and </if> 
+        (<if test="useDepartmentId != null">	dpu.ID = #{useDepartmentId} or </if>     
+        <if test="useDepartmentId != null">	dpu.PID = #{useDepartmentId} and </if>     
+		1=1)
+	</sql>
+	<!-- 电表按条件查询记录 end-->
+	<!-- 更新记录-->
+	<update id="update_sys" parameterType="com.supconit.base.entities.Device">
+		UPDATE DEVICE
+		<set>
+        <if test="deviceCode != null">DEVICE_CODE = #{deviceCode,jdbcType=VARCHAR},</if>
+        <if test="deviceName != null">DEVICE_NAME = #{deviceName,jdbcType=VARCHAR},</if>
+        <if test="deviceSpec != null">DEVICE_SPEC = #{deviceSpec,jdbcType=VARCHAR},</if>
+        <if test="categoryId != null">CATEGORY_ID = #{categoryId,jdbcType=NUMERIC},</if>
+        <if test="parentId != null">PARENT_ID = #{parentId,jdbcType=NUMERIC},</if>
+        <if test="locationId != null">LOCATION_ID = #{locationId,jdbcType=NUMERIC},</if>
+        <if test="locationName != null">LOCATION_NAME = #{locationName,jdbcType=VARCHAR},</if>
+        <if test="useDepartmentId != null">USE_DEPARTMENT_ID = #{useDepartmentId,jdbcType=NUMERIC},</if>
+        <if test="manageDepartmentId != null">MANAGE_DEPARTMENT_ID = #{manageDepartmentId,jdbcType=NUMERIC},</if>
+        <if test="managePersonIds != null">MANAGE_PERSON_IDS = #{managePersonIds,jdbcType=VARCHAR},</if>
+        <if test="managePersonName != null">MANAGE_PERSON_NAME = #{managePersonName,jdbcType=VARCHAR},</if>
+        <if test="supplierId != null">SUPPLIER_ID = #{supplierId,jdbcType=NUMERIC},</if>
+        <if test="maitainCycle != null">MAITAIN_CYCLE = #{maitainCycle,jdbcType=NUMERIC},</if>
+        <if test="timeAfterMaintain != null">TIME_AFTER_MAINTAIN = #{timeAfterMaintain,jdbcType=NUMERIC},</if>
+        <if test="totalRunningTime != null">TOTAL_RUNNING_TIME = #{totalRunningTime,jdbcType=NUMERIC},</if>
+        <if test="specialStatus != null">SPECIAL_STATUS = #{specialStatus,jdbcType=NUMERIC},</if>
+        <if test="barcode != null">BARCODE = #{barcode,jdbcType=VARCHAR},</if>
+        <if test="prduceDate != null">PRDUCE_DATE = #{prduceDate,jdbcType=TIMESTAMP},</if>
+        <if test="assetsCode != null">ASSETS_CODE = #{assetsCode,jdbcType=VARCHAR},</if>
+        <if test="enableDate != null">ENABLE_DATE = #{enableDate,jdbcType=TIMESTAMP},</if>
+        <if test="status != null">STATUS = #{status,jdbcType=NUMERIC},</if>
+        <if test="assetsCost != null">ASSETS_COST = #{assetsCost,jdbcType=NUMERIC},</if>
+        <if test="assetsResidual != null">ASSETS_RESIDUAL = #{assetsResidual,jdbcType=NUMERIC},</if>
+        <if test="depreciationAlgorithm != null">DEPRECIATION_ALGORITHM = #{depreciationAlgorithm,jdbcType=NUMERIC},</if>
+        <if test="depreciationRate != null">DEPRECIATION_RATE = #{depreciationRate,jdbcType=NUMERIC},</if>
+        <if test="depreciationYears != null">DEPRECIATION_YEARS = #{depreciationYears,jdbcType=NUMERIC},</if>
+        <if test="mapDisplay != null">MAP_DISPLAY = #{mapDisplay,jdbcType=NUMERIC},</if>
+        <if test="createId != null">CREATE_ID = #{createId,jdbcType=NUMERIC},</if>
+        <if test="creator != null">CREATOR = #{creator,jdbcType=VARCHAR},</if>
+        <if test="createDate != null">CREATE_DATE = #{createDate,jdbcType=TIMESTAMP},</if>
+        <if test="updateId != null">UPDATE_ID = #{updateId,jdbcType=NUMERIC},</if>
+        <if test="updator != null">UPDATOR = #{updator,jdbcType=VARCHAR},</if>
+        <if test="updateDate != null">UPDATE_DATE = #{updateDate,jdbcType=TIMESTAMP},</if>
+        <if test="discipinesCode != null">DISCIPINES_CODE = #{discipinesCode,jdbcType=VARCHAR},</if>
+        <if test="extended1 != null">EXTENDED1 = #{extended1,jdbcType=VARCHAR},</if>
+        <if test="contractNo != null">CONTRACT_NO = #{contractNo,jdbcType=VARCHAR},</if>
+        <if test="deviceType != null">DEVICE_TYPE = #{deviceType,jdbcType=NUMERIC},</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+	
+	<sql id="column_device" lang="velocity">
+		A.ID,
+		A.DEVICE_CODE,
+		A.EXTENDED1,
+		A.EXTENDED2,
+		A.DEVICE_NAME,
+		A.DEVICE_SPEC,
+		A.CATEGORY_ID,
+		A.PARENT_ID,
+		A.LOCATION_ID,
+		(select b.FULL_LEVEL_NAME from GEO_AREA b where b.id=a.LOCATION_ID) LOCATION_NAME,
+		A.USE_DEPARTMENT_ID,
+		A.MANAGE_DEPARTMENT_ID,
+		A.MANAGE_PERSON_IDS,
+		A.MANAGE_PERSON_NAME,
+		A.SUPPLIER_ID,
+		(select s.full_name from supplier s where s.id=a.supplier_id) supplier_name,
+		A.MAITAIN_CYCLE,
+		A.TIME_AFTER_MAINTAIN,
+		A.TOTAL_RUNNING_TIME,
+		A.SPECIAL_STATUS,
+		A.BARCODE,
+		A.PRDUCE_DATE,
+		A.ASSETS_CODE,
+		A.ENABLE_DATE,
+		A.STATUS,
+		A.ASSETS_COST,
+		A.ASSETS_RESIDUAL,
+		A.DEPRECIATION_ALGORITHM,
+		A.DEPRECIATION_RATE,
+		A.DEPRECIATION_YEARS,
+		A.MAP_DISPLAY,
+		A.CREATE_ID,
+		A.CREATOR,
+		A.CREATE_DATE,
+		A.UPDATE_ID,
+		A.UPDATOR,
+		A.UPDATE_DATE,
+		A.HPID,
+		A.G_SYSTEM_RULE_ID,
+		A.THREE_DIM_DISPLAY,
+		A.ALARM_TYPE_ID,
+		A.SPRING_EL,
+		A.CONTRACT_NO,
+		A.DEVICE_TYPE
+	</sql>
+	<sql id="column2_device">
+		A.ID,
+		A.DEVICE_CODE,
+		A.DEVICE_NAME,
+		A.DEVICE_SPEC,
+		A.CATEGORY_ID,
+		A.PARENT_ID,
+		A.LOCATION_ID,
+		(select b.FULL_LEVEL_NAME from GEO_AREA b where b.id=a.LOCATION_ID) LOCATION_NAME,
+		A.USE_DEPARTMENT_ID,
+		A.MANAGE_DEPARTMENT_ID,
+		A.MANAGE_PERSON_IDS,
+		A.MANAGE_PERSON_NAME,
+		A.SUPPLIER_ID,
+		A.MAITAIN_CYCLE,
+		A.TIME_AFTER_MAINTAIN,
+		A.TOTAL_RUNNING_TIME,
+		A.SPECIAL_STATUS,
+		A.BARCODE,
+		A.PRDUCE_DATE,
+		A.ASSETS_CODE,
+		A.ENABLE_DATE,
+		A.STATUS,
+		A.ASSETS_COST,
+		A.ASSETS_RESIDUAL,
+		A.DEPRECIATION_ALGORITHM,
+		A.DEPRECIATION_RATE,
+		A.DEPRECIATION_YEARS,
+		A.MAP_DISPLAY,
+		A.CREATE_ID,
+		A.CREATOR,
+		A.CREATE_DATE,
+		A.UPDATE_ID,
+		A.UPDATOR,
+		A.UPDATE_DATE,
+		A.HPID,
+		A.G_SYSTEM_RULE_ID,
+		A.THREE_DIM_DISPLAY,
+		A.ALARM_TYPE_ID,
+		A.SPRING_EL,
+		A.CONTRACT_NO,
+		A.DEVICE_TYPE,
+		A.REPAIR_TYPE
+	</sql>
+    <!-- 获取记录列表-->
+	<sql id="select_pre" lang="velocity">
+	    select 
+		<include refid="column_device" />,
+		gsr.name G_SYSTEM_RULE_NAME,
+		dpu.NAME USE_DEPARTMENT_NAME,
+		dpm.NAME MANAGE_DEPARTMENT_NAME,
+	    E1.ENUM_TEXT AS STATUS_NAME,
+	    dc.CATEGORY_NAME,
+	    #if($_databaseId=='oracle')
+	   		nvl(months_between(Sysdate,A.ENABLE_DATE)/12,0)
+	   	#else
+		    ISNULL(DATEDIFF(month,A.ENABLE_DATE,getdate())/12,0)
+		#end 
+	    USE_YEARS
+		FROM
+		DEVICE A
+		LEFT JOIN DEVICE_CATEGORY dc
+        ON A.CATEGORY_ID = dc.ID 
+        LEFT JOIN HO_DEPARTMENT dpu
+        ON A.USE_DEPARTMENT_ID = dpu.ID 
+        LEFT JOIN HO_DEPARTMENT dpm
+        ON A.MANAGE_DEPARTMENT_ID = dpm.ID 
+	    LEFT JOIN ENUM_DETAIL E1
+        ON A.STATUS = E1.ENUM_VALUE 
+        AND E1.TYPE_ID = 4
+        left join G_SYSTEM_RULE gsr 
+        on gsr.id = a.G_SYSTEM_RULE_ID
+	</sql>
+	<sql id="count_pre" lang="velocity">
+		SELECT
+		COUNT(*)
+		FROM
+		DEVICE A
+		INNER JOIN DEVICE_CATEGORY dc
+        ON A.CATEGORY_ID = dc.ID 
+        LEFT JOIN HO_DEPARTMENT dpu
+        ON A.USE_DEPARTMENT_ID = dpu.ID 
+        LEFT JOIN HO_DEPARTMENT dpm
+        ON A.MANAGE_DEPARTMENT_ID = dpm.ID 
+	    LEFT JOIN ENUM_DETAIL E1
+        ON A.STATUS = E1.ENUM_VALUE 
+        AND E1.TYPE_ID = 4
+	</sql>
+	<sql id="TABLE_NAME" lang="velocity">DEVICE</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>	
+	<insert id="insert" parameterType="com.supconit.base.entities.Device" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    <insert id="insert" parameterType="com.supconit.base.entities.Device" 
+		keyProperty="id" keyColumn="ID" 		lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>        
+		<include refid="INSERT_SQL" />
+	</insert>
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO DEVICE
+		(#if($_databaseId=='oracle') ID,#end 
+	        DEVICE_CODE,
+	        DEVICE_NAME,
+	        DEVICE_SPEC,
+	        CATEGORY_ID,
+	        PARENT_ID,
+	        LOCATION_ID,
+	        LOCATION_NAME,
+	        USE_DEPARTMENT_ID,
+	        MANAGE_DEPARTMENT_ID,
+	        MANAGE_PERSON_IDS,
+	        MANAGE_PERSON_NAME,
+	        SUPPLIER_ID,
+	        MAITAIN_CYCLE,
+	        TIME_AFTER_MAINTAIN,
+	        TOTAL_RUNNING_TIME,
+	        SPECIAL_STATUS,
+	        BARCODE,
+	        PRDUCE_DATE,
+	        ASSETS_CODE,
+	        ENABLE_DATE,
+	        STATUS,
+	        ASSETS_COST,
+	        ASSETS_RESIDUAL,
+	        DEPRECIATION_ALGORITHM,
+	        DEPRECIATION_RATE,
+	        DEPRECIATION_YEARS,
+	        MAP_DISPLAY,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE,
+	        UPDATE_ID,
+	        UPDATOR,
+	        UPDATE_DATE,
+	        HPID,
+	        G_SYSTEM_RULE_ID,
+	        THREE_DIM_DISPLAY,
+	        ALARM_TYPE_ID,
+	        SPRING_EL,
+	        CONTRACT_NO,
+	        DEVICE_TYPE,
+	        REPAIR_TYPE
+		) VALUES (        
+		#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end	
+        @{_parameter.deviceCode,jdbcType=VARCHAR},
+        @{_parameter.deviceName,jdbcType=VARCHAR},
+        @{_parameter.deviceSpec,jdbcType=VARCHAR},
+        @{_parameter.categoryId,jdbcType=NUMERIC},
+        @{_parameter.parentId,jdbcType=NUMERIC},
+        @{_parameter.locationId,jdbcType=NUMERIC},
+        @{_parameter.locationName,jdbcType=VARCHAR},
+        @{_parameter.useDepartmentId,jdbcType=NUMERIC},
+        @{_parameter.manageDepartmentId,jdbcType=NUMERIC},
+        @{_parameter.managePersonIds,jdbcType=VARCHAR},
+        @{_parameter.managePersonName,jdbcType=VARCHAR},
+        @{_parameter.supplierId,jdbcType=NUMERIC},
+        @{_parameter.maitainCycle,jdbcType=NUMERIC},
+        @{_parameter.timeAfterMaintain,jdbcType=NUMERIC},
+        @{_parameter.totalRunningTime,jdbcType=NUMERIC},
+        @{_parameter.specialStatus,jdbcType=NUMERIC},
+        @{_parameter.barcode,jdbcType=VARCHAR},
+        @{_parameter.prduceDate,jdbcType=TIMESTAMP},
+        @{_parameter.assetsCode,jdbcType=VARCHAR},
+        @{_parameter.enableDate,jdbcType=TIMESTAMP},
+        @{_parameter.status,jdbcType=NUMERIC},
+        @{_parameter.assetsCost,jdbcType=NUMERIC},
+        @{_parameter.assetsResidual,jdbcType=NUMERIC},
+        @{_parameter.depreciationAlgorithm,jdbcType=NUMERIC},
+        @{_parameter.depreciationRate,jdbcType=NUMERIC},
+        @{_parameter.depreciationYears,jdbcType=NUMERIC},
+        @{_parameter.mapDisplay,jdbcType=NUMERIC},
+        @{_parameter.createId,jdbcType=NUMERIC},
+        @{_parameter.creator,jdbcType=VARCHAR},
+        @{_parameter.createDate,jdbcType=TIMESTAMP},
+        @{_parameter.updateId,jdbcType=NUMERIC},
+        @{_parameter.updator,jdbcType=VARCHAR},
+        @{_parameter.updateDate,jdbcType=TIMESTAMP},
+        @{_parameter.hpid,jdbcType=VARCHAR},
+        @{_parameter.gSystemRuleId,jdbcType=VARCHAR},
+        @{_parameter.threeDimdisplay ,jdbcType=VARCHAR},
+        @{_parameter.alarmTypeId ,jdbcType=VARCHAR},
+        @{_parameter.springEl,jdbcType=VARCHAR},
+        @{_parameter.contractNo,jdbcType=VARCHAR},
+        @{_parameter.deviceType,jdbcType=NUMERIC},  		
+        @{_parameter.repairType,jdbcType=VARCHAR}  		
+		)
+	</sql>		        	   
+    <!-- 插入记录-->
+	<sql id="insert_sql">
+		INSERT INTO DEVICE(        
+        DEVICE_CODE,
+        DEVICE_NAME,
+        DEVICE_SPEC,
+        CATEGORY_ID,
+        PARENT_ID,
+        LOCATION_ID,
+        LOCATION_NAME,
+        USE_DEPARTMENT_ID,
+        MANAGE_DEPARTMENT_ID,
+        MANAGE_PERSON_IDS,
+        MANAGE_PERSON_NAME,
+        SUPPLIER_ID,
+        MAITAIN_CYCLE,
+        TIME_AFTER_MAINTAIN,
+        TOTAL_RUNNING_TIME,
+        SPECIAL_STATUS,
+        BARCODE,
+        PRDUCE_DATE,
+        ASSETS_CODE,
+        ENABLE_DATE,
+        STATUS,
+        ASSETS_COST,
+        ASSETS_RESIDUAL,
+        DEPRECIATION_ALGORITHM,
+        DEPRECIATION_RATE,
+        DEPRECIATION_YEARS,
+        MAP_DISPLAY,
+        CREATE_ID,
+        CREATOR,
+        CREATE_DATE,
+        UPDATE_ID,
+        UPDATOR,
+        UPDATE_DATE,
+        HPID,
+        G_SYSTEM_RULE_ID,
+        THREE_DIM_DISPLAY,
+        ALARM_TYPE_ID,
+        SPRING_EL,
+        CONTRACT_NO,
+        DEVICE_TYPE
+		) VALUES (        
+        #{deviceCode,jdbcType=VARCHAR},
+        #{deviceName,jdbcType=VARCHAR},
+        #{deviceSpec,jdbcType=VARCHAR},
+        #{categoryId,jdbcType=NUMERIC},
+        #{parentId,jdbcType=NUMERIC},
+        #{locationId,jdbcType=NUMERIC},
+        #{locationName,jdbcType=VARCHAR},
+        #{useDepartmentId,jdbcType=NUMERIC},
+        #{manageDepartmentId,jdbcType=NUMERIC},
+        #{managePersonIds,jdbcType=VARCHAR},
+        #{managePersonName,jdbcType=VARCHAR},
+        #{supplierId,jdbcType=NUMERIC},
+        #{maitainCycle,jdbcType=NUMERIC},
+        #{timeAfterMaintain,jdbcType=NUMERIC},
+        #{totalRunningTime,jdbcType=NUMERIC},
+        #{specialStatus,jdbcType=NUMERIC},
+        #{barcode,jdbcType=VARCHAR},
+        #{prduceDate,jdbcType=TIMESTAMP},
+        #{assetsCode,jdbcType=VARCHAR},
+        #{enableDate,jdbcType=TIMESTAMP},
+        #{status,jdbcType=NUMERIC},
+        #{assetsCost,jdbcType=NUMERIC},
+        #{assetsResidual,jdbcType=NUMERIC},
+        #{depreciationAlgorithm,jdbcType=NUMERIC},
+        #{depreciationRate,jdbcType=NUMERIC},
+        #{depreciationYears,jdbcType=NUMERIC},
+        #{mapDisplay,jdbcType=NUMERIC},
+        #{createId,jdbcType=NUMERIC},
+        #{creator,jdbcType=VARCHAR},
+        #{createDate,jdbcType=TIMESTAMP},
+        #{updateId,jdbcType=NUMERIC},
+        #{updator,jdbcType=VARCHAR},
+        #{updateDate,jdbcType=TIMESTAMP},
+        #{hpid,jdbcType=VARCHAR},
+        #{gSystemRuleId,jdbcType=VARCHAR},
+        #{threeDimdisplay ,jdbcType=VARCHAR},
+        #{alarmTypeId ,jdbcType=VARCHAR},
+        #{springEl,jdbcType=VARCHAR},
+        #{contractNo,jdbcType=VARCHAR},
+        #{deviceType,jdbcType=NUMERIC}         		
+		)
+	</sql>
+
+	<select id="getById" resultMap="DeviceResultMap" parameterType="Long" lang="velocity">
+		<include refid="select_pre" />        
+        WHERE A.ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+	
+	<select id="findById" parameterType="long" resultMap="DeviceResultMap">
+        select
+        <include refid="column2_device" />,
+    <!--   gsr.name G_SYSTEM_RULE_NAME,-->
+        dc.CATEGORY_NAME,     
+        dept1.NAME USE_DEPARTMENT_NAME,    
+        dept2.NAME MANAGE_DEPARTMENT_NAME ,
+        s.FULL_NAME  SUPPLIER_NAME
+        from DEVICE a
+        left join HO_DEPARTMENT dept1
+        on a.USE_DEPARTMENT_ID = dept1.ID 
+        left join HO_DEPARTMENT dept2
+        on a.MANAGE_DEPARTMENT_ID = dept2.ID 
+        left join SUPPLIER s
+        on a.SUPPLIER_ID = s.ID         
+		INNER JOIN DEVICE_CATEGORY dc
+        ON A.CATEGORY_ID = dc.ID 
+   <!--     left join G_SYSTEM_RULE gsr
+        on gsr.id = a.G_SYSTEM_RULE_ID-->
+        where a.ID = #{id}
+        
+    </select>
+
+	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.base.entities.Device">
+		UPDATE	DEVICE
+		<set>
+        <if test="deviceCode != null">DEVICE_CODE = #{deviceCode,jdbcType=VARCHAR},</if>
+        <if test="deviceName != null">DEVICE_NAME = #{deviceName,jdbcType=VARCHAR},</if>
+        <if test="deviceSpec != null">DEVICE_SPEC = #{deviceSpec,jdbcType=VARCHAR},</if>
+        <if test="categoryId != null">CATEGORY_ID = #{categoryId,jdbcType=NUMERIC},</if>
+        <if test="parentId != null">PARENT_ID = #{parentId,jdbcType=NUMERIC},</if>
+        <if test="locationId != null">LOCATION_ID = #{locationId,jdbcType=NUMERIC},</if>
+        <if test="locationName != null">LOCATION_NAME = #{locationName,jdbcType=VARCHAR},</if>
+        <if test="useDepartmentId != null">USE_DEPARTMENT_ID = #{useDepartmentId,jdbcType=NUMERIC},</if>
+        <if test="manageDepartmentId != null">MANAGE_DEPARTMENT_ID = #{manageDepartmentId,jdbcType=NUMERIC},</if>
+        <if test="managePersonIds != null">MANAGE_PERSON_IDS = #{managePersonIds,jdbcType=VARCHAR},</if>
+        <if test="managePersonName != null">MANAGE_PERSON_NAME = #{managePersonName,jdbcType=VARCHAR},</if>
+        SUPPLIER_ID = #{supplierId,jdbcType=NUMERIC},
+        MAITAIN_CYCLE = #{maitainCycle,jdbcType=NUMERIC},
+        <if test="timeAfterMaintain != null">TIME_AFTER_MAINTAIN = #{timeAfterMaintain,jdbcType=NUMERIC},</if>
+        <if test="totalRunningTime != null">TOTAL_RUNNING_TIME = #{totalRunningTime,jdbcType=NUMERIC},</if>
+        <if test="specialStatus != null">SPECIAL_STATUS = #{specialStatus,jdbcType=NUMERIC},</if>
+        <if test="barcode != null">BARCODE = #{barcode,jdbcType=VARCHAR},</if>
+        <if test="prduceDate != null">PRDUCE_DATE = #{prduceDate,jdbcType=TIMESTAMP},</if>
+        <if test="assetsCode != null">ASSETS_CODE = #{assetsCode,jdbcType=VARCHAR},</if>
+        <if test="enableDate != null">ENABLE_DATE = #{enableDate,jdbcType=TIMESTAMP},</if>
+        <if test="status != null">STATUS = #{status,jdbcType=NUMERIC},</if>
+        ASSETS_COST = #{assetsCost,jdbcType=NUMERIC},
+        <if test="assetsResidual != null">ASSETS_RESIDUAL = #{assetsResidual,jdbcType=NUMERIC},</if>
+        <if test="depreciationAlgorithm != null">DEPRECIATION_ALGORITHM = #{depreciationAlgorithm,jdbcType=NUMERIC},</if>
+        <if test="depreciationRate != null">DEPRECIATION_RATE = #{depreciationRate,jdbcType=NUMERIC},</if>
+        <if test="depreciationYears != null">DEPRECIATION_YEARS = #{depreciationYears,jdbcType=NUMERIC},</if>
+        <if test="mapDisplay != null">MAP_DISPLAY = #{mapDisplay,jdbcType=NUMERIC},</if>
+        <if test="createId != null">CREATE_ID = #{createId,jdbcType=NUMERIC},</if>
+        <if test="creator != null">CREATOR = #{creator,jdbcType=VARCHAR},</if>
+        <if test="createDate != null">CREATE_DATE = #{createDate,jdbcType=TIMESTAMP},</if>
+        <if test="updateId != null">UPDATE_ID = #{updateId,jdbcType=NUMERIC},</if>
+        <if test="updator != null">UPDATOR = #{updator,jdbcType=VARCHAR},</if>
+        <if test="updateDate != null">UPDATE_DATE = #{updateDate,jdbcType=TIMESTAMP},</if>
+		<if test="gSystemRuleId != null">G_SYSTEM_RULE_ID = #{gSystemRuleId,jdbcType=NUMERIC},</if>
+		<if test="threeDimdisplay  != null">THREE_DIM_DISPLAY = #{threeDimdisplay ,jdbcType=NUMERIC},</if>
+		<if test="alarmTypeId  != null">ALARM_TYPE_ID = #{alarmTypeId ,jdbcType=NUMERIC},</if>
+		<if test="springEl  != null">SPRING_EL = #{springEl ,jdbcType=VARCHAR},</if>
+		<if test="hpid  != null">HPID = #{hpid ,jdbcType=VARCHAR},</if>
+		<if test="contractNo  != null">CONTRACT_NO = #{contractNo ,jdbcType=VARCHAR},</if>
+		<if test="deviceType != null">DEVICE_TYPE = #{deviceType,jdbcType=NUMERIC},</if>
+		REPAIR_TYPE = #{repairType,jdbcType=VARCHAR}
+		</set>
+		WHERE ID = #{id}
+	</update>
+	
+	<update id="updateAssetsCode" parameterType="map">
+		UPDATE	DEVICE SET ASSETS_CODE = #{assetsCode,jdbcType=VARCHAR} WHERE ASSETS_CODE = #{oldAssetsCode,jdbcType=VARCHAR}
+	</update>
+    <!-- 通过 ID 获取对象-->
+	<delete id="deleteById" parameterType="Long">
+		DELETE FROM DEVICE WHERE ID = #{id}
+	</delete>
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+		#where()  
+			#set($_p = $_parameter.condition)
+			
+			1=1		
+			#if($_p.id)
+				#set($_id = $_p.id)
+				AND A.ID = @{_id,jdbcType=BIGINT}
+			#end		
+			#if($_p.gSystemRuleId)
+				#set($_gSystemRuleId = $_p.gSystemRuleId)
+				AND A.G_SYSTEM_RULE_ID = @{_gSystemRuleId,jdbcType=BIGINT}
+			#end
+			#if($_p.categoryCode)
+				#set($_categoryCode = $_p.categoryCode)
+				AND DC.CATEGORY_CODE = @{_categoryCode,jdbcType=VARCHAR}
+			#end
+			#if($_p.deviceType)
+				#set($_deviceType = $_p.deviceType)
+				AND DC.DEVICE_TYPE = @{_deviceType,jdbcType=BIGINT}
+			#end
+			#if($_p.hpid && $_p.hpid != '')
+				#set($_hpid = '%' + $_p.hpid + '%')
+				AND A.HPID LIKE @{_hpid,jdbcType=VARCHAR}
+			#end						
+			#if($_p.deviceCode && $_p.deviceCode != '')
+				#set($_deviceCode = '%' + $_p.deviceCode + '%')
+				AND A.DEVICE_CODE LIKE @{_deviceCode,jdbcType=VARCHAR}
+			#end	
+			
+			#if($_p.serviceAreaId)
+				#set($_serviceAreaId = $_p.serviceAreaId)
+				AND A.SERVICE_AREA_ID =@{_serviceAreaId,jdbcType=BIGINT}
+			#end
+			
+									
+			#if($_p.deviceName && $_p.deviceName != '')
+				#set($_deviceName = '%' + $_p.deviceName + '%')
+				AND A.DEVICE_NAME LIKE @{_deviceName,jdbcType=VARCHAR}
+			#end						
+			#if($_p.deviceSpec && $_p.deviceSpec != '')
+				#set($_deviceSpec = '%' + $_p.deviceSpec + '%')
+				AND A.DEVICE_SPEC LIKE @{_deviceSpec,jdbcType=VARCHAR}
+			#end
+			#if($_p.lstLocationId && $_p.lstLocationId.size()>0)
+				#set($_lstLocationId =$_p.lstLocationId)
+				AND 
+				#repeat( $_lstLocationId $id "," " A.LOCATION_ID IN  (" ")" )
+		    		@{id,jdbcType=BIGINT}
+				#end
+			#end						
+			#if($_p.lstCategoryId && $_p.lstCategoryId.size()>0)
+				#set($_lstCategoryId =$_p.lstCategoryId)
+				AND 
+				#repeat( $_lstCategoryId $id "," " A.CATEGORY_ID IN  (" ")" )
+		    		@{id,jdbcType=BIGINT}
+				#end
+			#end			
+			#if($_p.useDepartmentId)
+				#set($_useDepartmentId = $_p.useDepartmentId)
+				AND A.USE_DEPARTMENT_ID = @{_useDepartmentId,jdbcType=BIGINT}
+			#end						
+			#if($_p.manageDepartmentId)
+				#set($_manageDepartmentId = $_p.manageDepartmentId)
+				AND A.MANAGE_DEPARTMENT_ID = @{_manageDepartmentId,jdbcType=BIGINT}
+			#end
+			#if($_p.managePersonIds && $_p.managePersonIds != '')
+				#set($_managePersonIds = '%' + $_p.managePersonIds + '%')
+				AND A.MANAGE_PERSON_IDS like @{_managePersonIds,jdbcType=VARCHAR}
+			#end						
+			#if($_p.managePersonName && $_p.managePersonName != '')
+				#set($_managePersonName = '%' + $_p.managePersonName + '%')
+				AND A.MANAGE_PERSON_NAME like @{_managePersonName,jdbcType=VARCHAR}
+			#end		
+			#if($_p.supplierId)
+				#set($_supplierId = $_p.supplierId)
+				AND A.SUPPLIER_ID = @{_supplierId,jdbcType=BIGINT}
+			#end				
+			#if($_p.maitainCycle)
+				#set($_maitainCycle = $_p.maitainCycle)
+				AND A.MAITAIN_CYCLE = @{_maitainCycle,jdbcType=NUMERIC}
+			#end				
+		#end							
+		]]>	
+	</sql>
+    
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.base.entities.Device" resultMap="DeviceResultMap" lang="velocity" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre" />
+		<include refid="condition_sql" />
+		#order($_parameter.condition,"a.ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.base.entities.Device" resultMap="DeviceResultMap" lang="velocity" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		select 
+		<include refid="column_device" />,
+		gsr.name G_SYSTEM_RULE_NAME,
+		dpu.NAME USE_DEPARTMENT_NAME,
+		dpm.NAME MANAGE_DEPARTMENT_NAME,
+	    E1.ENUM_TEXT AS STATUS_NAME,
+	    dc.CATEGORY_NAME,
+		ISNULL(DATEDIFF(month,A.ENABLE_DATE,getdate())/12,0)
+	    USE_YEARS
+	    <include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"a.ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM
+		DEVICE A
+		INNER JOIN DEVICE_CATEGORY dc
+        ON A.CATEGORY_ID = dc.ID 
+        LEFT JOIN HO_DEPARTMENT dpu
+        ON A.USE_DEPARTMENT_ID = dpu.ID 
+        LEFT JOIN HO_DEPARTMENT dpm
+        ON A.MANAGE_DEPARTMENT_ID = dpm.ID 
+	    LEFT JOIN ENUM_DETAIL E1
+        ON A.STATUS = E1.ENUM_VALUE 
+        AND E1.TYPE_ID = 4
+        left join G_SYSTEM_RULE gsr 
+        on gsr.id = a.G_SYSTEM_RULE_ID
+		<include refid="condition_sql" />
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+
+    <select id="findGroupByCategory" parameterType="map" resultMap="DeviceResultMap">
+        select category_id from device where id in
+        <foreach collection="ids" open="(" close=")" separator="," item="id">
+            #{id}
+        </foreach>
+        group by category_id
+    </select>
+
+    <select id="findGroupByLocation" parameterType="map" resultMap="DeviceResultMap">
+        select location_id from device where id in
+        <foreach collection="ids" open="(" close=")" separator="," item="id">
+            #{id}
+        </foreach>
+        group by location_id
+    </select>
+
+    <select id ="findByIds" parameterType="list" resultMap="DeviceResultMap">
+        select * from device where id in
+        <foreach collection="ids" open="(" close=")" separator="," item="id">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="countByCondition" parameterType="com.supconit.base.entities.Device" resultType="long" lang="velocity">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+	
+	<select id="countByConditions" parameterType="com.supconit.base.entities.Device" resultType="long" lang="velocity">
+		<include refid="count_condition" />
+	</select>
+	
+	<sql id="count_condition" lang="velocity">
+		SELECT
+		COUNT(*)
+		FROM
+		DEVICE A
+		INNER JOIN DEVICE_CATEGORY dc
+        ON A.CATEGORY_ID = dc.ID 
+        LEFT JOIN HO_DEPARTMENT dpu
+        ON A.USE_DEPARTMENT_ID = dpu.ID 
+        LEFT JOIN HO_DEPARTMENT dpm
+        ON A.MANAGE_DEPARTMENT_ID = dpm.ID 
+	    LEFT JOIN ENUM_DETAIL E1
+        ON A.STATUS = E1.ENUM_VALUE 
+        AND E1.TYPE_ID = 4 where SERVICE_AREA_ID=@{_parameter, jdbcType=NUMERIC}
+	</sql>
+	
+	
+	<!-- 按设备类别查询-->
+	<select id="findByCategory"  parameterType="string" resultMap="DeviceResultMap">
+	    select 
+		<include refid="column2_device" />
+		FROM
+		DEVICE A
+		INNER JOIN DEVICE_CATEGORY DC
+        ON A.CATEGORY_ID = DC.ID 
+		WHERE DC.CATEGORY_CODE = #{categoryCode}
+	</select>
+	<!-- 按设备类别查询count-->
+	<select id="getByCategoryTotal"  parameterType="string" resultType="long">
+	    select 
+		count(1)
+		FROM
+		DEVICE A
+		INNER JOIN DEVICE_CATEGORY DC
+        ON A.CATEGORY_ID = DC.ID 
+		WHERE DC.CATEGORY_CODE = #{categoryCode}
+	</select>
+	<!-- 查询所有摄像头-->
+	<select id="findVideos" parameterType="hashmap" resultMap="DeviceResultMap">
+	    select 
+		A.ID,
+		A.DEVICE_CODE,
+		A.DEVICE_NAME+'['+A.DEVICE_SPEC+']' DEVICE_NAME,
+		A.LOCATION_ID,
+		(select b.FULL_LEVEL_NAME from GEO_AREA b where b.id=a.LOCATION_ID) LOCATION_NAME,
+		A.HPID,
+		A.G_SYSTEM_RULE_ID,
+		A.THREE_DIM_DISPLAY,
+		A.ALARM_TYPE_ID,
+		A.SPRING_EL
+		FROM
+		DEVICE A
+		INNER JOIN DEVICE_CATEGORY DC
+        ON A.CATEGORY_ID = DC.ID 
+		WHERE DC.CATEGORY_CODE = #{code1} 
+		OR DC.CATEGORY_CODE = #{code2} 
+		OR DC.CATEGORY_CODE = #{code3} 
+		OR DC.CATEGORY_CODE = #{code4} 
+		<if test="code4 != null ">	OR DC.CATEGORY_CODE = #{code4}  </if>
+	</select>
+	<!-- 按设备编码查询-->
+	<select id="getByDeviceCode"  parameterType="string" resultMap="DeviceResultMap">
+	    select 
+		A.ID,
+		A.DEVICE_CODE,
+		A.DEVICE_NAME,
+		A.CATEGORY_ID,
+		A.LOCATION_ID,
+		(select b.FULL_LEVEL_NAME from GEO_AREA b where b.id=a.LOCATION_ID) LOCATION_NAME,
+		A.HPID,
+		A.G_SYSTEM_RULE_ID,
+		A.THREE_DIM_DISPLAY,
+		A.ALARM_TYPE_ID,
+		A.SPRING_EL
+		FROM
+		DEVICE A
+		WHERE A.DEVICE_CODE = #{deviceCode}
+	</select>
+	<!-- 按设备模型编码查询-->
+	<select id="getByHpid"  parameterType="string" resultMap="DeviceResultMap">
+	    select 
+		A.ID,
+		A.HPID,
+		A.DEVICE_CODE,
+		A.DEVICE_NAME,
+		A.CATEGORY_ID,
+		A.LOCATION_ID,
+		(select b.FULL_LEVEL_NAME from GEO_AREA b where b.id=a.LOCATION_ID) LOCATION_NAME,
+		A.HPID,
+		A.G_SYSTEM_RULE_ID,
+		A.THREE_DIM_DISPLAY,
+		A.ALARM_TYPE_ID,
+		A.DISCIPINES_CODE,
+		A.SPRING_EL
+		FROM
+		DEVICE A
+		WHERE A.HPID = #{hpid}
+	</select>
+   	<!-- 按设备类别ID查询数量-删除设备类别验证用-->
+	<select id="findCountByCategoryId"  parameterType="long" resultType="long">
+	    select sum(b.nums) from(
+			select COUNT(A.ID) nums FROM DEVICE A WHERE A.CATEGORY_ID = #{id}
+			union
+			select COUNT(r.ID) nums FROM REPAIR_EVT_CATEGORY_PERSON r WHERE r.CATEGORY_ID = #{id}
+		) b
+	</select>
+    <!-- 删除多条记录-->
+	<update id="deleteByIds">
+        DELETE FROM DEVICE WHERE ID in 
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+   	<!-- 查询设备是否使用过-删除设备别验证用-->
+	<select id="getDeviceUseCount"  parameterType="com.supconit.base.entities.Device" resultMap="DeviceResultMap" databaseId="sqlserver">
+		SELECT TOP 1 'REPAIR' AS DEVICE_NAME FROM 
+		REPAIR A
+		WHERE A.DEVICE_ID = #{id}
+		UNION
+		SELECT TOP 1 'DEVICE' FROM 
+		DEVICE A
+		WHERE A.PARENT_ID = #{id}
+		UNION
+		SELECT TOP 1 'DEVICE_CHANGE' FROM 
+		DEVICE_CHANGE A
+		WHERE A.DEVICE_ID = #{id}
+		UNION
+		SELECT TOP 1 'MAINTAIN_ITEM' FROM 
+		MAINTAIN_ITEM A
+		WHERE A.DEVICE_ID = #{id} 
+		UNION
+		SELECT TOP 1 'INSPECTION_ITEM' FROM 
+		INSPECTION_ITEM A
+		WHERE A.DEVICE_ID = #{id}
+		UNION
+		SELECT TOP 1 'DEVICE_SPARE_IN' FROM 
+		DEVICE_SPARE_IN A
+		WHERE A.DEVICE_ID = #{id}
+		UNION
+		SELECT TOP 1 'A_REALALARM' FROM 
+		A_REALALARM A
+		WHERE A.DEVICEID =#{id}
+		UNION
+		SELECT TOP 1 'A_HISTORYALARM' FROM 
+		A_HISTORYALARM A
+		WHERE A.DEVICEID = #{id}
+	</select>
+	<select id="getDeviceUseCount"  parameterType="com.supconit.base.entities.Device" resultMap="DeviceResultMap" databaseId="oracle">
+		SELECT distinct 'REPAIR' AS DEVICE_NAME FROM 
+		REPAIR A
+		WHERE A.DEVICE_ID = #{id}
+		UNION
+		SELECT distinct 'DEVICE' FROM 
+		DEVICE A
+		WHERE A.PARENT_ID = #{id}
+		UNION
+		SELECT distinct 'DEVICE_CHANGE' FROM 
+		DEVICE_CHANGE A
+		WHERE A.DEVICE_ID = #{id}
+		UNION
+		SELECT distinct 'MAINTAIN_ITEM' FROM 
+		MAINTAIN_ITEM A
+		WHERE A.DEVICE_ID = #{id} 
+		UNION
+		SELECT distinct 'INSPECTION_ITEM' FROM 
+		INSPECTION_ITEM A
+		WHERE A.DEVICE_ID = #{id}
+		UNION
+		SELECT distinct 'DEVICE_SPARE_IN' FROM 
+		DEVICE_SPARE_IN A
+		WHERE A.DEVICE_ID = #{id}
+		UNION
+		SELECT distinct 'A_REALALARM' FROM 
+		A_REALALARM A
+		WHERE A.DEVICEID =#{id}
+		UNION
+		SELECT distinct 'A_HISTORYALARM' FROM 
+		A_HISTORYALARM A
+		WHERE A.DEVICEID = #{id}
+	</select>
+    <!-- 设备资产运行统计查询-->
+	<select id="findRunReportByCondition" parameterType="com.supconit.base.entities.Device" resultMap="DeviceResultMap" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		select
+		<include refid="column2_device" />,
+		ISNULL(DATEDIFF(month,A.ENABLE_DATE,getdate())/12,0) USE_YEARS,
+		( SELECT ISNULL(ROUND(SUM(CAST(DATEDIFF(MINUTE,b.START_TIME
+          		,CASE WHEN ISNULL(b.STOP_TIME,b.UPDATE_TIME)&lt;#{updateDate} THEN ISNULL(b.STOP_TIME,b.UPDATE_TIME) ELSE #{updateDate} END) AS FLOAT)/60),1),0) 
+          FROM DEVICE_START_STOP_RECORDS b 
+          WHERE a.ID = b.DEVICE_ID
+          		and ISNULL(b.STOP_TIME,b.UPDATE_TIME)>#{createDate} AND b.START_TIME&lt;=#{updateDate}
+		 ) AS RUNNING_TIME
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"A.ID")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		from 
+		DEVICE a
+		<include refid="runReportCondition_sql" />
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+    <!-- 设备资产运行统计查询-->
+	<select id="findRunReportByCondition" parameterType="com.supconit.base.entities.Device" resultMap="DeviceResultMap" lang="velocity" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		select
+		<include refid="column_device" />,
+		<![CDATA[
+		 nvl(months_between(Sysdate,A.ENABLE_DATE)/12,0) USE_YEARS,
+		( SELECT nvl(sum(round(TO_NUMBER(CASE WHEN nvl(b.STOP_TIME,b.UPDATE_TIME)<@{_parameter.condition.updateDate,jdbcType=DATE}
+THEN nvl(b.STOP_TIME,b.UPDATE_TIME) ELSE @{_parameter.condition.updateDate,jdbcType=DATE} END -b.START_TIME)*24,1)),0)
+FROM DEVICE_START_STOP_RECORDS b 
+WHERE a.ID = b.DEVICE_ID
+and  nvl(b.STOP_TIME,b.UPDATE_TIME)>@{_parameter.condition.createDate,jdbcType=DATE} AND b.START_TIME<@{_parameter.condition.updateDate,jdbcType=DATE}
+		 ) AS RUNNING_TIME
+		 ]]>
+		from 
+		DEVICE a
+		<![CDATA[
+		#where()  
+			#set($_p = $_parameter.condition)
+			1=1 		
+			#if($_p.lstLocationId)
+				#set($_lstLocationId =$_p.lstLocationId)
+				AND 
+				#repeat( $_lstLocationId $id "," " A.LOCATION_ID IN  (" ")" )
+		    		@{id,jdbcType=BIGINT}
+				#end
+			#end						
+			#if($_p.lstCategoryId)
+				#set($_lstCategoryId =$_p.lstCategoryId)
+				AND 
+				#repeat( $_lstCategoryId $id "," " A.CATEGORY_ID IN  (" ")" )
+		    		@{id,jdbcType=BIGINT}
+				#end
+			#end	
+		#end	
+		]]>	
+		#order($_parameter.condition,"A.ID")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+	<!--根据设备启停记录更新累计运行时间-->
+	<update id="updateTotalRunningTime" parameterType="com.supconit.base.entities.Device" databaseId="sqlserver">
+		UPDATE	DEVICE
+		<set>
+        TOTAL_RUNNING_TIME = ISNULL(TOTAL_RUNNING_TIME,0)+#{totalRunningTime,jdbcType=NUMERIC}	
+        </set>
+		WHERE ID = #{id}
+	</update>
+	<update id="updateTotalRunningTime" parameterType="com.supconit.base.entities.Device" databaseId="oracle">
+		UPDATE	DEVICE
+		<set>
+        TOTAL_RUNNING_TIME = nvl(TOTAL_RUNNING_TIME,0)+#{totalRunningTime,jdbcType=NUMERIC}	
+        </set>
+		WHERE ID = #{id}
+	</update>
+    <select id="countRunReportByCondition" parameterType="com.supconit.base.entities.Device" resultType="long">
+		SELECT
+		COUNT(*)
+		FROM
+		DEVICE A
+		<include refid="runReportCondition_sql" />
+	</select>
+	<sql id="runReportCondition_sql">
+		<where>   
+        <if test="locationId != null and lstLocationId != null and lstLocationId.size()>0"> 
+        A.LOCATION_ID IN 
+        <foreach item="item" index="index" collection="lstLocationId" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and
+        </if>   
+        <if test="categoryId != null and lstCategoryId != null and lstCategoryId.size()>0"> 
+        A.CATEGORY_ID IN 
+        <foreach item="item" index="index" collection="lstCategoryId" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and
+        </if>
+        1=1
+		</where>
+	</sql>
+    <!-- gis >>>>>-->	
+	<!-- 按设备模型编码or设备名称查询-->
+    <sql id="condition_g">
+    	DEVICE A
+    	INNER JOIN DEVICE_CATEGORY DC 
+		ON A.CATEGORY_ID = DC.ID
+		LEFT JOIN ATTACHMENT AT1
+		ON A.ID=AT1.F_ID
+		AND AT1.MODEL_TYPE ='device_img'
+		LEFT JOIN ATTACHMENT AT2
+		ON DC.ID=AT2.F_ID
+		AND AT2.MODEL_TYPE ='device_category'
+		<if test="createId != null">	
+		INNER JOIN GEO_AREA G 
+		ON A.LOCATION_ID = G.ID
+		AND G.PARENT_ID = #{createId}
+		</if>
+		<where> 
+		DC.CATEGORY_CODE=#{deviceSpec}
+		<if test="deviceName != null and deviceName != ''">	
+		AND (A.DEVICE_CODE like '%'+#{deviceName}+'%' OR 
+		A.DEVICE_NAME like '%'+#{deviceName}+'%' 	)
+		</if>
+		<if test="lstDeviceCode != null and lstDeviceCode != null and lstDeviceCode.size()>0"> 
+        AND A.HPID IN 
+        <foreach item="item" index="index" collection="lstDeviceCode" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        </if>  
+        
+        <if test="updateId == 2"><!-- 查询正在报警的设备-->
+		AND A.HPID IN (SELECT MR.OBJECTID FROM M_REALALARM MR WHERE MR.ALARMSTATE!=2 )
+		</if>
+		<if test="updateId == 0 or updateId == 1"><!-- 查询不在报警的设备-->
+		AND A.HPID NOT IN (SELECT MR.OBJECTID FROM M_REALALARM MR WHERE MR.ALARMSTATE!=2)
+		</if>
+		</where>
+	</sql>    
+	<select id="findByCodeName_g" parameterType="com.supconit.base.entities.Device" resultMap="DeviceResultMap" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+	    SELECT 
+		A.ID,
+		A.DEVICE_CODE,
+		A.DEVICE_NAME,
+		CASE WHEN A.LOCATION_ID=#{locationId} THEN -1 ELSE A.LOCATION_ID END LOCATION_ID,
+		(select b.FULL_LEVEL_NAME from GEO_AREA b where b.id=a.LOCATION_ID) LOCATION_NAME,
+		A.HPID,
+		A.STATUS,
+		A.G_SYSTEM_RULE_ID,
+		A.THREE_DIM_DISPLAY,
+		A.ALARM_TYPE_ID,
+		A.SPRING_EL,
+		ISNULL(AT1.STORE_PATH,AT2.STORE_PATH) AS CREATOR
+		<if test="updateId == null"><!-- 查询状态条件为空-->
+		,(SELECT CASE COUNT(M.ID) WHEN 0 THEN '正常' ELSE '报警' END FROM M_REALALARM M WHERE M.ALARMSTATE!=2 AND A.HPID=M.OBJECTID) AS OPEN_CLOSE_STATUS
+		</if>
+		<if test="updateId == 0 or updateId == 1"><!-- 查询开/关的设备-->
+		,'正常' AS OPEN_CLOSE_STATUS
+		</if>
+		<if test="updateId == 2"><!-- 查询报警设备-->
+		,'报警' AS OPEN_CLOSE_STATUS
+		</if>
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+ 		ORDER BY LOCATION_ID,A.HPID 
+ 		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM		
+		<include refid="condition_g" />
+	</select>	
+	<select id="findByCodeName_g" parameterType="com.supconit.base.entities.Device" resultMap="DeviceResultMap" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+	    SELECT 
+		A.ID,
+		A.DEVICE_CODE,
+		A.DEVICE_NAME,
+		CASE WHEN A.LOCATION_ID=#{locationId} THEN -1 ELSE A.LOCATION_ID END LOCATION_ID,
+		(select b.FULL_LEVEL_NAME from GEO_AREA b where b.id=a.LOCATION_ID) LOCATION_NAME,
+		A.HPID,
+		A.STATUS,
+		A.G_SYSTEM_RULE_ID,
+		A.THREE_DIM_DISPLAY,
+		A.ALARM_TYPE_ID,
+		A.SPRING_EL,
+		nvl(AT1.STORE_PATH,AT2.STORE_PATH) AS CREATOR
+		<if test="updateId == null"><!-- 查询状态条件为空-->
+		,(SELECT CASE COUNT(M.ID) WHEN 0 THEN '正常' ELSE '报警' END FROM M_REALALARM M WHERE M.ALARMSTATE!=2 AND A.HPID=M.OBJECTID) AS OPEN_CLOSE_STATUS
+		</if>
+		<if test="updateId == 0 or updateId == 1"><!-- 查询开/关的设备-->
+		,'正常' AS OPEN_CLOSE_STATUS
+		</if>
+		<if test="updateId == 2"><!-- 查询报警设备-->
+		,'报警' AS OPEN_CLOSE_STATUS
+		</if>
+		
+		FROM		
+		<include refid="condition_g" />
+		ORDER BY LOCATION_ID,A.HPID 
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+    <select id="countByFindByCodeName_g" parameterType="com.supconit.base.entities.Device" resultType="long">
+	    SELECT
+		COUNT(A.ID)
+		FROM
+		<include refid="condition_g" />
+	</select>
+    <select id="findByParam" parameterType="com.supconit.base.entities.Device" resultMap="DeviceResultMap">
+        select * from device
+        <where>
+            <if test="categoryId!=null and categoryId!=0">
+              and  category_id = #{categoryId}
+            </if>
+            <if test="locationId!=null and locationId !=0">
+              and location_id = #{locationId}
+            </if>
+            <if test="deviceCode !=null and deviceCode !=''">
+              and  device_Code like '%'+#{deviceCode}+'%'
+            </if>
+            <if test="deviceName !=null and deviceName !=''">
+              and  device_Name like '%'+#{deviceName}+'%'
+            </if>
+
+            <if test="lstDeviceCode !=null and lstDeviceCode.size()>0">
+              and  hpid IN 
+               <foreach item="item" index="index" collection="lstDeviceCode" open="(" separator="," close=")">
+            	 #{item}
+       		   </foreach>
+            </if>
+        </where>
+    </select>
+
+
+	<!--gis 设备查询轮询状态-->
+    <select id="findStatusByCodes" parameterType="com.supconit.base.entities.Device" resultMap="DeviceResultMap">
+	    SELECT
+		A.HPID,(SELECT CASE COUNT(M.ID) WHEN 0 THEN '正常' ELSE '报警' END FROM M_REALALARM M WHERE M.ALARMSTATE!=2 AND A.HPID=M.OBJECTID) AS OPEN_CLOSE_STATUS
+		
+		FROM
+		DEVICE A		
+		<if test="lstDeviceCode != null and lstDeviceCode != null and lstDeviceCode.size()>0"> 
+		WHERE 
+        A.HPID IN 
+        <foreach item="item" index="index" collection="lstDeviceCode" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        </if>
+	</select>
+
+	<!-- 框选-->
+	<sql id="conditionKuangxuan_g">
+		FROM
+		DEVICE A
+		INNER JOIN DEVICE_CATEGORY DC 
+		ON A.CATEGORY_ID = DC.ID
+		WHERE A.HPID in 
+		<foreach item="item" index="index" collection="hpidlst" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		<if test="deviceCode != null and deviceCode != ''"> and	A.DEVICE_CODE like '%'+#{deviceCode}+'%'  </if>
+        <if test="deviceName != null and deviceName != ''">	and A.DEVICE_NAME like '%'+#{deviceName}+'%'  </if>
+	</sql>
+
+	<!-- 手机端搜索设备 -->
+	<sql id="SEARCH_DEVICE_SQL" lang="velocity">
+		<![CDATA[
+			#if($_parameter.locationId && $_parameter.locationId!=0)
+				AND A.LOCATION_ID = @{_parameter.locationId,jdbcType=NUMERIC}
+			#end
+			#if($_parameter.categoryId && $_parameter.categoryId!=0)
+				AND A.CATEGORY_ID = @{_parameter.categoryId,jdbcType=NUMERIC}
+			#end
+			#if($_parameter.locationParentId && $_parameter.locationParentId!=0)
+				AND A.LOCATION_ID IN (SELECT G.ID FROM GEO_AREA G WHERE G.PARENT_ID=@{_parameter.locationParentId,jdbcType=NUMERIC})
+			#end
+			#if($_parameter.categoryParentId && $_parameter.categoryParentId!=0)
+				AND A.CATEGORY_ID IN (SELECT D.ID FROM DEVICE_CATEGORY D WHERE D.PARENT_ID=@{_parameter.categoryParentId,jdbcType=NUMERIC})
+			#end
+			#if($_parameter.deviceId && $_parameter.deviceId!=0)
+				AND A.ID > @{_parameter.deviceId,jdbcType=NUMERIC}
+			#end
+			#if($_parameter.deviceSearch && $_parameter.deviceSearch!='')
+				AND (A.DEVICE_NAME LIKE '%'||RTRIM(@{_parameter.deviceSearch,jdbcType=VARCHAR})||'%' ESCAPE '/'
+				OR A.DEVICE_CODE LIKE '%'||RTRIM(@{_parameter.deviceSearch,jdbcType=VARCHAR})||'%' ESCAPE '/')
+			#end
+		]]>
+	</sql>
+
+	<select id="findByKuangxuan_g" parameterType="com.supconit.base.entities.Device" resultMap="DeviceResultMap">
+	    SELECT 
+		A.ID,
+		A.DEVICE_CODE,
+		A.DEVICE_NAME,
+		A.LOCATION_ID,
+		(select b.FULL_LEVEL_NAME from GEO_AREA b where b.id=a.LOCATION_ID) LOCATION_NAME,
+		A.HPID,
+		A.STATUS,
+		A.G_SYSTEM_RULE_ID,
+		A.THREE_DIM_DISPLAY,
+		A.ALARM_TYPE_ID,
+		A.SPRING_EL,
+		(SELECT CASE COUNT(M.ID) WHEN 0 THEN '正常' ELSE '报警' END FROM M_REALALARM M WHERE M.ALARMSTATE!=2 AND A.HPID=M.OBJECTID) AS OPEN_CLOSE_STATUS
+		<include refid="conditionKuangxuan_g" />
+		ORDER BY A.HPID 
+	</select>	
+    <select id="countByFindByKuangxuan_g" parameterType="com.supconit.base.entities.Device" resultType="long">
+	    SELECT
+		COUNT(A.ID)
+		<include refid="conditionKuangxuan_g" />
+	</select>
+	<!-- 查询电梯-->
+	<sql id="conditionByCategoryArea">
+		FROM
+		DEVICE A
+		INNER JOIN DEVICE_CATEGORY DC 
+		ON A.CATEGORY_ID = DC.ID AND DC.CATEGORY_CODE = #{categoryCode}
+		INNER JOIN GEO_AREA G 
+		ON A.LOCATION_ID = G.ID AND G.AREA_CODE LIKE #{locationCode}+'%'
+	</sql>    
+	<select id="findByCategoryArea" parameterType="com.supconit.base.entities.Device"  resultMap="DeviceResultMap">
+	    SELECT 
+		A.ID,
+		A.DEVICE_CODE,
+		A.DEVICE_SPEC,
+		A.DEVICE_NAME,
+		A.LOCATION_ID,
+		(select b.FULL_LEVEL_NAME from GEO_AREA b where b.id=a.LOCATION_ID) LOCATION_NAME,
+		A.HPID,
+		A.G_SYSTEM_RULE_ID,
+		A.THREE_DIM_DISPLAY,
+		A.ALARM_TYPE_ID,
+		A.SPRING_EL,
+		(SELECT CASE COUNT(M.ID) WHEN 0 THEN '正常' ELSE '报警' END FROM M_REALALARM M WHERE M.ALARMSTATE!=2 AND A.HPID=M.OBJECTID) AS OPEN_CLOSE_STATUS
+		<include refid="conditionByCategoryArea" />
+		ORDER BY A.HPID 
+	</select>	
+    <select id="countByFindByCategoryArea" parameterType="com.supconit.base.entities.Device"  resultType="long">
+	    SELECT
+		COUNT(A.ID)
+		<include refid="conditionByCategoryArea" />
+	</select>
+	<!-- gis 开关状态轮询-->
+	<select id="findMjZnzm_g" resultMap="DeviceResultMap" parameterType="hashmap">
+		SELECT D.ID,D.HPID 
+		FROM DEVICE D,GEO_AREA G
+		WHERE 
+		D.G_SYSTEM_RULE_ID IN
+		<foreach item="item" index="index" collection="lstHaveOpenStatus" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		AND D.LOCATION_ID = G.ID
+		AND G.AREA_CODE = #{geoareaCode}
+        AND D.HPID NOT IN (
+			SELECT A.OBJECTID FROM M_REALALARM A WHERE A.ALARMSTATE!=2  
+		)
+	</select>   
+	<!-- gis 报警状态轮询-->
+	<select id="findAlarmDevice_g" resultMap="DeviceResultMap" parameterType="hashmap">
+		SELECT  D.ID,D.HPID 
+	    FROM DEVICE D,GEO_AREA G
+		WHERE D.LOCATION_ID = G.ID 
+		AND G.AREA_CODE =#{geoareaCode} 
+  		AND D.G_SYSTEM_RULE_ID IN
+		<foreach item="item" index="index" collection="lstHaveAlarmStatus" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		AND D.HPID IN (
+			SELECT A.OBJECTID FROM M_REALALARM A  WHERE A.ALARMSTATE!=2  
+	    )
+	</select>
+   	<!-- gis 门禁pop页面  ，获取设备图片-->
+	<select id="getDeviceImg" resultMap="DeviceResultMap" parameterType="com.supconit.base.entities.Device" databaseId="sqlserver">
+		SELECT ISNULL(AT1.STORE_PATH,AT2.STORE_PATH) AS IMG_PATH
+		FROM  DEVICE A
+    	INNER JOIN DEVICE_CATEGORY DC 
+		ON A.CATEGORY_ID = DC.ID
+		LEFT JOIN ATTACHMENT AT1
+		ON A.ID=AT1.F_ID
+		AND AT1.MODEL_TYPE ='device_img'
+		LEFT JOIN ATTACHMENT AT2
+		ON DC.ID=AT2.F_ID
+		AND AT2.MODEL_TYPE ='device_category'
+		WHERE A.ID =#{id} 
+	</select>
+   	<!-- gis 门禁pop页面  ，获取设备图片-->
+	<select id="getDeviceImg" resultMap="DeviceResultMap" parameterType="com.supconit.base.entities.Device" databaseId="oracle">
+		SELECT nvl(AT1.STORE_PATH,AT2.STORE_PATH) AS IMG_PATH
+		FROM  DEVICE A
+    	INNER JOIN DEVICE_CATEGORY DC 
+		ON A.CATEGORY_ID = DC.ID
+		LEFT JOIN ATTACHMENT AT1
+		ON A.ID=AT1.F_ID
+		AND AT1.MODEL_TYPE ='device_img'
+		LEFT JOIN ATTACHMENT AT2
+		ON DC.ID=AT2.F_ID
+		AND AT2.MODEL_TYPE ='device_category'
+		WHERE A.ID =#{id} 
+	</select>
+	<!-- gis <<<<<-->
+    <select id="findCate"  parameterType="hashmap" resultMap="DeviceResultMap">
+		SELECT DISTINCT
+			SUBSTRING (
+				HPID,
+				7,
+				charindex(
+					'_',
+					HPID,
+					charindex('_', HPID, 7) + 1
+				) - 7
+			) as hpid
+		FROM
+			DEVICE
+		WHERE
+			charindex(
+				'_',
+				HPID,
+				charindex('_', HPID, 7) + 1
+			) - 7 > 0
+		AND G_SYSTEM_RULE_id IN
+        <foreach item="item" index="index" collection="lstSystemRuleId" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+	</select>
+	    <!-- 按条件查询记录-->
+	<select id="findByExpDevice" parameterType="com.supconit.base.entities.Device" resultMap="DeviceResultMap" lang="velocity">
+		<include refid="select_pre" />
+		<include refid="condition_sql" />
+		#order($_parameter.condition,"a.ID")
+	</select>
+	
+<update id="updateLocationName" >
+		update d
+		set  d.location_name=g.FULL_LEVEL_NAME
+		from GEO_AREA g INNER JOIN device d on g.id=d.location_id
+	</update>
+	
+	
+   <update id="updateLocationName" databaseId="oracle">
+		update device d
+		set  d.location_name=(select g.FULL_LEVEL_NAME
+		from GEO_AREA g where g.id=d.location_id)
+	</update>
+
+
+    <!-- <select id="findByPid" parameterType="com.supconit.base.entities.Device" resultMap="DeviceTreeResultMap" databaseId="oracle">
+        select d.*,c.CATEGORY_NAME as CATEGORY_NAME from device d left join  DEVICE_CATEGORY c on c.id = d.CATEGORY_ID
+        <where>
+            <if test="id!=null and id!=0">
+                and  d.PARENT_ID = #{id}
+            </if>
+            <if test="id==null">
+                and  d.PARENT_ID =0
+            </if>
+
+            <if test="categoryId!=null and categoryId!=0">
+                and  d.category_id in(	WITH TT(ID) AS (
+                SELECT ID FROM DEVICE_CATEGORY  WHERE ID =#{categoryId}
+                UNION ALL
+                SELECT A.ID FROM DEVICE_CATEGORY A,TT B WHERE A.PARENT_ID = B.ID
+                )
+                SELECT 	ID  FROM TT   	)
+            </if>
+            <if test="locationId!=null and locationId !=0">
+                and d.location_id  in(	WITH TT(ID) AS (
+                SELECT ID FROM GEO_AREA  WHERE ID =#{locationId}
+                UNION ALL
+                SELECT A.ID FROM GEO_AREA A,TT B WHERE A.PARENT_ID = B.ID
+                )
+                SELECT 	ID  FROM TT )
+            </if>
+            <if test="deviceCode !=null and deviceCode !=''">
+                and  d.device_Code like '%'||#{deviceCode}||'%'
+            </if>
+            <if test="deviceName !=null and deviceName !=''">
+                and  d.device_Name like '%'||#{deviceName}||'%'
+            </if>
+            <if test="deviceType!=null">
+                and  d.device_Type = #{deviceType}
+            </if>
+            <if test="lstDeviceCode !=null and lstDeviceCode.size()>0">
+                and  d.hpid IN
+                <foreach item="item" index="index" collection="lstDeviceCode" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            
+        </where>
+        order by d.sort_idx asc,d.id asc
+    </select>
+    
+    <select id="findByPid" parameterType="com.supconit.base.entities.Device" resultMap="DeviceTreeResultMap" databaseId="sqlserver">
+        select d.*,c.CATEGORY_NAME as CATEGORY_NAME from device d left join  DEVICE_CATEGORY c on c.id = d.CATEGORY_ID
+        <where>
+            <if test="id!=null and id!=0">
+                and  d.PARENT_ID = #{id}
+            </if>
+            <if test="id==null">
+                and  d.PARENT_ID =0
+            </if>
+
+            <if test="categoryId!=null and categoryId!=0">
+                and  d.category_id in(	WITH TT(ID) AS (
+                SELECT ID FROM DEVICE_CATEGORY  WHERE ID =#{categoryId}
+                UNION ALL
+                SELECT A.ID FROM DEVICE_CATEGORY A,TT B WHERE A.PARENT_ID = B.ID
+                )
+                SELECT 	ID  FROM TT   	)
+            </if>
+            <if test="locationId!=null and locationId !=0">
+                and d.location_id  in(	WITH TT(ID) AS (
+                SELECT ID FROM GEO_AREA  WHERE ID =#{locationId}
+                UNION ALL
+                SELECT A.ID FROM GEO_AREA A,TT B WHERE A.PARENT_ID = B.ID
+                )
+                SELECT 	ID  FROM TT )
+            </if>
+            <if test="deviceCode !=null and deviceCode !=''">
+                and  d.device_Code like '%'+#{deviceCode}+'%'
+            </if>
+            <if test="deviceName !=null and deviceName !=''">
+                and  d.device_Name like '%'+#{deviceName}+'%'
+            </if>
+            <if test="deviceType!=null">
+                and  d.device_Type = #{deviceType}
+            </if>
+            <if test="lstDeviceCode !=null and lstDeviceCode.size()>0">
+                and  d.hpid IN
+                <foreach item="item" index="index" collection="lstDeviceCode" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select> -->
+    
+    <select id="findByPid" parameterType="com.supconit.hl.base.entities.Device" resultMap="DeviceTreeResultMap" databaseId="sqlserver">
+         <if test="categoryId!=null and categoryId!=0">
+                WITH TT(ID) AS (
+                SELECT ID FROM DEVICE_CATEGORY  WHERE ID =#{categoryId}
+                UNION ALL
+                SELECT A.ID FROM DEVICE_CATEGORY A,TT B WHERE A.PARENT_ID = B.ID
+                )
+                 	
+            </if>
+         <if test="(categoryId==null or  categoryId==0)  and locationId!=null and locationId !=0">
+                WITH TT1(ID) AS (
+                SELECT ID FROM GEO_AREA  WHERE ID =#{locationId}
+                UNION ALL
+                SELECT A.ID FROM GEO_AREA A,TT1 B WHERE A.PARENT_ID = B.ID
+                )
+          </if>       
+         <if test="categoryId!=null and categoryId!=0 and locationId!=null and locationId !=0">
+                , TT1(ID) AS (
+                SELECT ID FROM GEO_AREA  WHERE ID =#{locationId}
+                UNION ALL
+                SELECT A.ID FROM GEO_AREA A,TT1 B WHERE A.PARENT_ID = B.ID
+                )
+          </if>       
+                
+        select  e.enum_text STATUS_NAME,d.*,c.CATEGORY_NAME as CATEGORY_NAME from device d left join  DEVICE_CATEGORY c on c.id = d.CATEGORY_ID
+         left join   enum_detail e on d.status = e.enum_value and e.type_id = '4'
+        <where>
+
+
+            <if test="search ==false">
+                <if test="id!=null and id!=0">
+                    and  d.PARENT_ID = #{id}
+                </if>
+                <if test="id==null">
+                    and  d.PARENT_ID =0
+                </if>
+            </if>
+
+            <if test="statusString !=null and statusString !=''">
+                and   e.enum_value= #{statusString}
+            </if>
+            <if test="categoryId!=null and categoryId!=0">
+                and  d.category_id in(	 
+                SELECT 	ID  FROM TT )
+            </if>
+            <if test="locationId!=null and locationId !=0">
+                and d.location_id  in(	 
+                SELECT 	ID  FROM TT1 )
+            </if>
+            <if test="deviceCode !=null and deviceCode !=''">
+                and  d.device_Code like '%'+#{deviceCode}+'%'
+            </if>
+            <if test="deviceName !=null and deviceName !=''">
+                and  d.device_Name like '%'+#{deviceName}+'%'
+            </if>
+            <if test="lstDeviceCode !=null and lstDeviceCode.size()>0">
+                and  d.hpid IN
+                <foreach item="item" index="index" collection="lstDeviceCode" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    
+    
+    <select id="findByPid" parameterType="com.supconit.base.entities.Device" resultMap="DeviceTreeResultMap" databaseId="oracle">
+        select  e.enum_text STATUS_NAME,d.*,c.CATEGORY_NAME as CATEGORY_NAME from device d left join  DEVICE_CATEGORY c on c.id = d.CATEGORY_ID
+         left join   enum_detail e on d.status = e.enum_value and e.type_id = '4'
+        <where>
+            <if test="search ==false">
+                <if test="id!=null">
+                    and  d.PARENT_ID = #{id}
+                </if>
+                <if test="id==null">
+                    and  d.PARENT_ID =0
+                </if>
+            </if>
+            <if test="search ==true">
+                and  d.id !=0
+            </if>
+            <if test="statusString !=null and statusString !=''">
+                and   e.enum_value= #{statusString}
+            </if>
+            <if test="categoryId!=null and categoryId!=0">
+                and  d.category_id in(	WITH TT(ID) AS (
+                SELECT ID FROM DEVICE_CATEGORY  WHERE ID =#{categoryId}
+                UNION ALL
+                SELECT A.ID FROM DEVICE_CATEGORY A,TT B WHERE A.PARENT_ID = B.ID
+                )
+                SELECT 	ID  FROM TT   	)
+            </if>
+            <if test="locationId!=null and locationId !=0">
+                and d.location_id  in(	WITH TT(ID) AS (
+                SELECT ID FROM GEO_AREA  WHERE ID =#{locationId}
+                UNION ALL
+                SELECT A.ID FROM GEO_AREA A,TT B WHERE A.PARENT_ID = B.ID
+                )
+                SELECT 	ID  FROM TT )
+            </if>
+            <if test="deviceCode !=null and deviceCode !=''">
+                and  d.device_Code like '%'||#{deviceCode}||'%'
+            </if>
+            <if test="deviceName !=null and deviceName !=''">
+                and  d.device_Name like '%'||#{deviceName}||'%'
+            </if>
+
+            <if test="lstDeviceCode !=null and lstDeviceCode.size()>0">
+                and  d.hpid IN
+                <foreach item="item" index="index" collection="lstDeviceCode" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    <select id="findByleft"  parameterType="java.util.List" resultMap="DeviceTreeResultMap">
+        select  e.enum_text STATUS_NAME,d.*,c.CATEGORY_NAME as CATEGORY_NAME from device d left join  DEVICE_CATEGORY c on c.id = d.CATEGORY_ID
+        left join   enum_detail e on d.status = e.enum_value AND e .type_id = '4'
+        <where>
+             D.ID !=0 And (
+            <foreach collection="list" item="list" index="index" open="" close="" separator=" or ">
+	            <if test="list.lft !=null and list.lft !='' and list.rgt !=null and list.rgt !='' ">
+		                <![CDATA[
+		                ( d.LFT < #{list.lft}  AND  d.RGT > #{list.rgt})
+		            ]]>
+	            </if>
+            </foreach>
+            )
+
+        </where>
+    </select>
+    
+    <select id="findFirstLevel" resultMap="DeviceResultMap" lang="velocity">
+    	select * 
+    	from device d 
+    	where d.PARENT_ID=0
+    </select>
+    <!-- 递归查询子类别-->
+	<select id="findChildIds" parameterType="Long" resultType="Long" lang="velocity">
+		WITH TT(ID) AS (
+		SELECT ID FROM DEVICE WHERE ID = @{_parameter.id,jdbcType=BIGINT}
+		UNION ALL
+		SELECT A.ID FROM DEVICE A,TT B WHERE A.PARENT_ID = B.ID
+	    )
+	    SELECT 	ID  FROM TT   	
+	</select>
+	<!-- 所有记录-->
+	<select id="findAll" parameterType="com.supconit.base.entities.Device" resultMap="DeviceResultMap" lang="velocity" >
+		<include refid="select_pre" /> ORDER BY A.SORT_IDX DESC,A.HPID ASC
+	</select>
+	
+	<!-- 按类别统计设备的个数 --> 
+	<select id="countDeviceBySystemRuleId" resultMap="DeviceResultMap">
+		<if test="floorId != null"> 
+		with cte(id,parent_id,area_code,area_name) as(
+		 select id,parent_id,area_code,area_name from geo_area where id=#{floorId}
+		 union all
+		 select c.id,c.parent_id,c.area_code,c.area_name from geo_area c inner join cte on c.parent_id=cte.id
+		)
+		</if>
+		SELECT category_id,
+		       (SELECT category_name FROM device_category WHERE id = category_id) category_name,
+		       COUNT(*) DEVICE_COUNT
+		  FROM device t
+		  <where>
+		        <if test="systemRuleIds != null and systemRuleIds != null and systemRuleIds.size()>0"> 
+			       and t.g_system_rule_id IN 
+			        <foreach item="item" index="index" collection="systemRuleIds" open="(" separator="," close=")">
+			            #{item}
+			        </foreach>
+			     </if>
+			     <if test="floorId != null"> 
+			         and exists(select 1 from cte where cte.id=t.location_id)
+			      </if>
+		         and VIRTUAL=0 GROUP BY category_id
+		  </where>
+	</select> 
+	<select id="countAlarmDeviceBySystemRuleId" resultMap="DeviceResultMap">
+		<if test="floorId != null"> 
+		with cte(id,parent_id,area_code,area_name) as(
+		 select id,parent_id,area_code,area_name from geo_area where id=#{floorId}
+		 union all
+		 select c.id,c.parent_id,c.area_code,c.area_name from geo_area c inner join cte on c.parent_id=cte.id
+		)
+		</if>
+		SELECT category_id,
+		       (SELECT category_name FROM device_category WHERE id = category_id) category_name,
+		       COUNT(*) ALARM_DEVICE_COUNT
+		  FROM device t
+		  <where>
+		        <if test="systemRuleIds != null and systemRuleIds != null and systemRuleIds.size()>0"> 
+			       and t.g_system_rule_id IN 
+			        <foreach item="item" index="index" collection="systemRuleIds" open="(" separator="," close=")">
+			            #{item}
+			        </foreach>
+			     </if>
+			     <if test="floorId != null"> 
+			         and exists(select 1 from cte where cte.id=t.location_id)
+			      </if>
+		          and VIRTUAL=0 and t.id in(SELECT a.deviceid FROM a_realalarm a WHERE a.alarmstate != 2)
+				 GROUP BY category_id
+		  </where>
+	</select> 
+	<!-- 手机端使用 -->
+	<select id="searchAllDevice" resultMap="DeviceResultMap" lang="velocity">
+		SELECT D.ID,  D.DEVICE_NAME DEVICE_NAME
+		FROM DEVICE_CATEGORY C, DEVICE D
+		WHERE D.CATEGORY_ID = C.ID
+		ORDER BY C.ID DESC
+	</select>
+
+	<select id="selectDevices" parameterType="com.supconit.hl.base.entities.Device" resultMap="DeviceResultMap" lang="velocity" databaseId="oracle">
+		SELECT C.*
+		FROM (SELECT B.*, ROWNUM AS RW
+		FROM (SELECT A.*
+		FROM DEVICE A
+		WHERE A.DEVICE_CODE != 'ROOT'
+		<include refid="SEARCH_DEVICE_SQL"/>
+		ORDER BY A.ID) B
+		WHERE ROWNUM &lt; 26) C
+		WHERE C.RW >= 0
+	</select>
+
+	<select id="countDevices" parameterType="com.supconit.hl.base.entities.Device" resultType="long" lang="velocity">
+		SELECT COUNT(1)
+		FROM DEVICE A
+		WHERE A.DEVICE_CODE != 'ROOT'
+		<include refid="SEARCH_DEVICE_SQL"/>
+	</select>
+</mapper>

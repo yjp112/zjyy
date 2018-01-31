@@ -1,0 +1,276 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.repair.entities.RepairEvtCategory">
+
+	<resultMap type="com.supconit.repair.entities.RepairEvtCategory" id="RepairEvtCategoryResultMap">      
+        <result property="id" column="ID" />
+        <result property="categoryName" column="CATEGORY_NAME" />
+        <result property="parentId" column="PARENT_ID" />
+        <result property="finishtime" column="FINISH_TIME" />
+        <result property="emergency" column="EMERGENCY" />
+        <result property="sortidx" column="SORT_IDX" />
+        <result property="remark" column="REMARK" />
+        <result property="createId" column="CREATE_ID" />
+        <result property="creator" column="CREATOR" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="updateId" column="UPDATE_ID" />
+        <result property="updator" column="UPDATOR" />
+        <result property="updateDate" column="UPDATE_DATE" />
+        
+        <result property="emergencyName" column="EMERGENCY_NAME" />
+        <result property="parentName" column="PARENT_NAME" />
+        <result property="fullLevelName" column="FULL_LEVEL_NAME" />
+	</resultMap>
+
+	<sql id="TABLE_NAME" lang="velocity">REPAIR_EVT_CATEGORY</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	<!-- 获取记录列表-->
+	<sql id="select_pre" lang="velocity">
+    select 
+        A.ID,
+      	A.PARENT_ID,
+        A.FINISH_TIME,
+        A.EMERGENCY,
+        A.REMARK,
+        A.SORT_IDX,
+        A.CREATE_ID,
+        A.CREATOR,
+        A.CREATE_DATE,
+        A.UPDATE_ID,
+        A.UPDATOR,
+        A.UPDATE_DATE,
+        A.CATEGORY_NAME,
+        A.FULL_LEVEL_NAME,
+        E2.ENUM_TEXT AS EMERGENCY_NAME,
+        #if($_databaseId=='oracle') 
+        	nvl(B.CATEGORY_NAME,'维修类别簇') PARENT_NAME
+        #else 
+        	ISNULL(B.CATEGORY_NAME,'维修类别簇') PARENT_NAME 
+        #end
+		FROM
+		<include refid="TABLE_NAME"/> A
+		left join <include refid="TABLE_NAME"/> B
+		on A.PARENT_ID = B.ID
+		LEFT JOIN ENUM_DETAIL E2
+        ON A.EMERGENCY = E2.ENUM_VALUE 
+        AND E2.TYPE_ID = 36
+	</sql>
+	
+	<sql id="count_pre" lang="velocity">
+		SELECT
+		COUNT(*)
+		FROM
+		<include refid="TABLE_NAME"/> A
+	</sql>
+	
+	<insert id="insert" parameterType="com.supconit.repair.entities.RepairEvtCategory" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="insert_sql" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.repair.entities.RepairEvtCategory" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+	
+	 <!-- 插入记录-->
+	<sql id="insert_sql" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>(
+			#if($_databaseId == 'oracle') ID, #end        
+	        CATEGORY_NAME,
+	        PARENT_ID,
+	        FINISH_TIME,
+	        EMERGENCY,
+	        SORT_IDX,
+	        REMARK,
+	        FULL_LEVEL_NAME,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE
+		) VALUES (
+			#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end 
+			@{_parameter.categoryName,jdbcType=VARCHAR},
+	        @{_parameter.parentId,jdbcType=BIGINT},
+	        @{_parameter.finishtime,jdbcType=BIGINT},
+	        @{_parameter.emergency,jdbcType=BIGINT},
+	        @{_parameter.sortidx,jdbcType=BIGINT},
+	        @{_parameter.remark,jdbcType=VARCHAR},
+	        @{_parameter.fullLevelName,jdbcType=VARCHAR},
+	        @{_parameter.createId,jdbcType=BIGINT},
+	        @{_parameter.creator,jdbcType=VARCHAR},
+	        @{_parameter.createDate,jdbcType=TIMESTAMP}
+		)
+	</sql>
+	
+	<select id="getById" resultMap="RepairEvtCategoryResultMap" parameterType="Long" lang="velocity">
+		<include refid="select_pre" />        
+         WHERE A.ID = @{_parameter, jdbcType=BIGINT}
+	</select>
+	
+	<select id="getByPidAndCategoryName" resultMap="RepairEvtCategoryResultMap" parameterType="com.supconit.repair.entities.RepairEvtCategory" lang="velocity">
+		<include refid="select_pre" />        
+        WHERE 
+        A.CATEGORY_NAME = @{_parameter.categoryName, jdbcType=VARCHAR} 
+        AND
+        A.PARENT_ID=  @{_parameter.parentId, jdbcType=BIGINT}
+        #if($_parameter.id)and A.ID != @{_parameter.id,jdbcType=BIGINT}#end
+	</select>
+	
+    <select id="findAll" resultMap="RepairEvtCategoryResultMap" lang="velocity">
+		<include refid="select_pre" />
+		ORDER BY A.SORT_IDX
+	</select>
+	
+	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.repair.entities.RepairEvtCategory" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+		#mset()
+			<![CDATA[
+			    #if($_parameter.categoryName)CATEGORY_NAME = @{_parameter.categoryName,jdbcType=VARCHAR},#end
+			    #if($_parameter.finishtime)FINISH_TIME = @{_parameter.finishtime,jdbcType=BIGINT},#end
+			    #if($_parameter.parentId)PARENT_ID = @{_parameter.parentId,jdbcType=BIGINT},#end
+			    #if($_parameter.emergency)EMERGENCY = @{_parameter.emergency,jdbcType=BIGINT},#end
+			    #if($_parameter.sortidx)SORT_IDX = @{_parameter.sortidx,jdbcType=BIGINT},#end
+			    #if($_parameter.remark)REMARK = @{_parameter.remark,jdbcType=VARCHAR},#end
+			    #if($_parameter.fullLevelName)FULL_LEVEL_NAME = @{_parameter.fullLevelName,jdbcType=VARCHAR},#end
+			    #if($_parameter.updateId)UPDATE_ID = @{_parameter.updateId,jdbcType=NUMERIC},#end
+			    #if($_parameter.updator)UPDATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+			    #if($_parameter.updateDate)UPDATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+			]]>
+		#end
+		WHERE ID = @{_parameter.id,jdbcType=BIGINT}
+	</update>
+	
+    <!-- 通过 ID 获取对象-->
+	<delete id="deleteById" parameterType="Long" lang="velocity">
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE ID = @{_parameter.id,jdbcType=BIGINT}
+	</delete>
+	
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			#if($_p.id)
+				#set($_id =$_p.id)
+				AND A.ID = @{_id}
+			#end
+			#if($_p.emergency && $_p.emergency != '')
+				#set($_emergency =$_p.emergency)
+				AND A.EMERGENCY = @{_emergency}
+			#end
+			#if($_p.categoryName && $_p.categoryName != '')
+				#set($_categoryName = '%' + $_p.categoryName + '%')
+				AND A.CATEGORY_NAME LIKE @{_categoryName}
+			#end
+			#if($_p.parentId && $_p.childIds && $_p.childIds.size()>0)
+				#set($_childIds =$_p.childIds)
+				AND 
+				#repeat( $_childIds $id "," " a.ID IN (" ")" )
+		    		@{id,jdbcType=BIGINT}
+				#end
+			#end
+			#if($_p.remark && $_p.remark != '')
+				#set($_remark = '%' + $_p.remark + '%')
+				AND A.REMARK LIKE @{_remark}
+			#end
+		#end
+		]]>
+	</sql>
+
+	<!-- 按条件查询记录-->
+    <select id="findByCondition" parameterType="com.supconit.repair.entities.RepairEvtCategory" resultMap="RepairEvtCategoryResultMap" lang="velocity" databaseId="oracle">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre"/>
+		<include refid="condition_sql"/>
+		#order($_parameter.condition,"A.CREATE_DATE DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+	<!-- 按条件查询记录-->
+    <select id="findByCondition" parameterType="com.supconit.repair.entities.RepairEvtCategory" resultMap="RepairEvtCategoryResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			A.ID,
+	      	A.PARENT_ID,
+	        A.FINISH_TIME,
+	        A.EMERGENCY,
+	        A.REMARK,
+	        A.SORT_IDX,
+	        A.CREATE_ID,
+	        A.CREATOR,
+	        A.CREATE_DATE,
+	        A.UPDATE_ID,
+	        A.UPDATOR,
+	        A.UPDATE_DATE,
+	        A.CATEGORY_NAME,
+	        A.FULL_LEVEL_NAME,
+	        E2.ENUM_TEXT AS EMERGENCY_NAME,
+	        ISNULL(B.CATEGORY_NAME,'维修类别簇') PARENT_NAME
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"A.CREATE_DATE DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/> A
+		left join REPAIR_EVT_CATEGORY B
+		on A.PARENT_ID = B.ID
+		LEFT JOIN ENUM_DETAIL E2
+        ON A.EMERGENCY = E2.ENUM_VALUE 
+        AND E2.TYPE_ID = 36
+		<include refid="condition_sql"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+    <select id="countByCondition" parameterType="com.supconit.repair.entities.RepairEvtCategory" resultType="long" lang="velocity">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+
+  <!-- 递归查询子类别-->
+	<select id="findChildIds" parameterType="long" resultType="long" lang="velocity">
+		WITH TT(ID) AS ( 
+		SELECT ID FROM <include refid="TABLE_NAME"/>  WHERE ID = @{_parameter,jdbcType=BIGINT}
+	    UNION ALL 
+		SELECT A.ID FROM <include refid="TABLE_NAME"/> A,TT B WHERE A.PARENT_ID = B.ID
+		) 
+		SELECT 	ID  FROM TT   	
+	</select>  
+	
+  	<!-- 递归查询子类别-->
+	<select id="findChildIdsEntity" parameterType="long" resultMap="RepairEvtCategoryResultMap" lang="velocity">
+		WITH TT(ID,CATEGORY_NAME,PARENT_ID) AS ( 
+		SELECT ID,CATEGORY_NAME,PARENT_ID FROM <include refid="TABLE_NAME"/>  WHERE ID = @{_parameter,jdbcType=BIGINT}
+	    UNION ALL 
+		SELECT A.ID,A.CATEGORY_NAME,A.PARENT_ID FROM <include refid="TABLE_NAME"/> A,TT B WHERE A.PARENT_ID = B.ID
+		) 
+		SELECT 	ID,CATEGORY_NAME,PARENT_ID  FROM TT   	
+	</select>  
+	
+	<!-- 查询某设备类别的子节点数量-删除设备类别验证用-->
+	<select id="findChildrenCount"  parameterType="long" resultType="long" lang="velocity">
+	    SELECT 
+		COUNT(A.ID)
+		FROM
+		<include refid="TABLE_NAME"/> A
+        WHERE A.PARENT_ID = @{_parameter,jdbcType=BIGINT}
+	</select>
+	
+		<!-- 按设备类别查询层 gis-->
+	<select id="findByCodes_g" parameterType="hashmap" resultMap="RepairEvtCategoryResultMap" lang="velocity">
+		SELECT A.ID
+		FROM <include refid="TABLE_NAME"/> A
+		WHERE 
+        #repeat( $_parameter.codes $id "," " A.CATEGORY_CODE IN (" ")" )
+			@{id,jdbcType=BIGINT}
+		#end 
+	</select>
+	
+    <!-- 删除多条记录-->
+	<delete id="deleteByIds" lang="velocity">
+        DELETE FROM <include refid="TABLE_NAME"/> WHERE 
+		#repeat( $_parameter.ids $id "," " ID IN (" ")" )
+			@{id,jdbcType=BIGINT}
+		#end 
+  	</delete>
+
+</mapper>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.visitor.entities.VisitorReport">
+	<resultMap type="com.supconit.visitor.entities.VisitorReport" id="visitorReportResultMap">
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">RESERVATION</sql>
+	
+	<select id="deptReport" resultMap="visitorReportResultMap" lang="velocity">
+			SELECT
+				*
+			FROM
+				(
+					SELECT
+						#if($_databaseId != 'oracle') TOP 5  #end 
+						hd.NAME visitDeptName,
+						r.VISIT_DEPTID,
+						SUM (r.ACTUAL_VISITOTS) visitorNum
+					FROM
+						<include refid="TABLE_NAME"/> r
+						LEFT JOIN HO_DEPARTMENT hd ON r.VISIT_DEPTID = hd.ID
+					WHERE 
+					<![CDATA[
+					#set($_p = $_parameter.condition)
+					#if($_p.startMonth && $_p.startMonth != '')
+					#set($_startMonth = $_p.startMonth)
+					#set($_endMonth = $_p.endMonth)
+						r.VISIT_TIME >= @{_startMonth,jdbcType=TIMESTAMP} and r.VISIT_TIME < @{_endMonth,jdbcType=TIMESTAMP} and 
+					#end
+					]]>
+        			1=1
+					GROUP BY
+						r.VISIT_DEPTID,hd.NAME
+					ORDER BY
+						visitorNum DESC
+				) a
+			#if($_databaseId == 'oracle')
+			<![CDATA[where  rownum<6  ]]>
+			#end
+	</select>
+	
+	<select id="yearReport" parameterType="map" resultMap="visitorReportResultMap" lang="velocity">
+	<![CDATA[
+		SELECT
+			@{_parameter.jan} visitMonth,
+			SUM (r.ACTUAL_VISITOTS) visitorNum
+		from RESERVATION r 
+		WHERE R.VISIT_TIME>=@{_parameter.jan,jdbcType=DATE} AND R.VISIT_TIME<@{_parameter.feb,jdbcType=DATE}
+		UNION ALL
+		SELECT
+			@{_parameter.feb} visitMonth,
+			SUM (r.ACTUAL_VISITOTS) visitorNum
+		from RESERVATION r 
+		WHERE R.VISIT_TIME>=@{_parameter.feb,jdbcType=DATE} AND R.VISIT_TIME<@{_parameter.mar,jdbcType=DATE}
+		UNION ALL
+		SELECT
+			@{_parameter.mar} visitMonth,
+			SUM (r.ACTUAL_VISITOTS) visitorNum
+		from RESERVATION r 
+		WHERE R.VISIT_TIME>=@{_parameter.mar,jdbcType=DATE} AND R.VISIT_TIME<@{_parameter.apr,jdbcType=DATE}
+		UNION ALL
+		SELECT
+			@{_parameter.apr} visitMonth,
+			SUM (r.ACTUAL_VISITOTS) visitorNum
+		from RESERVATION r 
+		WHERE R.VISIT_TIME>=@{_parameter.apr,jdbcType=DATE} AND R.VISIT_TIME<@{_parameter.may,jdbcType=DATE}
+		UNION ALL
+		SELECT
+			@{_parameter.may} visitMonth,
+			SUM (r.ACTUAL_VISITOTS) visitorNum
+		from RESERVATION r 
+		WHERE R.VISIT_TIME>=@{_parameter.may,jdbcType=DATE} AND R.VISIT_TIME<@{_parameter.jun,jdbcType=DATE}
+		UNION ALL
+		SELECT
+			@{_parameter.jun} visitMonth,
+			SUM (r.ACTUAL_VISITOTS) visitorNum
+		from RESERVATION r 
+		WHERE R.VISIT_TIME>=@{_parameter.jun,jdbcType=DATE} AND R.VISIT_TIME<@{_parameter.jul,jdbcType=DATE}
+		UNION ALL
+		SELECT
+			@{_parameter.jul} visitMonth,
+			SUM (r.ACTUAL_VISITOTS) visitorNum
+		from RESERVATION r 
+		WHERE R.VISIT_TIME>=@{_parameter.jul,jdbcType=DATE} AND R.VISIT_TIME<@{_parameter.aug,jdbcType=DATE}
+		UNION ALL
+		SELECT
+			@{_parameter.aug} visitMonth,
+			SUM (r.ACTUAL_VISITOTS) visitorNum
+		from RESERVATION r 
+		WHERE R.VISIT_TIME>=@{_parameter.aug,jdbcType=DATE} AND R.VISIT_TIME<@{_parameter.sep,jdbcType=DATE}
+		UNION ALL
+		SELECT
+			@{_parameter.sep} visitMonth,
+			SUM (r.ACTUAL_VISITOTS) visitorNum
+		from RESERVATION r 
+		WHERE R.VISIT_TIME>=@{_parameter.sep,jdbcType=DATE} AND R.VISIT_TIME<@{_parameter.oct,jdbcType=DATE}
+		UNION ALL
+		SELECT
+			@{_parameter.oct} visitMonth,
+			SUM (r.ACTUAL_VISITOTS) visitorNum
+		from RESERVATION r 
+		WHERE R.VISIT_TIME>=@{_parameter.oct,jdbcType=DATE} AND R.VISIT_TIME<@{_parameter.nov,jdbcType=DATE}
+		UNION ALL
+		SELECT
+			@{_parameter.nov} visitMonth,
+			SUM (r.ACTUAL_VISITOTS) visitorNum
+		from RESERVATION r 
+		WHERE R.VISIT_TIME>=@{_parameter.nov,jdbcType=DATE} AND R.VISIT_TIME<@{_parameter.dece,jdbcType=DATE}
+		UNION ALL
+		SELECT
+			@{_parameter.dece} visitMonth,
+			SUM (r.ACTUAL_VISITOTS) visitorNum
+		from RESERVATION r 
+		WHERE R.VISIT_TIME>=@{_parameter.dece,jdbcType=DATE} AND R.VISIT_TIME<@{_parameter.nextJun,jdbcType=DATE}
+		]]>
+	</select>
+	
+	<select id="purposeReport" resultMap="visitorReportResultMap" lang="velocity">
+		SELECT 
+			r.VISTI_REASON visitPurpose, 
+			SUM(r.actual_visitots) visitorNum
+		FROM RESERVATION r
+		WHERE
+			<![CDATA[
+					#set($_p = $_parameter.condition)
+					#if($_p.startMonth && $_p.startMonth != '')
+					#set($_startMonth = $_p.startMonth)
+					#set($_endMonth = $_p.endMonth)
+						r.VISIT_TIME >= @{_startMonth,jdbcType=TIMESTAMP} and r.VISIT_TIME < @{_endMonth,jdbcType=TIMESTAMP} and 
+					#end
+			]]>
+		1=1
+		GROUP BY
+			r.VISTI_REASON
+	</select>
+   
+</mapper>

@@ -1,0 +1,234 @@
+#parse("index/_header.vm")
+</head>
+<body style="padding-bottom:40px;">
+<form id="myform_id" method="post" action="$!{rc.contextPath}/dev/gis/mapLevel/save" class="ui-layout-center ui-dialog-form">
+	<input type="hidden" name="id" value="$!{mapLevel.id}">
+    <table width="100%">
+		<tr #if("$!viewOnly" == "true") style="display:none;" #end>
+			<td width="20%" class="label"><label>参照其他楼：</label></td>
+            <td width="30%">
+				<select  class="k-textbox"  onchange="copyValue(this.value)">
+					<option value=''>--请选择--</option>
+				    #foreach($!{e} in $!{mapLevelList})
+	   					<option value="$!{e.id}">$!{e.buildName}[$!{e.floorName}]</option>
+	   				#end   
+				</select>
+			</td>
+			<td width="16%"><span class="ui-form-required">*</span>图层模式：</td>
+			<td width="30%">
+				<select  class="k-textbox" id="type" name="type" onchange="changBuildSystem()">
+					<option value=''>--请选择--</option>
+	   				<option value="1" #if($!{mapLevel.type}==1) selected #end>楼层图</option>
+	   				<option value="2" #if($!{mapLevel.type}==2) selected #end>系统图</option>
+				</select>
+			</td>
+			<td width="7%"></td>
+        </tr>
+        <tr id="build">
+            <td class="label"><span class="ui-form-required">*</span><label>大楼名称：</label></td>
+			<td width="30%">
+				<select  class="k-textbox" id="areaCode" name="initBuild"  onchange="changeFloor()">
+					<option value=''>--请选择--</option>
+				    #foreach($!{e} in $!{topArea})
+	   					<option value="$!{e.id}">$!{e.areaName}</option>
+	   				#end   
+				</select>
+			</td>
+			
+            <td class="label"><span class="ui-form-required">*</span>大楼楼层：</td>
+            <td>
+                <select  class="k-textbox"  id="areaLevel"  name="initFloor" >
+					<option value=''>--请选择--</option>
+				</select>
+            </td>
+            <td></td>
+        </tr>
+        <tr id="system">
+            <td class="label"><span class="ui-form-required">*</span><label>系统名称：</label></td>
+			<td width="30%">
+				 <input type="text" class="k-textbox" id="systemName" name="systemName" value="$!{mapLevel.systemName}">
+			</td>
+			
+            <td class="label"><span class="ui-form-required">*</span>系统编码：</td>
+            <td>
+                <input type="text" class="k-textbox" id="systemCode" name="systemCode" value="$!{mapLevel.systemCode}">
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td class="label"><span class="ui-form-required">*</span>底层地图：</td>
+			<td width="20%">
+				 <input type="text" class="k-textbox" name="baseLayer" value="$!{mapLevel.baseLayer}">
+			</td>
+			<td width="16%"></td>
+			<td width="30%"></td>
+			<td width="7%"></td>
+        </tr>
+        <tr>
+            <td class="label"><span class="ui-form-required">*</span>比例尺：</td>
+            <td><input type="text" class="k-textbox" name="scales" value="$!{mapLevel.scales}"></td>
+
+	        <td class="label"><span class="ui-form-required">*</span>初始等级：</td>
+	        <td><input type="text" class="k-textbox" name="initlevel" value="$!{mapLevel.initlevel}"></td>
+        <td></td>
+        </tr>
+        
+        <tr>
+	        <td class="label"><span class="ui-form-required">*</span>最小经度：</td>
+	        <td><input type="text" class="k-textbox" name="minlon" value="$!{mapLevel.sminlon}"></td>
+	
+	        <td class="label"><span class="ui-form-required">*</span>最大经度：</td>
+	        <td><input type="text" class="k-textbox" name="maxlon" value="$!{mapLevel.smaxlon}"></td>
+	        <td></td>
+	    </tr>
+	    
+	    <tr>
+		    <td class="label"><span class="ui-form-required">*</span>最小纬度：</td>
+		    <td><input type="text" class="k-textbox" name="minlat" value="$!{mapLevel.sminlat}"></td>
+		
+		    <td class="label"><span class="ui-form-required">*</span>最大纬度：</td>
+		    <td><input type="text" class="k-textbox" name="maxlat" value="$!{mapLevel.smaxlat}"></td>
+		    <td></td>
+		</tr>
+		
+		<tr>
+			<td class="label"><span class="ui-form-required">*</span>中心点X坐标：</td>
+			<td><input type="text" class="k-textbox" name="centerx" value="$!{mapLevel.scenterx}"></td>
+			
+			<td class="label"><span class="ui-form-required">*</span>中心点Y坐标：</td>
+			<td><input type="text" class="k-textbox" name="centery" value="$!{mapLevel.scentery}"></td>
+			<td></td>
+		</tr>
+		
+    </table>
+    <div class="actions">
+        <button class="k-primary hc_btn" id="save_button_id" type="submit"><i class="fa fa-save"></i>保 存</button>
+        <button class="hc_btn cancel" onclick="close_dialog('mapLevel_add_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+    </div>
+
+</form>
+
+<script type="text/javascript">
+	function copyValue(id){
+		if(id==""){
+			$("table input").val("");
+		}else{
+			$.ajax({
+	            'url': "$!{rc.contextPath}/dev/gis/mapLevel/copyValue",
+	            'dataType': 'json',
+	            'type': 'post',
+	            'data': {'id':id},
+	            'success': function (res) {
+	            	$("input[name='scales']").val(res.scales);
+	            	$("input[name='initlevel']").val(res.initlevel);
+	            	$("input[name='minlon']").val(res.minlon);
+	            	$("input[name='maxlon']").val(res.maxlon);
+	            	$("input[name='minlat']").val(res.minlat);
+	            	$("input[name='maxlat']").val(res.maxlat);
+	            	$("input[name='centerx']").val(res.centerx);
+	            	$("input[name='centery']").val(res.centery);
+	            }
+        	});
+		}
+	}
+	
+	
+	function changBuildSystem(){
+	    var valu = $("#type").val();
+		if(valu == '1'){
+			$("#build").show();
+			$("#system").hide();
+			$("#systemName").attr("novalidate","");
+			$("#systemCode").attr("novalidate","");
+			$("#areaCode").removeAttr("novalidate");
+			$("#areaLevel").removeAttr("novalidate");
+		}
+		if(valu == '2'){
+			$("#build").hide();
+			$("#systemName").removeAttr("novalidate");
+			$("#systemCode").removeAttr("novalidate");
+			$("#areaCode").attr("novalidate","");
+			$("#areaLevel").attr("novalidate","");
+			$("#system").show();
+		}
+	}
+	
+	 
+    $(document).ready(function () {
+		_iframe_layout = $('body').layout({
+	      defaults: {
+	        resizable: true,
+	        closable: false,
+	        spacing_open: 5
+	      }
+	    });
+	    
+	    
+        $("#myform_id").validator({
+            fields: {
+                baseLayer:"底层地图:required; length[~50]",
+                initBuild: "大楼名称：required; length[~20]",
+                initFloor: "大楼楼层：required; length[~20]",
+                systemName: "系统名称：required; length[~100]",
+                systemCode: "系统编码：required; length[~100]",
+                scales: "比例尺:required; length[~100]",
+                initlevel: "初始等级:required; 'intdigits'",
+                minlon: "最小经度:required; 'longitude'",
+                maxlon: "最大经度:required; 'longitude'",
+                minlat: "最小纬度:required; 'latitude'",
+                maxlat: "最大纬度:required; 'latitude'",
+                centerx: "中心点X坐标:required; 'locationnumber'",
+                centery: "中心点Y坐标:required; 'locationnumber'"
+            },
+            valid: function (form) {
+                form_btn_submit($("#save_button_id1"), form, function (res) {
+                    //console.log(res);
+                    validateCallback(res, "grid", "mapLevel_add_dlg");
+                });
+            }
+        });
+        var typeVal = "1";
+        if("$!{mapLevel.type}" != ''){
+        	typeVal = "$!{mapLevel.type}";
+        }
+        $("#type").val(typeVal);
+        if("$!{mapLevel.type}" == "1"){//楼层图
+        	if("$!{mapLevel.initBuild}" != ""){
+	        	$("#areaCode").val("$!{mapLevel.initBuild}");
+				changeFloor("$!{mapLevel.initFloor}");
+        	}
+        }
+        changBuildSystem();
+        
+        
+    });
+	
+        #if("$!viewOnly" == "true")
+        	setAllReadonly();
+        #end
+        
+   function changeFloor(objVal){
+        var val = $("#areaCode").val();
+        $.ajax({
+	            'url': "$!{rc.contextPath}/dev/gis/mapLevel/getFloor",
+	            'dataType': 'json',
+	            'type': 'post',
+	            'data': {'id':val},
+	            'success': function (res) {
+	                 var select = $("#areaLevel");
+	                 $(select).empty();
+	            	 for(var i=0;i<res.length;i++){
+	            	 	var tt = res[i];
+	            	 	var option = "<option value='"+tt.id+"'>"+tt.areaName+"</option>";
+	            	 	$(select).append(option);
+	            	 }
+	            	 if(objVal){
+	            	 	$("#areaLevel").val(objVal);
+	            	 }
+	            	 
+	            }
+        	});
+   }     
+</script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+#parse("index/_header.vm")
+</head>
+<body>
+  <div class="ui-layout-west" id="leftTreeWrap">
+			<div class="ui-layout-north">
+				<div class="k-header k-grid-toolbar" style="padding-left:10px;">设备类别</div>
+			</div>
+      <div class="ui-layout-center">
+  		  <ul id="zTree_dc_list" class="ztree"></ul>
+      </div>
+  </div>
+
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<form class="ui-form" id='queryForm'>
+    		<div class="ui-form-group" style="display:none" id='selectBlock2'>
+    			<div class="ui-form-item ui-form-item-block">
+    			  <label class="ui-label">您已选择：</label>
+    				  <span class="ui-form-pick">
+    				  	  <input id="parentId" type="hidden" name="parentId" value="$!{deviceCategory.parentId}">
+    					  <strong>设备类别：</strong><em id='parentName'></em><i class="iconfont icon-remove-sign"></i>
+    				  </span>
+    			</div>
+    		</div>	
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+                <tr>
+                  <td class="ui-search-name first"><label class="ui-label">类别编码：</label></td>
+				  <td class="ui-search-c"><input class="k-textbox" type="text" name="categoryCode" value="$!deviceCategory.categoryCode" maxlength="32"></td>
+                  <td class="ui-search-name">类别名称：</td>
+                  <td class="ui-search-c">
+                    <input class="k-textbox" type="text" name="categoryName" value="$!deviceCategory.categoryName"  maxlength="50">
+                  </td>
+                </tr>
+              </table>
+            </td>
+            <td width="150" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn" onclick="cancelLeftTreeSelected();"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+            <td></td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+#parse("index/_footer.vm") 
+
+<script type="text/javascript">
+  var _iframe_layout, _left_layout, _inner_layout;
+	$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      },
+      west: {
+        size: 0.18
+      }
+    });
+
+    _left_layout = $("#leftTreeWrap").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      }
+    });
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+
+    $('#resetBtn').click(function(){
+	$('#parentId').val('');
+      $("#queryForm :text").val('');  
+    });
+
+	$('.iconfont','.ui-form-pick').each(function(){
+      $(this).click(function(){
+      	$('#parentId').val('');
+      	$('#selectBlock').hide();
+        //$(this).parent().remove();
+      })
+    })
+	
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/device/deviceCategory/page", [{
+              field: "id",
+              hidden: true
+          }, {
+              field: "categoryCode",
+              title: "类别编码",
+              sortable: false,
+              width: 100,
+			  headerAttributes: {"class": "k-grid-text"},
+			  attributes: {"class": "k-grid-text"},
+              template:"<a href=\"javascript:void(0)\" title=\"查看#: data.categoryCode #的详细信息\" onclick=\"quick_dialog('device_add_dlg','查看#:data.categoryCode #的信息','$!{rc.contextPath}/device/deviceCategory/edit?viewOnly=true&id=#: data.id #',538, 213)\">#: data.categoryCode #</a>"          		
+		  }, {
+              field: "categoryName",
+              title: "类别名称",
+              sortable: false,
+              width: 150,
+			  headerAttributes: {"class": "k-grid-text"},
+		  	  #*attributes: {"class": "k-grid-text"},*#
+          	  attributes: {     
+  		  		title:"#: data.categoryName==null? '':data.categoryName #",
+  				"class": "k-grid-text k-grid-nowrap"
+		  	  }			  
+          }, {
+              field: "parentName",
+              title: "上级类别",
+              sortable: false,
+			  headerAttributes: {"class": "k-grid-text"},
+			  attributes: {"class": "k-grid-text"}				  
+          }], 
+      {
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          },
+		  resizable:true
+      }, {
+          serverSorting: true
+      }, [
+      	 #kendo_datagrid_btns("SBFL")#end
+      ]);
+		
+    });
+
+    /* zTree */
+    var setting = {
+    	data: {
+    		simpleData: {enable: true}
+          },
+          callback: {
+    			onClick: function(event, treeId, treeNode) {
+    				$("#parentId").val(treeNode.id);
+					$("#parentName").text(treeNode.name);
+					//$('#selectBlock').show();
+					$('#queryBtn').click();
+    			}
+    		}
+    };
+  	var zNodes = [];  
+  	zNodes.push({id:"0", pId:"-1", name:"设备类别簇"});     
+    
+    #foreach($!{treeNode} in $!{treeList})
+        zNodes.push({id:$!{treeNode.id}, pId:$!{treeNode.parentId}, name:"$!{treeNode.categoryName}"});     
+    #end
+
+  	$(document).ready(function(){
+  		$.fn.zTree.init($("#zTree_dc_list"), setting,zNodes).expandAll(true);;
+  		
+  	});
+	
+	function cancelLeftTreeSelected(){
+		$.fn.zTree.init($("#zTree_dc_list"), setting,zNodes).expandAll(true);;
+	}
+</script>
+</body>
+</html>
+ 
+    
+ 

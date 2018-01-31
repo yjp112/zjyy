@@ -1,0 +1,290 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+        <form class="ui-form" id='queryForm' method="post" action="$!{rc.contextPath}/base/deviceSpareIn/save">
+            <input type="hidden" name="id" id="id" value="$!{device.id}" />
+            <input type="hidden" name="deviceId" id="deviceId" value="$!{device.deviceId}" />
+            <table width="100%">
+                <tr>
+                    <td>
+                        <table class="ui-search-table" width="100%">
+                            <tr>
+                                <td class="ui-search-name first" align="right">部门：</td>
+                                <td class="ui-search-c">
+##                                <span class="k-textbox k-space-right" onclick="chooseDept('deptId','deptName','','')">
+									<input type="text" readonly id="deptName" name="deptName" value="$!{device.deptName}" class="k-textbox" />
+##									<a href="#" class="k-icon k-i-search">&nbsp;</a>
+##								</span>
+                                <input type="hidden" name="deptId" id="deptId" value="$!{device.deptId}"/>
+                                </td>
+                                <td class="ui-search-name"  align="right">入库人：</td>
+                                <td class="ui-search-c">
+								<input type="text" readonly id="creator" name="creator" value="$!{device.creator}" class="k-textbox" />
+                                <input type="hidden" id="createId" name="createId" value=" $!{device.createId}"/>
+                                </td>
+                                <td class="ui-search-name first"  align="right">入库时间：</td>
+                                <td class="ui-search-c">
+                                 <input type="text" name="createDate" id="createDate" value="#date_format($!{device.createDate},'yyyy-MM-dd')" class="k-textbox" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="ui-search-name first"  align="right">保管员：</td>
+                                <td class="ui-search-c">
+                                 <input type="text" name="storeMan" value="$!{device.storeMan}" class="k-textbox" />
+                                </td>
+                                <td class="ui-search-name"  align="right">资产管理员：</td>
+                                <td class="ui-search-c">
+                                <input type="text" name="assetmanager" value="$!{device.assetmanager}" class="k-textbox" />
+                                </td>
+                                <td class="ui-search-name first"  align="right">验收时间：</td>
+                                <td class="ui-search-c">
+                                 <input type="text" id="checkDate" name="checkDate" id="checkDate" value="#date_format($!{device.checkDate},'yyyy-MM-dd')"  />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="ui-search-name first"  align="right">设备名称：</td>
+                                <td class="ui-search-c">
+                                 <input type="text" name="deviceName"  id="deviceName" readonly value="$!{device.deviceName}" class="k-textbox" />
+                                </td>
+                                <td class="ui-search-name first"  align="right">生产厂商：</td>
+                                <td class="ui-search-c">
+                                 <input type="text" readonly name="supplierName" value="$!{device.supplierName}" class="k-textbox" />
+                                </td>
+                                
+                            </tr>
+                        </table>
+                    </td>
+                    <td width="150" valign="top" style="padding-top:4px;">
+                        <button class="hc_btn k-primary" id="save_button_id" type="submit" style="display:none"><i class="fa fa-save"></i>保 存</button>
+                        <a class="hc_btn k-primary"  onclick="reply()" style="background-color: #1ab38d;border-color: #1ab38d;"><i class="fa fa-reply"></i>返回</a>
+                    </td>
+                    <td></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div class="ui-layout-center">
+        <div id="grid"></div>
+    </div>
+</div>
+#parse("index/_footer.vm")
+<script type="text/javascript">
+var _iframe_layout, _left_layout, _inner_layout;
+$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+        defaults: {
+            resizable: false,
+            closable: false,
+            spacing_open: 5
+        }
+    });
+
+    _inner_layout = $("#subMain").layout({
+        defaults: {
+            resizable: false,
+            closable: false,
+            spacing_open: 0
+        },
+        center: {
+            onresize_end: function () {
+                var grid = $("#grid").data("kendoGrid");
+                grid.resize();
+            }
+        }
+    })
+    
+    var deviceSpareInId='$!{device.id}';
+    if(deviceSpareInId==''){
+    	deviceSpareInId=-1;
+    }
+    $("#queryForm").validator({
+        fields: {
+        	checkDate: "验收时间:required",
+        },
+        valid: function (form) {
+            form_btn_submit($("#save_button_id"), form, function (res) {
+           		  var sId=res.data.next;
+            	  quick_dialog("spareDetail_add_dlg", "新增备件", "$!{rc.contextPath}/base/deviceSpareIn/spareDetailEdit?sId="+sId, 459, 355);
+            });
+        }
+    });    
+    //列表
+    quick_datagrid("#grid", "", "$!{rc.contextPath}/base/deviceSpareIn/detailPage?deviceSpareInId="+deviceSpareInId, [{
+        field: "id",
+        hidden: true
+    }, {
+	    width: 50,
+        headerTemplate: '<input type="checkbox" id="check-all"/>',
+        template: '<div style="text-align:center;"><input type="checkbox" name="check" onclick="uncheck()" /></div>'           
+	},{
+        field: "spareName",
+        title: "备件名称",
+		headerAttributes: {"class": "k-grid-text"},
+        attributes: {"class": "k-grid-text"},
+		width: "300px"
+    }, {
+        field: "spareSpac",
+        title: "规格/型号", 
+		headerAttributes: {"class": "k-grid-text"},
+        attributes: {"class": "k-grid-text"},
+		width: "250px"
+    }, {
+        field: "total",
+        title: "数量", 
+		headerAttributes: {"class": "k-grid-num"},
+        attributes: {"class": "k-grid-num"},
+		width: "150px"
+    }
+    , {
+        field: "spareMaker",
+        title: "备件厂商", 
+		headerAttributes: {"class": "k-grid-text"},
+        attributes: {"class": "k-grid-text"},
+		width: "210px"
+    }
+    ,{
+    	field:"purpose",
+    	title:"用途",
+		headerAttributes: {"class": "k-grid-text"},
+        attributes: {"class": "k-grid-text"},
+		width:"210px"
+    }
+    ,{
+    	field:"price",
+    	title:"价格(元)",
+		headerAttributes: {"class": "k-grid-num"},
+        attributes: {"class": "k-grid-num"},
+		width:"150px"
+    }
+    
+    ],
+        {
+            sortable: {
+                mode: "multiple",
+                allowUnsort: true
+            },
+            selectable: 'multiple'
+        }, {
+            serverSorting: true
+        }, [
+                {
+                    name: "新增",
+                    icon: "fa fa-plus",
+                    onclick: function (obj,grid) {
+                        var row = grid.select();
+                        var data = grid.dataItem(row);
+                        var selectId;
+                        if(data)
+                            selectId = data.id;
+                    	
+                   	 	$("#save_button_id").click();
+                   	
+                   		//quick_dialog("spareDetail_add_dlg", "新增备件", "$!{rc.contextPath}/base/deviceSpareIn/spareDetailEdit?sId="+sId, 459, 355);
+                    }
+                },
+                {
+                    name: "修改",
+                    icon: "fa fa-pencil",
+                    onclick: function (obj,grid) {
+                      var cs = getCheckedData("#grid","input[name='check']");
+		        	  var ids = [];
+		              if (null == cs || cs.length == 0) {
+		                  notify("请选择要修改的项", "error");
+		                  return;
+		              }
+		              for(var i=0; i<cs.length; i++){
+		            	  ids.push(cs[i].id);
+		              }
+		              if(ids.length == 0){
+		            	  notify("没有选中需要修改的备件！","warn");
+		              	return;
+		              }else if(ids.length > 1){
+		            	  notify("请选中一项备件进行修改！","warn");
+			              return;
+		              }
+                        quick_dialog("spareDetail_add_dlg", "修改备件", "$!{rc.contextPath}/base/deviceSpareIn/spareDetailEdit?id="+ids, 459, 355, obj);
+                    }
+                },
+                {
+                    name: "删除",
+                    icon: "fa fa-remove",
+                    onclick: function (obj, grid) {
+        	          var cs = getCheckedData("#grid","input[name='check']");
+		        	  var ids = [];
+		              if (null == cs || cs.length == 0) {
+		                  notify("请选择要删除的项", "error");
+		                  return;
+		              }
+		              for(var i=0; i<cs.length; i++){
+		            	  ids.push(cs[i].id);
+		              }
+		              
+		              if(ids.length == 0){
+		            	  notify("没有选中需要删除的选项！","warn");
+		              	return;
+		              }
+		              
+		              if(!confirm("确定要删除吗？"))return;
+		        	  else{
+		                  $.ajax({
+		                      type: "post",
+		                      cache: false,
+		                      url: "$!rc.contextPath/base/deviceSpareIn/detaildelete",
+		                      data: "ids=" + ids,
+		                      success:function(msg){
+								if (msg.status == "fail") {
+									notify(msg.message);
+								}else{
+								
+									notify("删除成功","success");
+									$("#grid #check-all").removeAttr("checked");
+									edited_callback(grid);
+								}
+								
+							}, error: function (xhr, status, error) {
+								notify("删除失败，请检查网络！","error");
+		                      }
+		                  });
+		        	  }
+		        	  }
+                }
+        ]
+    );
+	checkALL("#check-all","input[name='check']");	
+	//commonSingleDateWithout("createDate","yyyy-MM-dd","zh-CN");	
+	 commonDateWithout("checkDate","createDate","yyyy-MM-dd","zh-CN");
+	var cDate='$!{device.createDate}';
+	//console.log(cDate);
+	//入库时间大于验收时间，如果入库时间为空则将其设置为当前时间，如果验收时间为空 则设置为当前时间
+	if(cDate==''){
+		$("#createDate").val(new Date().format("yyyy-MM-dd")).focus(); 
+		$("#checkDate").val(new Date().format("yyyy-MM-dd")).focus();
+		/*$("#checkDate").hcDatePicker({
+				 value:new Date(),
+	        	 format: "yyyy-MM-dd",
+	 		     culture: "zh-CN"
+	         }).data("kendoDatePicker");
+	         $("#checkDate").attr("readonly", true);*/
+     }//else{
+		//commonSingleDateWithout("checkDate","yyyy-MM-dd","zh-CN");
+	//}
+	
+});
+  	function uncheck(){
+  		var flag = 0;
+      if(document.getElementById("check-all").checked){
+    	  document.getElementById("check-all").checked=false;
+    	}
+      $.each($("input[name='check']"),function(i,v){
+			if(v.checked == false)
+				flag = 1;
+		});
+      if(flag != 1)
+    	  document.getElementById("check-all").checked=true;
+    }
+function reply(){
+    window.location.href= "$!{rc.contextPath}/base/deviceSpareIn/list";
+}
+</script>

@@ -1,0 +1,38 @@
+<table id='content_tableId' class="ui-table ">
+	<thead>
+		<tr>
+			<th>序号</th>
+			<th >设备名称</th>
+			<th >所在位置</th>
+			<th >保养内容</th>
+			<th >保养结果</th>
+			<th >保养结果说明</th>
+		</tr>
+	</thead>
+	<tbody>
+			#set($index = 0)
+			#foreach($!content in $!task.maintainTaskContentList)
+				<tr>
+					<td><span class="rowNumber">$velocityCount</span></td>
+					<td>
+						<input type="hidden" name="maintainTaskContentList[$!index].id" value="$!content.id"/>
+						<input type="hidden" name="maintainTaskContentList[$!index].deviceId" value="$!content.deviceId"/>
+						<input type="hidden" name="maintainTaskContentList[$!index].planId" value="$!content.planId"/>
+						<input readonly type="text" class="k-textbox" name="maintainTaskContentList[$!index].deviceName" value="$!content.deviceName"  style="width:110px;"/>
+					</td>
+					<td><input readonly type="text" class="k-textbox" name="maintainTaskContentList[$!index].locationName" value="$!content.locationName"  style="width:110px;"/></td>
+					<td><input readonly type="text" class="k-textbox" name="maintainTaskContentList[$!index].itemContent" value="$!content.itemContent"/></td>
+                    <td>
+						<select  #if($!viewOnly) disabled #end class="k-textbox" name="maintainTaskContentList[$!index].result">
+							<option value=''>--请选择--</option>
+							#foreach($!{item} in $!{maintainTaskResultList})
+		       			    <option value="$!{item.enumValue}" #if($!{item.enumValue} == $!{content.result}) selected #end>$!{item.enumText}</option>
+							#end
+						</select>
+					</td>
+					<td><input type="text" class="k-textbox" name="maintainTaskContentList[$!index].descripton" value="$!content.descripton"  /></td>
+				</tr>
+				#set($index =$index + 1)
+			#end
+	</tbody>
+</table>

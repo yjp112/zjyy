@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.emergency.entities.EmergencyFacility">
+
+	<resultMap type="com.supconit.emergency.entities.EmergencyFacility"
+		id="EmergencyFacilityResultMap">
+		<id property="id" column="ID" />
+		<result property="areaId" column="AREA_ID"/>
+		<result property="areaName" column="AREA_NAME"/>
+        <result property="facilityCode" column="FACILITY_CODE"/>
+        <result property="facilityName" column="FACILITY_NAME"/>
+        <result property="facilityType" column="FACILITY_TYPE"/>
+        <result property="facilityModel" column="FACILITY_MODEL"/>
+        <result property="location" column="LOCATION"/>
+        <result property="keeperId" column="KEEPER_ID"/>
+        <result property="keeperName" column="KEEPER_NAME"/>
+        <result property="remark" column="REMARK"/>
+        <result property="createId" column="CREATE_ID"/>
+        <result property="creator" column="CREATOR"/>
+        <result property="createDate" column="CREATE_DATE"/>
+        <result property="updateId" column="UPDATE_ID"/>
+        <result property="updator" column="UPDATOR"/>
+        <result property="updateDate" column="UPDATE_DATE"/>
+	</resultMap>
+
+
+	<sql id="TABLE_NAME" lang="velocity">EMERGENCY_FACILITY</sql>
+	<sql id="SEQUENCE" lang="velocity">
+		SELECT SEQ_<include refid="TABLE_NAME" />.NEXTVAL FROM DUAL
+	</sql>
+	<sql id="SELECT_PRE" lang="velocity">
+		SELECT * FROM
+		<include refid="TABLE_NAME" />
+	</sql>
+	<sql id="COUNT_PRE" lang="velocity">
+		SELECT COUNT(1) FROM
+		<include refid="TABLE_NAME" />
+	</sql>
+
+	<sql id="CONDITION_SQL" lang="velocity">
+		<![CDATA[
+		#where()
+					1=1
+					#if($_parameter.condition.facilityCode && $_parameter.condition.facilityCode != '')
+							#set($_facilityCode = '%' + $_parameter.condition.facilityCode + '%')
+						AND FACILITY_CODE 	LIKE @{_facilityCode,jdbcType=VARCHAR}
+					#end
+					#if($_parameter.condition.facilityType && $_parameter.condition.facilityType != 0)
+						AND FACILITY_TYPE = @{_parameter.condition.facilityType,jdbcType=NUMERIC}				
+					#end
+					#if($_parameter.condition.facilityName && $_parameter.condition.facilityName != '')
+						 #set($_facilityName = '%' + $_parameter.condition.facilityName + '%')
+						AND FACILITY_NAME LIKE @{_facilityName,jdbcType=VARCHAR}
+					#end
+					#if($_parameter.condition.areaIds && $_parameter.condition.areaIds.size() > 0 )
+						#set($areaIds =$_parameter.condition.areaIds)
+						AND
+						#repeat( $areaIds $id "," " AREA_ID IN (" ")" )
+				    		@{id,jdbcType=NUMERIC}
+						#end
+						
+					#end
+									
+		#end
+		]]>	
+	</sql>
+
+	<select id="getById" resultMap="EmergencyFacilityResultMap"
+		parameterType="long" lang="velocity">
+		<include refid="SELECT_PRE" />
+		WHERE ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+	<select id="findByCode" resultMap="EmergencyFacilityResultMap" parameterType="string">
+		<include refid="SELECT_PRE" />
+		where FACILITY_CODE = #{facilityCode}
+	</select>
+	<!-- 按条件查询记录-->
+    <select id="findByConditions"  resultMap="EmergencyFacilityResultMap" lang="velocity" databaseId="oracle">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="SELECT_PRE"/>
+		<include refid="CONDITION_SQL"/>
+		#order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+	<!-- 按条件查询记录-->
+    <select id="findByConditions"  resultMap="EmergencyFacilityResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			ID,
+			AREA_ID,
+	        AREA_NAME,
+	        FACILITY_CODE,
+	        FACILITY_NAME,
+	        FACILITY_TYPE,
+	        FACILITY_MODEL,
+	        LOCATION,
+	        KEEPER_ID,
+	        KEEPER_NAME,
+	        REMARK
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/> 
+		<include refid="CONDITION_SQL"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countByConditions" resultType="long" lang="velocity">
+        <include refid="COUNT_PRE"/>
+        <include refid="CONDITION_SQL"/>
+    </select>
+	
+
+	<sql id="INSERT_SQL" lang="velocity">
+		 INSERT INTO <include refid="TABLE_NAME"/>(
+        	#if($_databaseId == 'oracle') ID, #end
+	        AREA_ID,
+	        AREA_NAME,
+	        FACILITY_CODE,
+	        FACILITY_NAME,
+	        FACILITY_TYPE,
+	        FACILITY_MODEL,
+	        LOCATION,
+	        KEEPER_ID,
+	        KEEPER_NAME,
+	        REMARK,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE
+        ) VALUES (
+        	#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end
+	        @{_parameter.areaId,jdbcType=BIGINT},
+	        @{_parameter.areaName,jdbcType=VARCHAR},
+	        @{_parameter.facilityCode,jdbcType=VARCHAR},
+	        @{_parameter.facilityName,jdbcType=VARCHAR},
+	        @{_parameter.facilityType,jdbcType=INTEGER},
+	        @{_parameter.facilityModel,jdbcType=VARCHAR},
+	        @{_parameter.location,jdbcType=VARCHAR},
+	        @{_parameter.keeperId,jdbcType=BIGINT},
+	        @{_parameter.keeperName,jdbcType=VARCHAR},
+	        @{_parameter.remark,jdbcType=VARCHAR},
+	        @{_parameter.createId,jdbcType=NUMERIC},
+	        @{_parameter.creator,jdbcType=VARCHAR},
+	        @{_parameter.createDate,jdbcType=TIMESTAMP}
+        )
+	</sql>
+
+	<insert id="insert" parameterType="com.supconit.emergency.entities.EmergencyFacility"
+		keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>
+		<include refid="INSERT_SQL" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.emergency.entities.EmergencyFacility"
+		keyProperty="id" keyColumn="ID" lang="velocity">
+		<include refid="INSERT_SQL" />
+		<selectKey keyProperty="id" resultType="long" order="AFTER">
+			<include refid="_PUBLIC_V.SELECT_KEY" />
+		</selectKey>
+	</insert>
+
+	<update id="update" parameterType="com.supconit.emergency.entities.EmergencyFacility"
+		lang="velocity">
+		UPDATE
+		<include refid="TABLE_NAME" />
+		#mset()
+			<![CDATA[
+		        #if($_parameter.areaId && $_parameter.areaId !=0)AREA_ID = @{_parameter.areaId,jdbcType=BIGINT},#end
+		        #if($_parameter.areaName && $_parameter.areaName !='')AREA_NAME = @{_parameter.areaName,jdbcType=VARCHAR},#end
+		        #if($_parameter.facilityCode && $_parameter.facilityCode !='')FACILITY_CODE = @{_parameter.facilityCode,jdbcType=VARCHAR},#end
+		        #if($_parameter.facilityName && $_parameter.facilityName !='')FACILITY_NAME = @{_parameter.facilityName,jdbcType=VARCHAR},#end
+		        #if($_parameter.facilityType)FACILITY_TYPE = @{_parameter.facilityType,jdbcType=INTEGER},#end
+		        #if($_parameter.facilityModel && $_parameter.facilityModel !='')FACILITY_MODEL = @{_parameter.facilityModel,jdbcType=VARCHAR},#end
+		        #if($_parameter.location && $_parameter.location !='')LOCATION = @{_parameter.location,jdbcType=VARCHAR},#end
+		        #if($_parameter.keeperId && $_parameter.keeperId !=0)KEEPER_ID = @{_parameter.keeperId,jdbcType=BIGINT},#end
+		        #if($_parameter.keeperName && $_parameter.keeperName !='')KEEPER_NAME = @{_parameter.keeperName,jdbcType=VARCHAR},#end
+		        REMARK = @{_parameter.remark,jdbcType=VARCHAR},
+		        #if($_parameter.updateId)UPDATE_ID = @{_parameter.updateId,jdbcType=NUMERIC},#end
+		        #if($_parameter.updator)UPDATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+		        #if($_parameter.updateDate)UPDATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+		    ]]>
+		#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+
+	<delete id="deleteById" parameterType="long" lang="velocity">
+		DELETE FROM
+		<include refid="TABLE_NAME" />
+		WHERE ID = @{_parameter,jdbcType=NUMERIC}
+	</delete>
+	<delete id="deleteByIds">
+		DELETE FROM
+		<include refid="TABLE_NAME" />
+	    WHERE ID IN    
+	        <foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+				#{id,jdbcType=NUMERIC}
+			</foreach>
+	</delete>
+	
+</mapper>

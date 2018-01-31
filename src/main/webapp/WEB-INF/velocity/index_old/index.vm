@@ -1,0 +1,147 @@
+#set($_title = $!{index_title})
+#parse("index/_header.vm")
+</head>
+<body>
+
+<iframe class="ui-layout-center" id="_main_frame" name="_main_frame" scrolling="no" src="about:blank"
+        frameborder="no"></iframe>
+
+<!-- header start -->
+<div class="ui-layout-north">
+    <div class="ui-header">
+
+         <ul id="main_nav_menu">
+			#_menu("menu","ROOT_FUNCTION")#end
+			#if($!menu.children && !$!menu.children.isEmpty())
+				#foreach($!fmenu in $!menu.children)
+					#if($!fmenu.display)
+						## 一级菜单
+						<li  #if($!fmenu.linkUrl && ""!=$!fmenu.linkUrl) link="$!rc.contextPath/$!fmenu.linkUrl" #end><i class="fa $!fmenu.showIcon"></i>$!fmenu.name
+						#if($!fmenu.children && !$!fmenu.children.isEmpty())
+							<ul>
+							#foreach($!smenu in $!fmenu.children)
+								#if($!smenu.display)
+									## 二级菜单
+									<li  #if($!smenu.linkUrl && ""!=$!smenu.linkUrl) link="$!rc.contextPath/$!smenu.linkUrl" #end><i class="fa $!fmenu.showIcon"></i>$!smenu.name
+									 #if($!smenu.children && !$!smenu.children.isEmpty())
+										<ul>
+										#foreach($!tmenu in $!smenu.children)
+											#if($!tmenu.display)
+												## 三级菜单
+												<li  #if($!tmenu.linkUrl && ""!=$!tmenu.linkUrl) link="$!rc.contextPath/$!tmenu.linkUrl" #end>$!tmenu.name
+												</li>		
+											#end	
+										#end
+										</ul>
+									 #end
+									 </li>		
+								#end	
+							#end
+							</ul>
+						#end
+						</li>	
+					 #end
+				#end
+			#end
+		</ul>
+					
+        <div class='ui-header-info ui-header-info-top'>
+            <a href="javascript:void(0)" onclick="">#if($_user.name)$!{_user.name}#{else}$!name#{end}</a>
+            ，欢迎登录！
+            <a href="$!{rc.contextPath}/platform/logout"><i class="fa fa-power-off"></i></a>
+
+            <p style="margin:0;line-height:24px;" id="weather"></p>
+        </div>
+    </div>
+</div>
+<!-- header end -->
+
+<!-- west--quick funs -->
+<div class="ui-layout-west ui-west-shortcuts-wrap">
+##<span class="ui-shortcuts-icon"></span>
+    <div class="ui-shortcuts">
+        <a class="fun-search"></a>
+        <a class="fun-mail"></a>
+        <a class="fun-user"></a>
+        <a class="fun-nav"></a>
+    </div>
+    <div class="ui-shortcuts ui-shortcuts-bottom">
+        <a class="fun-skin" ></a>
+        <a class="fun-setting" onclick="javascript:window.open('$!rc.contextPath/platform/index')"></a>
+        ##<a class="fun-setting" href="$!rc.contextPath/platform/index" target="_blank"></a>
+    </div>
+</div>
+
+<!-- footer -->
+<div class="ui-layout-south">
+    <div class="ui-footer">Copyright &copy; 2003-2015 浙江浙大中控信息技术有限公司</div>
+</div>
+
+<!-- loading -->
+<div id="platform_loading"></div>
+
+<!-- 全文检索 -->
+<div id="fulltext_retrieval">
+    <input placeholder="快捷菜单"/>
+    <a class="search-btn"></a>
+</div>
+
+<script type="text/javascript">
+    $.CONTEXT_PATH = "$!{rc.contextPath}";
+    var _layout, _header_layout, _center_layout, _inner_layout;
+    var skin_url_cookie = readCookie("skin_url")? readCookie("skin_url") : "";//读取缓存skin
+
+    $(document).ready(function () {
+
+        _layout = $('body').layout({
+            defaults: {
+                resizable: false,
+                closable: true,
+                spacing_open: 0
+            },
+            north: {
+                size: 100
+            },
+            south: {
+                size: 25
+            },
+            west: {
+                size: 42
+            },
+            center: {
+                onresize_end: function () {
+                  var _top_menu = $("#main_nav_menu").data("navmenu");
+                  if (_top_menu) {
+                    _top_menu.onResize();
+                  }
+                }
+            },
+            onresize_end: function () {
+                $(".fun-search").css("left", _layout.state.center.innerWidth / 2 - $(".fun-search").width() / 2);
+            }
+        });
+
+      //菜单
+        $("#main_nav_menu").navmenu({
+            targetFrame: "#_main_frame",
+            type: "iframe"
+        });
+
+        iframe_loaded($("#_main_frame")[0], loadComplete);
+        
+
+    });
+
+    function loadFrame(url) {
+        $("#platform_loading").show();
+        $("#_main_frame").attr("src", url);
+    }
+    function loadComplete() {
+        $("#platform_loading").hide();
+    }
+
+
+
+</script>
+</body>
+</html>

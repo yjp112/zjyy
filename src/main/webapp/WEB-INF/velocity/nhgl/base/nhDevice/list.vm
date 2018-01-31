@@ -1,0 +1,155 @@
+<style>
+  	a.ui-input-remove, a.ui-input-icon{
+  		right:3px;
+  	}
+</style>
+<div class="ui-layout-center" id="subMain">
+	<div class="ui-layout-center">
+		<table id="config_datalist" class="fn-hide"></table>
+	</div>
+	<div class="ui-layout-north">
+		<div class="ui-module-name">
+			<label id="menuName">#crumbs("$!menu.code",1)</label>
+		</div>
+		<form id="deptConfig_list_search" class="ui-form ui-form-search fn-clear">
+		    <input type="hidden" id="serviceAreaId"  value="" name="serviceAreaId">
+			<div class="ui-form-search-left">
+    			<div class="ui-form-item">
+			  		<label class="ui-label">分项名称：</label>
+			  		<input class="ui-input ui-input-choose"readonly type="text" emptyFunc="clearItemCode" name="itemCodeName"  id="itemCodeName" onclick="chooseSubSystem('itemCode','itemCodeName','nhdevice_list','$!{nhtype}')"/>
+					<input type="hidden" name="itemCode" id="itemCode" />
+				</div>
+				<div class="ui-form-item">
+					<label class="ui-label">位号：</label>
+					<input class="ui-input" type="text" name="hpid">
+				</div>
+				<div class="ui-form-item">
+    			  <label class="ui-label">$!deviceName编码：</label>
+    			 <input class="ui-input" type="text"  name="deviceCode">
+    			</div>
+    			<div class="ui-form-item">
+    			  <label class="ui-label">$!deviceName名称：</label>
+    	          <input class="ui-input" type="text"  name="deviceName">
+    			</div>
+			</div>
+			<div class="ui-form-search-right">
+				<button type="submit" id="subButton" class="btn btn-primary"><i class="iconfont icon-search"></i> 查&nbsp;询</button>
+			</div>
+		</form>
+	</div>
+</div>
+<div class="ui-layout-west">
+    <div id="configlist_box" class="ui-box">
+		<div class="ztree-header">
+			<div class="ztree-title">服务区域族</div>
+		</div>
+		<div class="ui-box-container">
+			<ul id="configlist_tree" class="ztree"></ul>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	$(document).ready(function(){
+		T.nhInit();
+	 	T.tabLayout = $("#chart_content_id").layout({
+        defaults : {
+            resizable : false,
+            closable : false,
+            spacing_open : 5
+        },
+        west : {
+            size : 250,
+            resizable : true,
+            resizerTip : "移动改变大小",
+            closable : true,
+            togglerTip_open : "隐藏",
+            togglerTip_closed : "打开"
+        },
+        onresize_end : function(){
+            $("#configlist_box").box("resize");
+        }
+    });
+    	_content_layouts.push(T.tabLayout);
+		_inner_layout=$("#subMain").layout({
+			defaults:{
+				resizabel:false,
+				closable: false,
+				spacing_open:5
+			},
+			onresize_end:function(){
+				$("#config_datalist").datagridResize({width:_inner_layout.state.center.innerWidth,height:_inner_layout.state.center.innerHeight});
+			}
+		});
+		$("#configlist_box").box({
+        	width : function(){return T.tabLayout.state.west.innerWidth;},
+        	height : function(){return T.tabLayout.state.west.innerHeight-26;}
+    	});
+		var subSystemInfo_datagrid=$("#config_datalist").datagrid({
+			url:'$!{rc.contextPath}/nhgl/nhDevice/devicePage?categoryCode=$!category&nhtype=$!nhtype',
+			dataType: "json",
+			method: "post",
+			singleSelected : true,
+			striped : false,
+			height:  _inner_layout.center.state.innerHeight,
+			width :  _inner_layout.center.state.innerWidth,
+			showOrderNumber : true,
+			useRp : true,
+			usepager: true,
+    		rpOptions: [10, 20, 40, 50],
+    		pageSize: 20,
+    		searchFormId:"deptConfig_list_search",
+    		searchCallback:function(datagrid){},
+    		onSuccess:function(table,grid){
+    			if(!grid)return ;
+    		},
+    		colModel:[
+    			{"display":"序号"},
+    			{display: "$!deviceName编码", name: "deviceCode",width:"150"
+##    			,onclick:function(row,a){
+##    				$("#chart_content_id").load("$!{rc.contextPath}/nhgl/basic/areaConfig/edit?nhType=$!nhType&viewOnly=true&id="+row.id+"&areaId="+row.areaId)
+##    			}
+    			},
+    			{display: "$!deviceName名称",name:"deviceName",width:"200"},
+    			{display: "分项编码",name:"discipinesCode",width:"80",align:"center"},
+    			{display: "分项名称",name:"itemName",width:"100"},
+	            {display: "安装位置", name: "locationName",width:"130"},
+	            {display: "服务区域", name: "serviceAreaName",width:"200"}
+	           
+    		],
+    		buttons : [
+            	{name: '导入', bclass: 'icon-upload', onpress : upload},
+            	{name: '导出', bclass: 'icon-download', onpress : download}
+	        ]
+		});
+		
+		function upload(com, grid,datagrid) {
+			newDialog('handle','load:$!{rc.contextPath}/nhgl/nhDevice/preImp', '导入能耗设备档案', false, 600,500)
+        }
+		
+		function download(com, grid,datagrid) {
+			window.location.href="$!{rc.contextPath}/nhgl/nhDevice/expDevice"; 
+        }
+	});
+    var setting = {
+	data: {
+		simpleData: {enable: true}
+      },
+      callback: {
+			onClick: function(event, treeId, treeNode) {
+				 $('#serviceAreaId').val(treeNode.id);
+				 $('#subButton').click();
+			}
+		}
+    };
+	var zNodes = [];
+	#foreach($!{treeNode} in $!{treeList})
+		zNodes.push({id:"$!{treeNode.id}", pId:"$!{treeNode.parentId}", name:"$!{treeNode.areaName}",open:true});     
+	#end 
+	$(document).ready(function(){
+	        $.fn.zTree.init($("#configlist_tree"), setting,zNodes).expandAll(true);
+	});
+	function clearItemCode(){
+		$("#itemCodeName").attr("value","");
+		$("#itemCode").attr("value","");
+	}
+</script> 

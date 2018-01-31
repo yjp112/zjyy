@@ -1,0 +1,213 @@
+<style>
+.ui-table tbody tr {
+  background: #000;
+}
+.ui-table td {
+	background: #000;
+}
+.ui-table td {
+  border-bottom: 1px solid #0C4A25;
+  border-right: 1px solid #0C4A25;
+  color:white;
+}
+.ui-table {
+  border-top: 1px solid #24E648;
+  border-left: 1px solid #24E648;
+}
+.ui-module-name{
+ border-bottom: 1px solid #25e949; 
+}
+.ui-table-content{
+	 height: 585px;
+     overflow-x:hidden;
+     overflow-y:auto;
+}
+  body #centerMain {
+	overflow: hidden !important;
+	}
+a.ui-input-remove, a.ui-input-icon{ right:3px; }
+	.panel li.current a{ background: #06251d; }
+</style>
+<link href="$!{nhgl_static_custom_url}/js/treeTable/vsStyle/jquery.treeTable.css" rel="stylesheet">
+<script src="$!{nhgl_static_custom_url}/js/treeTable/jquery.treeTable.js"></script>
+<div class="ui-layout-north">
+	<div class="ui-module-name">
+    	<label id="menuName">#crumbs("$!menu.code",1)</label>
+    </div>
+    
+		<form class="ui-form ui-form-search fn-clear" id='queryForm1' action="$!rc.contextPath/nhgl/cost/costCount/export" method="post" >
+            <div class="ui-form-search-left">
+                <div class="ui-form-item-larger">
+                    <label class="ui-label">时间：</label>
+                    <input class="ui-input ui-input-small  Wdate " type="text" id="startDate" name="start"
+                           onclick="WdatePicker({dateFmt:'yyyy-MM-dd',maxDate:'#F{$dp.$D(\'endDate\')}'})"
+                           readonly
+                           value="$!condition.start">
+                    <span class="ui-form-text">至</span> 
+                    <input class="Wdate ui-input ui-input-small " type="text" id="endDate" name="end"
+                           onclick="WdatePicker({dateFmt:'yyyy-MM-dd',minDate:'#F{$dp.$D(\'startDate\')}'})"
+                           readonly
+                           value="$!condition.end">
+                </div>
+                <div class="ui-form-item">
+                    <input id="hidden_dept_id" type="hidden" value="$!condition.deptId"/>
+                    <label class="ui-label">部门：</label>
+					<input style="position: relative;" class="ui-input ui-input-choose" id="deptName" name="deptName" emptyFunc="clearItemCode" readonly="readonly" onclick="chooseDept('select_dept_id','deptName')"/>
+                	<input type="hidden" id="select_dept_id" name="deptId"/>
+                </div>
+            </div>
+                <div class="ui-form-search-right">
+                    <button type="button" class="btn btn-primary" onclick="serch()" id="searchButton" ><i class="iconfont icon-search"></i>查询</button>
+                    <button type="submit" onclick="check();" class="btn btn-primary" id="resetBtn"><i class="iconfont icon-upload-alt" style="padding-right:2px"></i>导出</button>
+                </div>
+        </form>
+</div>
+<div class="ui-layout-center" id="subMain">
+	<div class="ui-layout-north">
+		<table class="ui-table" >
+		<colgroup>
+            <col style="width:220px"></col>
+            <col style="width:150px"></col>
+            <col style="width:150px"></col>
+            <col style="width:150px"></col>
+            <col style="width:150px"></col>
+            <col style="width:150px"></col>
+            <col style="width:150px"></col>
+            <col style="width:150px"></col>
+            <col style="width:*px"></col>
+        </colgroup>
+		<thead>
+			<tr>
+                <td  align="center" style="color:white;">科室</td>
+                <td  align="center" style="color:white;">电(kwh)</td>
+                <td  align="center" style="color:white;">电费(元)</td>
+                <td  align="center" style="color:white;">水(t)</td>
+                <td  align="center" style="color:white;">水费(元)</td>
+                <td  align="center" style="color:white;">能量(J) </td>
+                <td  align="center" style="color:white;">能量费(元)</td>
+				<td  align="center" style="color:white;">蒸汽(t) </td>
+                <td  align="center" style="color:white;">蒸汽费(元)</td>
+             </tr>
+        </thead>
+		</table>
+	</div>
+	<div class="ui-table-content ui-layout-center">
+		<table class="ui-table">
+        <colgroup>
+            <col style="width:220px"></col>
+            <col style="width:150px" class="fInt"></col>
+            <col style="width:150px" class="fNum2"></col>
+            <col style="width:150px" class="fInt"></col>
+            <col style="width:150px" class="fNum2"></col>
+            <col style="width:150px" class="fInt"></col>
+            <col style="width:150px" class="fNum2"></col>
+            <col style="width:150px" class="fInt"></col>
+            <col style="width:*px" class="fNum2"></col>
+        </colgroup>
+        <tbody id="treeTable">
+        
+        </tbody>
+        </table>
+	</div>
+	
+</div>
+<script type="text/javascript">
+	/*
+	* theme: 主题，有两个选项：default、vsStyle. 默认:default
+	* expandLevel: 树表的展开层次. 默认:1
+	* column: int 可控制列的序号. 默认:0，即第一列
+	* onSelect:  拥有controller自定义属性的元素的点击事件 
+	*/
+	$(document).ready(function(){
+		T.nhInit();
+		$('#subMain').layout({
+		      defaults: {
+		        resizable: false,
+		        closable: false,
+		        spacing_open: 0
+		      },
+		      north: {
+		        size: 30
+		      }
+		    });
+		
+		fNumPage();
+	});
+	var option = {
+        theme:'vsStyle',
+        expandLevel : 2, 
+        onSelect : function($treeTable, id){
+        	return true;
+        }
+    };
+	var menuCode='$!menu.code';
+    $(document).ready(function(){
+    	$("#searchButton").click();
+    	//加载treeTable
+    	 $('#treeTable').treeTable(option);
+    	
+    });
+	
+    function check(){
+        var startDate = $("#startDate").val();
+        var endDate = $("#endDate").val();
+        if(startDate == "" || endDate == "" || startDate == undefined || endDate == undefined){
+            alert("时间不能为空");
+            $("#startDate").focus();
+            return false;
+        }
+        return true;
+    }
+  //点击事件
+	function serch(){
+		toAjaxFrom({start:$("#startDate").val(),end:$("#endDate").val(),deptId:$("#select_dept_id").val(),menuCode:menuCode},'$!rc.contextPath/nhgl/cost/costCount/costlist');
+	    $('#treeTable').treeTable(option);	
+	}
+
+   //动态加载数据
+   function writeHtml(costlist){
+	   $.each(costlist, function(i, cost){
+		 
+	var html = "<tr id='"+cost.id+"'  pId='"+cost.ppId+"'><td>"
+									+ cost.deptName
+									+ "</td><td align='right' class='fInt'>"
+									+ cost.electric
+									+ "</td>"
+									+ "<td align='right' class='fNum2'>"
+									+ cost.electricCost
+									+ "</td><td align='right' class='fInt'>"
+									+ cost.water
+									+ "</td>"
+									+ "<td align='right' class='fNum2'>"
+									+ cost.waterCost
+									+ "</td><td  align='right' class='fInt'>"
+									+ cost.energy 
+									+ "</td>"
+									+ "<td align='right' class='fNum2'>"
+									+ cost.energyCost
+									+ "</td><td align='right' class='fInt'>"
+									+ cost.gas
+									+ "</td>"
+									+ "<td align='right' class='fNum2'>"
+									+ cost.gasCost + "</td>"
+							$("#treeTable").append(html);
+						});
+		//便于递归其深度
+		fNumPage();
+		$("#treeTable tr:first").addClass("first");
+	}
+	function toAjaxFrom(data, url) {
+		//清除div表中的所有的数据
+		$("#treeTable").empty();
+		//ajax请求后台加载数据，并刷新数据表
+		$.post(url, data, function(costlist) {
+			//动态加载数据
+			writeHtml(costlist);
+			$('#treeTable').treeTable(option);
+		})
+	}
+	function clearItemCode() {
+		$("#deptName").attr("value", "");
+		$("#select_dept_id").attr("value", "");
+	}
+</script>

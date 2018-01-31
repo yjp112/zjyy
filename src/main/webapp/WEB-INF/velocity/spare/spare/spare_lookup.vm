@@ -1,0 +1,272 @@
+#parse("index/_header.vm")
+<style>
+    .center-grid {
+        overflow: hidden;
+    }
+</style>
+</head>
+<body>
+  <div class="ui-layout-west" style="border-right:solid 1px #e1e5e6;" id="leftTreeWrap">
+			<div class="ui-layout-north">
+				<div class="k-header k-grid-toolbar" style="padding-left:10px;">备件类别</div>
+			</div>
+      <div class="ui-layout-center">
+  		  <ul id="geoAreaTree" class="ztree"></ul>
+      </div>
+  </div>
+
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<form class="ui-form" id='queryForm'>
+		  <input id="spareCategoryId" type="hidden" name="spareCategoryId" value="$!spare.spareCategoryId" />
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+                <tr>
+                  <td class="ui-search-name first">备件编码：</td>
+                  <td class="ui-search-c">
+					  <input class="k-textbox" type="text" name="spareCode" value="$!spare.spareCode">
+                  </td>
+                  <td class="ui-search-name">备件名称：</td>
+                  <td class="ui-search-c">
+					 <input class="k-textbox" type="text" name="spareName" value="$!spare.spareName">
+                  </td>
+                </tr>
+              </table>
+            </td>
+            <td width="150" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+            <td></td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="center-grid ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+ #parse("index/_footer.vm")  
+<script type="text/javascript">
+  var _iframe_layout, _left_layout, _inner_layout;
+	$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      },
+      west: {
+        size: 0.25
+      }
+    });
+
+    _left_layout = $("#leftTreeWrap").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+        north: {
+            size: 28
+        }
+    });
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+
+    $('#resetBtn').click(function(){
+      $("#queryForm :text").val('');  
+    });
+
+	$('.iconfont','.ui-form-pick').each(function(){
+      $(this).click(function(){
+      	$('#treeId').val('');
+      	$('#selectBlock').hide();
+        //$(this).parent().remove();
+      })
+    })
+	
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/spare/spare/list?_t="+new Date().getTime(),
+		[{
+              field: "id",
+              hidden: true
+          }, {
+              field: "spareCode",
+              title: "备件编码",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              sortable: false
+          }, {
+              field: "spareName",
+              title: "备件名称",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              sortable: false
+              
+          }, {
+              field: "spareCategoryName",
+              title: "备件类别",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              sortable: false
+              
+          }, {
+              field: "model",
+              title: "备件型号",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              sortable: false
+              
+          }, {
+              field: "spec",
+              title: "备件规格",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              sortable: false
+              
+          }],
+		  
+      	{
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          }
+      }, {
+          serverSorting: true
+      }, [
+          {
+              name: "选择",
+              icon: "fa fa-plus",
+              onclick: function (obj, grid) {
+                  var row = grid.select();
+                  if (null == row || row.length == 0) {
+                      notify("你还没有选择备件", "warn");
+                      return;
+                  }
+                 var data = grid.dataItem(row);  
+				 debugger;
+				  if('changePrice'=='$!{flag}') {
+				 	  get_el_in_dialog("priceChange_add_dlg","#spareName").val(data.spareName);
+					  get_el_in_dialog("priceChange_add_dlg","#spareId").val(data.id);
+					  get_el_in_dialog("priceChange_add_dlg","#spareCode").val(data.spareCode);
+					  get_el_in_dialog("priceChange_add_dlg","#spareCategoryName").val(data.spareCategoryName);
+					  get_el_in_dialog("priceChange_add_dlg","#model").val(data.model);
+					  get_el_in_dialog("priceChange_add_dlg","#spec").val(data.spec);
+					  get_el_in_dialog("priceChange_add_dlg","#oldPrice").val(data.price);
+					  resetfocus(get_el_in_dialog("priceChange_add_dlg","#spareName").val(data.spareName));
+				  	  
+				  }
+				  else if("$!{flag}" == "alarm_device"){
+					  	 // 报警维修备件选择
+			           	 if("$!{txtId}" == "device_record_list"){
+			           		 //alert(data.spareCode);
+			           		 //alert(data.spareName);
+			           		 //alert(data.spec);
+			           		 //alert(data.price);
+			           		$("#spareId$!{txtName}",top.frames[0].document).attr("value",data.id);
+			           	 	$("#$!{txtName}",top.frames[0].document).attr("value",data.spareCode);	 
+			           	 	$("#spareName$!{txtName}",top.frames[0].document).attr("value",data.spareName);
+			           		$("#spareSpec$!{txtName}",top.frames[0].document).attr("value",data.spec);
+			           		$("#price$!{txtName}",top.frames[0].document).attr("value",data.price);
+			        	 }   
+				  }
+				  else{
+					  
+					  if(top.frames[0].window.spareCheckedCallback){
+                          top.frames[0].window.spareCheckedCallback(data);
+                          resetfocus($("#$!{txtName}",top.frames[0].document));
+                      }else{
+    					  $("#$!{txtId}",top.frames[0].document).val(data.id);
+    				  	  $("#$!{txtName}",top.frames[0].document).val(data.spareName);
+        				  $("#spareCode$!{txtName}",top.frames[0].document).val(data.spareCode);
+        				  $("#spec$!{txtName}",top.frames[0].document).val(data.spec);
+        				  $("#model$!{txtName}",top.frames[0].document).val(data.model);
+        				  $("#prc$!{txtName}",top.frames[0].document).val(data.price);		  
+        				  resetfocus($("#$!{txtName}",top.frames[0].document).val(data.spareName));
+                      }
+
+					  
+				  }
+				  grid.destroy();
+				  $("#grid").remove();
+				  close_dialog('selectDiloag');
+              }
+          },
+          {
+              name: "清空",
+              icon: "fa fa-remove",
+              onclick: function (obj, grid) {
+            	  if("$!{txtId}" == "device_record_list"){
+  	           		$("#spareId$!{txtName}",top.frames[0].document).attr("value","");
+	           	 	$("#$!{txtName}",top.frames[0].document).attr("value","");	 
+	           	 	$("#spareName$!{txtName}",top.frames[0].document).attr("value","");
+	           		$("#spareSpec$!{txtName}",top.frames[0].document).attr("value","");
+	           		$("#price$!{txtName}",top.frames[0].document).attr("value","");            		  
+            	  }
+				  if('changePrice'=='$!{flag}') {
+				 	  get_el_in_dialog("priceChange_add_dlg","#spareName").val("");
+					  get_el_in_dialog("priceChange_add_dlg","#spareId").val("");
+					  get_el_in_dialog("priceChange_add_dlg","#spareCode").val("");
+					  get_el_in_dialog("priceChange_add_dlg","#spareCategoryName").val("");
+					  get_el_in_dialog("priceChange_add_dlg","#model").val("");
+					  get_el_in_dialog("priceChange_add_dlg","#spec").val("");
+					  get_el_in_dialog("priceChange_add_dlg","#oldPrice").val("");
+					  resetfocus(get_el_in_dialog("priceChange_add_dlg","#spareName").val(data.spareName));
+				  	  
+				  }else{
+				  	  $("#$!{txtName}",top.frames[0].document).val("");
+    				  $("#spareCode$!{txtName}",top.frames[0].document).val("");
+    				  $("#spec$!{txtName}",top.frames[0].document).val("");
+    				  $("#model$!{txtName}",top.frames[0].document).val("");
+    				  $("#prc$!{txtName}",top.frames[0].document).val("");
+    				  $("#$!{txtId}",top.frames[0].document).val("");
+    				  resetfocus($("#$!{txtName}",top.frames[0].document).val(data.spareName));
+				  }
+				  grid.destroy();
+				  $("#grid").remove();
+				  close_dialog('selectDiloag');
+              }
+          }
+      ]);
+		
+    });
+
+    /* zTree */
+    var setting = {
+    	data: {
+    		simpleData: {enable: true}
+          },
+          callback: {
+    			onClick: function(event, treeId, treeNode) {
+    				 $('#spareCategoryId').val(treeNode.id);
+    			 	 $('#treeNodeText').text(treeNode.name);
+    			 	 $('#selectBlock').show();
+    				 $('#queryBtn').click();
+    			}
+    		}
+    };
+  	var zNodes = [];  
+  	//zNodes.push({id:"0", pId:"-1", name:"地理区域簇"});   
+  	#foreach($!{treeNode} in $!{treeDatas})
+      	zNodes.push({id:$!{treeNode.id}, pId:$!{treeNode.parentId}, name:"$!{treeNode.categoryName}"});      
+  	#end
+
+  	$(document).ready(function(){
+  		$.fn.zTree.init($("#geoAreaTree"), setting,zNodes).expandAll(true);
+  	});
+</script>

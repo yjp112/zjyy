@@ -1,0 +1,10 @@
+
+			INSERT (
+				ALARMLEVEL, LEVELREMARK, ALARMRANK
+			)
+		VALUES
+			(
+				b.ALARMLEVEL,
+				b.LEVELREMARK,
+				b.ALARMRANK
+			);

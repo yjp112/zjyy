@@ -1,0 +1,129 @@
+<div data-page="device" class="page">
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="navbar-inner">
+                <div class="navbar-left">
+                    <a href="#" class="link back">
+                        <i class="icon icon-c-back only-icon"></i>
+                    </a>
+                </div>
+                <div class="navbar-center">
+                    <form class="searchbar navbar-search search-mobile"  id="device_form">
+                        <input type="hidden" id="deviceSearchType" name="condition.deviceSearchType"/>
+                        <input type="hidden" id="searchId" name="condition.searchId"/>
+                        <input type="hidden" id="deviceCodeId" name="condition.deviceCodeId">
+                        <input type="hidden" id="parentId" name="condition.parentId">
+                        <input type="hidden" id="device_total">
+                        <div class="searchbar-input">
+                            <input type="search" placeholder="设备编码、设备名称搜索" name="condition.deviceSearch" id="deviceSearch" autocomplete="off">
+                            <a href="#" class="searchbar-clear"></a>
+                        </div>
+                        <a href="#" class="searchbar-cancel search-mobile">取消</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="searchbar-overlay"></div>
+
+    <div class="page-content device">
+
+        <!-- select bar -->
+        <div class="selectBar">
+            <div class="list-block">
+                <ul class="bottom-row row">
+                    <li class="col-33" id="picker-item0">
+                        <a href="#" onclick="controllDeviceTree('accordion0','picker0')" id="accordion0">
+                            <div class="content-inner">
+                                <span id="accordion-content0">类别一</span>
+                                <i class="icon-select">&nbsp;</i>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="col-33" id="picker-item1" disabled>
+                        <a href="#" onclick="controllDeviceTree('accordion1','picker1')" id="accordion1">
+                            <div class="content-inner">
+                              <span id="accordion-content1">类别二</span>
+                                <i class="icon-select">&nbsp;</i>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="col-33" id="picker-item2" disabled>
+                        <a href="#" onclick="controllDeviceTree('accordion2','picker2')" id="accordion2">
+                            <div class="content-inner">
+                                <span id="accordion-content2">类别三</span>
+                                <i class="icon-select">&nbsp;</i>
+                            </div>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- picker0 -->
+        <div class="picker-modal device-picker" id="picker0">
+            <div class="picker-modal-inner">
+                <div class="content-block">
+                    <div class="block-title">
+                        <span class="title">类别一</span>
+                        <a href="#" data-picker="#picker0" class="close-picker" onclick="removePickerClass()"></a>
+                    </div>
+                    <ul class="block-content" id="type0">
+                        <li class="item-content" id="item-content00" onclick="searchDeviceType(0,0,0,'系统')">
+                            <div class="item-inner">
+                                <div class="item-title">系统</div>
+                            </div>
+                        </li>
+                        <li class="item-content" id="item-content10" onclick="searchDeviceType(1,0,0,'区域')">
+                            <div class="item-inner">
+                                <div class="item-title">区域</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- picker1 -->
+        <div class="picker-modal device-picker" id="picker1">
+            <div class="picker-modal-inner">
+                <div class="content-block">
+                    <div class="block-title">
+                        <span class="title">类别二</span>
+                        <a href="#" data-picker="#picker1" class="close-picker" onclick="removePickerClass()"></a>
+                    </div>
+                    <ul class="block-content" id="type1">
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- picker2 -->
+        <div class="picker-modal device-picker" id="picker2">
+            <div class="picker-modal-inner">
+                <div class="content-block">
+                    <div class="block-title">
+                        <span class="title">类别三</span>
+                        <a href="#" data-picker="#picker2" class="close-picker" onclick="removePickerClass()"></a>
+                    </div>
+                    <ul class="block-content" id="type2">
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="searchbar-overlay"></div>
+
+        <div class="content-block infinite-scroll searchbar-found" id="deviceContent">
+            <div class="list-block" id="device_div">
+                <ul>
+                </ul>
+            </div>
+            <div class="infinite-scroll-preloader"  id="devicePreloader">
+                <div class="preloader"></div>
+            </div>
+        </div>
+    </div>
+</div>

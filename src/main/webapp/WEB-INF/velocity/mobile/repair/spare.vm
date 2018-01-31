@@ -1,0 +1,53 @@
+<div data-page="spare" class="page">
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="navbar-inner">
+                <div class="navbar-left">
+                    <a href="#" class="link back">
+                        <i class="icon icon-c-back only-icon"></i>
+                    </a>
+                </div>
+                <div class="navbar-center">
+                    <form class="searchbar navbar-search search-mobile"  id="spare_form">
+                        <input type="hidden" value="$!{spareIndex}" id="spareTypeIndex">
+                        <input type="hidden" id="searchId" name="condition.searchId"/>
+                        <input type="hidden" id="spareCodeId" name="condition.spareCodeId">
+                        <input type="hidden" id="spare_total">
+                        <div class="searchbar-input">
+                            <input type="search" placeholder="配件编码、配件名称搜索" name="condition.spareSearch" id="spareSearch" autocomplete="off">
+                            <a href="#" class="searchbar-clear"></a>
+                        </div>
+                        <a href="#" class="searchbar-cancel search-mobile">取消</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="searchbar-overlay"></div>
+
+    <div class="page-content spare">
+        <!-- select bar -->
+        <div class="selectBarText">
+            <ul class="row">
+            #if($!spareCategories && $!spareCategories.size()>0)
+                #foreach($!spareCategorie in $!spareCategories)
+                <li class="col-25"><a href="" onclick="searchSpareType($!spareCategorie.id)" id="spare_button$!spareCategorie.id" class="button">$!spareCategorie.categoryName</a></li>
+                #end
+            #end
+            </ul>
+        </div>
+
+        <div class="content-block infinite-scroll searchbar-found" id="spareContent">
+            <div class="list-block" id="spare_div">
+                <ul>
+
+                </ul>
+            </div>
+            <div class="infinite-scroll-preloader"  id="sparePreloader">
+                <div class="preloader"></div>
+            </div>
+        </div>
+    </div>
+</div>

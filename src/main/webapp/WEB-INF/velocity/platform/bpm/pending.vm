@@ -1,0 +1,46 @@
+#set($_title="我的待办")
+#parse("_header.vm")
+	</head>
+	<body>
+#parse("_navbar.vm")
+<div class="row">
+	<div class="col-12 col-sm-12 col-lg-12">
+	#if($group)
+		<a href="$!{rc.contextPath}/platform/bpm/pending?group=false" class="btn btn-default btn-sm pull-right">切换至流程分组试图</a>
+	#else
+		<a href="$!{rc.contextPath}/platform/bpm/pending?group=true" class="btn btn-default btn-sm pull-right">切换至活动分组试图</a>
+	#end
+	</div>
+</div>		
+<div class="row">
+	<div class="col-12 col-sm-12 col-lg-12">
+		<table class="table table-striped table-hover">
+			<tr>
+				<th width="80">序号</th>
+				<th width="300">流程名称</th>
+				#if($group)
+				<th width="300">活动节点</th>
+				#end
+				<th width="80">待办条数</th>
+				<th></th>
+			</tr>
+			#foreach($item in $pager)
+			<tr>
+				<td>$!{velocityCount}</td>
+				<td>$!{item.processDefinitionName}</td>
+				#if($group)
+				<td>$!{item.activityName}</td>
+				#end
+				<td><a href="$!{rc.contextPath}$!{item.listUrl}processKey=$!{item.processDefinitionKey}#if($group)&activityId=$!{item.activityId}#{end}">$!{item.num}</a></td>
+				<td></td>
+			</tr>
+			#end
+		</table>
+		#set($_page_link = $rc.contextPath + '/platform/bpm/pending?group=' + $group)		
+		#parse("_pager.vm")	
+	</div>
+</div>	
+#parse("_copyright.vm")
+#parse("_footer.vm")
+	</body>
+</html>

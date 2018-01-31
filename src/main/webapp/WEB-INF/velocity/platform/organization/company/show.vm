@@ -1,0 +1,36 @@
+<div class="ui-layout-center">
+
+<form class="ui-form">
+	<fieldset>
+		<div class="ui-form-item">
+			<label class="ui-label">单位编码：</label>
+			<span class="ui-text" title="$!{company.code}">$!{company.code}</span>
+		</div>
+		<div class="ui-form-item colspan2">
+			<label class="ui-label">单位名称：</label>
+			<span class="ui-text" title="$!{company.name}">$!{company.name}</span>
+		</div>
+		<div class="ui-form-item ui-form-item-textarea colspan3">
+      		<label class="ui-label">备注:</label>
+      		<textarea class="ui-textarea ui-textarea-large ui-readonly" readonly="readonly">$!{company.description}</textarea>
+		</div>
+	</fieldset>
+</form>
+
+</div>
+<div class="ui-layout-north">
+	#bread_crumbs('PLAT_ORG_COMPANY')
+	#operate_buttons('PLAT_ORG_COMPANY',true)#end
+</div>
+<script type="text/javascript">
+	$(function(){
+		if(_inner_layout) _inner_layout.destroy();
+		_inner_layout = $("#centerMain").layout({
+			defaults : {
+				resizable : false,
+				closable : false,
+				spacing_open : 5
+			}
+		});
+	});
+</script>	

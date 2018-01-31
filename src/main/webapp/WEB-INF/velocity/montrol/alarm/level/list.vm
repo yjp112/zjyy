@@ -1,0 +1,73 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<div class="ui-layout-center">
+        <div id="grid" ></div> 
+</div>
+        
+   #parse("index/_footer.vm")
+        
+<script>
+   var _iframe_layout, _left_layout, _inner_layout;
+	$(document).ready(function(){
+   _iframe_layout = $('body').layout({
+     defaults: {
+       resizable: false,
+       closable: false,
+       spacing_open: 5
+     },
+     center: {
+         onresize_end: function () {
+             var grid = $("#grid").data("kendoGrid");
+             grid.resize();
+         }
+     }
+   });
+
+       //表格
+		quick_datagrid("#grid", "", "$!{rc.contextPath}/hl/montrol/alarm/level/list", [{
+			 field: "id",
+            hidden: true, 
+            width: 20
+        }, {
+            field: "alarmLNum",
+            title: "报警等级",
+            headerAttributes: {"class": "k-grid-equilong"},
+            attributes: {"class": "k-grid-equilong","style":"text-align: center"},
+            sortable: true,
+            width: 100,
+        }, {
+            field: "alarmLevel",
+            title: "级别名称",
+            sortable: true,
+            headerAttributes: {"class": "k-grid-equilong"},
+            #*attributes: {"class": "k-grid-text"},*#
+         	attributes: {     
+  				title:"#: data.alarmLevel==null? '':data.alarmLevel #",
+  				"class": "k-grid-text k-grid-nowrap",
+  				"style":"text-align: center"
+		 	},
+            width: 100
+        }, {
+            field: "remark",
+            title: "级别说明",
+            headerAttributes: {"class": "k-grid-text"},
+            attributes: {"class": "k-grid-text","style":"text-align: center"},
+            sortable: false
+        }], 
+        {
+            sortable: {
+                mode: "single",
+                allowUnsort: true
+            },
+      		pageable:false, 
+      		showNumber:false,resizable:true
+        }, {
+            serverSorting: true
+        }, [ #kendo_datagrid_btns("ALARM_BJDJ")#end]);
+		
+   });
+</script>
+
+</body>
+</html>

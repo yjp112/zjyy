@@ -1,0 +1,174 @@
+<style type="text/css">
+.left{float:left;}
+.right{float:right;}
+</style>
+		<div id='excuteTimeDiv' class="ui-form-item " style="width:100%">
+          <label class="ui-label" for=""><span class="ui-form-required">*</span>监控时段起：</label>
+          <select class="ui-select" name="task.executionPlan.monitorHourStart" data-rule="监控时段起: required;length[~50];">
+            <option value="">--请选择--</option>
+            $!{monitorHourStart}
+          </select><span class="ui-form-text" style="color: #fff;">至</span> 
+          <select class="ui-select" name="task.executionPlan.monitorHourEnd" data-rule="监控时段止: required;length[~50];">
+            <option value="">--请选择--</option>
+            $!{monitorHourEnd}
+          </select>
+		  <input style="margin-left:20px;" class="ui-checkbox" name="task.executionPlan.isTomorrow" value="Y" type="checkbox" #if("Y"==$!task.executionPlan.isTomorrow) checked #end>
+          <span class="ui-form-text" style="color: #fff;">次日</span> 
+        </div>     
+        <div id="executeRate" class="ui-form-item" style="width:100%">
+          <label class="ui-label" for=""><span class="ui-form-required">*</span>执行频率：</label>
+            <input class="ui-radio" type="radio"  checked="true" name="task.executionPlan.executeType" value="1"/>
+			<span class="ui-form-text" style="color: #fff;">执行一次</span>
+            <input class="ui-radio" type="radio"  name="task.executionPlan.executeType" value="2"/>
+			<span class="ui-form-text" style="color: #fff;">按天</span>
+            <input class="ui-radio" type="radio"  name="task.executionPlan.executeType" value="3"/>
+			<span class="ui-form-text" style="color: #fff;">按周</span>
+        </div>       
+
+		<div id="executeParam2" style="width:100%;display:none" class="ui-form-item">
+          <label class="ui-label" for=""></label>
+		  <span class="ui-form-text" style="color:#fff">每隔<input style="width:20px" type="text" id="executeParam2Value" name="task.executionPlan.executeParam2" value="$!{scheduleJob.jobSubject}"
+				data-rule="间隔: length[~50];"/>天执行一次</span>
+        </div>
+		<div id="executeParam3" style="width:100%;display:none" class="ui-form-item">
+          <label class="ui-label" for=""></label>
+		  <input class="ui-checkbox" name="task.executionPlan.executeParam3" value="2" type="checkbox">
+          <span class="ui-form-text" style="color:#fff">周一</span> 
+          <input class="ui-checkbox" name="task.executionPlan.executeParam3" value="3" type="checkbox">
+          <span class="ui-form-text" style="color:#fff">周二</span> 
+          <input class="ui-checkbox" name="task.executionPlan.executeParam3" value="4" type="checkbox">
+          <span class="ui-form-text" style="color:#fff">周三</span> 
+          <input class="ui-checkbox" name="task.executionPlan.executeParam3" value="5" type="checkbox">
+          <span class="ui-form-text" style="color:#fff">周四</span> 
+          <input class="ui-checkbox" name="task.executionPlan.executeParam3" value="6" type="checkbox">
+          <span class="ui-form-text" style="color:#fff">周五</span> 
+          <input class="ui-checkbox" name="task.executionPlan.executeParam3" value="7" type="checkbox">
+          <span class="ui-form-text" style="color:#fff">周六</span> 
+          <input class="ui-checkbox" name="task.executionPlan.executeParam3" value="1" type="checkbox">
+          <span class="ui-form-text" style="color:#fff">周日</span> 
+
+        </div>
+          
+        <div class="ui-form-item">
+			  <label class="ui-label" for=""><span class="ui-form-required">*</span>开始时间：</label>
+	          <input id="startTime" type="text" name="task.executionPlan.startDate"  class="ui-input Wdate"  
+				onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',maxDate:'#F{$dp.$D(\'endTime\')}'})" 
+				value="#date_format($!task.executionPlan.startDate,'yyyy-MM-dd HH:mm:ss')"  
+				size=22 
+                data-rule="开始时间: required;"/>
+        </div>
+        <div class="ui-form-item">
+              <label class="ui-label" for="">结束时间：</label>
+	          <input id="endTime" type="text" name="task.executionPlan.endDate"  class="ui-input Wdate"  onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'#F{$dp.$D(\'startTime\')}'})" value="#date_format($!task.executionPlan.endDate,'yyyy-MM-dd HH:mm:ss')"  size=22 />
+        </div>
+        <div class="ui-form-item ui-form-item-textarea colspan2" style="width:100%;">
+            <label class="ui-label" style="color: #fff;">执行时间举例:</label>
+			<div class="ui-textarea" style="height:100px;">
+			  <ul class="left">
+			  </ul>
+			  <ul class="right">
+			  </ul>
+			</div>
+			<button type="button" class="btn btn-success" style="margin-left:10px;" id="computeBtn" onclick="computeExecuteTime(this)">计算</button>
+        </div>
+<script type="text/javascript">
+    function computeExecuteTime(btn){
+	   if(!validateExecuteTimeTab()){
+	     return false;
+	   }
+	   var datas={};
+	   var week=[];
+	  $('#executeParam3 input:checked').each(function(idx){
+	    week.push($(this).val());
+	  })
+	  datas['executionPlan.executeType']=$('#executeRate input[type=radio]:checked').val();
+	  datas['executionPlan.executeParam3']=week;
+	  datas['executionPlan.executeParam2']=$.trim($('#executeParam2 input').val());
+	  datas['executionPlan.executeType']=$('#executeRate input[type=radio]:checked').val();
+	  datas['executionPlan.startDate']=$('#startTime').val();
+	  datas['executionPlan.endDate']=$('#endTime').val();
+	  $.ajax({  
+        url: '$!{rc.contextPath}/nhgl/basic/taskSet/base/computeExecuteTime?t='+new Date().getTime(),  
+        //data: { "selectedIDs": _list },  
+        data: datas,  
+        dataType: "json",  
+        type: "POST",  
+        traditional: true,  
+        success: function (jsonArray) {  
+			 if(jsonArray==null||jsonArray.length==0){
+			   $('.left').html('<span style="color: #fff;">请检查执行频率、开始时间、结束时间是否输入正确。</span>');
+			   $('.right').html('');
+			   return false;
+			  } 
+			 var times_left='';
+			 var times_right='';
+			 $.each(jsonArray,function(idx,json){
+			    if(idx>4){
+			  		times_right+='<li style="color:#fff">'+json+'</li>'
+				}else{
+			  		times_left+='<li style="color:#fff">'+json+'</li>'
+				}
+			 })
+			 $('.left').html(times_left)
+			 $('.right').html(times_right)
+        }  
+    }); 
+	   
+	}
+    function validateExecuteTimeTab(){
+	   var executeType=$('#executeRate input[type=radio]:checked').val();
+		if(executeType==2){//每天
+		  var executeParam=$.trim($('#executeParam2 input').val());
+		  if(executeParam==''){
+    		   alert('请输入天数。');
+    		   return false;
+		  }
+		  if(executeParam==0){
+		  	alert('请输入大于0的数字。');
+    		return false;
+		  }
+		  //$('#executeParam2 input').val(executeParam);
+		}else if(executeType==3){//每周
+		  if($('#executeParam3 input:checked').size()==0){
+		    alert('请选择星期。');
+			return false;
+		  }
+		}else if(executeType==1){//执行一次
+		  $('#endTime').val($('#startTime').val())		
+		}   
+		
+		//if($('#startTime').val()==''){
+		//  alert('请输入开始时间');
+		//  return false;
+		//}
+		return true;
+    }
+	 $(document).ready(function(){
+		$('#executeRate input[type=radio]').change(function(){
+		  var checkValue=$(this).val();
+		  $.each(['executeParam2','executeParam3'],function(idx,item){
+		    if('executeParam'+checkValue==item){
+			  $('#'+item).show();
+			}else{
+				$('#'+item).hide();
+			}
+		  });
+		});
+		
+		var executeType='$!{task.executionPlan.executeType}';
+		var executeParam='$!{task.executionPlan.executeParam}'
+		if(executeType==2){//每天
+		  $('#executeParam2 input').val(executeParam);
+		}else if(executeType==3){//每周
+		  $.each(executeParam.split(','),function(idx,item){
+		    $('#executeParam3 input[value='+item+']').attr('checked',true);
+		  })
+		}
+		$('#executeRate input[type=radio][value='+executeType+']').click();
+		if('$!task.id'!=''){
+			$('#computeBtn').click();
+		}
+	 });
+    $(document).ready(function(){
+    });
+</script>

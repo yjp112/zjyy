@@ -1,0 +1,282 @@
+#parse("index/_header.vm")
+<style>
+    .ztree {
+        overflow: auto;
+    }
+</style>
+</head>
+<body>
+  <div class="ui-layout-west" style="border-right:solid 1px #e1e5e6;" id="leftTreeWrap">
+			<div class="ui-layout-center">
+				    <div id="tabstrip" class="k-header k-grid-toolbar" style="padding-left:10px;">
+					    <ul>
+					        <li class="k-state-active" id="li_category">系统</li>
+					        <li id="li_area">区域</li>
+					    </ul>
+						 <div id="tabstrip-1">
+							<span class="k-header k-grid-toolbar" style="padding-left:10px;padding-top:10px;">系统类别</span>
+							<ul id="tabstripTree1" class="ztree"></ul>
+				        </div>
+					    <div id="tabstrip-2">
+							<span class="k-header k-grid-toolbar" style="padding-left:10px;padding-top:10px;">地理区域</span>
+							<ul id="tabstripTree2" class="ztree"></ul>
+				        </div>
+				    </div >
+			</div>
+  </div>
+
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<form class="ui-form" id='queryForm'>
+			<input id="treeId1" type="hidden" name="categoryId">
+			<input id="treeId2" type="hidden" name="areaId">
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+				<tr>
+					<td class="ui-search-name first">设备编码：</td>
+					<td class="ui-search-c">
+						<input name="deviceCode" class="k-textbox" type="text" value="$!{deviceCode}">
+					</td>
+					
+					<td class="ui-search-name first">设备名称：</td>
+					<td class="ui-search-c">
+						<input name="deviceName" class="k-textbox" type="text">
+					</td>
+					
+					<td class="ui-search-name">任务状态：</td>
+                    <td class="ui-search-c">
+						<select  class="k-textbox" name="status">
+							<option value=''>--请选择--</option>
+							#foreach($!{item} in $!{inspectionTaskStatusList})
+		       			    <option value="$!{item.enumValue}">$!{item.enumText}</option>
+							#end
+						</select>
+	                </td>
+                </tr>
+				
+				<tr>
+					<td class="ui-search-name">巡检时间：</td>
+					<td class="ui-search-c" colspan="3">
+						<input  id="startTime"  class="k-textbox"  name="beginTime" />
+						至
+						<input id="endTime"  class="k-textbox"  name="endTime" />
+					</td>
+	        	</tr>
+				
+              </table>
+            </td>
+            <td width="150" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn" onclick="cancelLeftTreeSelected();"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+            <td></td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+#parse("index/_footer.vm") 
+<script type="text/javascript">
+  var menuCode='$!{menu.code}';
+  var _iframe_layout, _left_layout, _inner_layout,containerHeight;
+	$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      },
+      west: {
+        size: 0.18
+      }
+    });
+
+    _left_layout = $("#leftTreeWrap").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+    	center: {
+    	  onresize_end:function(){
+              containerHeight = _left_layout.state.container.innerHeight-78;
+              $("#tabstripTree1").css("height",containerHeight);
+              $("#tabstripTree2").css("height",containerHeight);
+  		}
+      }
+    });
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+   
+
+    $('#li_category').click(function(){
+		$("#treeId2").val('');
+		$.fn.zTree.init($("#tabstripTree2"), setting2,zNodes2);
+		$('#queryBtn').click();
+	});
+	
+    $('#li_area').click(function(){
+		$("#treeId1").val('');
+		$.fn.zTree.init($("#tabstripTree1"), setting1,zNodes1);
+		$('#queryBtn').click();
+	});
+	
+    $('#resetBtn').click(function(){
+		$("#treeId1").val('');
+		$("#treeId2").val('');
+		clearDate("startTime", "endTime");
+    });
+
+	$('.iconfont','.ui-form-pick').each(function(){
+		$(this).click(function(){
+      	$('#treeId1').val('');
+      	$('#treeId2').val('');
+      	$('#selectBlock').hide();
+      })
+    });
+		 $("#tabstrip").hcTabStrip({
+	            animation: {
+	                // fade-out current tab over 1000 milliseconds
+	                close: {
+	                    duration: 100,
+	                    effects: "fadeOut"
+	                },
+	               // fade-in new tab over 500 milliseconds
+	               open: {
+	                   duration: 100,
+	                   effects: "fadeIn"
+	               }
+	           }
+	        });
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/inspection/task/list?r=" + new Date(), [
+		  {
+		  	field: "id",
+			hidden: true,
+			sortable:false
+		  },{
+		  	field: "inspectionCode",
+			title: "巡检单号",
+			sortable: false,
+			headerAttributes: {"class": "k-grid-equilong"},
+		  	attributes: {"class": "k-grid-equilong  $#: data.deviceId #$"},
+			template:"<a href=\"javascript:void(0)\" title=\"查看#: data.inspectionCode #的详细信息\" onclick=\"window.location.href = '$!{rc.contextPath}/inspection/task/edit?viewOnly=true&menuCode='+menuCode+'&id=#: data.id #'\">#: data.inspectionCode #</a>"  
+		  }, {
+              field: "inspectionGroupName",
+              title: "巡检班组",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "currentNode==null? '结束':currentNode",
+              title: "当前节点",
+			  sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+		  	  attributes: {"class": "k-grid-equilong"}
+          }, {
+              field: "expectStartTime",
+			  title: "计划开始时间",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "actualStartTime",
+			  title: "实际开始时间",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "actualEndTime",
+              title: "实际结束时间",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "statuss",
+              title: "任务状态",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }
+          
+          ], 
+      {
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          },resizable:true
+      }, {
+          serverSorting: true
+      }, [
+          
+      ]);
+	
+    $("#tabstripTree1").css("height",_left_layout.state.container.outerHeight-78);
+    $("#tabstripTree2").css("height",_left_layout.state.container.outerHeight-78);
+    });
+	
+	commonDate("startTime","endTime","yyyy-MM-dd HH:mm:ss","zh-CN");
+	
+    /* zTree */
+    var setting1 = {
+    	data: {
+    		simpleData: {enable: true}
+          },
+          callback: {
+    			onClick: function(event, treeId, treeNode) {
+    				 $('#treeId1').val(treeNode.id);
+    			 	 $('#selectBlock').show();
+    				 $('#queryBtn').click();
+    			}
+    		}
+    };
+    var setting2 = {
+    	data: {
+    		simpleData: {enable: true}
+          },
+          callback: {
+    			onClick: function(event, treeId, treeNode) {
+    				 $('#treeId2').val(treeNode.id);
+    			 	 $('#selectBlock').show();
+    				 $('#queryBtn').click();
+    			}
+    		}
+    };
+  	var zNodes1 = [];  
+  	zNodes1.push({id:"0", pId:"-1", name:"设备类别簇", open:"true"});
+  	#foreach($!{treeNode} in $!{deviceCategoryList})
+      	zNodes1.push({id:$!{treeNode.id}, pId:$!{treeNode.parentId}, name:"$!{treeNode.categoryName}"});
+  	#end 
+  	var zNodes2 = [];  
+  	zNodes2.push({id:"0", pId:"-1", name:"地理区域簇", open:"true"});
+  	#foreach($!{treeNode} in $!{geoAreaList})
+      	zNodes2.push({id:$!{treeNode.id}, pId:$!{treeNode.parentId}, name:"$!{treeNode.areaName}"});     
+  	#end 
+  	$(document).ready(function(){
+  		$.fn.zTree.init($("#tabstripTree1"), setting1,zNodes1);
+  		$.fn.zTree.init($("#tabstripTree2"), setting2,zNodes2);
+  	});
+	
+	function cancelLeftTreeSelected(){
+		$.fn.zTree.init($("#tabstripTree1"), setting1,zNodes1);
+  		$.fn.zTree.init($("#tabstripTree2"), setting2,zNodes2);
+	}
+	
+</script>

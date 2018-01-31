@@ -1,0 +1,41 @@
+<form class="ui-form ui_dialog" id="ngArea_edit_form" action="$!{rc.contextPath}/nhgl/basic/ngArea/save" method="post">
+    <input type="hidden" name="id" value="$!{ngArea.id}" />
+	<fieldset>
+		<div class="ui-form-item">
+            <label class="ui-label">#if(!$!viewOnly)<span class="ui-form-required">*</span>#end区域编码：</label>
+            <input id="areaCode" type="text" name="areaCode" class="ui-input" data-rule="区域编码:required; length[~10]" value="$!{ngArea.areaCode}"/>
+		</div>
+		 
+		<div class="ui-form-item" >
+			<label class="ui-label" >#if(!$!viewOnly)<span class="ui-form-required">*</span>#end区域名称：</label>
+			<input id="areaName" type="text" name="areaName" class="ui-input" data-rule="区域名称:required; length[~15]" value="$!{ngArea.areaName}"/>
+		</div>
+		<div class="ui-form-item" >
+			<label class="ui-label" >#if(!$!viewOnly)<span class="ui-form-required">*</span>#end父区域：</label>
+			 <input  type="hidden" name="parentId" id="parentId" value="$!{ngArea.parentId}"/>
+			<input id="parentName" readonly class="ui-input ui-input-choose" type="text" data-rule="父区域:required"  name="parentName" value="$!{ngArea.parentName}" onclick="chooseNgArea('parentId','parentName','nhArea',null,'$!{ngArea.id}')"/>
+		</div>
+		<div class="ui-form-item" >
+			<label class="ui-label" >#if(!$!viewOnly)<span class="ui-form-required">*</span>#end序号：</label>
+			<input id="sort" type="text" name="sort" data-rule="序号:required; length[~5]; digits" class="ui-input" value="$!{ngArea.sort}"/>
+		</div>
+		<div class="ui-form-item" >
+			<label class="ui-label" >区域人数：</label>
+			<input id="persons" type="text" name="persons" class="ui-input"  value="$!{ngArea.persons}"   data-rule="length[~100]; persons"   data-rule-persons="[/^[0-9]*$/, '请输入整数']"/>
+		</div>
+		<div class="ui-form-item" >
+			<label class="ui-label" >区域面积：</label>
+			<input id="area" type="text" name="area" class="ui-input" value="$!{ngArea.area}" data-rule="length[~100]; area"   data-rule-area="[/^\d+(.\d{1,2})?$/,'请输入小数或整数']"/>
+		</div>
+		<div class="ui-form-item ui-form-item-textarea colspan2" >
+			<label class="ui-label" >备注：</label>
+			<textarea  id="remark" class="ui-textarea" data-rule="length[~100]" name="remark">$!{ngArea.remark}</textarea>
+		</div>
+	</fieldset>
+</form>
+<script type="text/javascript">
+ 	#if($!viewOnly)
+	        setAllReadonly("dialog");
+	  #end
+
+</script>

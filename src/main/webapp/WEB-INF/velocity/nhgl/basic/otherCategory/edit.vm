@@ -1,0 +1,49 @@
+<form class="ui-form ui_dialog" id="otherCategory_edit_form" action="$!{rc.contextPath}/nhgl/basic/otherCategory/save" method="post">
+    <input type="hidden" name="id" value="$!{otherCategory.id}" />
+	<fieldset>
+		<div class="ui-form-item">
+            <label class="ui-label"><span class="ui-form-required">*</span>分类编码：</label>
+            <input id="code" type="text" name="code" class="ui-input" data-rule="区域编码:required; length[~10]" value="$!{otherCategory.code}"/>
+		</div>
+		 
+		<div class="ui-form-item" >
+			<label class="ui-label" ><span class="ui-form-required">*</span>分类名称：</label>
+			<input id="name" type="text" name="name" class="ui-input" data-rule="区域名称:required; length[~15]" value="$!{otherCategory.name}"/>
+		</div>
+		<div class="ui-form-item" >
+			<label class="ui-label" ><span class="ui-form-required">*</span>父区域：</label>
+			 <input  type="hidden" name="parentId" id="parentId" value="$!{otherCategory.parentId}"/>
+			<input id="parentName" readonly class="ui-input ui-input-choose" type="text" data-rule="父区域:required"  name="parentName" value="$!{otherCategory.parentName}" onclick="chooseOtherCategory('parentId','parentName')"/>
+		</div>
+		<div class="ui-form-item" >
+			<label class="ui-label" ><span class="ui-form-required">*</span>序号：</label>
+			<input id="sort" type="text" name="sort" data-rule="序号:required; length[~5]; digits" class="ui-input" value="$!{otherCategory.sort}"/>
+		</div>
+		<div class="ui-form-item" >
+			<label class="ui-label" >人数：</label>
+			<input id="persons" type="text" name="persons" class="ui-input"  value="$!{otherCategory.persons}"   data-rule="length[~100]; persons"   data-rule-persons="[/^[0-9]*$/, '请输入数字']"/>
+		</div>
+		<div class="ui-form-item" >
+			<label class="ui-label" >面积：</label>
+			<input id="area" type="text" name="area" class="ui-input" value="$!{otherCategory.area}" data-rule="length[~100]; area"   data-rule-area="[/^((-|\+)?\d+\.\d*)|(\d+)$/,'请输入小数或整数']"/>
+		</div>
+		<div class="ui-form-item" >
+			<label class="ui-label" >能耗种类：</label>
+			<select name="nhType" class="k-textbox">
+				#foreach($!type in $!typeList)
+					<option value="$!{type.enumValue}" #if($!{type.enumValue}==$!{otherCategory.nhType}) selected #end>$!{type.enumText}</option>
+				#end
+			</select>
+		</div>
+		<div class="ui-form-item ui-form-item-textarea" >
+			<label class="ui-label" >备注：</label>
+			<textarea  id="remark" class="ui-textarea" data-rule="length[~100]" name="remark">$!{otherCategory.remark}</textarea>
+		</div>
+	</fieldset>
+</form>
+<script type="text/javascript">
+ 	#if($!viewOnly)
+	        setAllReadonly("dialog");
+	  #end
+
+</script>

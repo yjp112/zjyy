@@ -1,0 +1,127 @@
+<div data-page="visitor_add" class="page page-visitor-add">
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="navbar-inner">
+                <div class="navbar-left">
+                    <a href="#" class="link back">
+                        <i class="icon icon-c-back only-icon"></i>
+                    </a>
+                </div>
+                <div class="navbar-center">访客登记-预约</div>
+                <div class="navbar-right">
+                        <a href="" class="link" id="visitor_submit" onclick="visitSubmit()">
+                            <i class="icon text">提交</i>
+                        </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-content show-content">
+        <form class="list-block" id="visitor_save" method="post">
+            <ul class="visitor">
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title"><span class="required">*</span>来访客人</div>
+                            <div class="item-input">
+                                <input type="text" name="condition.visitorList[0].visitorName" id="visitorName" placeholder="请填写主访客姓名" maxlength="20"/>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title"><span class="optional"></span>访客单位</div>
+                            <div class="item-input">
+                                <input type="text" name="condition.visitorList[0].visitorUnit" placeholder="请填写访客单位" maxlength="25">
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title"><span class="optional"></span>访客电话</div>
+                            <div class="item-input">
+                                <input type="tel" name="condition.visitorList[0].visitorPhone" placeholder="请填写访客电话" id="visitorPhone" maxlength="15">
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title"><span class="required">*</span>来访人数</div>
+                            <div class="item-input">
+                                <input type="tel" name="condition.expectVisitors" id="expectVisitors" placeholder="请填写访客人数" maxlength="3">
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title"><span class="required">*</span>来访时间</div>
+                            <div class="item-input">
+                                <input type="text" name="condition.visitTime" id="visitTime" placeholder="请填写来访时间">
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title"><span class="required">*</span>来访天数</div>
+                            <div class="item-input">
+                                <input type="tel" name="condition.visitDays" id="visitDays" placeholder="请填写访问天数" maxlength="3">
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title"><span class="required">*</span>来访事由</div>
+                            <div class="item-input">
+                                <input type="text" id="visitReasonName" placeholder="请填写来访事由">
+                                <input type="hidden" name="condition.visitReason" id="visitReason">
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title"><span class="optional"></span>车辆数</div>
+                            <div class="item-input">
+                                <input type="tel" name="condition.visitCars" id="visitCars" placeholder="请填写来访车辆数" maxlength="3">
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title"><span class="optional"></span>车牌号</div>
+                            <div class="item-input">
+                                <input type="text" name="condition.visitCarNos" id="visitCarNos" placeholder="请填写来访车牌号" maxlength="15">
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title"><span class="optional"></span>备注</div>
+                            <div class="item-input">
+                                <textarea  id="remark" name="condition.remark" placeholder="请填写备注信息" maxlength="40"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </form>
+    </div>
+</div>

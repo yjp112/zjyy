@@ -1,0 +1,549 @@
+<script type="text/javascript">
+/* gis画面专用jsJS */
+/* code by lgp v 1.1  2012.03.16 需要JQUERY支持*/
+/*--------------------------------start----------------------------------------*/
+//变量定义
+var selectList ;//保存设备查询结果    ,鼠标单击 检索列表行时要用到	
+var itvRefresh =null;
+var itvFindRefresh =null;
+var refreshHpids = new Array();
+var currentFloorOld="";
+var circleNow="";
+var currentTC="";
+var currentTCOld="";
+var isRefreshing = false;
+//单击楼层
+function changeFloor(areaCode,$objFloor){
+    var issuccess = g_changeFloor(areaCode);
+    if(issuccess){
+        if($objFloor){
+            var that =$objFloor.parent();
+            if (!that.hasClass("floor-item-selected")) {
+                $(".floor-item").removeClass("floor-item-selected");
+                that.addClass("floor-item-selected");
+            }
+        }
+        if($objFloor!=false){
+            if (($objFloor==null&&${cengcount}==0)|| !$objFloor || $objFloor.attr("isShowCeng")!= "no"){
+                #foreach($layer in $lstLayer)
+                    g_addDeviceLayers("$layer.layerCodeJs",$layer.display);//添加图层
+                    if ("$layer.pop" == "1"&&$layer.display) {
+                        g_showDeviceState("$layer.layerCodeJs");//飘窗、显示气泡（温度值）
+                    }
+                #end
+            }
+        }
+    }
+}
+//单击大楼	 
+function changeBuilding(buildingId,buildingName){   
+	$("#loadingCeng").show();
+    $.ajax({
+           'url':"$!{rc.contextPath}/hl/gis/getFloorByBuildingId?type=$!{type}&buildingId="+buildingId,
+           'data': '',
+           'dataType': 'json',
+           'type': 'get',
+  	      'error': function(data){
+         	   $("#my_ul_floor").html("");
+			     return false;
+	           },
+           'success': function(data) {
+		   		   var tempCount = $("#my_ul_floor li").length;
+		           var li =  "";
+	        	   if (data!=null && data.length>0) {
+				       //data为该楼的所有楼层
+				       var count = 0;
+	                   $.each(data, function(index, geoArea) {
+					   	  li+="<li><a areaCode='"+geoArea.areaCode+"' id='ceng_"+geoArea.id+"' href='javascript:void(0);' onclick='ui_floor_click($(this));' class='ui-floor-a";	
+						  if(geoArea.remark=="alarm"){//是报警楼层
+						  	li+=" ui-floor-warn";	
+						  }
+						  if(isShowCeng(geoArea.id)){//是否显示该楼层 (是否是含有该子系统的楼层)
+						  	li+=" ui-floor-1' isShowCeng='yes' >";	
+						  }else{
+						  	li+=" ui-floor-2' isShowCeng='no' >";	
+						  }
+						  count+=1;
+						  li+=geoArea.areaName+"</a></li>"
+					   });
+					}
+				   $("#my_totalCeng .fn-left").html(buildingName);
+				   $("#my_totalCeng .fn-right").html("共"+count+"层楼");
+				   $("#my_ul_floor").hide();
+				   $("#my_ul_floor").html(li);				   
+				   if(tempCount==0 && "${initShowCeng}"!=""){//初次进入本画面
+				      $("a#ceng_${initShowCeng}").click();
+					  var timer = 300;
+					  hideLoading(timer);
+                	  window.setTimeout(function(){$("#my_ul_floor").show();},timer)//防快选
+				   }else{
+				      $("#my_ul_floor").show();
+				   	  hideLoading();
+				   }				   
+		   }
+      });
+}
+
+//单击设备
+function gc_clickDevice(feature){
+	var code=feature.attributes.hpid;
+	if(code !=null && code !=""){
+	 	getLayerByHpid(code,feature);
+	}
+	return true;
+}  
+//框选返回的结果
+function gc_kuangxuan(codes){
+	if(codes!=null && codes.length>0){
+		circle(circleNow,codes);
+	}
+}
+/*设备查询
+*selectType: 按钮查询：button  框选查询：kuangxuan
+*type:分页查询：select， 上一页：left，下一页：right
+*codes:框选查询时用到，是gis返回框住了的hpid数组
+*/
+function findDevices(type){
+	var dataIn;
+	var page =parseInt($("#spnPage").text());
+	if(type=="left"){
+		page-=1;
+	}else if(type=="right"){
+		page+=1;
+	}else{
+		page=1;
+	}
+	dataIn={"page":page,"type":"$!{type}","codeName":$("#txtCodeName").val(),"areaCode":g_selectfloor,"selLou":$("#selLou").val(),"selStatus":$("#selStatus").val()};
+
+	$("#loadingCeng").show();
+	$.ajax({
+	           'url':"$!{rc.contextPath}/hl/gis/findDevices?r="+Math.random(),
+	           'data':dataIn,
+	           'dataType': 'json',
+			   'traditional': true,//传统数组
+	           'type': 'post',
+	  	      'error': function(data){
+				     return false;
+		           },
+			   'complete':function(data){
+				     hideLoading();
+		           },	   
+	           'success': function(data) {
+                  var itemListContainer = $("#G_ItemLists").empty();
+                  $.each(data.pager.rows,function(infoIndex, info){
+				   var p_status="";
+				   var classImg="";
+				   if(info.creator==null || info.creator==""){//该设备档案里是否有设备图片
+				   	   classImg="fn-hide";
+				   }
+				   var p_status="<p id='p_"+info.hpid+"' name='p_status'>";
+				   p_status+=getStatusHtml(info)+"</p>";
+                   var itemE = $("<li class='item_list clearfix' id='"+info.hpid+"' onclick=item_clickHandler('"+info.hpid+"','"+info.gisSort+"') onmouseover=item_mouseEnterHandler('"+info.hpid+"','"+info.gisSort+"') onmouseout=item_mouseLeaveHandler('"+info.hpid+"','"+info.gisSort+"')> "
+                    +"<input type='hidden' name='hdnHpid' value='"+info.hpid+"'/>"
+					+"<div class='fn-left'><input type='checkbox' class='item_list_check' style='display:none;'/></div>"
+                    +"<div class='plant_position fn-left'>"+info.gisSort+"</div>"
+                    +"<div class='plant_des fn-left'>"
+                    +"<div class='plant_list_title' style='width:166px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;' title='"+info.deviceName+"'>"+info.deviceName+"</div>"
+                     +"<div class='plant_list_content'>"
+                     +"<p>设备编码: "+info.deviceCode+"</p>"
+                     +"<p>安装位置: "+info.locationName+"</p>"						 
+                     +p_status
+					 +"<p class='item_list_fns'>"
+					 +"<a class='linkText icon18_a icon_report fn-left' onclick='parent.loadMain(\"$!{rc.contextPath}/hl/device/device/edit?from=gis&showFlag=1&id="+info.id+"\");'>详情>></a>"
+                     //+"<a href='#' class='linkText icon18_a icon_info fn-left'>简介</a>"
+                     //+"<a class='linkText icon18_a icon_chart fn-left'>统计</a>"
+                     //+"<a class='linkText icon18_a icon_report fn-left'>协同</a>"
+                     +"</p>"
+                     +"</div>"
+                    +"</div>"
+                    +"<div class='plant_pic fn-left "+classImg+"'><a><img width='74px' height='54px' onerror='this.src=\"$!rc.contextPath/modules/assets/images/gis/imgDeviceCategory/default.jpg\";' src='"+data.imagePath+info.creator+"' /></a></div>"
+                   
+                  +"</li>");
+
+                    itemListContainer.append(itemE);
+                  });
+				  selectList=data.pager.rows;//保存查询结果    ,鼠标单击 检索列表行时要用到		
+				  g_idAddFeature(selectList);
+				  $("#spnTotal").html(data.pager.total);
+				  $("#spnPage").text(data.pager.page);
+				  $("#spnTotalPage").text(data.totalPage);
+				  //控制上下翻页
+				  if(data.bolUp==false){
+    				  $("#pageLR").show();
+    				  $("#pageLW").hide();
+				  }else{
+    				  $("#pageLR").hide();
+    				  $("#pageLW").show();
+				  }
+				  if(data.bolNext==false){
+    				  $("#pageRR").show();
+    				  $("#pageRW").hide();
+				  }else{
+    				  $("#pageRR").hide();
+    				  $("#pageRW").show();
+				  }
+				  
+				  if("$!{haveOpenClose}"=="true"){
+				  	 newTimerRefreshFindDevice();
+				  }
+			   }
+	      });
+}
+//---------------实时更新门禁、灯的状态以及设备的报警状态-----start-------------------
+function newTimerRefreshDevice(){
+    window.setTimeout(function(){
+		if(itvRefresh != null){
+            window.clearInterval(itvRefresh);//new前清空原先timer
+    	}
+		//重新轮询
+        refreshDeviceState(0);
+        itvRefresh = window.setInterval("refreshDeviceState(1)",$!{refreshTime});//摄像头每次都会显示
+    },1500);
+}
+//设置当前图层&&清空变量
+function cleanHpids(){
+	refreshHpids = new Array();
+}
+
+var xmlhttp =createXmlhttp(completeXmlhttp,alreadyResponse);
+function completeXmlhttp(data){
+    var myDate = new Date();
+    g_dcPoint(data.openDevice, 1); //切换状态
+    g_dcPoint(data.alarmDevice, 2); //切换报警
+    var alams=".floor-list a[areacode="+g_selectfloorId+"]";
+    if(data.alarmDevice == null || data.alarmDevice == ""){
+        $(alams).parent().removeClass("floor-item-warn");
+    }else{
+        $(alams).parent().addClass("floor-item-warn");
+    }
+    refreshHpids = data.hpids;
+    data = null;
+}
+function alreadyResponse(){
+    isRefreshing = false;
+}
+function refreshDeviceState(sort){
+    if(isRefreshing==false || sort ==0){
+        isRefreshing = true;
+        if(sort==0){//首次轮询
+            cleanHpids();//设置当前图层&&清空变量
+        }
+        var myDate = new Date();
+        currentTC =  g_getLayerName();
+        if(xmlhttp==null){alert("xmlhttp==null");}
+        var url = "$!{rc.contextPath}/hl/gis/refreshDeviceState?geoareaCode=" + g_selectfloorId  + "&r=" + Math.random();
+        sendXmlhttp(xmlhttp,"POST",url,"hpids="+refreshHpids+"&tuCeng="+currentTC);
+    }
+}
+//---------------实时更新门禁、灯的状态以及设备的报警状态-----end-------------------
+
+//设备查询列表中的状态改变
+function getStatusHtml(info){
+   var p_status="";
+   if(info.openCloseStatus=="开"||info.openCloseStatus=="关"||info.openCloseStatus=="报警"){
+       p_status="设备状态: <span name='span_status'>"+info.openCloseStatus+"</span>";
+       if("$!{haveOpenClose}"=="true"){
+       	   var temp_btn= "<a  class='ui-status-btn btn-status-open' hpid='"+info.hpid+"' onclick='ui_status_btn_click($(this));'>";
+    	   if(info.openCloseStatus=="开"){
+    	      temp_btn+="关</a>";
+    	   }else if(info.openCloseStatus=="关"){
+    	      temp_btn+="开</a>";
+    	   }else if(info.openCloseStatus=="报警"){
+    	      temp_btn="";
+    	   }
+    	   //alert(info.openCloseStatus);
+       	   p_status+="<img src='"+device_img[getMiddleCode(info.hpid)][info.openCloseStatus]+"' width='24px' height='24px' style='vertical-align:middle; margin:0 6px;'></img>"+temp_btn;
+       }
+   }
+   return p_status;
+}
+
+
+//轮询设备状态
+function newTimerRefreshFindDevice(){
+	if(itvFindRefresh != null){
+        window.clearInterval(itvFindRefresh);//new前清空原先timer
+	}
+    itvFindRefresh = window.setInterval("afterFindDevices()",6000);
+}
+//------轮询查询出的设备状态------
+var xmlhttp2 =createXmlhttp(completeXmlhttp2);
+function completeXmlhttp2(data){
+	var devices = data.lstResultDevice;
+	if(devices==null){return;}
+   	$("#G_ItemLists p[name='p_status']").each(function(i){
+		for(k in devices){
+			if($(this).attr("id")=="p_"+devices[k].hpid && $(this).find("span[name='span_status']").text()!=devices[k].openCloseStatus){
+				$(this).html(getStatusHtml(devices[k]));
+				break;
+			}
+		}
+	})
+}
+function afterFindDevices(){
+	if(itvFindRefresh != null 
+		&& 	($("#G_MapMuneCon_tabB").length==0 
+    	    || $("#G_MapMuneCon_tabB").is(":hidden")
+    		|| $("#G_ItemLists input[name='hdnHpid']").length==0)){
+        window.clearInterval(itvFindRefresh);//new前清空原先timer
+		return;
+	}
+
+	var codes=new Array();
+	$("#G_ItemLists input[name='hdnHpid']").each(function(i){
+		codes.push($(this).val());
+	})
+	if(xmlhttp2==null){alert("xmlhttp2==null");}
+	var url = "$!{rc.contextPath}/hl/gis/afterFindDevices?r="+Math.random();
+	sendXmlhttp(xmlhttp2,"POST",url,"codes="+codes);
+	
+}
+/* -----------------item gis交互效果-------------------*/
+//鼠标单击 检索列表行
+function item_clickHandler(objId, var1){
+	$("#"+objId).addClass("fix").siblings().removeClass("fix");
+	//clickListItem(objId);
+	g_queryListClick($("#"+objId).find("input[name='hdnHpid']").val(),"ceng_$!{type}",selectList)
+}
+//鼠标移入
+function item_mouseEnterHandler(objId, var1){
+	$("#"+objId).addClass("hover");
+}
+//鼠标移出
+function item_mouseLeaveHandler(objId, var1){
+	$("#"+objId).removeClass("hover");
+}
+/*------------------ GIS回调 -----------------------*/
+function gc_hoverinSort(hpid){
+	item_mouseEnterHandler(hpid);
+}
+function gc_hoveroutSort(hpid){
+	item_mouseLeaveHandler(hpid);
+}
+function gc_showPopup(feature,local,hpid){
+	$.ajax({
+		url:"$!{rc.contextPath}/hl/gis/getPopopSwf?hpid="+hpid,
+		type:'get',
+		dataType:'json',
+		cache: true,
+		success:function(data){
+			if(data!=null){
+				gs_addStatePopup(feature,'<iframe frameborder="0" width="'+data.popWindowW+'px" height="'+data.popWindowH+'px" scrolling="no"  allowtransparency="true" src='
+				+projectName+'/hl/gis/flashPop?local='+local+'&hpid='+hpid+'&flashName='+data.flashName
+				+'&flashW='+data.flashW+'&flashH='+data.flashH+'></iframe>',data.popWindowW,data.popWindowH);
+			}
+		}
+	})
+}
+//切换楼层的回调，单击楼层或单击设备查询列表都可切换楼层。
+function gc_changeFloor(areaCode){
+	newTimerRefreshDevice(areaCode);
+	$("#geoAreaName_id").text(getFullName(areaCode));
+	if($("#chkSA").length>0){
+		$("#chkSA").attr("checked",false);//默认不显示视频
+	}
+}
+			
+
+
+/*--------------------------------子函数start--------------------------------------*/
+
+//单击摄像头
+var clickVS =function (layer,hpid){
+	var url = '$!{rc.contextPath}/hl/video/video?hpid='+hpid;
+	window.open(url,layer.clickWindowTitle, 'left='+(window.screen.width-layer.clickWindowW)/2+' top='+(window.screen.height-layer.clickWindowH)/2+', height='+layer.clickWindowH+', width='+layer.clickWindowW+', toolbar=no, menubar=no, scrollbars=yes, resizable=no, location=no, status=no');	
+}
+//单击门禁
+var clickDM =function (layer,hpid,feature){
+	g_addPopUp(feature,layer.clickWindowTitle,'<iframe height="'+layer.clickWindowH+'"  width="'+layer.clickWindowW+'" src="$!{rc.contextPath}/hl/gis/doorPop?hpid='+hpid+'&r='+Math.random()+'" frameborder="0" scrolling="no" allowtransparency="true"></iframe>');
+}
+//单击楼控
+var clickBA =function (layer,hpid){
+	if(!isEmpty(layer.flashName) && !isEmpty(layer.flashH) && !isEmpty(layer.flashW)){
+		var url = "$!{rc.contextPath}/hl/gis/flashBA?hpid="+hpid+"&flashH="+layer.flashH+"&flashW="+layer.flashW+"&flashName="+layer.flashName+"&r="+Math.random();
+		quick_dialog("gis_click_dlg",layer.clickWindowTitle,url,layer.clickWindowW,layer.clickWindowH);
+	}else{
+		alert("未在flash配置表里配置flash信息");
+	}
+}
+//框选摄像头
+var circleVS =function (layer,hpid){
+    var url ="$!{rc.contextPath}/hl/video/videos?hpids="+hpid;
+    quick_dialog("circleVS",layer.circleWindowTitle,url,layer.circleWindowW,layer.circleWindowH);
+}
+//框选门禁
+var circleDM =function (layer,hpid){
+    var url ="$!{rc.contextPath}/hl/gis/doors?hpids="+hpid;
+    quick_dialog("circleDM",layer.circleWindowTitle,url,layer.circleWindowW,layer.circleWindowH);
+}
+
+//隐藏loading.gif图片
+function hideLoading(timer){
+	if(timer){
+		window.setTimeout(function(){
+  		$("#loadingCeng").fadeOut("slow");						
+		},timer)//防快选
+	}else{
+		$("#loadingCeng").fadeOut("slow");
+	}
+}
+function ShowCurrentTime(){    
+	var date = new Date();
+	var hour = date.getHours();		
+	var min = date.getMinutes();		
+	if(hour<10)hour="0"+hour;
+	if(min<10)min="0"+min;
+	$("#spnCurrentTime").text(hour+":"+min)
+    setTimeout("ShowCurrentTime()",1000);
+}
+function callfun(fun,layer,hpid,feature){
+	this[fun](layer,hpid,feature);
+}
+function getLayerByHpid(hpid,feature){
+	$.ajax({
+		"url":"$!{rc.contextPath}/hl/gis/getLayerByHpid",
+		"type":"get",
+		"data":{"hpid":hpid},
+		'dataType': 'json',
+		"async":true,
+		"success":function(d){
+			var data = d.layer
+			if(data==null){
+				alert("设备表找不到该设备（hpid:"+hpid+"）,或该设备不属于此图层里的系统类别");
+			}else if(data.clickEvent==1){ 
+				callfun(data.clickFunction,data,hpid,feature);
+        	}
+		},
+		"error":function(d){
+			alert("err");
+		}
+	})
+}
+function circle(layerCodeJs,hpid){
+	$.ajax({
+		"url":"$!{rc.contextPath}/hl/gis/getLayerByLayerCodeJs",
+		"type":"get",
+		"data":{"layerCodeJs":layerCodeJs},
+		'dataType': 'json',
+		"async":true,
+		"success":function(d){
+			var data = d.layer;
+			if(data.circleEvent==1){ 
+				callfun(data.circleFunction,data,hpid);
+        	}
+		},
+		"error":function(d){
+			alert("err");
+		}
+	})
+}
+
+//取得楼层全名
+function getFullName(areaCode){
+	#foreach($g in $lstGeoFullName)
+		if("$g.id"==areaCode){
+			return "$g.fullLevelName";
+		}
+	#end
+	return "";
+}
+function openVideoByTool(key,bol){
+    g_changLayerVisibility(key,bol);
+
+    var liid="#li"+key;
+    if(bol){
+        $(liid).show();
+    }else{
+        $(liid).hide();
+    }
+}
+
+
+function getLayerByLayerCodeJs(layerCodeJs){
+	for(var key in gs_pzlayer){
+		if(gs_pzlayer[key].layername==layerCodeJs){
+		 	return key;
+		}
+	}
+	return "";
+}
+
+
+//是否显示楼层
+function isShowCeng(id){
+	var bol =false;
+	if("$!{lstShowCeng}" ==null || "$!{lstShowCeng}"==""){
+	  	bol =true;
+	} 
+    #foreach($a in $lstShowCeng)
+	  	if($!{a.id}==id){
+			return true;
+		}
+	#end
+	return bol;
+}
+/*--------------------------------子函数end----------------------------------------*/
+
+//-----------------------UI-------------------------
+//设备查询中的全选
+function checkAll(){
+  var checked = $(".checkAll").attr("checked");
+  if(checked == "checked"){
+    $(".item_list_check").attr("checked","checked");
+  }else{
+    $(".item_list_check").removeAttr("checked");
+  }
+}
+//楼层选择样式
+function ui_floor_click($objFloor){
+    $(".floor-list li").removeClass("floor-item-selected");
+   if($objFloor.hasClass("ui-floor-warn")){
+      $objFloor.addClass("ui-floor-warn-on");
+      $objFloor.parent().siblings().find(".ui-floor-a").removeClass("ui-floor-1-on").removeClass("ui-floor-2-on").removeClass("ui-floor-warn-on");
+   }else if($objFloor.hasClass("ui-floor-1")){
+      $objFloor.addClass("ui-floor-1-on");
+      $objFloor.parent().siblings().find(".ui-floor-a").removeClass("ui-floor-1-on").removeClass("ui-floor-2-on").removeClass("ui-floor-warn-on");
+   }else if($objFloor.hasClass("ui-floor-2")){
+      $objFloor.addClass("ui-floor-2-on");
+      $objFloor.parent().siblings().find(".ui-floor-a").removeClass("ui-floor-1-on").removeClass("ui-floor-2-on").removeClass("ui-floor-warn-on");
+   }
+   changeFloor($objFloor.attr("areaCode"),$objFloor);
+    var  MapToolBar =  $("#G_MapToolBar li input[type=checkbox]");
+    if(MapToolBar.is(":checked")==true){
+        MapToolBar.click();
+    }
+}
+
+//设备查询中的开/关设备按钮大单击样式
+function ui_status_btn_click($objStatus){
+  //写点位
+  var hpid = [$objStatus.attr("hpid")];
+  var val = $objStatus.text()=="开"?"1":"0";
+  writeBlock(hpid,null,val,"$!{rc.contextPath}");
+}
+	
+function loadUi(){
+    initGisIndex();//高度设定
+    $(".ui-footer").css({position:'absolute',bottom:'0',width:'100%'});
+    //单击大楼
+    $(".type_slide_li_a").click(function(){
+      $(this).addClass("type_slide_li_aOn");
+      $(this).parent().siblings().find(".type_slide_li_a").removeClass("type_slide_li_aOn");
+  	  changeBuilding($(this).attr("areaId"),$(this).attr("areaName"));
+    })
+    //切换选择楼层/设备查询
+    $("#G_Tabs ul li").click(function(){
+      if($(this).hasClass("sysCf") == true){
+        $(this).addClass("sysCf-on");
+        $(".eqsearch").removeClass("eqsearch-on");
+      }else if($(this).hasClass("eqsearch") == true){
+        $(this).addClass("eqsearch-on");
+        $(".sysCf").removeClass("sysCf-on");
+      }
+    })
+  //设备查询中的操作按钮的单击事件
+  $("#btn-batch").click(function(){
+  	$(".batch-box").toggleClass("fn-hide");
+  })
+}
+</script>

@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.basic.ngArea.entities.NgArea">
+
+	<resultMap type="com.supconit.nhgl.basic.ngArea.entities.NgArea" id="NgAreaResultMap">      
+        <result property="id" column="ID" />
+        <result property="areaCode" column="AREA_CODE" />
+        <result property="areaName" column="AREA_NAME" />
+        <result property="areaType" column="AREA_TYPE" />
+        <result property="parentId" column="PARENT_ID" />
+        <result property="fullLevelName" column="FULL_LEVEL_NAME" />
+        <result property="sort" column="SORT" />
+        <result property="remark" column="REMARK" />
+        <result property="createId" column="CREATE_ID" />
+        <result property="creator" column="CREATOR" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="updateId" column="UPDATE_ID" />
+        <result property="updator" column="UPDATOR" />
+        <result property="updateDate" column="UPDATE_DATE" />
+        <result property="parentName" column="parentName" />
+        <result property="persons" column="PERSONS" />
+        <result property="area" column="AREA" />
+	</resultMap>
+	
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+	<sql id="TABLE_NAME" lang="velocity">NH_AREA</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+    <!-- 获取记录列表-->
+	<sql id="select_pre" lang="velocity">
+    SELECT  ID, AREA_CODE, AREA_NAME, AREA_TYPE,
+		PARENT_ID, FULL_LEVEL_NAME, SORT, REMARK,
+		CREATE_ID, CREATOR, CREATE_DATE, UPDATE_ID,
+		UPDATOR, UPDATE_DATE, PERSONS, AREA	
+	FROM NH_AREA
+	</sql>
+	
+	<select id="getById" resultMap="NgAreaResultMap" parameterType="Long" lang="velocity">
+		<include refid="select_pre" />        
+        WHERE ID =  @{_parameter,jdbcType=NUMERIC}
+	</select>
+	
+     <sql id="findFirstForWith" lang="velocity">
+		WITH AREA (ID, AREA_CODE, AREA_NAME, AREA_TYPE, PARENT_ID, FULL_LEVEL_NAME, SORT, REMARK,
+	      PERSONS, AREA, CREATE_ID, CREATOR, CREATE_DATE, UPDATE_ID, UPDATOR, UPDATE_DATE,lvl
+        ) AS ( SELECT A.ID, A.AREA_CODE, A.AREA_NAME, A.AREA_TYPE, A.PARENT_ID, A.FULL_LEVEL_NAME, A.SORT,
+	      A.REMARK, A.PERSONS, A.AREA, A.CREATE_ID, A.CREATOR, A.CREATE_DATE, A.UPDATE_ID, A.UPDATOR, A.UPDATE_DATE,1 lvl
+	      FROM NH_AREA A WHERE
+	      #if($_parameter.condition.id==0)
+			A.PARENT_ID=@{_parameter.condition.id,jdbcType=NUMERIC}
+		  #else
+		 	A.ID=@{_parameter.condition.id,jdbcType=NUMERIC}
+	 	  #end 
+	      UNION ALL SELECT B.ID, B.AREA_CODE, B.AREA_NAME, B.AREA_TYPE, B.PARENT_ID, B.FULL_LEVEL_NAME,
+	      B.SORT, B.REMARK, B.PERSONS, B.AREA, B.CREATE_ID, B.CREATOR, B.CREATE_DATE, B.UPDATE_ID,
+	      B.UPDATOR, B.UPDATE_DATE,AREA.LVL+1 LVL FROM NH_AREA B
+	      INNER JOIN AREA ON B.PARENT_ID = AREA.ID
+        ) 
+	</sql>
+    <!-- 按条件查询记录-->
+	<select id="findByConditions" parameterType="com.supconit.nhgl.basic.ngArea.entities.NgArea" resultMap="NgAreaResultMap" lang="velocity" databaseId="oracle">
+		<include refid="findFirstForWith"/> 
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT ID, AREA_CODE, AREA_NAME, AREA_TYPE, PARENT_ID, FULL_LEVEL_NAME, SORT, REMARK,
+		PERSONS, AREA, CREATE_ID, CREATOR, CREATE_DATE, UPDATE_ID, UPDATOR, UPDATE_DATE
+		FROM area
+		<include refid="condition_sql"/>
+		#order($_parameter.condition,"LVL ASC,SORT ASC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+	<select id="findByConditions" parameterType="com.supconit.nhgl.basic.ngArea.entities.NgArea" resultMap="NgAreaResultMap" lang="velocity" databaseId="sqlserver">
+		<include refid="findFirstForWith"/> 
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT ID, AREA_CODE, AREA_NAME, AREA_TYPE, PARENT_ID, FULL_LEVEL_NAME, SORT, REMARK,
+		PERSONS, AREA, CREATE_ID, CREATOR, CREATE_DATE, UPDATE_ID, UPDATOR, UPDATE_DATE
+   		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+ 		#order($_parameter.condition,"LVL ASC,SORT ASC")
+ 		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM area
+	   <include refid="condition_sql"/>
+	   <include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+    <select id="countByConditions" parameterType="com.supconit.nhgl.basic.ngArea.entities.NgArea" resultType="long" lang="velocity">
+		<include refid="findFirstForWith"/>
+		SELECT count(1) co from area
+	</select>
+	
+	<select id="findAll" resultMap="NgAreaResultMap" >
+		SELECT  
+			t.ID, t.AREA_CODE, t.AREA_NAME, t.AREA_TYPE, t.PARENT_ID, t.FULL_LEVEL_NAME, t.SORT, t.REMARK, 
+			t.CREATE_ID, t.CREATOR, t.CREATE_DATE, t.UPDATE_ID, t.UPDATOR, t.UPDATE_DATE, t.PERSONS, t.AREA,
+			n.AREA_CODE parentName	
+		FROM NH_AREA t
+		LEFT JOIN NH_AREA n on t.PARENT_ID = n.ID
+	</select>
+	
+	<select id="findAllDArea" resultMap="NgAreaResultMap"  lang="velocity">
+		   SELECT  ID, AREA_CODE, AREA_NAME, AREA_TYPE,
+		PARENT_ID, FULL_LEVEL_NAME, SORT, REMARK,
+		CREATE_ID, CREATOR, CREATE_DATE, UPDATE_ID,
+		UPDATOR, UPDATE_DATE, PERSONS, AREA	
+		FROM VIEW_NH_D_AREA
+	</select> 
+	<select id="findAllSArea" resultMap="NgAreaResultMap"  lang="velocity">
+		   SELECT  ID, AREA_CODE, AREA_NAME, AREA_TYPE,
+		PARENT_ID, FULL_LEVEL_NAME, SORT, REMARK,
+		CREATE_ID, CREATOR, CREATE_DATE, UPDATE_ID,
+		UPDATOR, UPDATE_DATE, PERSONS, AREA	
+		FROM VIEW_NH_S_AREA
+	</select> 
+	
+	
+	<select id="findAllExceptionRoot" resultMap="NgAreaResultMap">
+		<include refid="select_pre" /> 
+		where NH_AREA.AREA_CODE!='ROOT'
+	</select>
+	<select id="findByCode" resultMap="NgAreaResultMap" parameterType="string" lang="velocity">
+		<include refid="select_pre" />
+		where AREA_CODE =  @{_parameter,jdbcType=VARCHAR}
+	</select>
+	<!-- DElETE -->
+	<delete id="deleteById" parameterType="long" lang="velocity">
+		delete from NH_AREA where  ID =  @{_parameter,jdbcType=NUMERIC}
+	</delete>
+	
+	<select id="findById" resultMap="NgAreaResultMap" parameterType="long" lang="velocity">
+	  WITH A (ID,AREA_CODE,AREA_NAME,AREA_TYPE,PARENT_ID,FULL_LEVEL_NAME,SORT,REMARK,PERSONS, AREA,CREATE_ID,CREATOR,CREATE_DATE,UPDATE_ID,UPDATOR,UPDATE_DATE)
+		AS ( SELECT ID,AREA_CODE,AREA_NAME,AREA_TYPE,PARENT_ID,FULL_LEVEL_NAME,SORT,REMARK,PERSONS, AREA,CREATE_ID,CREATOR,CREATE_DATE,UPDATE_ID,UPDATOR,UPDATE_DATE
+		 	 FROM NH_AREA  where ID =  @{_parameter,jdbcType=NUMERIC}
+		UNION ALL SELECT B.ID,B.AREA_CODE,B.AREA_NAME,B.AREA_TYPE,B.PARENT_ID,B.FULL_LEVEL_NAME,B.SORT,B.REMARK,B.PERSONS, B.AREA,B.CREATE_ID,B.CREATOR,B.CREATE_DATE,B.UPDATE_ID,B.UPDATOR,B.UPDATE_DATE
+				 FROM NH_AREA B,A where A.ID = B.PARENT_ID)
+		 SELECT * from A order by A.SORT ASC
+	</select>
+	<select id="findByRoot" resultMap="NgAreaResultMap" parameterType="long" lang="velocity">
+	  WITH A (ID,AREA_CODE,AREA_NAME,AREA_TYPE,PARENT_ID,FULL_LEVEL_NAME,SORT,REMARK,PERSONS, AREA,CREATE_ID,CREATOR,CREATE_DATE,UPDATE_ID,UPDATOR,UPDATE_DATE)
+		AS ( SELECT ID,AREA_CODE,AREA_NAME,AREA_TYPE,PARENT_ID,FULL_LEVEL_NAME,SORT,REMARK,PERSONS, AREA,CREATE_ID,CREATOR,CREATE_DATE,UPDATE_ID,UPDATOR,UPDATE_DATE
+		 	 FROM NH_AREA  where PARENT_ID =  @{_parameter,jdbcType=NUMERIC}
+		UNION ALL SELECT B.ID,B.AREA_CODE,B.AREA_NAME,B.AREA_TYPE,B.PARENT_ID,B.FULL_LEVEL_NAME,B.SORT,B.REMARK,B.PERSONS, B.AREA,B.CREATE_ID,B.CREATOR,B.CREATE_DATE,B.UPDATE_ID,B.UPDATOR,B.UPDATE_DATE
+				 FROM NH_AREA B,A where A.ID = B.PARENT_ID)
+		 SELECT * from A order by A.SORT
+	</select> 
+	<select id="findByName" resultMap="NgAreaResultMap" parameterType="com.supconit.nhgl.basic.ngArea.entities.NgArea" lang="velocity">
+		select *from nh_AREA where (id= @{_parameter.parentId,jdbcType=NUMERIC}
+		 or PARENT_ID=@{_parameter.parentId,jdbcType=NUMERIC}) and area_name=@{_parameter.areaName,jdbcType=VARCHAR}
+	</select>
+	<select id="findByConfig" resultMap="NgAreaResultMap" parameterType="Long" lang="velocity">
+		select *from NH_AREA a where EXISTS(
+			select  max(c.AREA_ID) from NH_AREA_CONFIG c where a.id=c.AREA_ID and c.NH_TYPE=@{_parameter,jdbcType=NUMERIC} GROUP BY c.AREA_ID
+		)
+	</select>
+	<sql id="condition_sql" lang="velocity">
+	<![CDATA[
+		#where()
+				#set($_p = $_parameter.condition)
+				1=1
+				#if($_p.areaCode && $_p.areaCode!='')
+					#set($_areaCode='%' +$_p.areaCode+ '%')
+					and AREA_CODE LIKE @{_areaCode,jdbcType=VARCHAR}
+				#end
+				#if($_p.areaName && $_p.areaName!='')
+					#set($_areaName='%' +$_p.areaName+ '%')
+					and AREA_NAME LIKE @{_areaName,jdbcType=VARCHAR}
+				#end
+				#if($_p.areaType && $_p.areaType!='')
+					#set($_areaType=$_p.areaType)
+					and AREA_TYPE = @{_areaType,jdbcType=NUMERIC}
+				#end
+				#if($_p.parentId)
+					#set($_parentId = $_p.parentId)
+					AND PARENT_ID= @{_parentId,jdbcType=BIGINT}
+				#end
+				#if($_p.fullLevelName && $_p.fullLevelName!='')
+					#set($_fullLevelName='%' +$_p.fullLevelName+ '%')
+					and FULL_LEVEL_NAME LIKE @{fullLevelName,jdbcType=VARCHAR}
+				#end	
+				#if($_p.sort )
+					#set($_sort  = $_p.sort )
+					AND SORT= @{_sort ,jdbcType=NUMERIC}
+				#end
+	    #end
+		]]>	
+	</sql>
+	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.nhgl.basic.ngArea.entities.NgArea">
+		UPDATE	NH_AREA
+		<set>
+        <if test="areaCode != null">AREA_CODE = #{areaCode,jdbcType=VARCHAR},</if>
+        <if test="areaName != null">AREA_NAME = #{areaName,jdbcType=VARCHAR},</if>
+        <if test="areaType != null">AREA_TYPE = #{areaType,jdbcType=NUMERIC},</if>
+        <if test="parentId != null">PARENT_ID = #{parentId,jdbcType=NUMERIC},</if>
+        <if test="fullLevelName != null">FULL_LEVEL_NAME = #{fullLevelName,jdbcType=VARCHAR},</if>
+        <if test="sort != null">SORT = #{sort,jdbcType=NUMERIC},</if>
+        <if test="remark != null">REMARK = #{remark,jdbcType=VARCHAR},</if>
+        PERSONS = #{persons,jdbcType=INTEGER},
+        AREA = #{area,jdbcType=NUMERIC},
+        <if test="createId != null">CREATE_ID = #{createId,jdbcType=NUMERIC},</if>
+        <if test="creator != null">CREATOR = #{creator,jdbcType=VARCHAR},</if>
+        <if test="createDate != null">CREATE_DATE = #{createDate,jdbcType=TIMESTAMP},</if>
+        <if test="updateId != null">UPDATE_ID = #{updateId,jdbcType=NUMERIC},</if>
+        <if test="updator != null">UPDATOR = #{updator,jdbcType=VARCHAR},</if>
+        <if test="updateDate != null">UPDATE_DATE = #{updateDate,jdbcType=DATE},</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+	<sql id="count_pre" lang="velocity">
+		SELECT COUNT(*) FROM AREA
+	</sql>
+	<insert id="insert" parameterType="com.supconit.nhgl.basic.ngArea.entities.NgArea" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="INSERT_SQL"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    <insert id="insert" parameterType="com.supconit.nhgl.basic.ngArea.entities.NgArea" 
+		keyProperty="id" keyColumn="ID" 		lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>        
+		<include refid="INSERT_SQL" />
+	</insert>
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>
+		(#if($_databaseId=='oracle') ID,#end
+		AREA_CODE,
+        AREA_NAME,
+        AREA_TYPE,
+        PARENT_ID,
+        FULL_LEVEL_NAME,
+        SORT,
+        REMARK,
+        PERSONS,
+		AREA,
+        CREATE_ID,
+        CREATOR,
+        CREATE_DATE,
+        UPDATE_ID,
+        UPDATOR,
+        UPDATE_DATE
+        ) VALUES (        
+		#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end
+		@{_parameter.areaCode,jdbcType=VARCHAR},
+        @{_parameter.areaName,jdbcType=VARCHAR},
+        @{_parameter.areaType,jdbcType=NUMERIC},
+        @{_parameter.parentId,jdbcType=NUMERIC},
+        @{_parameter.fullLevelName,jdbcType=VARCHAR},
+        @{_parameter.sort,jdbcType=NUMERIC},
+        @{_parameter.remark,jdbcType=VARCHAR},
+        @{_parameter.persons,jdbcType=VARCHAR},
+        @{_parameter.area,jdbcType=NUMERIC},
+        @{_parameter.createId,jdbcType=NUMERIC},
+        @{_parameter.creator,jdbcType=VARCHAR},
+        @{_parameter.createDate,jdbcType=TIMESTAMP},
+        @{_parameter.updateId,jdbcType=NUMERIC},
+        @{_parameter.updator,jdbcType=VARCHAR},
+        @{_parameter.updateDate,jdbcType=DATE}		
+		)
+		</sql>
+</mapper>

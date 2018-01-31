@@ -1,0 +1,236 @@
+
+#parse("index/_header.vm")
+</head>
+<body>
+  <div class="ui-layout-west" style="border-right:solid 1px #e1e5e6;" id="leftTreeWrap">
+			<div class="ui-layout-north">
+				<div class="k-header k-grid-toolbar" style="padding-left:10px;">备件类别</div>
+			</div>
+      <div class="ui-layout-center">
+  		  <ul id="categoryTree" class="ztree"></ul>
+      </div>
+  </div>
+
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<form class="ui-form" id='queryForm'>
+    		<div class="ui-form-group" style="display:none" id='selectBlock2'>
+    			<div class="ui-form-item ui-form-item-block">
+    			  <label class="ui-label">您已选择：</label>
+    				  <span class="ui-form-pick">
+    					  <input id="categoryId" type="hidden" name="categoryId" value="$!{categoryId}">
+    					  <strong>备件类别：</strong><em id='treeNodeText'></em><i class="iconfont icon-remove-sign"></i>
+    				  </span>
+    			</div>
+    		</div>	
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+                <tr>
+                  <td class="ui-search-name first">备件编码：</td>
+                  <td class="ui-search-c">
+                    <input name="spareCode" value="$!stock.spareCode" class="k-textbox" type="text">
+                  </td>
+                  <td class="ui-search-name">备件名称：</td>
+                  <td class="ui-search-c">
+                    <input  name="spareName" value="$!stock.spareName" class="k-textbox" type="text">
+                  </td>
+                  
+                      <td class="ui-search-name">仓库：</td>
+                     <td class="ui-search-c">
+                  <select id="sub_cat_id" name="warehouseId" class="k-textbox">
+               		<option value="">--请选择--</option>
+               		${warehouseOptions}
+              		#foreach($sub in $!warehouseOptions)
+                    	 <option value="$!sub.id">$!sub.warehouseName</option>
+               		#end
+                  </select> 
+                  </td>              
+                </tr>
+              </table>
+            </td>
+            <td width="180" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn" onclick="cancelLeftTreeSelected();"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+            <td></td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+ #parse("index/_footer.vm")  
+
+<script type="text/javascript">
+  var _iframe_layout, _left_layout, _inner_layout;
+	$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      },
+      west: {
+        size: 0.18
+      }
+    });
+
+    _left_layout = $("#leftTreeWrap").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      }
+    });
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+
+    $('#resetBtn').click(function(){
+      $("#queryForm :text").val('');  
+    });
+
+		$('.iconfont','.ui-form-pick').each(function(){
+      $(this).click(function(){
+      	$('#categoryId').val('');
+      	$('#selectBlock').hide();
+        //$(this).parent().remove();
+      })
+    })
+	
+	//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/spare/stock/list", [{
+              field: "id",
+              hidden: true
+          }, {
+              field: "spareCode",
+              title: "备件编码",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              width: 100
+          }, {
+              field: "spareName",
+              title: "备件名称",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+		  	  #*attributes: {"class": "k-grid-text"},*#
+          	  attributes: {     
+  		  		title:"#: data.spareName==null? '':data.spareName #",
+  				"class": "k-grid-text k-grid-nowrap"
+		  	  },
+              width: 120
+          }, {
+              field: "categoryName",
+              title: "备件类别",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              width: 120
+          }, {
+              field: "spec",
+              sortable: false,
+              title: "备件规格",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              width: 120
+          }, {
+              field: "model",
+              sortable: false,
+              title: "备件型号",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              width: 120
+          }, {
+              field: "warehouseName",
+              sortable: false,
+              title: "仓库",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              width: 120
+          }, {
+              field: "qty",
+              sortable: false,
+              title: "现存量",
+              headerAttributes: {"class": "k-grid-num"},
+              attributes: {"class": "k-grid-num"},
+              template:function(dataItem){
+            	  if(dataItem.qty != null)
+            		  return fInt(dataItem.qty);
+            	  else
+            		  return '';
+              },
+              width: 120
+          }, {
+              field: "availableQty",
+              sortable: false,
+              title: "可用量",
+              headerAttributes: {"class": "k-grid-num"},
+              attributes: {"class": "k-grid-num"},
+              template:function(dataItem){
+            	  if(dataItem.availableQty != null)
+            		  return fInt(dataItem.availableQty);
+            	  else return '';
+              },
+              width: 120
+          }], 
+      {
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          },resizable:true
+      }, {
+          serverSorting: true
+      }, [            
+      ]);
+		
+    });
+
+    /* zTree */
+    var setting = {
+    	data: {
+    		simpleData: {enable: true}
+          },
+          callback: {
+    			onClick: function(event, treeId, treeNode) {
+    				 $('#categoryId').val(treeNode.id);
+    			 	 $('#treeNodeText').text(treeNode.name);
+    			 	 $('#selectBlock').show();
+    				 $('#queryBtn').click();
+    			}
+    		}
+    };
+  	var zNodes = [];  
+	zNodes.push({id:"0", pId:"-1", name:"备件类别簇",open:true});   
+  	#foreach($!{treeNode} in $!{treeDatas})
+  	    #if("$!{treeNode.categoryName}"!=1)
+        	zNodes.push({id:$!{treeNode.id}, pId:$!{treeNode.parentId}, name:"$!{treeNode.categoryName}"}); 
+        #end    
+  	#end
+
+  	$(document).ready(function(){
+  		$.fn.zTree.init($("#categoryTree"), setting,zNodes);
+  	});
+	
+	function cancelLeftTreeSelected(){
+		$.fn.zTree.init($("#categoryTree"), setting,zNodes);
+	}
+	
+</script>
+</body>
+</html>

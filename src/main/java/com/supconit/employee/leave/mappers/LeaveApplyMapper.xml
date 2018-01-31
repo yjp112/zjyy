@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.employee.leave.entities.LeaveApply">
+	<resultMap type="com.supconit.employee.leave.entities.LeaveApply" id="leaveApplyResultMap">
+		<result property="id" column="ID"/>
+		<result property="processInstanceId" column="PROCESS_INSTANCE_ID"/>
+        <result property="leaveCode" column="LEAVE_CODE"/>
+        <result property="leaveType" column="LEAVE_TYPE"/>
+        <result property="leaveDays" column="LEAVE_DAYS"/>
+        <result property="leaveHours" column="LEAVE_HOURS"/>
+        <result property="startDate" column="START_DATE"/>
+        <result property="endDate" column="END_DATE"/>
+        <result property="reason" column="REASON"/>
+        <result property="result" column="RESULT"/>
+        <result property="deptId" column="DEPT_ID"/>
+        <result property="createId" column="CREATE_ID"/>
+        <result property="creator" column="CREATOR"/>
+        <result property="createDate" column="CREATE_DATE"/>
+        <result property="updateId" column="UPDATE_ID"/>
+        <result property="updator" column="UPDATOR"/>
+        <result property="updateDate" column="UPDATE_DATE"/>
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">LEAVE_APPLY</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	<sql id="select_pre" lang="velocity">
+		SELECT
+			a.ID,
+			a.PROCESS_INSTANCE_ID,
+			a.LEAVE_CODE,
+			a.LEAVE_TYPE,
+	        a.LEAVE_DAYS,
+	        a.LEAVE_HOURS,
+	        a.START_DATE,
+	        a.END_DATE,
+	        a.REASON,
+	        a.RESULT,
+	        a.DEPT_ID,
+	        a.CREATE_ID,
+	        a.CREATOR,
+	        a.CREATE_DATE
+		FROM  <include refid="TABLE_NAME"/> a
+	</sql>
+	
+	<sql id="count_pre" lang="velocity">SELECT COUNT(*) FROM <include refid="TABLE_NAME"/> a </sql>
+	
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			#if($_p.createId && $_p.createId != '')
+				#set($_createId = $_p.createId)
+				AND CREATE_ID = @{_createId}
+			#end
+			#if($_p.leaveType && $_p.leaveType != '')
+				#set($_leaveType = $_p.leaveType)
+				AND LEAVE_TYPE = @{_leaveType}
+			#end
+			#if($_p.result && $_p.result != '')
+				#set($_result = $_p.result)
+				AND RESULT = @{_result}
+			#end
+			#if($_p.applyStart && $_p.applyStart != '')
+				#set($_applyStart = $_p.applyStart)
+				AND a.CREATE_DATE >= @{_applyStart,jdbcType=TIMESTAMP}
+			#end
+			#if($_p.applyEnd && $_p.applyEnd != '')
+				#set($_applyEnd = $_p.applyEnd)
+				AND a.CREATE_DATE <= @{_applyEnd,jdbcType=TIMESTAMP}
+			#end	
+		#end
+		]]>	
+    </sql>
+	
+    <!-- 插入记录-->
+    <sql id="insert_sql" lang="velocity">
+        INSERT INTO <include refid="TABLE_NAME"/>(
+        	#if($_databaseId == 'oracle') ID, #end
+        	PROCESS_INSTANCE_ID,
+	        LEAVE_CODE,
+			LEAVE_TYPE,
+	        LEAVE_DAYS,
+	        LEAVE_HOURS,
+	        START_DATE,
+	        END_DATE,
+	        REASON,
+	        RESULT,
+	        DEPT_ID,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE
+        ) VALUES (
+        	#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end
+	        @{_parameter.processInstanceId,jdbcType=VARCHAR},
+	        @{_parameter.leaveCode,jdbcType=VARCHAR},
+	        @{_parameter.leaveType,jdbcType=INTEGER},
+	        @{_parameter.leaveDays,jdbcType=INTEGER},
+	        @{_parameter.leaveHours,jdbcType=INTEGER},
+	        @{_parameter.startDate,jdbcType=TIMESTAMP},
+	        @{_parameter.endDate,jdbcType=TIMESTAMP},
+	        @{_parameter.reason,jdbcType=VARCHAR},
+	        @{_parameter.result,jdbcType=INTEGER},
+	        @{_parameter.deptId,jdbcType=NUMERIC},
+	        @{_parameter.createId,jdbcType=NUMERIC},
+	        @{_parameter.creator,jdbcType=VARCHAR},
+	        @{_parameter.createDate,jdbcType=TIMESTAMP}
+        )
+    </sql>
+    
+    <insert id="insert" parameterType="com.supconit.employee.leave.entities.LeaveApply" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="insert_sql" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.employee.leave.entities.LeaveApply" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    
+	<!-- 更新记录-->
+	<update id="update"  parameterType="com.supconit.employee.leave.entities.LeaveApply" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+			#mset()
+				<![CDATA[
+			        #if($_parameter.processInstanceId && $_parameter.processInstanceId !='')PROCESS_INSTANCE_ID = @{_parameter.processInstanceId,jdbcType=VARCHAR},#end
+			        #if($_parameter.leaveCode && $_parameter.leaveCode !='')LEAVE_CODE = @{_parameter.leaveCode,jdbcType=VARCHAR},#end
+			        #if($_parameter.leaveType)LEAVE_TYPE = @{_parameter.leaveType,jdbcType=INTEGER},#end
+			        #if($_parameter.leaveDays)LEAVE_DAYS = @{_parameter.leaveDays,jdbcType=INTEGER},#end
+			        #if($_parameter.leaveHours)LEAVE_HOURS = @{_parameter.leaveHours,jdbcType=INTEGER},#end
+			        #if($_parameter.startDate)START_DATE = @{_parameter.startDate,jdbcType=TIMESTAMP},#end
+			        #if($_parameter.endDate)END_DATE = @{_parameter.endDate,jdbcType=TIMESTAMP},#end
+			        #if($_parameter.reason  && $_parameter.reason !='')REASON = @{_parameter.reason,jdbcType=VARCHAR},#end
+			        #if($_parameter.result)RESULT = @{_parameter.result,jdbcType=INTEGER},#end
+			        #if($_parameter.deptId)DEPT_ID = @{_parameter.deptId,jdbcType=NUMERIC},#end
+			        #if($_parameter.updateId)UPDATE_ID = @{_parameter.updateId,jdbcType=NUMERIC},#end
+			        #if($_parameter.updator)UPDATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateDate)UPDATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+			    ]]>
+			#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+	
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.employee.leave.entities.LeaveApply" resultMap="leaveApplyResultMap" lang="velocity" databaseId="oracle">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre"/>
+		<include refid="condition_sql"/>
+		#order($_parameter.condition,"a.ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.employee.leave.entities.LeaveApply" resultMap="leaveApplyResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			a.ID,
+			a.PROCESS_INSTANCE_ID,
+	        a.LEAVE_CODE,
+			a.LEAVE_TYPE,
+	        a.LEAVE_DAYS,
+	        a.LEAVE_HOURS,
+	        a.START_DATE,
+	        a.END_DATE,
+	        a.REASON,
+	        a.RESULT,
+	        a.DEPT_ID,
+	        a.CREATE_ID,
+	        a.CREATOR,
+	        a.CREATE_DATE
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"a.ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/> a
+		<include refid="condition_sql"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countByConditions" resultType="long" lang="velocity">
+        <include refid="count_pre"/>
+        <include refid="condition_sql"/>
+    </select>
+    
+    <select id="getById" resultMap="leaveApplyResultMap" parameterType="long" lang="velocity">
+		<include refid="select_pre"/>
+		WHERE a.ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+	
+	<delete id="deleteById" parameterType="long" lang="velocity"> 
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</delete>
+	
+	<select id="sumByConditions" resultMap="leaveApplyResultMap" lang="velocity">
+        SELECT SUM(LEAVE_DAYS) LEAVE_DAYS,SUM(LEAVE_HOURS) LEAVE_HOURS FROM <include refid="TABLE_NAME"/> a 
+        WHERE 
+        <![CDATA[
+        	a.RESULT <> 9
+			#if($_parameter.createId && $_parameter.createId != '')
+				AND CREATE_ID = @{_parameter.createId}
+			#end
+			#if($_parameter.leaveType && $_parameter.leaveType != '')
+				AND LEAVE_TYPE = @{_parameter.leaveType}
+			#end
+			#if($_parameter.applyStart && $_parameter.applyStart != '')
+				AND a.CREATE_DATE >= @{_parameter.applyStart,jdbcType=TIMESTAMP}
+			#end
+			#if($_parameter.applyEnd && $_parameter.applyEnd != '')
+				AND a.CREATE_DATE <= @{_parameter.applyEnd,jdbcType=TIMESTAMP}
+			#end	
+		]]>	
+    </select>
+    
+</mapper>

@@ -1,0 +1,9 @@
+
+							<form class="ui-form" id="jobschedule_schedule_job_add_form" action="$!{rc.contextPath}/jobschedule/schedule-job/add" method="post">
+  <fieldset>
+  		    		    	    		    	    		    	    		    	    		    	    		    	    		    	  		    		    	    		    	    		    	    		    	    		    	    		    	    		    	  </fieldset>
+  
+  
+  
+
+</form>

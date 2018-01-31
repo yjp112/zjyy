@@ -1,0 +1,313 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.base.entities.NhDevice">
+<resultMap type="com.supconit.nhgl.base.entities.NhDevice" id="NhDeviceResultMap">      
+        <result property="id" column="ID" />
+        <result property="parentId" column="PARENT_ID" />
+        
+        <result property="deviceCode" column="DEVICE_CODE" />
+        <result property="deviceName" column="DEVICE_NAME" />
+        <result property="discipinesCode" column="DISCIPINES_CODE" />
+        <result property="deviceSpec" column="DEVICE_SPEC" />
+        <result property="categoryId" column="CATEGORY_ID" />
+        <result property="locationId" column="LOCATION_ID" />
+        <result property="locationName" column="LOCATION_NAME" />
+        <result property="useDepartmentId" column="USE_DEPARTMENT_ID" />
+        <result property="manageDepartmentId" column="MANAGE_DEPARTMENT_ID" />
+        <result property="managePersonIds" column="MANAGE_PERSON_IDS" />
+        <result property="managePersonName" column="MANAGE_PERSON_NAME" />
+        
+        <result property="supplierId" column="SUPPLIER_ID" />
+        <result property="maitainCycle" column="MAITAIN_CYCLE" />
+        <result property="timeAfterMaintain" column="TIME_AFTER_MAINTAIN" />
+        <result property="totalRunningTime" column="TOTAL_RUNNING_TIME" />
+        <result property="specialStatus" column="SPECIAL_STATUS" />
+        <result property="barcode" column="BARCODE" />
+        <result property="prduceDate" column="PRDUCE_DATE" />
+        <result property="contractNo" column="CONTRACT_NO" />
+        <result property="assetsCode" column="ASSETS_CODE" />
+        <result property="assetsCost" column="ASSETS_COST" />
+        <result property="enableDate" column="ENABLE_DATE" />
+        <result property="status" column="STATUS" />
+        
+        <result property="discipinesCode" column="DISCIPINES_CODE"/>
+        <result property="extended1" column="EXTENDED1"/>
+        <result property="gSystemRuleName" column="G_SYSTEM_RULE_NAME" />
+        <result property="gSystemRuleId" column="G_SYSTEM_RULE_ID" />
+        <result property="hpid" column="HPID" />
+        <result property="mapDisplay" column="MAP_DISPLAY" />
+        <result property="threeDimdisplay" column="THREE_DIM_DISPLAY" />
+        <result property="springEl" column="SPRING_EL" />
+        <result property="deviceType" column="DEVICE_TYPE" />
+        <result property="repairType" column="REPAIR_TYPE" />
+        
+       
+        <result property="depreciationAlgorithm" column="DEPRECIATION_ALGORITHM" />
+        <result property="depreciationRate" column="DEPRECIATION_RATE" />
+        <result property="depreciationYears" column="DEPRECIATION_YEARS" />
+        <result property="assetsResidual" column="ASSETS_RESIDUAL" />
+        <result property="serviceAreaId" column="SERVICE_AREA_ID"/>
+        <result property="serviceAreaName" column="SERVICE_AREA_NAME"/>
+        <result property="itemName" column="itemName"/>
+        
+        <result property="createId" column="CREATE_ID" />
+        <result property="creator" column="CREATOR" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="updateId" column="UPDATE_ID" />
+        <result property="updator" column="UPDATOR" />
+        <result property="updateDate" column="UPDATE_DATE" />
+	</resultMap>
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+	
+	<sql id="column_device" lang="velocity">
+		A.ID,
+		A.DEVICE_CODE,
+		A.EXTENDED1,
+		A.DEVICE_NAME,
+		A.DISCIPINES_CODE,
+		A.DEVICE_SPEC,
+		A.CATEGORY_ID,
+		A.PARENT_ID,
+		A.LOCATION_ID,
+	   	(select b.FULL_LEVEL_NAME from  NH_AREA b where b.id=a.SERVICE_AREA_ID) SERVICE_AREA_NAME,
+	   	(select b.FULL_LEVEL_NAME from  GEO_AREA b where b.id=a.LOCATION_ID) LOCATION_NAME,
+		A.USE_DEPARTMENT_ID,
+		A.MANAGE_DEPARTMENT_ID,
+		A.MANAGE_PERSON_IDS,
+		A.MANAGE_PERSON_NAME,
+		A.SUPPLIER_ID,
+		(select s.full_name from supplier s where s.id=a.supplier_id) supplier_name,
+		A.MAITAIN_CYCLE,
+		A.TIME_AFTER_MAINTAIN,
+		A.TOTAL_RUNNING_TIME,
+		A.SPECIAL_STATUS,
+		A.BARCODE,
+		A.PRDUCE_DATE,
+		A.ASSETS_CODE,
+		A.ENABLE_DATE,
+		A.STATUS,
+		A.ASSETS_COST,
+		A.ASSETS_RESIDUAL,
+		A.DEPRECIATION_ALGORITHM,
+		A.DEPRECIATION_RATE,
+		A.DEPRECIATION_YEARS,
+		A.MAP_DISPLAY,
+		A.CREATE_ID,
+		A.CREATOR,
+		A.CREATE_DATE,
+		A.UPDATE_ID,
+		A.UPDATOR,
+		A.UPDATE_DATE,
+		A.HPID,
+		A.G_SYSTEM_RULE_ID,
+		A.THREE_DIM_DISPLAY,
+		A.ALARM_TYPE_ID,
+		A.SPRING_EL,
+		A.CONTRACT_NO,
+		A.DEVICE_TYPE
+	</sql>
+    <!-- 获取记录列表-->
+	<sql id="select_pre" lang="velocity">
+	    select 
+		<include refid="column_device" />,
+		gsr.name G_SYSTEM_RULE_NAME,
+		dpu.NAME USE_DEPARTMENT_NAME,
+		dpm.NAME MANAGE_DEPARTMENT_NAME,
+	    E1.ENUM_TEXT AS STATUS_NAME,
+	    dc.CATEGORY_NAME,
+	    #if($_databaseId=='oracle')
+	   		nvl(months_between(Sysdate,A.ENABLE_DATE)/12,0)
+	   	#else
+		    ISNULL(DATEDIFF(month,A.ENABLE_DATE,getdate())/12,0)
+		#end 
+	    USE_YEARS
+		FROM
+		DEVICE A
+		LEFT JOIN DEVICE_CATEGORY dc
+        ON A.CATEGORY_ID = dc.ID 
+        LEFT JOIN HO_DEPARTMENT dpu
+        ON A.USE_DEPARTMENT_ID = dpu.ID 
+        LEFT JOIN HO_DEPARTMENT dpm
+        ON A.MANAGE_DEPARTMENT_ID = dpm.ID 
+	    LEFT JOIN ENUM_DETAIL E1
+        ON A.STATUS = E1.ENUM_VALUE 
+        AND E1.TYPE_ID = 4
+        left join G_SYSTEM_RULE gsr 
+        on gsr.id = a.G_SYSTEM_RULE_ID
+	</sql>
+	<sql id="count_pre" lang="velocity">
+		SELECT
+		COUNT(*)
+		FROM
+		DEVICE A
+		INNER JOIN DEVICE_CATEGORY dc
+        ON A.CATEGORY_ID = dc.ID 
+        LEFT JOIN HO_DEPARTMENT dpu
+        ON A.USE_DEPARTMENT_ID = dpu.ID 
+        LEFT JOIN HO_DEPARTMENT dpm
+        ON A.MANAGE_DEPARTMENT_ID = dpm.ID 
+	    LEFT JOIN ENUM_DETAIL E1
+        ON A.STATUS = E1.ENUM_VALUE 
+        AND E1.TYPE_ID = 4
+	</sql>
+	 <sql id="findFirstForWith" lang="velocity">
+			WITH AREA(ID) AS(
+			SELECT A.ID FROM NH_AREA A WHERE 
+			#if($_parameter.condition.serviceAreaId==0 || !$_parameter.condition.serviceAreaId)
+				A.PARENT_ID=0
+			#else
+			 	A.ID=@{_parameter.condition.serviceAreaId,jdbcType=NUMERIC}
+		 	#end 
+			UNION ALL
+			SELECT B.ID FROM NH_AREA B INNER JOIN AREA ON B.PARENT_ID=AREA.ID
+		),
+		DD(ID) AS(
+			SELECT A.ID FROM DEVICE_CATEGORY A WHERE 
+			#if($_parameter.condition.categoryId==0 || !$_parameter.condition.categoryId)
+				A.PARENT_ID=0
+			#else
+			 	A.ID=@{_parameter.condition.categoryId,jdbcType=NUMERIC}
+		 	#end 
+			UNION ALL
+			SELECT B.ID FROM DEVICE_CATEGORY B INNER JOIN DD ON B.PARENT_ID=DD.ID
+		 	),
+	 	II(CODE,NAME,STANDARD_CODE) AS(
+			SELECT A.CODE,A.NAME,A.STANDARD_CODE FROM NH_ITEM A WHERE
+			#if($_parameter.condition.itemCode==0 || !$_parameter.condition.itemCode)
+				A.PARENT_CODE='0'
+			#else
+			 	A.STANDARD_CODE=@{_parameter.condition.itemCode,jdbcType=VARCHAR}
+		 	#end
+			    AND A.NH_TYPE=@{_parameter.condition.nhtype,jdbcType=NUMERIC}
+			UNION ALL
+			SELECT B.CODE,B.NAME,B.STANDARD_CODE FROM NH_ITEM B INNER JOIN II ON B.PARENT_CODE=II.CODE AND B.NH_TYPE=@{_parameter.condition.nhtype,jdbcType=NUMERIC}
+		)
+		 
+	</sql>	
+	<sql id="TABLE_NAME" lang="velocity">DEVICE</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>	
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+		#where()  
+			#set($_p = $_parameter.condition)
+			
+			1=1		
+			#if($_p.categoryCode)
+				#set($_categoryCode = $_p.categoryCode)
+				AND DC.CATEGORY_CODE = @{_categoryCode,jdbcType=VARCHAR}
+			#end
+			
+			#if($_p.deviceCode && $_p.deviceCode != '')
+				#set($_deviceCode = '%' + $_p.deviceCode + '%')
+				AND A.DEVICE_CODE LIKE @{_deviceCode,jdbcType=VARCHAR}
+			#end	
+			
+			#if($_p.deviceName && $_p.deviceName != '')
+				#set($_deviceName = '%' + $_p.deviceName + '%')
+				AND A.DEVICE_NAME LIKE @{_deviceName,jdbcType=VARCHAR}
+			#end	
+			#if($_p.hpid && $_p.hpid != '')
+				#set($_hpid = '%' + $_p.hpid + '%')
+				AND A.HPID LIKE @{_hpid,jdbcType=VARCHAR}
+			#end	
+			    and II.name is not null 
+		#end							
+		]]>	
+	</sql>
+    
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.nhgl.base.entities.NhDevice" resultMap="NhDeviceResultMap" lang="velocity" databaseId="oracle">
+		<include refid="findFirstForWith"/>
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		select 
+		<include refid="column_device" />,
+		gsr.name G_SYSTEM_RULE_NAME,
+		dpu.NAME USE_DEPARTMENT_NAME,
+		dpm.NAME MANAGE_DEPARTMENT_NAME,
+	    E1.ENUM_TEXT AS STATUS_NAME,
+	    dc.CATEGORY_NAME,
+	    II.name itemName,
+	   	nvl(months_between(Sysdate,A.ENABLE_DATE)/12,0)  USE_YEARS
+		FROM
+		DEVICE A
+		 JOIN DEVICE_CATEGORY dc
+        ON A.CATEGORY_ID = dc.ID 
+        LEFT JOIN II ON A.DISCIPINES_CODE=II.STANDARD_CODE
+        LEFT JOIN HO_DEPARTMENT dpu
+        ON A.USE_DEPARTMENT_ID = dpu.ID 
+        LEFT JOIN HO_DEPARTMENT dpm
+        ON A.MANAGE_DEPARTMENT_ID = dpm.ID 
+	    LEFT JOIN ENUM_DETAIL E1
+        ON A.STATUS = E1.ENUM_VALUE 
+        AND E1.TYPE_ID = 4
+        LEFT join G_SYSTEM_RULE gsr 
+        on gsr.id = a.G_SYSTEM_RULE_ID
+       	LEFT JOIN AREA t2 ON A.SERVICE_AREA_ID = t2.ID
+       	LEFT JOIN DD t3 ON A.CATEGORY_ID = t3.ID
+		<include refid="condition_sql" />
+		#order($_parameter.condition,"a.ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.nhgl.base.entities.NhDevice" resultMap="NhDeviceResultMap" lang="velocity" databaseId="sqlserver">
+		<include refid="findFirstForWith"/>
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		select 
+		<include refid="column_device" />,
+		gsr.name G_SYSTEM_RULE_NAME,
+		dpu.NAME USE_DEPARTMENT_NAME,
+		dpm.NAME MANAGE_DEPARTMENT_NAME,
+	    E1.ENUM_TEXT AS STATUS_NAME,
+	    dc.CATEGORY_NAME,
+	    II.name itemName,
+		ISNULL(DATEDIFF(month,A.ENABLE_DATE,getdate())/12,0)
+	    USE_YEARS
+	    <include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"a.ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM
+		DEVICE A
+		LEFT JOIN DEVICE_CATEGORY dc
+        ON A.CATEGORY_ID = dc.ID 
+        LEFT JOIN II ON A.DISCIPINES_CODE=II.STANDARD_CODE
+        LEFT JOIN HO_DEPARTMENT dpu
+        ON A.USE_DEPARTMENT_ID = dpu.ID 
+        LEFT JOIN HO_DEPARTMENT dpm
+        ON A.MANAGE_DEPARTMENT_ID = dpm.ID 
+	    LEFT JOIN ENUM_DETAIL E1
+        ON A.STATUS = E1.ENUM_VALUE 
+        AND E1.TYPE_ID = 4
+        LEFT join G_SYSTEM_RULE gsr 
+        on gsr.id = a.G_SYSTEM_RULE_ID
+        INNER JOIN AREA t2 ON A.SERVICE_AREA_ID = t2.ID
+        LEFT JOIN DD t3 ON A.CATEGORY_ID = t3.ID
+		<include refid="condition_sql" />
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="countByCondition" parameterType="com.supconit.nhgl.base.entities.NhDevice" resultType="long" lang="velocity">
+		<include refid="findFirstForWith"/>
+		SELECT
+		COUNT(*)
+		FROM
+		DEVICE A
+		 JOIN DEVICE_CATEGORY dc
+        ON A.CATEGORY_ID = dc.ID 
+        LEFT JOIN II ON A.DISCIPINES_CODE=II.STANDARD_CODE
+        LEFT JOIN HO_DEPARTMENT dpu
+        ON A.USE_DEPARTMENT_ID = dpu.ID 
+        LEFT JOIN HO_DEPARTMENT dpm
+        ON A.MANAGE_DEPARTMENT_ID = dpm.ID 
+	    LEFT JOIN ENUM_DETAIL E1
+        ON A.STATUS = E1.ENUM_VALUE 
+        AND E1.TYPE_ID = 4
+        INNER JOIN AREA t2 ON A.SERVICE_AREA_ID = t2.ID
+        LEFT JOIN DD t3 ON A.CATEGORY_ID = t3.ID
+		<include refid="condition_sql" />
+	</select>
+    
+</mapper>

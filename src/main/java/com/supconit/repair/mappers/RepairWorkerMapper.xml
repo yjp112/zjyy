@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.repair.entities.RepairWorker">
+    <resultMap type="com.supconit.repair.entities.RepairWorker" id="RepairWorkerResultMap">     
+        <result property="id" column="ID"/>
+        <result property="repairCode" column="REPAIR_CODE"/>
+        <result property="workerMode" column="WORKER_MODE"/>
+        <result property="workerType" column="WORKER_TYPE"/>
+        <result property="workerId" column="WORKER_ID"/>
+        <result property="workerName" column="WORKER_NAME"/>
+        <result property="unit" column="UNIT"/>
+        <result property="descripton" column="DESCRIPTON"/>
+        <result property="qty" column="QTY"/>
+        <result property="workHours" column="WORK_HOURS"/>
+        <result property="money" column="MONEY"/>
+    </resultMap>
+    
+    <sql id="TABLE_NAME" lang="velocity">REPAIR_WORKER</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	<insert id="insert" parameterType="com.supconit.repair.entities.RepairWorker" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="insert_sql" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.repair.entities.RepairWorker" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    
+    <sql id="insert_sql" lang="velocity">
+        INSERT INTO <include refid="TABLE_NAME"/>(
+        	#if($_databaseId == 'oracle') ID, #end
+            REPAIR_CODE,
+            WORKER_MODE,
+            WORKER_TYPE,
+            WORKER_ID,
+            WORKER_NAME,
+            UNIT,
+            DESCRIPTON,
+            QTY,
+            WORK_HOURS,
+            MONEY
+	    ) VALUES(
+	        #if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end
+            @{_parameter.repairCode,jdbcType=VARCHAR},
+            @{_parameter.workerMode,jdbcType=NUMERIC},
+            @{_parameter.workerType,jdbcType=NUMERIC},
+            @{_parameter.workerId,jdbcType=NUMERIC},
+            @{_parameter.workerName,jdbcType=VARCHAR},
+            @{_parameter.unit,jdbcType=VARCHAR},
+            @{_parameter.descripton,jdbcType=VARCHAR},
+            @{_parameter.qty,jdbcType=NUMERIC},
+            @{_parameter.workHours,jdbcType=NUMERIC},
+            @{_parameter.money,jdbcType=NUMERIC}
+        )
+    </sql>
+
+    <insert id="batch_insert" databaseId="oracle">
+       INSERT ALL 
+        <foreach collection="workerList"  separator=" " item="worker">
+	        INTO <include refid="TABLE_NAME"/>(
+	        	ID,
+	            REPAIR_CODE,
+	            WORKER_MODE,
+	            WORKER_TYPE,
+	            WORKER_ID,
+	            WORKER_NAME,
+	            UNIT,
+	            DESCRIPTON,
+	            QTY,
+	            WORK_HOURS,
+	            MONEY
+		    ) VALUES
+            (
+            func_getseqval('SEQ_REPAIR_WORKER'),
+            #{orderCode,jdbcType=VARCHAR},
+            #{worker.workerMode,jdbcType=NUMERIC},
+            #{worker.workerType,jdbcType=NUMERIC},
+            #{worker.workerId,jdbcType=NUMERIC},
+            #{worker.workerName,jdbcType=VARCHAR},
+            #{worker.unit,jdbcType=VARCHAR},
+            #{worker.descripton,jdbcType=VARCHAR},
+            #{worker.qty,jdbcType=NUMERIC},
+            #{worker.workHours,jdbcType=NUMERIC},
+            #{worker.money,jdbcType=NUMERIC}
+            )
+        </foreach>
+        SELECT * FROM dual
+    </insert>
+    
+    <insert id="batch_insert" databaseId="sqlserver">
+       INSERT INTO <include refid="TABLE_NAME"/>(
+            REPAIR_CODE,
+            WORKER_MODE,
+            WORKER_TYPE,
+            WORKER_ID,
+            WORKER_NAME,
+            UNIT,
+            DESCRIPTON,
+            QTY,
+            WORK_HOURS,
+            MONEY
+	    ) VALUES
+        <foreach collection="workerList"  separator="," item="worker">
+            (
+            #{orderCode,jdbcType=VARCHAR},
+            #{worker.workerMode,jdbcType=NUMERIC},
+            #{worker.workerType,jdbcType=NUMERIC},
+            #{worker.workerId,jdbcType=NUMERIC},
+            #{worker.workerName,jdbcType=VARCHAR},
+            #{worker.unit,jdbcType=VARCHAR},
+            #{worker.descripton,jdbcType=VARCHAR},
+            #{worker.qty,jdbcType=NUMERIC},
+            #{worker.workHours,jdbcType=NUMERIC},
+            #{worker.money,jdbcType=NUMERIC}
+            )
+        </foreach>
+    </insert>
+
+	<delete id="deleteById" parameterType="Long" lang="velocity">
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE ID = @{_parameter.id,jdbcType=BIGINT}
+	</delete>
+
+    <delete id="deleteByOrderCode" parameterType="string" lang="velocity">
+        DELETE FROM <include refid="TABLE_NAME"/> WHERE REPAIR_CODE = @{_parameter.orderCode,jdbcType=VARCHAR}
+    </delete>
+
+    <select id="findListByOrderCode" parameterType="string" resultMap="RepairWorkerResultMap" lang="velocity">
+        SELECT
+            ID,
+            REPAIR_CODE,
+            WORKER_MODE,
+            WORKER_TYPE,
+            WORKER_ID,
+            WORKER_NAME,
+            UNIT,
+            DESCRIPTON,
+            QTY,
+            WORK_HOURS,
+            MONEY
+        FROM
+        REPAIR_WORKER
+        WHERE REPAIR_CODE = @{_parameter.orderCode,jdbcType=VARCHAR}
+    </select>
+
+
+</mapper>

@@ -1,0 +1,135 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<div class="ui-layout-center" id="subMain">
+	<div class="ui-layout-north">
+		 <form class="ui-form" id='queryForm'>
+			
+	     <table width="100%">
+	       <tr>
+	         <td>
+	           <table class="ui-search-table">
+	             <tr>
+	               <td class="ui-search-name first">属性编码：</td>
+	               <td class="ui-search-c">
+	                 <input  name="propertyCode" value="$!deviceProperty.propertyCode" class="k-textbox" type="text"  maxlength="32">
+	               </td>
+	               <td class="ui-search-name">属性名称：</td>
+	               <td class="ui-search-c">
+	                 <input  name="propertyName" value="$!deviceProperty.propertyName" class="k-textbox" type="text" maxlength="50">
+	               </td>
+	               <td class="ui-search-name">是否启用：</td>
+	               <td class="ui-search-c">
+		               <select name="status" class="k-textbox">
+		       			<option value="">--请选择--</option>
+							#foreach($!{e} in $!{lstStatus})
+		       			    <option value="$!{e.enumValue}">$!{e.enumText}</option>
+							#end    
+						</select>
+	               </td>
+	             </tr>
+	           </table>
+	         </td>
+	         <td width="150" valign="top" style="padding-top:4px;">
+	           <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+	           <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+	         </td>
+	         <td></td>
+	       </tr>
+	     </table>
+	 	</form>
+	</div>
+	<div class="ui-layout-center">
+	  <div id="grid"></div> 
+     </div>
+</div>
+#parse("index/_footer.vm") 
+
+<script type="text/javascript">
+     var _iframe_layout,_inner_layout;
+	$(document).ready(function(){
+		_iframe_layout = $('body').layout({
+		      defaults: {
+		        resizable: false,
+		        closable: false,
+		        spacing_open: 5
+		      }
+		    });
+		 _inner_layout = $("#subMain").layout({
+		      defaults: {
+		        resizable: false,
+		        closable: false,
+		        spacing_open: 0
+		      },
+		      center: {
+		          onresize_end: function () {
+		              var grid = $("#grid").data("kendoGrid");
+		              grid.resize();
+		          }
+		      }
+     })
+
+    $('#resetBtn').click(function(){
+      $("#queryForm :text").val('');  
+    });
+
+		
+	
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/device/deviceProperty/page", [{
+              field: "id",
+              hidden: true
+          }, {
+              field: "propertyCode",
+              title: "属性编码",
+              sortable: false,
+              template:"<a href=\"javascript:void(0)\" title=\"查看#: data.propertyCode #的详细信息\" onclick=\"quick_dialog('deviceProperty_add_dlg','查看#:data.propertyCode #的信息','$!{rc.contextPath}/device/deviceProperty/edit?showFlag=1&id=#: data.id #',450,350)\">#: data.propertyCode #</a>",
+              width: 150,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "propertyName",
+              title: "属性名称",
+              sortable: false,
+              width: 200,
+              headerAttributes: {"class": "k-grid-text"},
+              #*attributes: {"class": "k-grid-text"},*#
+              attributes: {     
+  				 title:"#: data.propertyName #",
+  				 "class": "k-grid-text k-grid-nowrap"
+			   }
+              
+             
+          }, {
+              field: "inputTypeName",
+              title: "数据输入方式",
+			   sortable: false,
+              width: 200,
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"}
+           
+          }, {
+              field: "statusName",
+              sortable: false,
+              title: "是否启用",
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"}
+             
+          }], 
+      {
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          },resizable:true
+      }, {
+          serverSorting: true
+      }, [
+ 		#kendo_datagrid_btns("SX")#end
+      ]);
+		
+    });
+	  
+	 
+</script>
+</body>
+</html>

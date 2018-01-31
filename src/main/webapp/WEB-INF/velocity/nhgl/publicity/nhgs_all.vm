@@ -1,0 +1,188 @@
+<script type="text/javascript">
+$(document).ready(function(){
+	showProgress("span_dept");
+	showProgress("span_area");
+	showProgress("span_dept_water");
+	showProgress("span_area_water");
+	$("#startMonth").attr("value",'$!sMonth');
+	$("#endsMonth").attr("value",'$!eMonth');
+		
+});
+</script>
+<div style="overflow:hidden;">
+<div class="nh-grid-wrap" style="float:left">
+	<h2>用电总能耗排行榜（区域排行前10名）<a class="nh-link" href="javascript:;" onclick=""></a></h2> ##//<a class="nh-link" href="javascript:;" onclick="openDilog('arealist','area','electric')">更多>></a>
+    <div class="nh-grid">
+        <table class="nh-table">
+        	<thead>
+    			<tr>
+                    <th class="nh-table-num" style="width:100px">序号</th>
+                    <th class="nh-table-num" style="width:200px">区域</th>
+                    <th class="nh-table-num">耗电总量(kWh)</th>
+                </tr>
+        	</thead>
+        	#set($num = 0)
+        	#foreach($area in $areaMonthList)
+				##if($area.total != '0.00')
+					#set($num = $num + 1)
+            		<tr>
+            			<td class="nh-table-num">$num</td>
+            			<td style="text-align:left"><a href="#" onclick="detail($!{area.areaId},'area',1)">$area.areaName</a></td>
+            			<td style="text-align:center">
+        					<span class="handle-num fInt" style="margin-left:100px">$area.totalMonthValue</span>
+        					<span class="handle-bar fInt" name="span_area" num="$area.totalMonthValue" style="float:left"></span>
+        				</td>
+            		</tr>
+				##end
+        	#end
+			#if($num < 10)
+				#set($num = $num + 1)
+				#foreach($a in [$num..10])
+					<tr>
+						<td class="nh-table-num">$a</td>
+						<td style="text-align:left"><a href="#" onclick=""></a></td>
+						<td style="text-align:center">
+						</td>
+					</tr>
+				#end
+			#end
+        </table>
+    </div>
+</div>
+<div class="nh-grid-wrap" style="float:left">
+	<h2>用水总能耗排行榜（区域排行前10名）<a class="nh-link" href="javascript:;" onclick=""></a></h2>  ##//<a class="nh-link" href="javascript:;" onclick="openDilog('areaWaterList','area')">更多>></a>
+    <div class="nh-grid">
+        <table class="nh-table">
+        	<thead>
+    			<tr>
+                    <th class="nh-table-num" style="width:100px">序号</th>
+                    <th class="nh-table-num" style="width:200px">区域</th>
+                    <th class="nh-table-num">耗水总量(t)</th>
+                </tr>
+        	</thead>
+        	#set($num = 0)
+        	#foreach($area in $areaWaterMonthList)
+				##if($area.total != '0.00')
+					#set($num = $num + 1)
+            		<tr>
+            			<td class="nh-table-num">$num</td>
+            			<td style="text-align:left"><a href="#" onclick="detail($!{area.areaId},'area',2)">$area.areaName</a></td>
+            			<td style="text-align:center">
+        					<span class="handle-num fInt" style="margin-left:100px">$area.totalMonthValue</span>
+        					<span class="handle-bar" name="span_area_water" num="$area.totalMonthValue" style="float:left"></span>
+        				</td>
+            		</tr>
+				##end
+        	#end
+			#if($num < 10)
+				#set($num = $num + 1)
+				#foreach($a in [$num..10])
+					<tr>
+						<td class="nh-table-num">$a</td>
+						<td style="text-align:left"><a href="#" onclick=""></a></td>
+						<td style="text-align:center">
+						</td>
+					</tr>
+				#end
+			#end
+        </table>
+    </div>
+</div>
+</div>
+<div class="nh-grid-wrap" style="float:left">
+	<h2>用电总能耗排行榜（部门排行前10名）<a class="nh-link" href="javascript:;" onclick=""></a></h2>  ##//<a class="nh-link" href="javascript:;" onclick="openDilog('deptlist','dept','electric')">更多>></a>
+    <div  class="nh-grid">
+        <table class="nh-table">
+            <thead>
+    			<tr>
+                    <th class="nh-table-num" style="width:100px">序号</th>
+                    <th class="nh-table-num" style="width:200px">部门</th>
+                    <th class="nh-table-num">耗电总量(kWh)</th>
+                </tr>
+            </thead>
+        	#set($num = 0)
+        	#foreach($dept in $deptMonthList)
+				##if($dept.total != '0.00')
+					#set($num = $num + 1)
+            		<tr>
+            			<td class="nh-table-num">$num</td>
+            			<td style="text-align:left"><a href="#" onclick="detail($!{dept.deptId},'dept',1)">$dept.deptName</a></td>
+                        <td style="text-align:center">
+        					<span class="handle-num fInt">$dept.totalMonthValue</span>
+        					<span class="handle-bar" name="span_dept" num="$dept.totalMonthValue" style="float:left"></span>
+        				</td>
+            		</tr>
+				##end
+        	#end
+			#if($num < 10)
+				#set($num = $num + 1)
+				#foreach($a in [$num..10])
+					<tr>
+						<td class="nh-table-num">$a</td>
+						<td style="text-align:left"><a href="#" onclick=""></a></td>
+						<td style="text-align:center">
+						</td>
+					</tr>
+				#end
+			#end
+        </table>
+    </div>
+</div>
+<div class="nh-grid-wrap" style="float:left">
+	<h2>用水总能耗排行榜（部门排行前10名）<a class="nh-link" href="javascript:;" onclick=""></a></h2>  ##//<a class="nh-link" href="javascript:;" onclick="openDilog('deptWaterList','dept')">更多>></a>
+    <div  class="nh-grid">
+        <table class="nh-table">
+            <thead>
+    			<tr>
+                    <th class="nh-table-num" style="width:100px">序号</th>
+                    <th class="nh-table-num" style="width:200px">部门</th>
+                    <th class="nh-table-num">耗水总量(t)</th>
+                </tr>
+            </thead>
+        	#set($num = 0)
+        	#foreach($dept in $deptWaterMonthList)
+				##if($dept.total != '0.00')
+					#set($num = $num + 1)
+            		<tr>
+            			<td class="nh-table-num">$num</td>
+            			<td style="text-align:left"><a href="#" onclick="detail($!{dept.deptId},'dept',2)">$dept.deptName</a></td>
+                        <td style="text-align:center">
+        					<span class="handle-num fInt">$dept.totalMonthValue</span>
+        					<span class="handle-bar" name="span_dept_water" num="$dept.totalMonthValue" style="float:left"></span>
+        				</td>
+            		</tr>
+				##end
+        	#end
+			#if($num < 10)
+				#set($num = $num + 1)
+				#foreach($a in [$num..10])
+					<tr>
+						<td class="nh-table-num">$a</td>
+						<td style="text-align:left"><a href="#" onclick=""></a></td>
+						<td style="text-align:center">
+						</td>
+					</tr>
+				#end
+			#end
+        </table>
+    </div>
+</div>
+<script type="text/javascript">
+fNumPage();
+$(".nh-grid").circular();
+function detail(parentId,attach,nhType){
+	$.dialogs.normalDialog(
+		'addDiloag12', 
+		'$!{rc.ContextPath}/nhgl/publicity/getSubAll?parentId='+parentId+'&nhType='+nhType+'&attach='+attach+"&startMonth="+'$!sMonth'+"&endMonth="+'$!eMonth',
+		function(dlg,btn){
+			dlg.close(); return true;
+		},
+		730, 
+		605,
+		"查看",
+		"",
+		false
+			
+	);
+}
+</script>

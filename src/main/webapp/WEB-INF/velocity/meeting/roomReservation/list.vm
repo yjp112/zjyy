@@ -1,0 +1,339 @@
+#parse("index/_header.vm")
+<style>
+	.k-grid-header th.k-header{
+		padding: 0.5em 0em 0.4em 0em;
+	}
+	.k-grid td{
+		padding: 0em 0em 0em 0em;
+	}
+	.labelcolor{
+		color:#00AE00;
+	}
+</style>
+</head>
+<body>
+<div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+        <form class="ui-form" id='queryForm' action="$!{rc.contextPath}/meeting/roomReservation/list">
+			<input type="hidden" name="roomType" value="$!{meeting.roomType}"/>
+			<input type="hidden" name="capacity"/>
+              <table class="ui-search-table" style="font-size:13px;margin-bottom:5px;">
+                  <tr>
+					<td width="5%">
+                    </td>
+					<td >部门：
+						<span  class="k-textbox k-space-right" style="width: 170px;">
+							<input type="hidden" class="k-textbox" name="useDeptId" value="$!{deptId}" >
+							<input type="text" class="k-textbox" name="useDepartmentName" value="$!{deptName}" >
+							<a href="#" class="k-icon k-i-search" id="useDepartmentId_id">&nbsp;</a>
+							<div id="deptTree"></div>
+                    	</span>
+                    </td>
+					<!--
+					<td width="150" valign="top" style="padding-top:4px;">
+                      <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+                      <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+					</td>
+					-->
+                  </tr>
+				  
+				  
+                  <tr>
+					<td >
+                    </td>
+                    <td id="roomCapacity">大小：
+						<label onclick="capacityClick('')" class="pointer labelcolor">
+                                     <u>
+        								所有
+                                     </u>
+    					</label>
+						&nbsp;
+						#foreach($!mCapacity in $!roomCapacityList)
+    							<label onclick="capacityClick($!{mCapacity.enumValue})" class="pointer">
+                                     <u>
+        								$!{mCapacity.enumText}
+                                     </u>
+    							</label>
+							 &nbsp;
+						#end
+					</td>
+                  </tr>
+				  
+                  <tr>
+					<td >
+                    </td>
+                    <td>日期：
+						<input id="datepicker" name="meetingDate" value="$!{meeting.meetingDate}" style="width: 168px;"/>
+					</td>
+					<td width="150" valign="top" style="padding-top:4px;">
+                      <button type="submit" style="display:none;" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+					</td>
+					<td style="height:28px;width:78px;text-align:center;background-color:#c3c3c3;">会议已结束</td>
+					<td style="height:28px;width:78px;text-align:center;background-color:#ed1c24;">会议正在进行</td>
+					<td style="height:28px;width:78px;text-align:center;background-color:#ffc90e;">会议还未召开</td>
+					<td style="height:28px;width:78px;text-align:center;background-color:#55a8f5;">会议未预订</td>
+                    <td style="width:12px"></td>
+                  </tr>
+              </table>
+        </form>
+    </div>
+    <div class="ui-layout-center" id="centerGird">
+        <div id="grid"></div>
+    </div>
+</div>
+#parse("index/_footer.vm")
+<script type="text/javascript">
+var _iframe_layout, _left_layout, _inner_layout;
+$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+        defaults: {
+            resizable: false,
+            closable: false,
+            spacing_open: 5
+        }
+    });
+
+    _inner_layout = $("#subMain").layout({
+        defaults: {
+            resizable: false,
+            closable: false,
+            spacing_open: 0
+        },
+        center: {
+            onresize_end: function () {
+                var grid = $("#grid").data("kendoGrid");
+                grid.resize();
+            }
+        }
+    })
+	
+	$("#centerGird").css("zIndex",-1);
+	
+    //列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/meeting/roomReservation/list?r=" + new Date(), [
+        { 
+    	field: "roomName", title:"会议室",sortable: false,
+		headerAttributes: {"style": "text-align: left;"},
+		attributes: {     
+      		title:"#: data.roomName==null? '':data.roomName+','+data.location+','+data.capacityPerson+'人'+','+data.networkName #",
+      		"style": "background-color:white;text-align: left;",
+			"class": "k-grid-text k-grid-nowrap"
+    	}
+        },
+        { field: "reserve0", title:"8:00-8:30",sortable: false,attributes: {"style": "height:28px;"},
+          template:function(data){
+          return schedule(data.meetingUsedConditionList[0],data.id,data.flag);
+          }
+        },
+        { field: "reserve1", title:"8:30-9:00",sortable: false,attributes: {"style": "height:28px;"},
+          template:function(data){
+          return schedule(data.meetingUsedConditionList[1],data.id,data.flag);
+          }
+        },
+        { field: "reserve2", title:"9:00-9:30",sortable: false,attributes: {"style": "height:28px;"},
+          template:function(data){
+          return schedule(data.meetingUsedConditionList[2],data.id,data.flag);
+          }
+        },
+        { field: "reserve3", title:"9:30-10:00",sortable: false,attributes: {"style": "height:28px;"},
+          template:function(data){
+          return schedule(data.meetingUsedConditionList[3],data.id,data.flag);
+          }
+        },
+        { field: "reserve4", title:"10:00-10:30",sortable: false,attributes: {"style": "height:28px;"},
+          template:function(data){
+          return schedule(data.meetingUsedConditionList[4],data.id,data.flag);
+          }
+        },
+        { field: "reserve5", title:"10:30-11:00",sortable: false,attributes: {"style": "height:28px;"},
+          template:function(data){
+          return schedule(data.meetingUsedConditionList[5],data.id,data.flag);
+          }
+        },
+        { field: "reserve6", title:"11:00-11:30",sortable: false,attributes: {"style": "height:28px;"},
+          template:function(data){
+          return schedule(data.meetingUsedConditionList[6],data.id,data.flag);
+          }
+        },
+        { field: "reserve7", title:"11:30-12:00",sortable: false,attributes: {"style": "height:28px;"},
+          template:function(data){
+          return schedule(data.meetingUsedConditionList[7],data.id,data.flag);
+          }
+        },
+        { field: "reserve8", title:"12:00-12:30",sortable: false,attributes: {"style": "height:28px;"},
+          template:function(data){
+          return schedule(data.meetingUsedConditionList[8],data.id,data.flag);
+          }
+        },
+        { field: "reserve9", title:"12:30-13:00",sortable: false,attributes: {"style": "height:28px;"},
+          template:function(data){
+          return schedule(data.meetingUsedConditionList[9],data.id,data.flag);
+          }
+        },
+        { field: "reserve10", title:"13:00-13:30",sortable: false,attributes: {"style": "height:28px;"},
+          template:function(data){
+          return schedule(data.meetingUsedConditionList[10],data.id,data.flag);
+          }
+        },
+        { field: "reserve11", title:"13:30-14:00",sortable: false,attributes: {"style": "height:28px;"},
+          template:function(data){
+          return schedule(data.meetingUsedConditionList[11],data.id,data.flag);
+          }
+        },
+        { field: "reserve12", title:"14:00-14:30",sortable: false,attributes: {"style": "height:28px;"},
+          template:function(data){
+          return schedule(data.meetingUsedConditionList[12],data.id,data.flag);
+          }
+        },
+        { field: "reserve13", title:"14:30-15:00",sortable: false,attributes: {"style": "height:28px;"},
+          template:function(data){
+          return schedule(data.meetingUsedConditionList[13],data.id,data.flag);
+          }
+        },
+        { field: "reserve14", title:"15:00-15:30",sortable: false,attributes: {"style": "height:28px;"},
+          template:function(data){
+          return schedule(data.meetingUsedConditionList[14],data.id,data.flag);
+          }
+        },
+        { field: "reserve15", title:"15:30-16:00",sortable: false,attributes: {"style": "height:28px;"},
+          template:function(data){
+          return schedule(data.meetingUsedConditionList[15],data.id,data.flag);
+          }
+        },
+        { field: "reserve16", title:"16:00-16:30",sortable: false,attributes: {"style": "height:28px;"},
+          template:function(data){
+          return schedule(data.meetingUsedConditionList[16],data.id,data.flag);
+          }
+        },
+        { field: "reserve17", title:"16:30-17:00",sortable: false,attributes: {"style": "height:28px;"},
+          template:function(data){
+          return schedule(data.meetingUsedConditionList[17],data.id,data.flag);
+          }
+        }],
+        {
+			resizable:true,
+            sortable: false
+        }, {
+            serverSorting: true
+        }, [
+        ]
+    );
+});
+
+    function schedule(data,meetingId,flag){
+    	var id = data.id;
+    	var color = data.color;
+    	if(!id){
+    	 id = '0';
+    	}
+    	if(color == '1'){
+    		color = '#c3c3c3';//gray
+    	}else if(color == '2'){
+    		color = '#ed1c24';//red
+    	}else if(color == '3'){
+    		color = '#ffc90e';//yellow
+    	}else{
+    		color = '#55a8f5';//blue
+    	}
+    	var str='';
+        str = "<div onclick='editResever("+id+","+meetingId+","+flag+")' style='height:100%;cursor:pointer;background-color:"+color+";'/></div>";
+    	return str;
+    }
+    function editResever(val,meetingId,flag){
+    	if(0 == val){
+			if(flag){
+				quick_dialog("reserveMeeting_add_dlg", "预订会议室", "$!{rc.contextPath}/meeting/roomReservation/edit?way=1&mId=" + meetingId, 1000, 680);
+			}
+		}else{
+			quick_dialog("reserveMeeting_add_dlg", "预订会议室", "$!{rc.contextPath}/meeting/roomReservation/edit?way=1&mId="+meetingId+"&id=" + val, 1000, 680);
+		}
+    }
+</script>
+<script>
+    $(document).ready(function() {
+        function onChange() {
+			var day = kendo.toString(this.value(), 'yyyy-MM-dd');
+			$("input[name='meetingDate']").val(day);
+			$("#queryForm").submit();
+        }
+        $("#datepicker").kendoDatePicker({
+            change: onChange,
+			culture: "zh-CN",
+			format: "yyyy-MM-dd"
+        }).attr("readonly",true);
+    });
+</script>   
+<script >
+	$(document).ready(function(){
+		//$("#dept label").click(function(){
+		//	$(this).addClass("labelcolor").siblings().removeClass("labelcolor");
+		//});
+		$("#roomCapacity label").click(function(){
+			$(this).addClass("labelcolor").siblings().removeClass("labelcolor");
+		});
+	});
+	function capacityClick(val){
+		$("input[name='capacity']").val(val);
+		$('#queryBtn').submit();
+	}
+	
+	/*
+	function typeClick(val){
+		if(val==2){
+			$("#useDepartmentName").val('');
+			$("#useDeptId").val('');
+			$("#typeLabel").addClass("labelcolor")
+		}else{
+			$("#typeLabel").removeClass("labelcolor")
+		}
+		$("input[name='roomType']").val(val);
+		$('#queryBtn').submit();
+	}
+	
+	$('#resetBtn').click(function(){
+	  $("input[name='roomType']").val(1);
+	  $("#typeLabel").removeClass("labelcolor");
+    });
+	
+	$('#queryBtn').click(function(){
+		var deptId = $("input[name='useDeptId']").val();
+		var roomType = $("input[name='roomType']").val();
+		if(deptId=='' && roomType=='1'){
+			$('#resetBtn').click();
+		}
+    });
+	
+	function afterAction(){
+		$("#typeLabel").removeClass("labelcolor");
+		$("input[name='roomType']").val(1);
+		$('#queryBtn').submit();
+	}
+	*/
+	
+	##部门选择
+    var deptTree = $("#deptTree").comboTree({url:'$!{rc.contextPath}/meeting/roomReservation/dept_firstLevel',
+		callback:function(data){
+			if(data.cid == '1'){
+				$("input[name='roomType']").val(2);
+				$("input[name='useDeptId']").val('');
+				$("input[name='useDepartmentName']").val(data.name);
+			}else{
+				$("input[name='roomType']").val(1);
+    			$("input[name='useDeptId']").val(data.cid);
+    			$("input[name='useDepartmentName']").val(data.name);
+			}
+			$('#queryBtn').submit();
+		}
+	});
+
+	var count = 0;
+	$("#useDepartmentId_id").click(function(){
+		if(count == 0){
+			deptTree.reload('$!{rc.contextPath}/meeting/roomReservation/dept_firstLevel');
+			count++;
+		}
+		deptTree.open();
+	});
+</script>
+</body>
+</html>

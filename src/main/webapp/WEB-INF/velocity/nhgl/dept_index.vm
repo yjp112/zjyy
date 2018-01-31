@@ -1,0 +1,41 @@
+<<<<<<< HEAD
+ <script type="text/javascript" src="$!{rc.contextPath}/js_nhgl/js/tabs.min.js"> </script>
+=======
+ <script type="text/javascript" src="$!{nhgl_static_hc_url}/js/tabs.min.js"> </script>
+>>>>>>> 457de380b8153516088e259188a5962b5f2d5ced
+<div class="row-fluid">
+  <div class="span12 first">
+    <div id="tab-container" class="ui-tab">
+          <ul class="ui-tab-items">
+			
+			##这里使用循环遍历出分项
+			##foreach($dept in $deptList)
+			##	<li class="ui-tab-item"><a href="#" data-target="#tab1"></a></li>
+			##end
+			<li class="ui-tab-item"><a href="$!{rc.contextPath}/nhgl/dept/sub" data-target="#tabAll">全部</a></li>
+			##这里使用循环遍历出分项
+			#foreach($s in $slist)
+				<li class="ui-tab-item"><a href="$!{rc.contextPath}/nhgl/dept/subFx?fxCode=$s.code" data-target="#tab$velocityCount">$s.name</a></li>
+			#end
+			##<li class="ui-tab-item"><a href="#" data-target="#tabOther">其他用电</a></li>
+          </ul>
+          <div  class="ui-tab-panels">
+    		    <div id="tabAll" class="ui-tab-panel">
+				</div>
+    		   #foreach($s1 in $slist)
+    			<div id="tab$velocityCount" class="ui-tab-panel" >
+    			</div>
+    			#end
+               <div id="tabOther" class="ui-tab-panel" >
+    		   </div>
+		   </div>
+          </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+	$(document).ready(function(){
+    	$('#tab-container').tabs();
+		
+    });
+</script>
+

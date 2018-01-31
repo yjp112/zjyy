@@ -1,0 +1,64 @@
+<div class="ui-layout-center" id="subMain"><table id="wf_model_manage_datalist" class="fn-hide"></table></div>
+<div class="ui-layout-north">
+	#bread_crumbs('WF_MODEL_MANAGE')
+	<form id="wf_model_manage_list_search" class="ui-form ui-form-search fn-clear">
+		<div class="ui-form-search-left">
+			<div class="ui-form-item">
+				<label class="ui-label">名称:</label>
+	    		<input class="ui-input" type="text" name="name" value="$!{name}" />
+	    	</div>
+	    	<div class="ui-form-item">
+				<label class="ui-label">KEY：</label>
+	    		<input class="ui-input" type="text" name="key" value="$!{key}" placeholder="请输入完整的KEY" />
+	    	</div>
+	    </div>
+		<div class="ui-form-search-right">
+			<button type="submit" class="btn btn-primary"><i class="iconfont icon-search"></i> 查&nbsp;询</button>
+		</div>
+	</form>
+</div>
+<script type="text/javascript">
+	var wf_model_manage_datagrid;
+	$(function(){
+		if(_inner_layout) _inner_layout.destroy();
+		_inner_layout = $("#centerMain").layout({
+			defaults : {
+				resizable : false,
+				closable : false,
+				spacing_open : 5
+			},
+			onresize_end : function(){
+				$("#wf_model_manage_datalist").datagridResize({width:_inner_layout.state.center.innerWidth,height:_inner_layout.state.center.innerHeight});
+			}
+		});
+		wf_model_manage_datagrid = $("#wf_model_manage_datalist").datagrid({
+			url: '$!{rc.contextPath}/platform/bpm/model/list',
+			dataType: "json",
+			method: "POST",
+			singleSelected : true,
+			striped : false,
+			height:  _inner_layout.center.state.innerHeight,
+			width :  _inner_layout.center.state.innerWidth,
+			showOrderNumber : true,
+			useRp : true,
+			usepager: true,
+    		rpOptions: [10, 20, 40, 50],
+    		pageSize: 20,
+    		searchFormId : "wf_model_manage_list_search",
+    		searchCallback : function(datagrid){
+    			
+    		},
+			colModel : [
+				{"display":"序号"},
+				{"display": "ID","name": "id","hide": true},
+				{"display": "名称","name": "name",width:200},
+				{"display": "KEY","name": "key",width:300},
+				{"display": "版本","name": "version",width:80,align:"center"},
+				{"display": "创建时间","name": "createTime",width:150,align:"center"}
+	    	],
+			buttons : [
+				#data_grid_buttons("WF_MODEL_MANAGE")#end
+			]
+		});
+	});
+</script>

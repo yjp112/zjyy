@@ -1,0 +1,86 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<form id="testUpdate" method="post" action="$!{rc.contextPath}/hl/montrol/alarm/realalarm/testUpdateAlarms"
+      class="ui-dialog-form">
+          <input type="hidden"  name="alarmId" value="$!{realAlarm.id}">
+    <input type="hidden" name="handleType" value="">
+    <input type="hidden" name="handleState" value="">
+    <table width="100%">
+        <tr>
+            <td width="100" class="label"><label>报警设备：</label></td>
+            <td width="300">
+                <input style="width:240px" class="k-textbox" type="text" readonly="readonly" value="$!{realAlarm.deviceName}">
+            </td>
+
+            <td width="100" class="label"><label>所处位置：</label></td>
+            <td width="300"><input class="k-textbox" style="width:240px" type="text" readonly="readonly" value="$!{realAlarm.areaStr}"></td>
+        </tr>
+        <tr>
+            <td class="label"><label>报警级别：</label></td>
+            <td>
+                <input class="k-textbox" style="width:240px" type="text" readonly="readonly" value="$!{level.alarmLevel}">
+            </td>
+
+            <td class="label"><label>报警值：</label></td>
+            <td>
+                <input class="k-textbox" style="width:240px" type="text" readonly="readonly" value="$!{realAlarm.alarmData}">
+            </td>
+        </tr>
+        <tr>
+            <td class="label">报警描述：</td>
+            <td><input class="k-textbox" style="width:240px" type="text" readonly="readonly" value="$!{realAlarm.alarmRemark}"></td>
+
+            <td class="label">报警状态：</td>
+            <td><input class="k-textbox" style="width:240px" type="text" readonly="readonly" #if($realAlarm.alarmState == 1) value="正在报警" #end #if($realAlarm.alarmState == 2) value="已恢复" #end #if($realAlarm.alarmState == 3) value="已消失" #end ></td>
+        </tr>
+        <tr>
+            <td class="label">报警时间：</td>
+            <td><input class="k-textbox" style="width:240px" type="text" readonly="readonly" value="$!realAlarm.alarmTime.substring(0,19)"></td>
+
+            <td class="label">恢复时间：</td>
+            <td><input class="k-textbox" style="width:240px" type="text" readonly="readonly" value="$!realAlarm.lastAlarmTime" ></td>
+        </tr>
+    </table>
+    <div class="actions">
+         <button class="k-primary hc_btn" type="button"  onclick="alarmSubmit1(1);"><i class="fa fa-save"></i>确认</button>
+           <button class="k-primary hc_btn" type="button"  onclick="alarmSubmit1(2);"><i class="fa fa-close"></i>忽略</button>
+           <button class="k-primary hc_btn" type="button"  onclick="alarmSubmit(1);"><i class="fa fa-save"></i>处理</button>
+           <button class="k-primary hc_btn" type="button"  onclick="alarmSubmit(2);"><i class="fa fa-close"></i>关闭</button>
+    </div>
+</form>
+    #parse("index/_footer.vm")
+<script>
+	var id = $!{alarmId};
+    $("#testUpdate").validator({
+        fields: {
+            handlePerson: "处理人:required; ",
+            handleType: "处理类型:required; ",
+            handleState: "处理状态:required"
+        },
+        valid: function (form) {
+            form_btn_submit($("#tijiao"), form, function (res) {
+                // 关闭窗口
+                validateCallback(res, "grid", "alarm_handle_dlg");
+            });
+        }
+    });
+    
+    function alarmSubmit1(type) {
+        $("input[name='handleType']").val(type);
+        $("input[name='handleState']").val(3);
+        $("#testUpdate").submit();
+    }
+    
+	function alarmSubmit(type) {
+        if(type=='1'){
+			//处理
+    		var url = '${rc.contextPath}/platform/bpm/start?_bpm_extra_params={alarmId:'+id+'}&_bpm_process_key=DEVICE_NEW_REPAIR_PROCESS&menuCode=NBGL_HJZX_SQD';
+    		quick_dialog("handle","报警处理" , url, 1000,600);
+		}
+		close_dialog();
+    }
+</script>
+
+</body>
+</html>

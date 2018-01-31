@@ -1,0 +1,181 @@
+#parse("index/_header.vm")
+</head>
+<body>
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<form class="ui-form" id='queryForm'>
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+                <tr>
+                  <td class="ui-search-name first">来访时间：</td>
+				  
+				  <td class="ui-search-c">
+		                  	<input id="startTime" type="text" name="startTime"   value="$!reservationVisitor.startTime"/>
+							<span class="ui-form-text">至</span> 
+							<input id="endTime" type="text" name="endTime"  value="$!reservationVisitor.endTime"/>
+		                  </td>
+				  <td class="ui-search-name first">访客姓名：</td>
+				  <td class="ui-search-c">
+		                    <input  name="visitorName" class="k-textbox" type="text">
+		          </td>
+                </tr>
+              </table>
+            </td>
+            <td width="180" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+#parse("index/_footer.vm") 
+
+<script type="text/javascript">
+  var _iframe_layout, _left_layout, _inner_layout;
+	$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      }
+    });
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+	
+    $('#resetBtn').click(function(){
+      $("#queryForm :text").val('');  
+    });
+
+		$('.iconfont','.ui-form-pick').each(function(){
+      $(this).click(function(){
+      	$('#treeId').val('');
+      	$('#selectBlock').hide();
+      })
+    })
+	
+	//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/visitor/reservation/list", [{
+              field: "id",
+              hidden: true
+          }, {
+              title: "预约情况",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+    		  attributes: {"class": "k-grid-text"},
+              width: 280,
+              template:"<a href=\"javascript:view('#:data.id #')\" title=\"#: visitTime.split(' ')[0]+','+data.reversationName +'预约接待'+visitReason+'来访  '+expectVisitors+' 人'#\" >#: visitTime.split(' ')[0]+','+data.reversationName+'预约接待'+visitReason+'来访  '+expectVisitors+' 人' #</a>"
+          }, {
+              field: "deptName",
+              title: "接待人部门",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+    		  #*attributes: {"class": "k-grid-text"},*#
+              attributes: {     
+      		  	 title:"#: data.deptName==null? '':data.deptName #",
+      			 "class": "k-grid-text k-grid-nowrap"
+    		  },
+              width: 250
+          }, {
+              field: "reversationName",
+              title: "接待人",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+    		  attributes: {"class": "k-grid-text"},
+              width: 80
+          }, {
+              field: "visitors",
+              title: "访客姓名",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+    		  attributes: {"class": "k-grid-text"},
+              width: 120
+          }, {
+              field: "expectVisitors",
+              title: "访客人数",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-num"},
+    		  attributes: {"class": "k-grid-num"},
+              width: 80
+          }, {
+              field: "visitTime.split(' ')[0]",
+              title: "来访时间",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+    		  attributes: {"class": "k-grid-equilong"},
+              width: 100
+          }, {
+              field: "visitReason",
+              title: "来访事由",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+    		  #*attributes: {"class": "k-grid-text"},*#
+              attributes: {     
+      		  	 title:"#: data.visitReason==null? '':data.visitReason #",
+      			 "class": "k-grid-text k-grid-nowrap"
+    		  },
+              width: 100
+          }, {
+              field: "visitStatus",
+              title: "访客状态",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+    		  attributes: {"class": "k-grid-equilong"},
+              width: 100
+          },{
+              field: "creator",
+              title: "登记人",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+    		  attributes: {"class": "k-grid-text"},
+              width: 70
+          },{
+              field: "createDate",
+			  title: "登记时间",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {     
+  				 title:"#: data.createDate #",
+  				 "class": "k-grid-equilong k-grid-nowrap"
+			   },
+			  width: 150
+          }], 
+      {
+    	  resizable:true,
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          }
+      }, {
+          serverSorting: true
+      }, [
+          #kendo_datagrid_btns("FKGL_YYDJ")#end 
+      ]);
+		
+    });
+    commonDateWithout("startTime","endTime","yyyy-MM-dd","zh-CN");
+    function view(id){
+    	quick_dialog("visitor_add_dlg", "预约登记", "$!{rc.contextPath}/visitor/reservation/edit?type=3&view=true&id=" +id, 900, 460);
+    }
+</script>
+</body>
+</html>

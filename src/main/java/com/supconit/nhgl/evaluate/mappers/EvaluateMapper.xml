@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.evaluate.entities.EvaluateInfo">
+
+    <resultMap id="evaluateResultMap" type="com.supconit.nhgl.evaluate.entities.EvaluateInfo">
+        <result property="taskCode" column="task_code"/>
+        <result property="taskName" column="task_name"/>
+        <result property="taskVesting" column="task_vesting"/>
+        <result property="content" column="content"/>
+        <result property="score" column="score"/>
+    </resultMap>
+
+    <resultMap id="monitorObjectScore" type="com.supconit.nhgl.evaluate.entities.MonitorObjScore">
+        <result property="deviceCode" column="device_code"/>
+        <result property="deviceName" column="device_name"/>
+        <result property="location" column="location"/>
+        <result property="department" column="department"/>
+        <result property="score" column="score"/>
+        <result property="executeTime" column="execute_time"/>
+    </resultMap>
+
+
+    <select id="queryEvaluateInfosWithDate" parameterType="string" resultMap="evaluateResultMap" lang="velocity">
+    <![CDATA[
+        select DISTINCT MA.CONTENT,TL.TASK_VESTING,OS.SCORE,MA.ALARM_TIME,MA.TASK_CODE 
+        from NH_ENERGY_ALARM MA
+        left join NH_MONITOR_OBJ_SCORE OS
+        on MA.task_code = os.task_code  and MA.ALARM_TIME = os.EXECUTE_TIME
+        left join NH_TASK_LOG TL
+        on MA.TASK_CODE = TL.TASK_CODE  AND MA.ALARM_TIME = TL.INVOKE_TIME
+        where
+        ma.ALARM_TIME>=  
+        #if($_databaseId=='oracle') 
+        	to_date(@{_parameter.yesterday,jdbcType=VARCHAR},'yyyy-mm-dd')
+        #else
+        	@{_parameter.yesterday,jdbcType=VARCHAR}
+        #end
+        and 
+        ma.ALARM_TIME <=
+        #if($_databaseId=='oracle')
+        	(to_date(@{_parameter.yesterday,jdbcType=VARCHAR}||' 23:59:59','yyyy-mm-dd hh24-mi-ss')+ interval '1' day)
+        #else
+	        dateadd(day,1,CONVERT(datetime,@{_parameter.yesterday,jdbcType=VARCHAR}+' 23:59:59'))
+	    #end
+		ORDER BY MA.ALARM_TIME DESC
+		]]>
+    </select>
+
+    <select id="queryMonitorObjScoreByTaskCode" parameterType="map" resultMap="monitorObjectScore">
+        select d.device_code,d.device_name,d.locatioin_name,s.score,s.execute_time
+        from device d left join nh_monitor_obj_score s
+        on d.id = s.device_id
+        where s.task_code = #{taskCode,jdbcType=VARCHAR} and
+        convert(VARCHAR(10),s.EXECUTE_TIME,120) = #{today,jdbcType=VARCHAR}
+    </select>
+
+</mapper>

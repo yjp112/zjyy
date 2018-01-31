@@ -1,0 +1,35 @@
+<form class="ui-form ui_dialog" id="extractData_edit_form" action="$!{rc.contextPath}/nhgl/basic/extractData/edit" method="post">
+    <input type="hidden" name="id" value="" />
+	<fieldset>
+		<div class="ui-form-item">
+            <label class="ui-label">能耗类型：</label>
+            <select name="nhType" class="k-textbox" style="width:165px;">
+				#foreach($!type in $!typeList)
+					<option value="$!{type.enumValue}">$!{type.enumText}</option>
+				#end
+			</select>
+		</div>
+		 
+		<div class="ui-form-item" >
+			<label class="ui-label" >统计维度：</label>
+			<select name="weidu" class="k-textbox" style="width:165px;">
+				#foreach($!type in $!weiduList)
+					<option value="$!{type.enumValue}">$!{type.enumText}</option>
+				#end
+			</select>
+		</div>
+		<div class="ui-form-item" >
+			<label class="ui-label" >抽取开始时间：</label>
+			<input class="ui-input ui-input-small  Wdate" type="text" data-rule="抽取开始时间:required;" name="startTime" id="startTime" onclick="WdatePicker({dateFmt:'yyyy-MM-dd',maxDate:'#F{$dp.$D(\'endTime\')}'})" >
+		</div>
+		<div class="ui-form-item" >
+			<label class="ui-label" >抽取结束时间：</label>
+			<input class="ui-input ui-input-small  Wdate" type="text" data-rule="抽取结束时间:required;" name="endTime" id="endTime" onclick="WdatePicker({dateFmt:'yyyy-MM-dd',minDate:'#F{$dp.$D(\'startTime\')}'})"  >
+		</div>
+	</fieldset>
+</form>
+<script type="text/javascript">
+ 	#if($!viewOnly)
+	        setAllReadonly("dialog");
+	#end
+</script>

@@ -1,0 +1,103 @@
+#parse("mobile/_header.vm")
+<body>
+<!-- Status bar overlay for fullscreen mode-->
+<div class="statusbar-overlay"></div>
+
+<!-- Views, and they are tabs-->
+<!-- We need to set "toolbar-through" class on it to keep space for our tab bar-->
+<div class="views">
+    <div id="view" class="view view-main">
+        <!-- Pages-->
+        <div class="pages navbar-fixed">
+            <div data-page="mine" class="page page-about">
+
+                <div class="navbar">
+                    <div class="navbar-inner">
+                        <div class="navbar-inner">
+                            <div class="navbar-center">我的</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="page-content">
+                    <div class="list-block" id="mineContent">
+                        <ul>
+                            <li class="infomation block-area">
+                                <div class="item-content">
+                                    <div class="item-media">
+                                        <img src="$!{rc.contextPath}/mobile/images/default.jpg" id="headImg">
+                                    </div>
+                                    <div class="item-inner">
+                                        <div class="item-title-row row1">
+                                            <div class="item-title">姓&nbsp;&nbsp;&nbsp;名</div>
+                                            <div class="item-title">员工号</div>
+                                            <div class="item-title">部&nbsp;&nbsp;&nbsp;门</div>
+                                        </div>
+                                        <div class="item-title-row row2">
+                                            <div class="item-title">
+                                                <span class="text">$!{exPerson.name}</span>
+                                            </div>
+                                            <div class="item-title">
+                                                <span class="text">$!{exPerson.code}</span>
+                                            </div>
+                                            <div class="item-title">$!{exPerson.deptName}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <a href="/jcds/mobile/mine/sign" class="item-link item-content">
+                                    <i class="icon icon-dec"></i>
+                                    <div class="item-inner">
+                                        <div class="item-title">
+                                            <span>功能简介</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/jcds/mobile/mine/qrcode" class="item-link item-content" style="border-top: none;">
+                                    <i class="icon icon-qrc"></i>
+                                    <div class="item-inner">
+                                        <div class="item-title">
+                                            <span>二维码</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="block-area">
+                                <a href="/jcds/mobile/mine/about" class="item-link item-content">
+                                    <i class="icon icon-about"></i>
+                                    <div class="item-inner">
+                                        <div class="item-title">
+                                            <span>关于中控运维平台</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+
+                            <li class="setting">
+                                <a href="/jcds/mobile/mine/config" class="item-link item-content">
+                                    <i class="icon icon-setting"></i>
+                                    <div class="item-inner">
+                                        <div class="item-title">
+                                            <span>设置</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> <!-- view-1 end-->
+
+</div><!-- views end -->
+</body>
+</html>
+#parse("mobile/_footer.vm")
+<script type="text/javascript" src="$!{rc.contextPath}/mobile/js/mine-app.js"></script>
+<!-- Path to your app js-->
+<script type="text/javascript" src="$!{rc.contextPath}/mobile/js/util.js"></script>

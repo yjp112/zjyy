@@ -1,0 +1,144 @@
+<div class="ui-layout-center" id="subMain">
+	<table id="pagerTable" class="fn-hide"></table>
+</div>
+<div class="ui-layout-north">
+	<!--#bread_crumbs("NHGL_ZXRZ")-->
+	<div class="ui-module-name">
+    	#crumbs("$!menu.code",1)
+    </div>
+	<form id="queryForm" class="ui-form ui-form-search fn-clear">
+		<!--input name="pageNo" type="hidden" value="1"/-->
+		<input name="condition.id" id="treeId" value="" type="hidden"/>
+		<div class="ui-form-search-left">
+			<div class="ui-form-item">
+				<label class="ui-label">任务名称：</label>
+				<input class="ui-input" type="text" name="condition.taskName" value="$!condition.taskName">
+			</div>
+			<div class="ui-form-item">
+    			  <label class="ui-label" for="">开始时间：</label>
+    	          <input id="startTime" type="text" name="condition.startTime"  class="ui-input Wdate"  onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',maxDate:'#F{$dp.$D(\'endTime\')}'})" value="#date_format($!condition.startTime,'yyyy-MM-dd HH:mm:ss')" size=22/>
+            </div>
+            <div class="ui-form-item">
+                  <label class="ui-label" for="">结束时间：</label>
+    	          <input id="endTime" type="text" name="condition.endTime"  class="ui-input Wdate"  onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'#F{$dp.$D(\'startTime\')}'})" value="#date_format($!condition.endTime,'yyyy-MM-dd HH:mm:ss')"  size=22 />
+            </div>
+			<div class="ui-form-item">
+				<input name="condition.taskType" id="treeId" value="" type="hidden"/>
+				<label class="ui-label">任务归属：</label>
+				<select class="ui-select" name="condition.taskVesting">
+                    <option value="">--请选择--</option>
+					#foreach($tc in $taskV)
+						<option value="$!{tc.enumValue}">$tc.enumText</option>
+					#end
+				</select>
+			</div>
+		</div>
+		<div class="ui-form-search-right">			
+			<button type="submit" class="btn btn-primary" id="queryBtn"><i class="iconfont icon-search"></i> 查&nbsp;询</button>
+		</div>	
+	</form>
+</div>
+    <script type="text/javascript">
+	$(document).ready(function(){
+    	if(T.innerLayout&&!T.innerLayout.destroyed){
+			T.innerLayout.destroy();
+		}
+		if(_inner_layout&&!_inner_layout.destroyed){
+			_inner_layout.destroy();
+		}
+		_inner_layout = $("#centerMain").layout({
+			defaults : {
+				resizable : false,
+				closable : false,
+				spacing_open : 5
+			},
+			onresize_end : function(){
+				$("#pagerTable").datagridResize({width:_inner_layout.state.center.innerWidth,height:_inner_layout.state.center.innerHeight});
+			}
+		});
+	
+			var height = $(window).height();
+            //列表
+			var pagerTable=$("#pagerTable").datagrid({
+			url:'$!{rc.contextPath}/nhgl/schedule/controller/log/executeLoglist',
+			dataType: "json",
+			method: "POST",
+			singleSelected : true,
+			striped : false,
+			height:  _inner_layout.center.state.innerHeight,
+			width :  _inner_layout.center.state.innerWidth,
+			showOrderNumber : true,
+			showCheckbox: true,
+			useRp : true,
+			usepager: true,
+    		rpOptions: [10, 20, 40, 50],
+    		pageSize: 20,
+    		searchFormId:"queryForm",
+    		searchCallback:function(datagrid){},
+    		onSuccess:function(table,grid){
+    			if(!grid)return ;
+    		},
+    		colModel:[
+			 {display: "ID", name: "id",hide:true }, 
+			 {display: "任务ID", name: "taskId",hide:true },
+			 {display: "任务归属类别", name: "taskVesting",hide:true },
+			 {display: "序号"},
+			 {display:"checkbox",width:10},
+             {display: "任务名称", name: "taskName", width: 180,"onclick":function(row,a){
+        	    var url="";
+				var taskVesting = row.taskVesting;
+        	  	if(taskVesting == "1")
+        			url='$!{rc.contextPath}/nhgl/basic/taskSet/device_runtime/edit?id='+row.taskId;
+        		else if(taskVesting=="2")
+        			url='$!{rc.contextPath}/nhgl/basic/taskSet/electric/edit?id='+row.taskId;
+        		else if(taskVesting=="3")
+        			url='$!{rc.contextPath}/nhgl/basic/taskSet/water/edit?id='+row.taskId;
+        		$.dialogs.normalDialog(
+        				'addDiloag12', 
+        				url,
+        				function(dlg,btn){
+        					if(readyForSave(btn) == false)
+							return false;
+        					$.forms.submits("#deviceRuntime_edit_form", 
+        						function(){ 
+        							location.reload()
+        							dlg.close(); return true; 
+        						}, 
+        					btn);
+        					return false; 
+        				},
+        				950, 
+        				400,
+        				"查看",
+						"确定",
+						false,
+						"取消"
+        				
+        		);}},                                      
+             {display: "任务分类", name: "categoryText", width: 100}, 
+             {display: "任务归属", name: "typeName", width: 60}, 
+			 {display: "执行频率", name: "executeTypeName", width: 100},
+			 {display: "执行状态", name: "strStatus", width: 60},
+			 {display: "开始时间", name: "startTime", width: 150},
+			 {display: "结束时间", name: "endTime", width: 150},
+			 {display: "错误信息", name: "errorMsg", width: 370,"onclick":function(row,a){
+	    					    					$.dialogs.normalDialog("jobschedule_schedule_log_view_dlg", "$!{rc.contextPath}/nhgl/schedule/controller/log/view?id="+row.id, function(dlg,btn){
+								return false;
+							},1180,550,row.name || "错误详情",null,false,"关闭");}}
+    		],
+			buttons : [
+				#data_grid_buttons("NHGL_ZXRZ")#end
+			]
+			});
+			$('#resetBtn').click(function(){
+        		$("#queryForm :text").val('');  
+       		});
+    });
+   
+	
+	function reload(){
+	  	$("#pagerTable").flexReload();
+	  }
+	  
+    </script>
+

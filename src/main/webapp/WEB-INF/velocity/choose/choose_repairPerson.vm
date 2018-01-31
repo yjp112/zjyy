@@ -1,0 +1,103 @@
+#parse("index/_header.vm")
+</head>
+<body style="padding-bottom:40px;">
+#parse("index/_footer.vm")  
+<script type="text/javascript">
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+	      defaults: {
+	        resizable: true,
+	        closable: false,
+	        spacing_open: 5
+	      }
+	    });
+	});
+
+    var setting = {
+	data: {
+		simpleData: {enable: true}
+      },
+      callback: {
+			onClick: function(event, treeId, treeNode) {
+					var dialogId = "$!{dialogId}";
+					var txtGroupId = "$!{txtGroupId}";
+					var txtGroupName = "$!{txtGroupName}";
+            		if(dialogId != ""){
+            			get_el_in_dialog("$!{dialogId}","#"+"$!{txtId}").val(treeNode.id);
+            			get_el_in_dialog("$!{dialogId}","#"+"$!{txtName}").val(treeNode.personName);
+            			if(txtGroupId != ""){
+            				get_el_in_dialog("$!{dialogId}","#"+"$!{txtGroupId}").val(treeNode.repairGroupId);
+            			}
+                        if(txtGroupName != ""){
+                        	get_el_in_dialog("$!{dialogId}","#"+"$!{txtGroupName}").val(treeNode.repairGroupName);
+            			}
+
+            			resetfocus(get_el_in_dialog("$!{dialogId}","#"+"$!{txtName}"));
+            		}else{
+            			var id_v = $("#"+"$!{txtId}",window.parent["_main_frame"].document);
+            			id_v.val(treeNode.id);
+            			var id_t = $("#"+"$!{txtName}",window.parent["_main_frame"].document);
+            			id_t.val(treeNode.personName);
+            			if(txtGroupId != ""){
+            				var id_i = $("#"+"$!{txtGroupId}",window.parent["_main_frame"].document);
+            				id_i.val(treeNode.repairGroupId);
+            			}
+                        if(txtGroupName != ""){
+                        	var id_e = $("#"+"$!{txtGroupName}",window.parent["_main_frame"].document);
+            				id_e.val(treeNode.repairGroupName);
+            			}
+            			resetfocus($("#"+"$!{txtName}",window.parent["_main_frame"].document));
+            			
+            		}
+				//var id_v = $("#"+"$!{txtId}",window.parent["_main_frame"].document);
+				//id_v.val(treeNode.id);
+				//var id_t = $("#"+"$!{txtName}",window.parent["_main_frame"].document);
+				//id_t.val(treeNode.fullLevelName);
+				//resetfocus($("#"+"$!{txtName}",window.parent["_main_frame"].document));
+				//关闭iframe
+				close_dialog('select_repairPerson');
+				
+    			//window.close();
+			}
+		}
+    };
+    var zNodes = [];  
+    zNodes.push({id:"0", pId:"-1", name:"服务人员",open:true});
+    #foreach($!{treeNode} in $!{treeList})
+        zNodes.push({id:$!{treeNode.personId}, pId:0, name:"$!{treeNode.personName}"+"|"+"$!{treeNode.telephone}",personName:"$!{treeNode.personName}",repairGroupId:$!{treeNode.repairGroupId},repairGroupName:"$!{treeNode.repairGroupName}",url:"",target:""});     
+    #end
+
+    $(document).ready(function(){
+		$.fn.zTree.init($("#geoEvtTree"), setting,zNodes);
+    });
+    
+    function clearChoose(){
+    	if("$!{dialogId}"!=""){
+    		get_el_in_dialog("$!{dialogId}","#$!{txtId}").val("");
+    		get_el_in_dialog("$!{dialogId}","#$!{txtName}").val("");  
+    		resetfocus(get_el_in_dialog("$!{dialogId}","#$!{txtName}"));
+    	}else{
+			var id_v = $("#"+"$!{txtId}",window.parent["_main_frame"].document);
+			id_v.val("");
+			var id_t = $("#"+"$!{txtName}",window.parent["_main_frame"].document);
+			id_t.val("");
+			resetfocus($("#"+"$!{txtName}",window.parent["_main_frame"].document));
+		}
+		//关闭iframe
+		close_dialog('select_repairPerson');
+		return true;
+    }
+</script>
+  
+<div class="ui-layout-center ui-dialog-form">
+	<div class="tree">
+		<ul id="geoEvtTree" class="ztree"></ul>   
+	</div>
+
+	<div class="actions">
+	<button class="hc_btn cancel" onclick="clearChoose()" type="button"><i class="fa fa-close"></i>清空</button>
+	</div>
+</div>
+  </body>
+</html>
+ 

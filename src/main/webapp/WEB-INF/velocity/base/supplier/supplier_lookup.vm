@@ -1,0 +1,161 @@
+#parse("index/_header.vm")
+</head>
+<body>
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<form class="ui-form" id='queryForm'>
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+                <tr>
+                  <td class="ui-search-name first">厂商编码：</td>
+                  <td class="ui-search-c">
+                      <input class="k-textbox" type="text" name="supplierCode" value="$!supplier.supplierCode">
+                  </td>
+                  <td class="ui-search-name">厂商名称：</td>
+                  <td class="ui-search-c">
+                     <input class="k-textbox" type="text" name="fullName" value="$!supplier.fullName">
+                  </td>
+                </tr>
+              </table>
+            </td>
+            <td width="150" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+            <td></td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+  #parse("index/_footer.vm") 
+<script type="text/javascript">
+  var _iframe_layout, _left_layout, _inner_layout;
+	$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      }
+    });
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+
+    $('#resetBtn').click(function(){
+      $("#queryForm :text").val('');  
+    });
+
+		$('.iconfont','.ui-form-pick').each(function(){
+      $(this).click(function(){
+      	$('#treeId').val('');
+      	$('#selectBlock').hide();
+        //$(this).parent().remove();
+      })
+    })
+	
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/base/supplier/list?_t="+new Date().getTime(), [{
+              field: "id",
+              hidden: true
+          }, {
+              field: "supplierCode",
+              title: "厂商编码",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              width: 150
+          }, {
+              field: "fullName",
+              title: "厂商名称",
+              sortable: false,
+              width: 200,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+              
+          }, {
+              field: "legalPerson",
+              title: "法人代表",
+              sortable: false,
+              width: 200 ,
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"}
+          }
+		  , {
+              field: "companyType",
+              sortable: false,
+              title: "公司类型",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }], 
+      {
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          }
+      }, {
+          serverSorting: true
+      }, [{
+              name: "选择",
+              icon: "fa fa-plus",
+              onclick: function (obj, grid) {
+    			  var row = grid.select();
+                  if (null == row || row.length == 0) {
+                      notify("你还没有选择厂商", "warn");
+                      return;
+                  }
+                  var data = grid.dataItem(row);
+				  if('0'!='$!{flag}'){
+    			 	 get_el_in_dialog("spare_add_dlg","#"+"$!{txtName}").val(data.fullName);
+    			 	 get_el_in_dialog("spare_add_dlg","#"+"$!{txtId}").val(data.id);
+    			 	resetfocus(get_el_in_dialog("spare_add_dlg","#"+"$!{txtName}"));
+				  }else{
+			  		var id_v = $("#"+"$!{txtId}",window.parent["_main_frame"].document);
+					id_v.val(data.id);
+					var id_t = $("#"+"$!{txtName}",window.parent["_main_frame"].document);
+					id_t.val(data.fullName);
+					resetfocus($("#"+"$!{txtName}",window.parent["_main_frame"].document));
+				  }
+				  close_dialog('selectDiloag');
+			  }
+          },
+          {
+              name: "清空",
+              icon: "fa fa-remove",
+              onclick: function (obj, grid) {
+				  if('0'!='$!{flag}'){
+    			 	 get_el_in_dialog("spare_add_dlg","#"+"$!{txtName}").val("");
+    			 	 get_el_in_dialog("spare_add_dlg","#"+"$!{txtId}").val("");
+    			 	resetfocus(get_el_in_dialog("repairTool_add_dlg","#"+"$!{txtName}"));
+				  }else{
+			  		var id_v = $("#"+"$!{txtId}",window.parent["_main_frame"].document);
+					id_v.val("");
+					var id_t = $("#"+"$!{txtName}",window.parent["_main_frame"].document);
+					id_t.val("");
+					resetfocus($("#"+"$!{txtName}",window.parent["_main_frame"].document));
+				  }
+    			  close_dialog('selectDiloag')
+			  }
+          }
+      ]);
+		
+    });
+  
+</script>

@@ -1,0 +1,4 @@
+<!-- Path to Framework7 Library JS-->
+<script type="text/javascript" src="$!{rc.contextPath}/mobile/js/framework7.js"></script>
+
+

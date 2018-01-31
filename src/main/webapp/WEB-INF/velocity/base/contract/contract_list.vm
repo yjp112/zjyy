@@ -1,0 +1,143 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<div class="ui-layout-center" id="subMain">
+	<div class="ui-layout-north">
+		 <form class="ui-form" id='queryForm'>
+	     <table width="100%">
+	       <tr>
+	         <td>
+	           <table class="ui-search-table">
+	             <tr>
+	               <td class="ui-search-name first">合同编码：</td>
+	               <td class="ui-search-c">
+	                 <input name="contractCode" value="$!contract.contractCode" class="k-textbox" type="text"  maxlength="32">
+	               </td>
+	               <td class="ui-search-name">合同名称：</td>
+	               <td class="ui-search-c">
+	                 <input  name="contractName" value="$!contract.contractName" class="k-textbox" type="text" maxlength="100">
+	               </td>
+	               <td class="ui-search-name">合同状态：</td>
+	               <td class="ui-search-c">
+		               <select name="contractStatus" class="k-textbox" >
+			               	<option value="">--请选择--</option>
+	   						#foreach($!{e} in $!{lstStatus})
+	   						<option value="$!{e.enumValue}">$!{e.enumText}</option>
+	   						#end          
+						</select>
+	               </td>
+	             </tr>
+	           </table>
+	         </td>
+	         <td width="150" valign="top" style="padding-top:4px;">
+	           <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+	           <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+	         </td>
+	         <td></td>
+	       </tr>
+	     </table>
+	 	</form>
+	</div>
+	<div class="ui-layout-center">
+	  <div id="grid"></div> 
+     </div>
+</div>
+#parse("index/_footer.vm") 
+
+<script type="text/javascript">
+     var _iframe_layout,_inner_layout;
+	$(document).ready(function(){
+		_iframe_layout = $('body').layout({
+		      defaults: {
+		        resizable: false,
+		        closable: false,
+		        spacing_open: 5
+		      }
+		    });
+		 _inner_layout = $("#subMain").layout({
+		      defaults: {
+		        resizable: false,
+		        closable: false,
+		        spacing_open: 0
+		      },
+		      center: {
+		          onresize_end: function () {
+		              var grid = $("#grid").data("kendoGrid");
+		              grid.resize();
+		          }
+		      }
+     })
+
+    $('#resetBtn').click(function(){
+      $("#queryForm :text").val('');  
+    });
+
+		
+	
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/device/contract/page", [{
+              field: "id",
+              hidden: true
+          }, {
+              field: "contractCode",
+              title: "合同编码",
+              sortable: false,
+              template:"<a href=\"javascript:void(0)\" title=\"查看#: data.contractCode #的详细信息\" onclick=\"quick_dialog('contract_add_dlg','查看#:data.contractCode #的信息','$!{rc.contextPath}/device/contract/edit?showFlag=1&id=#: data.id #',600,400)\">#: data.contractCode #</a>",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+            
+          }, {
+              field: "contractName",
+              title: "合同名称",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+		  	  #*attributes: {"class": "k-grid-text"},*#
+          	  attributes: {     
+  		  		title:"#: data.contractName==null? '':data.contractName #",
+  				"class": "k-grid-text k-grid-nowrap"
+		  	  }
+              
+          }, {
+              field: "contractB",
+              title: "合同乙方",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "beginDate",
+              sortable: false, 
+              title: "开始时间",
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"}
+          }, {
+              field: "endDate",
+              sortable: false,
+              title: "结束时间",
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"}
+          }, {
+              field: "contractStatusName",
+              sortable: false,
+              title: "合同状态",
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"}
+          }
+          
+          ], 
+      {
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          },resizable:true
+      }, {
+          serverSorting: true
+      }, [
+      	#kendo_datagrid_btns("WWHT")#end
+      ]);
+		
+    });
+	  
+	 
+</script>
+</body>
+</html>

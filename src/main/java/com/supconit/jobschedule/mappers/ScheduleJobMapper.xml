@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.jobschedule.entities.ScheduleJob">
+
+	<resultMap type="com.supconit.jobschedule.entities.ScheduleJob"
+		id="ScheduleLogResultMap">
+		<id property="id" column="ID" />
+		<result property="jobSubject" column="JOB_SUBJECT" />
+		<result property="jobName" column="JOB_NAME" />
+		<result property="groupName" column="GROUP_NAME" />
+		<result property="beanOrClass" column="BEAN_OR_CLASS" />
+		<result property="targetObject" column="TARGET_OBJECT" />
+		<result property="targetMethod" column="TARGET_METHOD" />
+		<result property="targetArguments" column="TARGET_ARGUMENTS" />
+		<result property="cronExpression" column="CRON_EXPRESSION" />
+		<result property="startDate" column="START_DATE" />
+		<result property="nextDate" column="NEXT_DATE" />
+		<result property="endDate" column="END_DATE" />
+		<result property="ignoreError" column="IGNORE_ERROR" />
+		<result property="concurrent" column="CONCURRENT" />
+		<result property="description" column="DESCRIPTION" />
+		<result property="status" column="STATUS" />
+	</resultMap>
+
+
+	<sql id="TABLE_NAME" lang="velocity">SCHEDULE_JOB</sql>
+	<sql id="SEQUENCE" lang="velocity">
+		SELECT SEQ_<include refid="TABLE_NAME" />.NEXTVAL FROM DUAL
+	</sql>
+	<sql id="SELECT_PRE" lang="velocity">
+		SELECT * FROM
+		<include refid="TABLE_NAME" />
+	</sql>
+	<sql id="COUNT_PRE" lang="velocity">
+		SELECT COUNT(1) FROM
+		<include refid="TABLE_NAME" />
+	</sql>
+
+	<sql id="SEARCH_CONDITION_SQL" lang="velocity">
+		<![CDATA[
+		#where()
+				#if($_parameter.condition.jobSubject && $_parameter.condition.jobSubject != '')
+					AND JOB_SUBJECT 
+										#set($_jobSubject = '%' + $_parameter.condition.jobSubject + '%')
+						LIKE @{_jobSubject,jdbcType=VARCHAR}
+				#end
+				#if($_parameter.condition.jobName && $_parameter.condition.jobName != '')
+					AND JOB_NAME 
+										#set($_jobName = '%' + $_parameter.condition.jobName + '%')
+						LIKE @{_jobName,jdbcType=VARCHAR}
+				#end
+				#if($_parameter.condition.groupName && $_parameter.condition.groupName != '')
+					AND GROUP_NAME 
+										#set($_groupName = '%' + $_parameter.condition.groupName + '%')
+						LIKE @{_groupName,jdbcType=VARCHAR}
+				#end
+				#if($_parameter.condition.status)																																																															#if($_parameter.condition.status && $_parameter.condition.status != '')
+				AND STATUS 
+									= @{_parameter.condition.status,jdbcType=NUMERIC}
+				#end					
+		#end
+							#end
+		]]>	
+	</sql>
+
+	<select id="getById" resultMap="ScheduleLogResultMap"
+		parameterType="long" lang="velocity">
+		<include refid="SELECT_PRE" />
+		WHERE ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+
+	<select id="selectPager" lang="velocity" resultMap="ScheduleLogResultMap" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE" />
+		<include refid="SELECT_PRE" />
+		<include refid="SEARCH_CONDITION_SQL" />
+		#order($_parameter.condition,"GROUP_NAME DESC,ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER" />
+	</select>
+
+	<select id="selectPager" lang="velocity" resultMap="ScheduleLogResultMap"
+		databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE" />
+		SELECT *
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" />
+		#order($_parameter.condition,"GROUP_NAME DESC,ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM
+		<include refid="TABLE_NAME" />
+		<include refid="SEARCH_CONDITION_SQL" />
+		<include refid="_PUBLIC_V.PAGER_AFTER" />
+	</select>
+
+	<select id="countPager" lang="velocity" resultType="long">
+		<include refid="COUNT_PRE" />
+		<include refid="SEARCH_CONDITION_SQL" />
+	</select>
+
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO
+		<include refid="TABLE_NAME" />
+		(
+		#if($_databaseId == 'oracle') ID,#end
+		JOB_SUBJECT
+		,JOB_NAME
+		,GROUP_NAME
+		,BEAN_OR_CLASS
+		,TARGET_OBJECT
+		,TARGET_METHOD
+		,TARGET_ARGUMENTS
+		,CRON_EXPRESSION
+		,START_DATE
+		,NEXT_DATE
+		,END_DATE
+		,IGNORE_ERROR
+		,CONCURRENT
+		,DESCRIPTION
+		,STATUS
+		) VALUES (
+		#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end
+		@{_parameter.jobSubject,jdbcType=VARCHAR}
+		,@{_parameter.jobName,jdbcType=VARCHAR}
+		,@{_parameter.groupName,jdbcType=VARCHAR}
+		,@{_parameter.beanOrClass,jdbcType=VARCHAR}
+		,@{_parameter.targetObject,jdbcType=VARCHAR}
+		,@{_parameter.targetMethod,jdbcType=VARCHAR}
+		,@{_parameter.targetArguments,jdbcType=VARCHAR}
+		,@{_parameter.cronExpression,jdbcType=VARCHAR}
+		,@{_parameter.startDate,jdbcType=TIMESTAMP}
+		,@{_parameter.nextDate,jdbcType=TIMESTAMP}
+		,@{_parameter.endDate,jdbcType=TIMESTAMP}
+		,@{_parameter.ignoreError,jdbcType=VARCHAR}
+		,@{_parameter.concurrent,jdbcType=VARCHAR}
+		,@{_parameter.description,jdbcType=VARCHAR}
+		,@{_parameter.status,jdbcType=NUMERIC}
+		)
+	</sql>
+
+	<insert id="insert" parameterType="com.supconit.jobschedule.entities.ScheduleJob"
+		keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>
+		<include refid="INSERT_SQL" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.jobschedule.entities.ScheduleJob"
+		keyProperty="id" keyColumn="ID" lang="velocity">
+		<include refid="INSERT_SQL" />
+		<selectKey keyProperty="id" resultType="long" order="AFTER">
+			<include refid="_PUBLIC_V.SELECT_KEY" />
+		</selectKey>
+	</insert>
+
+	<update id="update" parameterType="com.supconit.jobschedule.entities.ScheduleJob"
+		lang="velocity">
+		UPDATE
+		<include refid="TABLE_NAME" />
+		#mset()
+		<![CDATA[
+																							#if($_parameter.jobSubject)JOB_SUBJECT = @{_parameter.jobSubject,jdbcType=VARCHAR},#end
+																#if($_parameter.jobName)JOB_NAME = @{_parameter.jobName,jdbcType=VARCHAR},#end
+																#if($_parameter.groupName)GROUP_NAME = @{_parameter.groupName,jdbcType=VARCHAR},#end
+																#if($_parameter.beanOrClass)BEAN_OR_CLASS = @{_parameter.beanOrClass,jdbcType=VARCHAR},#end
+																#if($_parameter.targetObject)TARGET_OBJECT = @{_parameter.targetObject,jdbcType=VARCHAR},#end
+																#if($_parameter.targetMethod)TARGET_METHOD = @{_parameter.targetMethod,jdbcType=VARCHAR},#end
+																#if($_parameter.targetArguments)TARGET_ARGUMENTS = @{_parameter.targetArguments,jdbcType=VARCHAR},#end
+																#if($_parameter.cronExpression)CRON_EXPRESSION = @{_parameter.cronExpression,jdbcType=VARCHAR},#end
+																START_DATE = @{_parameter.startDate,jdbcType=TIMESTAMP},
+																END_DATE = @{_parameter.endDate,jdbcType=TIMESTAMP},
+																NEXT_DATE = @{_parameter.nextDate,jdbcType=TIMESTAMP},
+																#if($_parameter.ignoreError)IGNORE_ERROR = @{_parameter.ignoreError,jdbcType=VARCHAR},#end
+																#if($_parameter.concurrent)CONCURRENT = @{_parameter.concurrent,jdbcType=VARCHAR},#end
+																#if($_parameter.description)DESCRIPTION = @{_parameter.description,jdbcType=VARCHAR},#end
+																#if($_parameter.status)STATUS = @{_parameter.status,jdbcType=NUMERIC},#end
+									]]>
+		#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+
+	<delete id="deleteById" parameterType="long" lang="velocity">
+		DELETE FROM
+		<include refid="TABLE_NAME" />
+		WHERE ID = @{_parameter,jdbcType=NUMERIC}
+	</delete>
+	<select id="selectByStatus"  resultMap="ScheduleLogResultMap">
+		SELECT * FROM <include refid="TABLE_NAME" />
+		where STATUS=#{_parameter}
+	</select>
+</mapper>

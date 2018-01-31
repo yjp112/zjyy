@@ -1,0 +1,309 @@
+#parse("index/_header.vm")
+
+</head>
+<body style="padding-bottom:40px;">
+<form id="editUnifyTagForm" method="post" action="$!{rc.contextPath}/hl/montrol/alarm/deviceTag/save"
+      class="ui-layout-center ui-dialog-form">
+    <table>
+        <tr>
+            <td width="95" class="label">
+                <input id="monitorID" type="hidden" name="monitorID" value="$!{monitorId}">
+                <input id="tagId" type="hidden" name="id" value="$!{tag.id}">
+                <label><span class="ui-form-required">*</span>位号名：</label>
+            </td>
+            <td width="235"><input class="k-textbox" type="text" id="tagName" name="tagName" value="$!{tag.tagName}">
+            </td>
+
+            <td width="110" class="label"><label><span class="ui-form-required">*</span>位号类型：</label></td>
+            <td width="235">
+                <select name="tagType" id="tagType" class="ui-combobox" data-rule="required:tagName"
+                        onChange="changehref(this.value)">
+                    <option value="">--请选择--</option>
+                    <option value="13" #if($tag.tagType == 13) selected #end>开关量</option>
+                    <option value="14" #if($tag.tagType == 14) selected #end>模拟量</option>
+                    <option value="15" #if($tag.tagType == 15) selected #end>字符串</option>
+                </select>
+            </td>
+            <td width="50"></td>
+        </tr>
+
+        <tr>
+            <td width="95" class="label">
+                <label>单位：</label>
+            </td>
+            <td width="235">
+                <input class="k-textbox" type="text" id="tagUnit" name="tagUnit" value="$!{tag.tagUnit}">
+            </td>
+
+            <td width="110" class="label"><label>位值转换：</label></td>
+            <td width="235">
+                <input class="k-textbox" type="text" id="textRules" name="textRules" value="$!{tag.textRules}">
+            </td>
+            <td width="50"></td>
+        </tr>
+        <tr>
+            <td width="95" class="label"><label><span class="ui-form-required">*</span>是否可写：</label></td>
+            <td width="235">
+                <select name="isWrite" id="isWrite" class="ui-combobox" data-rule="required:isWrite">
+                    <option value="">--请选择--</option>
+                    <option value="1" #if($tag.isWrite == 1) selected #end>是</option>
+                    <option value="0" #if($tag.isWrite == 0) selected #end>否</option>
+                </select>
+            </td>
+
+            <td width="110" class="label"><label><span class="ui-form-required">*</span>位号性质：</label></td>
+            <td width="235">
+                <select name="alarmPoint" id="isAlarmPoint" class="ui-combobox" data-rule="required:isAlarmPoint"
+                        onChange="selectObjectShowDiv(this.value)">
+                    <option value="">--请选择--</option>
+                    <option value="1" #if($tag.alarmPoint == 1) selected #end>报警点</option>
+                    <option value="0" #if($tag.alarmPoint == 0) selected #end>运行点</option>
+                    <option value="2" #if($tag.alarmPoint == 2) selected #end>起停点</option>
+                    <option value="3" #if($tag.alarmPoint == 3) selected #end>故障点</option>
+                </select>
+            </td>
+            <td width="50"></td>
+        </tr>
+        <tr>
+            <td class="label"><label class="ui-label" for="">位号描述：</label></td>
+            <td colspan="3"><textarea id="textAreaId" id="tagDesc" name="tagDesc" cols="50" maxlength="255" rows="3"
+                                      class="k-textbox k-textarea">$!{tag.tagDesc}</textarea></td>
+        </tr>
+        <tr>
+            <td colspan="6" rowspan="6">
+                <div class="ui-montrol-box fn-left" id="mnl" #if($tag.alarmPoint == 1 && $tag.tagType == 14) #else
+                     style="display:none"  #end>
+                    <div class="ui-montrol-title" style="margin-left:24px;color: #4B4B4B;">报警信息：</div>
+                    <table>
+                        <tr>
+                            <td width="85" class="label"><label>HH：</label></td>
+                            <td width="235">
+                                <select id="HH" name="HH" class="ui-combobox">
+                                    <option value="0" #if($pointMap.get("HH").alarmLevelId == 0) selected #end>--请选择--
+                                    </option>
+                                    #foreach($level in $levels)
+
+                                        <option value="$!{level.id}" #if($pointMap.get("HH").alarmLevelId == $!{level.id})
+                                                selected #end>$!{level.alarmLevel}</option>
+                                    #end
+                                </select>
+                            </td>
+
+                            <td width="105" class="label"><label>H：</label></td>
+                            <td width="235">
+                                <select id="H" name="H" class="ui-combobox">
+                                    <option value="0" #if($pointMap.get("H").alarmLevelId == 0) selected #end>--请选择--
+                                    </option>
+                                    #foreach($level in $levels)
+
+                                        <option value="$!{level.id}" #if($pointMap.get("H").alarmLevelId == $!{level.id})
+                                                selected #end>$!{level.alarmLevel}</option>
+                                    #end
+                                </select>
+                            </td>
+                            <td width="45"></td>
+                        </tr>
+                        <tr>
+                            <td width="85" class="label"><label>LL：</label></td>
+                            <td width="235">
+                                <select id="LL" name="LL" class="ui-combobox">
+                                    <option value="0" #if($pointMap.get("LL").alarmLevelId == 0) selected #end>--请选择--
+                                    </option>
+                                    #foreach($level in $levels)
+
+                                        <option value="$!{level.id}" #if($pointMap.get("LL").alarmLevelId == $!{level.id})
+                                                selected #end>$!{level.alarmLevel}</option>
+                                    #end
+                                </select>
+                            </td>
+                            <td width="105" class="label"><label>L：</label></td>
+                            <td width="235">
+                                <select id="L" name="L" class="ui-combobox">
+                                    <option value="0" #if($pointMap.get("L").alarmLevelId == 0) selected #end>--请选择--
+                                    </option>
+                                    #foreach($level in $levels)
+
+                                        <option value="$!{level.id}" #if($pointMap.get("L").alarmLevelId == $!{level.id})
+                                                selected #end>$!{level.alarmLevel}</option>
+                                    #end
+                                </select>
+                            </td>
+                            <td width="45"></td>
+                        </tr>
+                        <tr>
+                            <td width="85" class="label"><label>PRIN：</label></td>
+                            <td width="235">
+                                <select id="PRIN" name="PRIN" class="ui-combobox">
+                                    <option value="0" #if($pointMap.get("PRIN").alarmLevelId == 0) selected #end>
+                                        --请选择--
+                                    </option>
+                                    #foreach($level in $levels)
+
+                                        <option value="$!{level.id}" #if($pointMap.get("PRIN").alarmLevelId == $!{level.id})
+                                                selected #end>$!{level.alarmLevel}</option>
+                                    #end
+                                </select>
+                            </td>
+                            <td width="105" class="label"><label>NRIN：</label></td>
+                            <td width="235">
+                                <select id="NRIN" name="NRIN" class="ui-combobox">
+                                    <option value="0" #if($pointMap.get("NRIN").alarmLevelId == 0) selected #end>
+                                        --请选择--
+                                    </option>
+                                    #foreach($level in $levels)
+
+                                        <option value="$!{level.id}" #if($pointMap.get("NRIN").alarmLevelId == $!{level.id})
+                                                selected #end>$!{level.alarmLevel}</option>
+                                    #end
+                                </select>
+                            </td>
+                        </tr>
+                        <td width="45"></td>
+                    </table>
+                </div>
+
+                <div class="ui-montrol-box fn-left" id="kgl" #if($tag.alarmPoint == 1 && $tag.tagType == 13) #else
+                     style="display:none" #end>
+                    <div class="ui-montrol-title" style="margin-left:24px;color: #4B4B4B;">报警信息：</div>
+                    <table>
+                        <tr>
+                            <td width="85" class="label"><label>ON：</label></td>
+                            <td width="235">
+                                <select id="ON" name="ON" class="ui-combobox">
+                                    <option value="0" #if($pointMap.get("ON").alarmLevelId == 0) selected #end>--请选择--
+                                    </option>
+                                    #foreach($level in $levels)
+
+                                        <option value="$!{level.id}" #if($pointMap.get("ON").alarmLevelId == $!{level.id})
+                                                selected #end>$!{level.alarmLevel}</option>
+                                    #end
+                                </select>
+                            </td>
+
+                            <td width="105" class="label"><label>OFF：</label></td>
+                            <td width="235">
+                                <select id="OFF" name="OFF" class="ui-combobox">
+                                    <option value="0" #if($pointMap.get("OFF").alarmLevelId == 0) selected #end>
+                                        --请选择--
+                                    </option>
+                                    #foreach($level in $levels)
+
+                                        <option value="$!{level.id}" #if($pointMap.get("OFF").alarmLevelId == $!{level.id})
+                                                selected #end>$!{level.alarmLevel}</option>
+                                    #end
+                                </select>
+                            </td>
+                            <td width="45"></td>
+                        </tr>
+                    </table>
+                </div>
+            </td>
+        </tr>
+    </table>
+    <div class="actions">
+        <button class="k-primary hc_btn" id="save_button_id" type="submit"><i class="fa fa-save"></i>保 存</button>
+        <button class="hc_btn cancel" onclick="close_dialog('editMonitorTag')" type="button"><i class="fa fa-close"></i>取
+            消
+        </button>
+    </div>
+</form>
+<script type="text/javascript">
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+              defaults: {
+                resizable: true,
+                closable: false,
+                spacing_open: 5
+              }
+            });
+	});
+
+</script>
+<script>
+        var dlg = get_dialog("editMonitorTag");
+        dlg.setOptions({height: 367});
+	 	function changehref(tagType){
+		 	$("#kgl").hide();
+		 	$("#mnl").hide();
+            var combobox = $("#isAlarmPoint").data("kendoComboBox");
+            combobox.value(0);
+	 	}
+	 	
+	 	function selectObjectShowDiv(v){
+	 		if(v == "1"){
+				var tv = $("#tagType").val();
+				if(tv == "13"){
+					$("#kgl").show();
+				}else if(tv == "14"){
+					$("#mnl").show();
+				}else if(tv == "15"){
+                    var combobox = $("#isAlarmPoint").data("kendoComboBox");
+                    combobox.value(0);
+                    notify( "字符串不支持报警 ！","error");
+				}else{
+                    var combobox = $("#isAlarmPoint").data("kendoComboBox");
+                    combobox.value(0);
+                    notify( "请选择位号类型 ！","error");
+				}
+	 		}else{
+			 	$("#kgl").hide();
+			 	$("#mnl").hide();	 		
+	 		}
+	 	}
+</script>
+<script>
+  
+ 	   $('#editUnifyTagForm').validator({
+ 		  fields: {
+ 			 	tagName: "位号名:required",
+ 				tagType:"位号类型:required",
+ 				isWrite:"是否可写:required",
+ 				isAlarmPoint:"位号性质:required"
+ 	          },
+ 		  valid:function(form){
+              form_btn_submit($("#save_button_id11"),form,function(res){
+                  validateCallbackSelf(res, "grid", "editMonitorTag");
+              });
+          }
+        });     		
+     		
+
+
+	
+function validateCallbackSelf(response, dataGridId,dialogId) {
+    if (response.status == "success") {
+        notify(response.data.message || "操作成功！", "success");
+
+        if (response.data.next) {
+            if (response.data.next == ".") {//刷新datagrid
+                //edited_callback(window.parent._main_frame.get_grid("#" + dataGridId));
+				edited_callback(window.parent.frames[0].frames[0].get_grid("#" + dataGridId));
+            } else if (response.data.next == "x") {//关闭dialog并刷新datagrid
+            	//edited_callback(window.parent._main_frame.get_grid("#" + dataGridId));
+            	edited_callback(window.parent.frames[0].frames[0].get_grid("#" + dataGridId));
+                close_dialog();//关闭dialog
+            }
+            else if (response.data.next == 'r') {
+
+            } else if (response.data.next == 'c') {
+                close_dialog(dialogId);//关闭dialog
+            } else {//关闭dialog并刷新页面
+
+                if (parent) {//dialog中有iframe
+                    if (parent.$("#_main_frame")) {
+                        parent.loadFrame(response.data.next);
+                    }
+                } else if ($("#_main_frame")) {
+                    loadFrame(response.data.next);
+                }
+                if(dialogId) {
+                    close_dialog(dialogId);//关闭dialog
+                }
+            }
+        }
+    }
+}
+</script>
+    #parse("index/_footer.vm")
+</body>
+</html>

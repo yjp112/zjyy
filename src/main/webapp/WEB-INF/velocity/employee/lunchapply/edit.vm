@@ -1,0 +1,161 @@
+#parse("index/_header.vm")
+<style>
+	.k-webkit .k-combobox .k-dropdown-wrap:before, .k-webkit .k-picker-wrap:before, .k-webkit .k-numeric-wrap:before {
+  		padding-bottom: .2em;
+	}
+	.n-bottom .msg-wrap {
+      margin-top: -15px;
+    }
+</style>
+</head>
+<body>
+<form id="myform" method="post" class="ui-layout-center ui-dialog-form">
+	<input type="hidden" id="processType" name="processType" />
+    <!--BPM -->
+    <input type="hidden" name="_bpm_param" value="$!{_bpm_param}"/>
+    <input type="hidden" name="_bpm_ts_id" value=""/>
+    <input type="hidden" name="bpm_ts_id" value=""/>
+    <input type="hidden" name="_bpm_enabled" value="true"/>
+    <input type="hidden" name="id" value="$!{lunchApply.id}">
+    <input type="hidden" name="lunchcode" value="$!{lunchApply.lunchcode}">
+    <input type="hidden" name="result" value="$!{lunchApply.result}">
+    <table width="100%">
+        <tr>
+            <td class="label"><label>姓名：</label></td>
+            <td>
+				<input type="text" class="k-textbox" id="personId" name="createId" style="display:none;" value="$!{lunchApply.createId}">
+				<input #if($!viewOnly) readonly #end type="text" class="k-textbox" readonly name="creator" value="$!{lunchApply.creator}">
+			</td>
+			
+            <td class="label"><label>部门：</label></td>
+            <td><input readonly type="text" class="k-textbox" value="$!{lunchApply.deptName}"></td>
+				
+            <td width="5%"></td>
+        </tr>
+		
+        <tr>
+			<td class="label"><label>餐别：</label></td>
+            <td class="ui-search-c">
+				<select #if($!viewOnly) disabled #end id="type" name="lunchType" class="k-textbox">
+					#foreach($item in $!lunchTypeList)
+						<option value="$item.enumValue" #if($!{lunchApply.lunchType} == $item.enumValue) selected="selected" #end>$item.enumText</option>
+					#end
+				</select>
+	        </td>
+				
+			<td class="label"><label>申请时间：</label></td>
+            <td><input type="text" class="k-textbox" name="createDate" readonly value="#date_format($!{lunchApply.createDate},'yyyy-MM-dd HH:mm')"></td>
+        </tr>
+		
+		<tr>
+			<td class="label"><label>就餐日期：</label></td>
+            <td><input type="text" class="k-textbox" name="lunchDate" readonly value="#date_format($!{lunchApply.lunchDate},'yyyy-MM-dd')"></td>
+				
+		</tr>
+		
+		<tr>
+            <td class="label">#if(!$!viewOnly) <span class="ui-form-required">*</span>#end 申请事由：</td>
+            <td colspan="3"><textarea #if($!viewOnly) readonly #end  data-rule="申请事由:required;length[~50]" class="k-textbox k-textarea" style="height:200px" name="reason">$!{lunchApply.reason}</textarea></td>
+        
+		</tr>
+		#if($!lunchApply.id && !$!hisView && !$!view)
+		 <tr>
+            <td class="label"><span class="ui-form-required">*</span>审批意见：</td>
+            <td colspan="3">
+                      <select id="status" name="status" class="k-textbox"  style="width:100px;">
+                                <option value="1" >同意</option>
+                                <option value="0" >不同意</option>
+                    </select>
+                   </td>
+        </tr>
+        <tr>
+			<td colspan="4">
+				<div class="ui-co-seg" style="padding-left:36px">
+                <div class="ui-co-flow">
+                    <div>
+                        流转意见(流转意见提交时保存)：
+                        <textarea id="_bpm_comment" class="k-textbox"  name="_bpm_comment" />$!_bpm_comment</textarea>
+                    </div>
+                </div>
+        	</div>
+			</td>
+		</tr>
+		#end
+		#if($!lunchApply.id)
+		  <tr>
+		      <td  colspan="4">
+		      <div style="padding-left: 36px;">
+		  			#parse("bpm/bpm_audit.vm")
+		  	  </div>
+		      </td>
+	      </tr>			
+        #end
+    </table>
+	
+</form>
+<div class="lf-tool ui-layout-south" >
+	#if($!lunchApply.id)
+	<div class="lf-btns">
+        <a href="javascript:showFlowChart('$!lunchApply.processInstanceId',1000,600);" class="lf-btn lf-btn-chart" title="查看流程图"></a>
+    </div>
+	#end
+<div class="lf-operate actions">
+	#foreach($ts in $!_bpm_transitions)
+	<button class="k-primary hc_btn" type="submit" id="$!ts.id"><i class="fa fa-save"></i>$!ts.name</button>
+	#end
+	#if(!$!viewOnly && !$!hisView)
+	<button class="hc_btn cancel" onclick="close_dialog('process_deal_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+	#end
+</div>
+</div>
+<script type="text/javascript">
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+	      defaults: {
+	        resizable: false,
+	        closable: false,
+	        spacing_open: 0
+	      },
+		  south: {
+			size: 40
+		  }
+	    });
+		$("#editor").kendoEditor();
+	});
+
+    $(document).ready(function () {
+
+        $("#myform").validator({
+                valid: function (form) {
+                    form_btn_submit($("#save_button_id"), form, function (res) {
+                        //console.log(res);
+                        validateCallback(res, "grid", "process_deal_dlg");
+                    });
+                }
+        });
+		
+    });
+	
+	$("button[type='submit']").click(function(en){
+		var eventId = en.currentTarget.id;
+		resetStatusValue(eventId);
+		$("input[name='_bpm_ts_id']").val(eventId);
+		$("input[name='bpm_ts_id']").val(eventId);
+        $("input[name='_bpm_enabled']", $("#myform")).val(true);
+        $("#myform").attr("action", "$!{rc.contextPath}/employee/lunchapply/save");
+		$("#myform").submit();
+    });
+
+    function resetStatusValue(ts) {
+        if (ts == "LUNCH_APPLY") {
+            $("input[name='processType']").val('01');
+        } else if (ts == "LUNCH_COMFIRM_YES") {
+            $("input[name='processType']").val('01');
+        } else if (ts == "LUNCH_COMFIRM_NO") {
+            $("input[name='processType']").val('02');
+        } 
+    }
+	
+</script>
+</body>
+</html>

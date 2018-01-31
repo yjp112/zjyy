@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.supconit.maintain.entities.MaintainTask" >
+	<resultMap id="maintainTaskResultMap" type="com.supconit.maintain.entities.MaintainTask" >
+		<id column="ID" property="id" jdbcType="DECIMAL" />
+	    <result column="PROCESS_INSTANCE_ID" property="processInstanceId" jdbcType="VARCHAR" />
+	    <result column="MAINTAIN_CODE" property="maintainCode" jdbcType="VARCHAR" />
+	    <result column="MAINTAIN_DESCRIPTION" property="maintainDescription" jdbcType="VARCHAR" />
+	    <result column="MAINTAIN_GROUP_ID" property="maintainGroupId" jdbcType="DECIMAL" />
+	    <result column="MAINTAIN_GROUP_NAME" property="maintainGroupName" jdbcType="VARCHAR" />
+	    <result column="MAINTAIN_PERSON_ID" property="maintainPersonId" jdbcType="DECIMAL" />
+	    <result column="MAINTAIN_PERSON_NAME" property="maintainPersonName" jdbcType="VARCHAR" />
+	    <result column="MAINTAIN_WORKER_IDS" property="maintainWorkerIds" jdbcType="VARCHAR" />
+	    <result column="MAINTAIN_WORKER_NAMES" property="maintainWorkerNames" jdbcType="VARCHAR" />
+	    <result column="PLAN_ID" property="planId" jdbcType="DECIMAL" />
+	    <result column="EXPECT_START_TIME" property="expectStartTime" jdbcType="DATE" />
+	    <result column="ACTUAL_START_TIME" property="actualStartTime" jdbcType="DATE" />
+	    <result column="ACTUAL_END_TIME" property="actualEndTime" jdbcType="DATE" />
+	    <result column="STATUS" property="status" jdbcType="DECIMAL" />
+	    <result column="STATUS" property="statuss" jdbcType="DECIMAL" />
+	    <result column="REMARK" property="remark" jdbcType="VARCHAR" />
+	    <result column="CURRENTNODE" property="currentNode" jdbcType="VARCHAR" />
+	</resultMap>
+  
+	
+	<sql id="TABLE_NAME" lang="velocity">MAINTAIN_TASK</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	<sql id="select_pre" lang="velocity">
+		SELECT
+			a.ID
+			,a.PROCESS_INSTANCE_ID
+			,a.MAINTAIN_CODE
+			,a.MAINTAIN_DESCRIPTION
+			,a.MAINTAIN_GROUP_ID
+			,a.MAINTAIN_GROUP_NAME
+			,a.MAINTAIN_PERSON_ID
+			,a.MAINTAIN_PERSON_NAME
+			,a.MAINTAIN_WORKER_IDS
+			,a.MAINTAIN_WORKER_NAMES
+			,a.PLAN_ID
+			,a.EXPECT_START_TIME
+			,a.ACTUAL_START_TIME
+			,a.ACTUAL_END_TIME
+			,a.STATUS
+			,a.REMARK
+		FROM  <include refid="TABLE_NAME"/> a
+	</sql>
+    <update id="readyForTask">
+  		{call proc_maintain_task()}
+  	</update>
+    <select id="findReadyTask" resultMap="maintainTaskResultMap" lang="velocity" databaseId="oracle">
+		<include refid="select_pre"/> <![CDATA[where PROCESS_INSTANCE_ID is null and expect_start_time<last_day(trunc(add_Months(SYSDATE,1), 'Month'))+1
+		]]>
+    </select>
+    <select id="findReadyTask" resultMap="maintainTaskResultMap" lang="velocity" databaseId="sqlserver">
+		<include refid="select_pre"/> <![CDATA[where PROCESS_INSTANCE_ID is null and expect_start_time<convert(datetime,convert(varchar(10),dateadd(day,-day(getdate())+1,dateadd(month,2,getdate())),20),20)
+		]]>
+    </select>
+    
+    <sql id="select_pre_content" lang="velocity">
+		SELECT
+			DISTINCT
+			a.MAINTAIN_CODE
+		FROM MAINTAIN_TASK_CONTENT a
+		LEFT JOIN DEVICE d ON a.DEVICE_ID = d.ID
+	</sql>
+	
+	 <sql id="count_pre_content" lang="velocity">
+	    SELECT COUNT(DISTINCT(a.MAINTAIN_CODE))
+	    FROM MAINTAIN_TASK_CONTENT a 
+		LEFT JOIN DEVICE d ON a.DEVICE_ID = d.ID
+    </sql>
+    
+    <sql id="condition_sql_content" lang="velocity">
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			#if($_p.deviceCode && $_p.deviceCode != '')
+				#set($_deviceCode = '%' + $_p.deviceCode + '%')
+				AND d.DEVICE_CODE LIKE @{_deviceCode} ESCAPE '/' 
+			#end
+			#if($_p.deviceName && $_p.deviceName != '')
+				#set($_deviceName = '%' + $_p.deviceName + '%')
+				AND d.DEVICE_NAME LIKE @{_deviceName} ESCAPE '/' 
+			#end
+			#if($_p.deviceCategoryChildIds && $_p.deviceCategoryChildIds.size()>0)
+				#set($_deviceCategoryChildIds =$_p.deviceCategoryChildIds)
+				AND 
+				#repeat( $_deviceCategoryChildIds $id "," " d.CATEGORY_ID IN (" ")" )
+					@{id,jdbcType=BIGINT}
+				#end
+			#end
+			#if($_p.geoAreaChildIds && $_p.geoAreaChildIds.size()>0)
+				#set($_geoAreaChildIds =$_p.geoAreaChildIds)
+				AND 
+				#repeat( $_geoAreaChildIds $id "," " d.LOCATION_ID IN (" ")" )
+					@{id,jdbcType=BIGINT}
+				#end
+			#end
+		#end
+		]]>	
+    </sql>
+    
+    <!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.maintain.entities.MaintainTask" resultMap="maintainTaskResultMap" lang="velocity" databaseId="oracle">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre_content"/>
+		<include refid="condition_sql_content"/>
+		#order($_parameter.condition,"a.MAINTAIN_CODE DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.maintain.entities.MaintainTask" resultMap="maintainTaskResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			DISTINCT
+			a.MAINTAIN_CODE
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"a.MAINTAIN_CODE DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM MAINTAIN_TASK_CONTENT a
+		LEFT JOIN DEVICE d ON a.DEVICE_ID = d.ID
+		<include refid="condition_sql_content"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countByConditions" resultType="long" lang="velocity">
+        <include refid="count_pre_content"/>
+        <include refid="condition_sql_content"/>
+    </select>
+    
+    <!-- 按条件查询记录-->
+    <select id="selectMaintainTaskList" parameterType="com.supconit.maintain.entities.MaintainTask" resultMap="maintainTaskResultMap" lang="velocity" >
+        SELECT
+			a.ID
+			,a.PROCESS_INSTANCE_ID
+			,a.MAINTAIN_CODE
+			,a.MAINTAIN_DESCRIPTION
+			,a.MAINTAIN_GROUP_ID
+			,a.MAINTAIN_GROUP_NAME
+			,a.MAINTAIN_PERSON_ID
+			,a.MAINTAIN_PERSON_NAME
+			,a.MAINTAIN_WORKER_IDS
+			,a.MAINTAIN_WORKER_NAMES
+			,a.PLAN_ID
+			,a.EXPECT_START_TIME
+			,a.ACTUAL_START_TIME
+			,a.ACTUAL_END_TIME
+			,a.STATUS
+			,a.REMARK
+			,but.NAME CURRENTNODE
+		FROM  <include refid="TABLE_NAME"/> a
+		LEFT JOIN BPM_USER_TASK but ON a.PROCESS_INSTANCE_ID = but.PROCESS_INSTANCE_ID
+		WHERE 1=1
+		<![CDATA[
+			#set($_p = $_parameter.condition)
+			#if($_p.status)
+				#set($_status = $_p.status)
+				AND a.STATUS = @{_status}
+			#end
+			#if($_p.beginTime && $_p.beginTime != '')
+				#set($_beginTime = $_p.beginTime)
+				AND a.ACTUAL_END_TIME >= @{_beginTime,jdbcType=TIMESTAMP}
+			#end
+			#if($_p.endTime && $_p.endTime != '')
+				#set($_endTime = $_p.endTime)
+				AND a.ACTUAL_START_TIME <= @{_endTime,jdbcType=TIMESTAMP}
+			#end
+			#if($_p.maintainCodeList && $_p.maintainCodeList.size()>0)
+				AND
+				#repeat( $_p.maintainCodeList $code "," " a.MAINTAIN_CODE IN (" ")" )
+					@{code,jdbcType=VARCHAR}
+				#end
+			#end
+		]]>
+		ORDER BY a.MAINTAIN_CODE DESC
+    </select>
+    
+    <select id="getById" resultMap="maintainTaskResultMap" parameterType="long" lang="velocity">
+		<include refid="select_pre"/>
+		WHERE a.ID = @{_parameter, jdbcType=BIGINT}
+	</select>
+	
+	<!-- 更新记录-->
+	<update id="update"  parameterType="com.supconit.maintain.entities.MaintainTask" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+			#mset()
+				<![CDATA[
+			        #if($_parameter.status)STATUS = @{_parameter.status,jdbcType=INTEGER},#end
+			        #if($_parameter.maintainPersonId)MAINTAIN_PERSON_ID = @{_parameter.maintainPersonId,jdbcType=BIGINT},#end
+			        #if($_parameter.maintainPersonName && $_parameter.maintainPersonName !='')MAINTAIN_PERSON_NAME = @{_parameter.maintainPersonName,jdbcType=VARCHAR},#end
+			        #if($_parameter.maintainWorkerIds && $_parameter.maintainWorkerIds !='')MAINTAIN_WORKER_IDS = @{_parameter.maintainWorkerIds,jdbcType=VARCHAR},#end
+			        #if($_parameter.maintainWorkerNames && $_parameter.maintainWorkerNames !='')MAINTAIN_WORKER_NAMES = @{_parameter.maintainWorkerNames,jdbcType=VARCHAR},#end
+			        #if($_parameter.actualStartTime)ACTUAL_START_TIME = @{_parameter.actualStartTime,jdbcType=DATE},#end
+			        #if($_parameter.actualEndTime)ACTUAL_END_TIME = @{_parameter.actualEndTime,jdbcType=DATE},#end
+			    ]]>
+			#end
+		WHERE ID = @{_parameter.id,jdbcType=BIGINT}
+	</update>
+	
+	 <!-- 按条件查询记录-->
+    <select id="findProcessIds" resultType="long"  lang="velocity" >
+        SELECT
+			but.ID
+		FROM  <include refid="TABLE_NAME"/> a
+		LEFT JOIN BPM_USER_TASK but ON a.PROCESS_INSTANCE_ID=but.PROCESS_INSTANCE_ID
+		WHERE 1=1
+		<![CDATA[
+			#if($_parameter.ids && $_parameter.ids.size()>0)
+				AND
+				#repeat( $_parameter.ids $id "," " a.ID IN (" ")" )
+					@{id,jdbcType=VARCHAR}
+				#end
+			#end
+		]]>
+    </select>
+    
+    <select id="getByDeviceId" resultMap="maintainTaskResultMap" parameterType="long" lang="velocity">
+		<include refid="select_pre"/>
+		WHERE ID = (
+			SELECT MIN(d.ID) FROM (
+			       SELECT c.id,c.MAINTAIN_CODE,c.ACTUAL_START_TIME FROM <include refid="TABLE_NAME"/> c
+			       WHERE c.MAINTAIN_CODE in (
+			             SELECT b.MAINTAIN_CODE FROM MAINTAIN_TASK_CONTENT b
+			             WHERE b.DEVICE_ID = @{_parameter.deviceId, jdbcType=BIGINT}
+			             )
+			       and c.STATUS = @{_parameter.status, jdbcType=BIGINT}
+			  ) d
+			WHERE d.ACTUAL_START_TIME = (
+			      SELECT MIN(c.ACTUAL_START_TIME) FROM <include refid="TABLE_NAME"/> c
+			       WHERE c.MAINTAIN_CODE in (
+			             SELECT b.MAINTAIN_CODE FROM MAINTAIN_TASK_CONTENT b
+			             WHERE b.DEVICE_ID = @{_parameter.deviceId, jdbcType=BIGINT}
+			             )
+			       and c.STATUS = @{_parameter.status, jdbcType=BIGINT}
+			)
+		)
+	</select>
+</mapper>

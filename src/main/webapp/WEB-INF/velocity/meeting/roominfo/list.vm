@@ -1,0 +1,241 @@
+#parse("index/_header.vm")
+</head>
+<body>
+  <div class="ui-layout-west" style="border-right:solid 1px #e1e5e6;" id="leftTreeWrap">
+	<div class="ui-layout-north">
+		<div class="k-header k-grid-toolbar" style="padding-left:10px;">部门</div>
+	</div>
+	<div class="ui-layout-center">
+		<ul id="MeetingTypeTree" class="ztree"></ul>
+	</div>
+  </div>
+
+	<div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<form class="ui-form" id='queryForm'>
+			<input id="treeId" type="hidden" name="treeId" value="$!{treeId}">
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+                <tr>
+                  <td class="ui-search-name first">会议室名称：</td>
+                  <td class="ui-search-c">
+                    <input name="roomName" value="$!meeting.roomName" class="k-textbox" type="text">
+                  </td>
+				  
+				  <td class="ui-search-name">会议室类别：</td>
+                  <td class="ui-search-c">
+		               <select  class="k-textbox" name="roomType">
+						<option value=''>--请选择--</option>
+				    	${roomTypeList}
+				       </select>
+	              </td>
+					
+				  <td class="ui-search-name">多功能会议室：</td>
+                  <td class="ui-search-c">
+		               <select  class="k-textbox" name="multiFunctional">
+						<option value=''>--请选择--</option>
+				    	${multiFunction}
+				       </select>
+	              </td>
+				  
+				  <td class="ui-search-name">网络情况：</td>
+				  <td class="ui-search-c">
+		               <select  class="k-textbox" name="network">
+						<option value=''>--请选择--</option>
+				    	${network}
+				       </select>
+	              </td>
+				  
+				    
+                </tr>
+              </table>
+            </td>
+            <td width="150" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn" onclick="cancelLeftTreeSelected();"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+            <td></td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+#parse("index/_footer.vm") 
+
+<script type="text/javascript">
+  var _iframe_layout, _left_layout, _inner_layout;
+	$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      },
+      west: {
+        size: 0.18
+      }
+    });
+
+    _left_layout = $("#leftTreeWrap").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      }
+    });
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+
+    $('#resetBtn').click(function(){
+    	$("input[name='useDeptId']").val("");
+		$("#queryForm :text").val("");  
+    });
+
+		$('.iconfont','.ui-form-pick').each(function(){
+      $(this).click(function(){
+      	$('#treeId').val('');
+      	$('#selectBlock').hide();
+      })
+    })
+	
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/meeting/roomInfo/list", [{
+              field: "id",
+              hidden: true
+          }, {
+              field: "roomName",
+              title: "会议室名称",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {     
+      		  	 title:"#: data.areaName==null? '':data.areaName #",
+      			 "class": "k-grid-text"
+    		  },
+               width: 200
+          }, {
+              field: "roomTypeName",
+              title: "会议室类别",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+    		  attributes: {"class": "k-grid-equilong"},
+              width: 80
+          }, {
+              field: "deptName==''? '一汽技术中心':deptName",
+              title: "所属部门",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {     
+      		  	 title:"#: data.fullLevelName==null? '':data.fullLevelName #",
+      			 "class": "k-grid-text k-grid-nowrap"
+    		  },
+              width: 150
+          }, {
+              field: "capacityPerson",
+              title: "可容纳人数",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-num"},
+    		  attributes: {"class": "k-grid-num"},
+              width: 70
+          }, {
+              field: "location",
+              title: "地理位置",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {     
+      		  	 title:"#: data.fullLevelName==null? '':data.fullLevelName #",
+      			 "class": "k-grid-text k-grid-nowrap"
+    		  },
+              width: 100
+          },{
+              field: "networkName",
+              title: "网络情况",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+    		  attributes: {"class": "k-grid-text"},
+              width: 80
+          },{
+              field: "multiFunctionalName",
+              title: "多功能会议室",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+    		  attributes: {"class": "k-grid-equilong"},
+              width: 80
+          },{
+              field: "isSign=='1'? '是':'否'",
+              title: "签到",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+    		  attributes: {"class": "k-grid-equilong"},
+              width: 80
+          },{
+              field: "remark",
+			  title: "备注",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {     
+  				 title:"#: data.remark #",
+  				 "class": "k-grid-text k-grid-nowrap"
+			   },
+			  width: 150
+          }], 
+      {
+    	  resizable:true,
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          }
+      }, {
+          serverSorting: true
+      },[
+      #kendo_datagrid_btns("MEETING_ROOM")#end
+      ]);
+		
+    });
+
+    /* zTree */
+    var setting = {
+    	data: {
+    		simpleData: {enable: true}
+          },
+          callback: {
+    			onClick: function(event, treeId, treeNode) {
+    				 $('#treeId').val(treeNode.id);
+    			 	 $('#selectBlock').show();
+    				 $('#queryBtn').click();
+    			}
+    		}
+    };
+  	var zNodes = [];  
+  	zNodes.push({id:"10001", pId:"0", name:"一汽技术中心", open:"true"});
+    #foreach($!{treeNode} in $!{deptList})
+		zNodes.push({id:$!{treeNode.id}, pId:$!{treeNode.pid}, name:"$!{treeNode.name}"});
+  	#end  
+
+  	$(document).ready(function(){
+  		$.fn.zTree.init($("#MeetingTypeTree"), setting,zNodes);
+  	});
+	
+	function cancelLeftTreeSelected(){
+		$('#treeId').val('');
+		$.fn.zTree.init($("#MeetingTypeTree"), setting,zNodes);
+	}
+</script>
+</body>
+</html>

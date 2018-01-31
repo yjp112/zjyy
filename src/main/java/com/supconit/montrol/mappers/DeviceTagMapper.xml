@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 学习可参看：http://www.mybatis.org/core/zh/index.html -->
+
+<mapper namespace="com.supconit.montrol.entity.DeviceTag">
+
+	<resultMap type="com.supconit.montrol.entity.DeviceTag" id="DataResultMap">
+		<id property="id" column="ID" />
+		<result property="monitorID" column="MONITORID" />
+		<result property="tagName" column="TAGNAME" />
+		<result property="tagType" column="TAGTYPE" />
+		<result property="tagDesc" column="TAGDESC" />
+		<result property="alarmPoint" column="ALARMPOINT" />
+		<result property="isWrite" column="ISWRITE" />
+		<result property="extension1" column="EXTENSION1" />
+		<result property="extension2" column="EXTENSION2" />
+	</resultMap>
+    <sql id="TABLE_NAME" lang="velocity">A_DEVICETAG</sql>
+    <sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+    <sql id="COUNT_PRE" lang="velocity">SELECT COUNT(1) FROM <include refid="TABLE_NAME"/></sql>
+    <sql id="SELECT_PRE" lang="velocity">SELECT * FROM  <include refid="TABLE_NAME"/>
+    </sql>
+    <sql id="SEARCH_CONDITION_SQL" lang="velocity">
+        <![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			#if($_p.tagName && $_p.tagName != '')
+				#set($_tagName = '%' + $_p.tagName + '%')
+				AND TAGNAME LIKE @{_tagName}
+			#end
+			#if($_p.monitorID && $_p.monitorID != '')
+				#set($_monitorID =  $_p.monitorID )
+				AND MONITORID = @{_monitorID}
+			#end
+		#end
+		]]>
+    </sql>
+
+    <sql id="INSERT_SQL" lang="velocity">
+        INSERT INTO <include refid="TABLE_NAME"/>(
+        #if($_databaseId == 'oracle') ID, #end
+        MONITORID,
+        TAGNAME,
+        TAGTYPE,
+        TAGDESC,
+        ALARMPOINT,
+        EXTENSION1,
+        EXTENSION2,
+        ISWRITE
+        ) VALUES (
+        #if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end
+        @{_parameter.monitorID,jdbcType=VARCHAR},
+        @{_parameter.tagName,jdbcType=VARCHAR},
+        @{_parameter.tagType,jdbcType=VARCHAR},
+        @{_parameter.tagDesc,jdbcType=VARCHAR},
+        @{_parameter.alarmPoint,jdbcType=NUMERIC},
+        @{_parameter.extension1,jdbcType=VARCHAR},
+        @{_parameter.extension1,jdbcType=VARCHAR},
+        @{_parameter.isWrite,jdbcType=NUMERIC}
+        )
+    </sql>
+    <insert id="insert" parameterType="com.supconit.montrol.entity.DeviceTag" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+        <selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="INSERT_SQL" />
+    </insert>
+    <insert id="insert" parameterType="com.supconit.montrol.entity.DeviceTag" keyProperty="id" keyColumn="ID" lang="velocity">
+        <include refid="INSERT_SQL"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+
+    <update id="update" parameterType="com.supconit.montrol.entity.DeviceTag" lang="velocity">
+        UPDATE <include refid="TABLE_NAME"/>
+        #mset()
+        <![CDATA[
+            #if($_parameter.monitorID)MONITORID = @{_parameter.monitorID,jdbcType=VARCHAR},#end
+            #if($_parameter.tagName)TAGNAME = @{_parameter.tagName,jdbcType=VARCHAR},#end
+            #if($_parameter.tagType)TAGTYPE = @{_parameter.tagType,jdbcType=VARCHAR},#end
+            #if($_parameter.tagDesc)TAGDESC = @{_parameter.tagDesc,jdbcType=VARCHAR},#end
+            #if($_parameter.alarmPoint)ALARMPOINT = @{_parameter.alarmPoint,jdbcType=NUMERIC},#end
+            #if($_parameter.extension1)EXTENSION1 = @{_parameter.extension1,jdbcType=VARCHAR},#end
+            #if($_parameter.extension2)EXTENSION2 = @{_parameter.extension2,jdbcType=VARCHAR},#end
+            #if($_parameter.isWrite)ISWRITE = @{_parameter.isWrite,jdbcType=NUMERIC},#end
+        ]]>
+        #end
+        WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+    </update>
+
+    <delete id="deleteById" parameterType="long" lang="velocity">
+        DELETE FROM <include refid="TABLE_NAME"/> WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+    </delete>
+
+    <select id="getByName" parameterType="com.supconit.montrol.entity.DeviceTag" resultMap="DataResultMap" lang="velocity">
+        <include refid="SELECT_PRE"/>
+        WHERE TAGNAME = @{_parameter.tagName, jdbcType=VARCHAR}
+    </select>
+
+    <select id="getById" parameterType="long" resultMap="DataResultMap" lang="velocity">
+        <include refid="SELECT_PRE"/>
+        WHERE ID = @{_parameter, jdbcType=NUMERIC}
+    </select>
+
+    <select id="selectPager" lang="velocity" resultMap="DataResultMap" parameterType="com.supconit.montrol.entity.DeviceTag">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+        <include refid="SELECT_PRE"/>
+        <include refid="SEARCH_CONDITION_SQL"/>
+        #order($_parameter.condition,"ID ")
+        <include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="selectPager" lang="velocity" resultMap="DataResultMap" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+        SELECT *
+        <include refid="_PUBLIC_V.ROW_NUMBER_OVER" />
+        #order($_parameter.condition,"ID ")
+        <include refid="_PUBLIC_V.AS_ROW_NUM" />
+        FROM <include refid="TABLE_NAME"/>
+        <include refid="SEARCH_CONDITION_SQL"/>
+        <include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countPager" lang="velocity" resultType="long">
+        <include refid="COUNT_PRE"/><include refid="SEARCH_CONDITION_SQL"/>
+    </select>
+</mapper>

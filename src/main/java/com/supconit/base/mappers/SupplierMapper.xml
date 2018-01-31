@@ -1,0 +1,417 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.base.entities.Supplier">
+
+	<resultMap type="com.supconit.base.entities.Supplier" id="SupplierResultMap">      
+        <result property="id" column="ID" />
+        <result property="supplierCode" column="SUPPLIER_CODE" />
+        <result property="fullName" column="FULL_NAME" />
+        <result property="simpleName" column="SIMPLE_NAME" />
+        <result property="shortCode" column="SHORT_CODE" />
+        <result property="legalPerson" column="LEGAL_PERSON" />
+        <result property="businessLicense" column="BUSINESS_LICENSE" />
+        <result property="licenseExpiryDate" column="LICENSE_EXPIRY_DATE" />
+        <result property="companyType" column="COMPANY_TYPE" />
+        <result property="website" column="WEBSITE" />
+        <result property="address" column="ADDRESS" />
+        <result property="contact" column="CONTACT" />
+        <result property="telNo" column="TEL_NO" />
+        <result property="mobile" column="MOBILE" />
+        <result property="fax" column="FAX" />
+        <result property="email" column="EMAIL" />
+        <result property="zipCode" column="ZIP_CODE" />
+        <result property="postAddress" column="POST_ADDRESS" />
+        <result property="bank" column="BANK" />
+        <result property="bankAccount" column="BANK_ACCOUNT" />
+        <result property="remark" column="REMARK" />
+        <result property="createId" column="CREATE_ID" />
+        <result property="creator" column="CREATOR" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="updateId" column="UPDATE_ID" />
+        <result property="updator" column="UPDATOR" />
+        <result property="updateDate" column="UPDATE_DATE" />
+	</resultMap>
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+	<sql id="TABLE_NAME" lang="velocity">SUPPLIER</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+    <!-- 获取记录列表-->
+	<sql id="select_pre" lang="velocity">
+    select 
+        ID,
+        SUPPLIER_CODE,
+        FULL_NAME,
+        SIMPLE_NAME,
+        SHORT_CODE,
+        LEGAL_PERSON,
+        BUSINESS_LICENSE,
+        LICENSE_EXPIRY_DATE,
+        COMPANY_TYPE,
+        WEBSITE,
+        ADDRESS,
+        CONTACT,
+        TEL_NO,
+        MOBILE,
+        FAX,
+        EMAIL,
+        ZIP_CODE,
+        POST_ADDRESS,
+        BANK,
+        BANK_ACCOUNT,
+        REMARK,
+        CREATE_ID,
+        CREATOR,
+        CREATE_DATE,
+        UPDATE_ID,
+        UPDATOR,
+        UPDATE_DATE		
+		FROM
+		SUPPLIER
+	</sql>
+	<sql id="count_pre" lang="velocity">
+		SELECT
+		COUNT(*)
+		FROM
+		SUPPLIER
+	</sql>
+	<insert id="insert" parameterType="com.supconit.base.entities.Supplier" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="INSERT_SQL"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    <insert id="insert" parameterType="com.supconit.base.entities.Supplier" 
+		keyProperty="id" keyColumn="ID" 		lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>        
+		<include refid="INSERT_SQL" />
+	</insert>	
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>
+		(#if($_databaseId=='oracle') ID,#end   
+		SUPPLIER_CODE,
+        FULL_NAME,
+        SIMPLE_NAME,
+        SHORT_CODE,
+        LEGAL_PERSON,
+        BUSINESS_LICENSE,
+        LICENSE_EXPIRY_DATE,
+        COMPANY_TYPE,
+        WEBSITE,
+        ADDRESS,
+        CONTACT,
+        TEL_NO,
+        MOBILE,
+        FAX,
+        EMAIL,
+        ZIP_CODE,
+        POST_ADDRESS,
+        BANK,
+        BANK_ACCOUNT,
+        REMARK,
+        CREATE_ID,
+        CREATOR,
+        CREATE_DATE,
+        UPDATE_ID,
+        UPDATOR,
+        UPDATE_DATE 
+        ) VALUES (        
+		#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end
+		@{_parameter.supplierCode,jdbcType=VARCHAR},
+        @{_parameter.fullName,jdbcType=VARCHAR},
+        @{_parameter.simpleName,jdbcType=VARCHAR},
+        @{_parameter.shortCode,jdbcType=VARCHAR},
+        @{_parameter.legalPerson,jdbcType=VARCHAR},
+        @{_parameter.businessLicense,jdbcType=VARCHAR},
+        @{_parameter.licenseExpiryDate,jdbcType=NVARCHAR},
+        @{_parameter.companyType,jdbcType=VARCHAR},
+        @{_parameter.website,jdbcType=VARCHAR},
+        @{_parameter.address,jdbcType=VARCHAR},
+        @{_parameter.contact,jdbcType=VARCHAR},
+        @{_parameter.telNo,jdbcType=VARCHAR},
+        @{_parameter.mobile,jdbcType=VARCHAR},
+        @{_parameter.fax,jdbcType=VARCHAR},
+        @{_parameter.email,jdbcType=VARCHAR},
+        @{_parameter.zipCode,jdbcType=VARCHAR},
+        @{_parameter.postAddress,jdbcType=VARCHAR},
+        @{_parameter.bank,jdbcType=VARCHAR},
+        @{_parameter.bankAccount,jdbcType=VARCHAR},
+        @{_parameter.remark,jdbcType=VARCHAR},
+        @{_parameter.createId,jdbcType=NUMERIC},
+        @{_parameter.creator,jdbcType=VARCHAR},
+        @{_parameter.createDate,jdbcType=DATE},
+        @{_parameter.updateId,jdbcType=NUMERIC},
+        @{_parameter.updator,jdbcType=VARCHAR},
+        @{_parameter.updateDate,jdbcType=DATE}		
+		)
+	</sql>
+    <!-- 插入记录-->
+	<sql id="insert_sql">
+		INSERT INTO SUPPLIER(        
+        SUPPLIER_CODE,
+        FULL_NAME,
+        SIMPLE_NAME,
+        SHORT_CODE,
+        LEGAL_PERSON,
+        BUSINESS_LICENSE,
+        LICENSE_EXPIRY_DATE,
+        COMPANY_TYPE,
+        WEBSITE,
+        ADDRESS,
+        CONTACT,
+        TEL_NO,
+        MOBILE,
+        FAX,
+        EMAIL,
+        ZIP_CODE,
+        POST_ADDRESS,
+        BANK,
+        BANK_ACCOUNT,
+        REMARK,
+        CREATE_ID,
+        CREATOR,
+        CREATE_DATE,
+        UPDATE_ID,
+        UPDATOR,
+        UPDATE_DATE
+		) VALUES (        
+        #{supplierCode,jdbcType=VARCHAR},
+        #{fullName,jdbcType=VARCHAR},
+        #{simpleName,jdbcType=VARCHAR},
+        #{shortCode,jdbcType=VARCHAR},
+        #{legalPerson,jdbcType=VARCHAR},
+        #{businessLicense,jdbcType=VARCHAR},
+        #{licenseExpiryDate,jdbcType=NVARCHAR},
+        #{companyType,jdbcType=VARCHAR},
+        #{website,jdbcType=VARCHAR},
+        #{address,jdbcType=VARCHAR},
+        #{contact,jdbcType=VARCHAR},
+        #{telNo,jdbcType=VARCHAR},
+        #{mobile,jdbcType=VARCHAR},
+        #{fax,jdbcType=VARCHAR},
+        #{email,jdbcType=VARCHAR},
+        #{zipCode,jdbcType=VARCHAR},
+        #{postAddress,jdbcType=VARCHAR},
+        #{bank,jdbcType=VARCHAR},
+        #{bankAccount,jdbcType=VARCHAR},
+        #{remark,jdbcType=VARCHAR},
+        #{createId,jdbcType=NUMERIC},
+        #{creator,jdbcType=VARCHAR},
+        #{createDate,jdbcType=DATE},
+        #{updateId,jdbcType=NUMERIC},
+        #{updator,jdbcType=VARCHAR},
+        #{updateDate,jdbcType=DATE}		
+		)
+	</sql>
+
+	<select id="getById" resultMap="SupplierResultMap" parameterType="Long">
+		select 
+        ID,
+        SUPPLIER_CODE,
+        FULL_NAME,
+        SIMPLE_NAME,
+        SHORT_CODE,
+        LEGAL_PERSON,
+        BUSINESS_LICENSE,
+        LICENSE_EXPIRY_DATE,
+        COMPANY_TYPE,
+        WEBSITE,
+        ADDRESS,
+        CONTACT,
+        TEL_NO,
+        MOBILE,
+        FAX,
+        EMAIL,
+        ZIP_CODE,
+        POST_ADDRESS,
+        BANK,
+        BANK_ACCOUNT,
+        REMARK,
+        CREATE_ID,
+        CREATOR,
+        CREATE_DATE,
+        UPDATE_ID,
+        UPDATOR,
+        UPDATE_DATE		
+		FROM
+		SUPPLIER        
+        WHERE ID = #{id}
+	</select>
+	
+	<select id="findByCode" resultMap="SupplierResultMap" parameterType="string">
+		select 
+        ID,
+        SUPPLIER_CODE,
+        FULL_NAME,
+        SIMPLE_NAME,
+        SHORT_CODE,
+        LEGAL_PERSON,
+        BUSINESS_LICENSE,
+        LICENSE_EXPIRY_DATE,
+        COMPANY_TYPE,
+        WEBSITE,
+        ADDRESS,
+        CONTACT,
+        TEL_NO,
+        MOBILE,
+        FAX,
+        EMAIL,
+        ZIP_CODE,
+        POST_ADDRESS,
+        BANK,
+        BANK_ACCOUNT,
+        REMARK,
+        CREATE_ID,
+        CREATOR,
+        CREATE_DATE,
+        UPDATE_ID,
+        UPDATOR,
+        UPDATE_DATE		
+		FROM
+		SUPPLIER        
+        WHERE SUPPLIER_CODE = #{supplierCode}
+	</select>
+	
+	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.base.entities.Supplier">
+		UPDATE	SUPPLIER
+		<set>
+        <if test="supplierCode != null">SUPPLIER_CODE = #{supplierCode,jdbcType=VARCHAR},</if>
+        <if test="fullName != null">FULL_NAME = #{fullName,jdbcType=VARCHAR},</if>
+        <if test="simpleName != null">SIMPLE_NAME = #{simpleName,jdbcType=VARCHAR},</if>
+        <if test="shortCode != null">SHORT_CODE = #{shortCode,jdbcType=VARCHAR},</if>
+        <if test="legalPerson != null">LEGAL_PERSON = #{legalPerson,jdbcType=VARCHAR},</if>
+        <if test="businessLicense != null">BUSINESS_LICENSE = #{businessLicense,jdbcType=VARCHAR},</if>
+        <if test="licenseExpiryDate != null">LICENSE_EXPIRY_DATE = #{licenseExpiryDate,jdbcType=NVARCHAR},</if>
+        <if test="companyType != null">COMPANY_TYPE = #{companyType,jdbcType=VARCHAR},</if>
+        <if test="website != null">WEBSITE = #{website,jdbcType=VARCHAR},</if>
+        <if test="address != null">ADDRESS = #{address,jdbcType=VARCHAR},</if>
+        <if test="contact != null">CONTACT = #{contact,jdbcType=VARCHAR},</if>
+        <if test="telNo != null">TEL_NO = #{telNo,jdbcType=VARCHAR},</if>
+        <if test="mobile != null">MOBILE = #{mobile,jdbcType=VARCHAR},</if>
+        <if test="fax != null">FAX = #{fax,jdbcType=VARCHAR},</if>
+        <if test="email != null">EMAIL = #{email,jdbcType=VARCHAR},</if>
+        <if test="zipCode != null">ZIP_CODE = #{zipCode,jdbcType=VARCHAR},</if>
+        <if test="postAddress != null">POST_ADDRESS = #{postAddress,jdbcType=VARCHAR},</if>
+        <if test="bank != null">BANK = #{bank,jdbcType=VARCHAR},</if>
+        <if test="bankAccount != null">BANK_ACCOUNT = #{bankAccount,jdbcType=VARCHAR},</if>
+        <if test="remark != null">REMARK = #{remark,jdbcType=VARCHAR},</if>
+        <if test="createId != null">CREATE_ID = #{createId,jdbcType=NUMERIC},</if>
+        <if test="creator != null">CREATOR = #{creator,jdbcType=VARCHAR},</if>
+        <if test="createDate != null">CREATE_DATE = #{createDate,jdbcType=DATE},</if>
+        <if test="updateId != null">UPDATE_ID = #{updateId,jdbcType=NUMERIC},</if>
+        <if test="updator != null">UPDATOR = #{updator,jdbcType=VARCHAR},</if>
+        <if test="updateDate != null">UPDATE_DATE = #{updateDate,jdbcType=DATE},</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+    <!-- 通过 ID 获取对象-->
+	<delete id="deleteById" parameterType="Long">
+		DELETE FROM SUPPLIER WHERE ID = #{id}
+	</delete>
+	<sql id="condition_sql" lang="velocity">
+	<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			1=1 		
+			#if($_p.id)
+				#set($_id = $_p.id)
+				AND ID = @{_id,jdbcType=BIGINT}
+			#end
+			#if($_p.supplierCode && $_p.supplierCode != '')
+				#set($_supplierCode = '%' + $_p.supplierCode + '%')
+				AND SUPPLIER_CODE like @{_supplierCode,jdbcType=VARCHAR}
+			#end
+			#if($_p.fullName && $_p.fullName != '')
+				#set($_fullName = '%' + $_p.fullName + '%')
+				AND FULL_NAME like @{_fullName,jdbcType=VARCHAR}
+			#end
+			#if($_p.simpleName && $_p.simpleName != '')
+				#set($_simpleName = '%' + $_p.simpleName + '%')
+				AND SIMPLE_NAME like @{_simpleName,jdbcType=VARCHAR}
+			#end
+			#if($_p.shortCode && $_p.shortCode != '')
+				#set($_shortCode = '%' + $_p.shortCode + '%')
+				AND SHORT_CODE like @{_shortCode,jdbcType=VARCHAR}
+			#end
+			#if($_p.legalPerson && $_p.legalPerson != '')
+				#set($_legalPerson = '%' + $_p.legalPerson + '%')
+				AND LEGAL_PERSON like @{_legalPerson,jdbcType=VARCHAR}
+			#end
+			#if($_p.businessLicense && $_p.businessLicense != '')
+				#set($_businessLicense = '%' + $_p.businessLicense + '%')
+				AND BUSINESS_LICENSE like @{_businessLicense,jdbcType=VARCHAR}
+			#end
+			#if($_p.email && $_p.email != '')
+				#set($_email = '%' + $_p.email + '%')
+				AND EMAIL like @{_email,jdbcType=VARCHAR}
+			#end
+		#end
+		]]>
+	</sql>
+    
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.base.entities.Supplier" resultMap="SupplierResultMap" lang="velocity" databaseId="oracle">
+	    <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre" />
+		<include refid="condition_sql" />
+		#order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+	<select id="findByCondition" parameterType="com.supconit.base.entities.Supplier" resultMap="SupplierResultMap" lang="velocity" databaseId="sqlserver">
+	    <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		    select 
+        ID,
+        SUPPLIER_CODE,
+        FULL_NAME,
+        SIMPLE_NAME,
+        SHORT_CODE,
+        LEGAL_PERSON,
+        BUSINESS_LICENSE,
+        LICENSE_EXPIRY_DATE,
+        COMPANY_TYPE,
+        WEBSITE,
+        ADDRESS,
+        CONTACT,
+        TEL_NO,
+        MOBILE,
+        FAX,
+        EMAIL,
+        ZIP_CODE,
+        POST_ADDRESS,
+        BANK,
+        BANK_ACCOUNT,
+        REMARK,
+        CREATE_ID,
+        CREATOR,
+        CREATE_DATE,
+        UPDATE_ID,
+        UPDATOR,
+        UPDATE_DATE		
+        <include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM
+		SUPPLIER
+		<include refid="condition_sql" />
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+
+    <select id="countByCondition" parameterType="com.supconit.base.entities.Supplier" resultType="long" lang="velocity">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+    
+    <!-- 删除多条记录-->
+	<delete id="deleteByIds">
+        DELETE FROM SUPPLIER WHERE ID in 
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+
+	</delete>
+
+</mapper>

@@ -1,0 +1,30 @@
+#parse("ywgl/gis/gis_head.vm")
+#parse("ywgl/gis/common/gis_common_js.vm")
+<script type="text/javascript" >
+    $(document).ready(function(){
+		ShowCurrentTime();//显示当前时间
+		loadUi();//加载UI
+        #if($!layerModel==2)
+            changeFloor("$!{systemCode}");
+        #elseif($!layout==2)
+            changeFloor("${initShowCeng}");
+        #else
+            #if($!initShowCeng==0)
+                $("#ceng_${initShowLou}").click();
+            #else
+                $("#ceng_${initShowCeng}").click();//加载gis地图
+            #end
+
+        #end
+    });
+</script>
+<body>
+<div class="ui-template-main">
+	#parse("ywgl/gis/common/gis_common_tool.vm")
+    #parse("ywgl/gis/common/gis_common_map.vm")
+    #if($!leftVm)
+        #parse("$!leftVm")
+    #end
+</div>
+</body>
+</html>

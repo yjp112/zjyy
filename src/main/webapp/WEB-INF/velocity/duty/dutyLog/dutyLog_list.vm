@@ -1,0 +1,181 @@
+#parse("index/_header.vm")
+</head>
+<body>
+
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<form class="ui-form" id='queryForm'>
+    	<input name="datyType" type="hidden" value-="$!dutyLog.dutyType"/>
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+                <tr>
+	                <td class="ui-search-name first">值班人员：</td>
+	                <td class="ui-search-c">
+	                  <input name="personName" value="$!dutyLog.personName" class="k-textbox" type="text">
+	                </td>
+	                <td class="ui-search-name">接班人员：</td>
+	                <td class="ui-search-c">
+	                  <input name="replacePersonName" value="$!dutyLog.replacePersonName" class="k-textbox" type="text">
+	                </td>
+	                <td class="ui-search-name">值班日期：</td>
+	                 <td class="ui-search-c">
+	                    <input  name="dutyDate" id="dutyDate" value="$!dutyLog.dutyDate" type="text"/>
+	                  </td>
+                </tr>
+              </table>
+            </td>
+            <td width="180" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+#parse("index/_footer.vm") 
+
+<script type="text/javascript">
+var type=$!{dutyLog.dutyType};
+var code='$!{menu.code}';
+  var _iframe_layout, _inner_layout;
+	$(document).ready(function(){
+		
+	    _iframe_layout = $('body').layout({
+	      defaults: {
+	        resizable: false,
+	        closable: false,
+	        spacing_open: 5
+	      }
+	    });
+	    _inner_layout = $("#subMain").layout({
+	      defaults: {
+	        resizable: false,
+	        closable: false,
+	        spacing_open: 0
+	      },
+	      center: {
+	          onresize_end: function () {
+	              var grid = $("#grid").data("kendoGrid");
+	              grid.resize();
+	          }
+	      }
+	    })
+	    $("#dutyDate").hcDatePicker({
+        	 format: "yyyy-MM-dd",
+ 		     culture: "zh-CN"
+         }).data("kendoDatePicker");
+        $("#dutyDate").attr("readonly", true);
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/duty/dutylog/list?dutyType=$!dutyLog.dutyType", [{
+              field: "id",
+              hidden: true
+          },{
+              field: "dutyType",
+              hidden: true
+          }, {
+              field: "personName",
+              title: "值班人员",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              template:"<a href=\"javascript:void(0)\" title=\"查看#: data.personName #的详细信息\" onclick=\"window.location.href='$!{rc.contextPath}/duty/dutylog/edit?viewOnly=true&dutyType=#: data.dutyType#&id=#: data.id #'\">#: data.personName #</a>",
+              width: 150
+          }, {
+              field: "orderName",
+              title: "班次",
+              sortable: false,
+              attributes: {"class": "k-grid-equilong"},
+              width: 100
+              
+          }, {
+              field: "startTime",
+              title: "值班日期",
+              attributes: {"class": "k-grid-equilong"},
+              sortable: false,
+              width: 150
+          },{
+              field: "startTime",
+              title: "值班开始时间",
+              attributes: {"class": "k-grid-equilong"},
+              sortable: false,
+              width: 150
+          }, {
+              field: "endTime",
+              title: "值班结束时间",
+              attributes: {"class": "k-grid-equilong"},
+              sortable: false,
+              width: 150
+          }, {
+              field: "replacePersonName",
+              title: "接班人员",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              width: 150
+          }, {
+              field: "replaceTime",
+              sortable: false,
+              attributes: {"class": "k-grid-equilong"},
+              title: "接班时间",
+			  width: 150
+          }, {
+              field: "createDate",
+              sortable: false,
+              attributes: {"class": "k-grid-equilong"},
+              title: "创建时间"
+          }], 
+      {
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          },
+          resizable:true
+      }, {
+          serverSorting: true
+      }, [ /* {
+           "class": "k-grid-num"
+              name: "添加",
+              icon: "fa fa-plus",
+              onclick: function (obj) {
+            	  window.location.href = '$!{rc.contextPath}/duty/dutylog/edit?dutyType=$!dutyLog.dutyType&menuCode=$!menu.code';
+                  //quick_dialog("dutyLog_add_dlg", "添加值班日志", "$!{rc.contextPath}/duty/dutyLog/edit", 585, 590, obj);
+              }
+          },
+          {
+              name: "修改",
+              icon: "fa fa-pencil",
+              onclick: function (obj, grid) {
+                  var row = grid.select();
+                  if (null == row || row.length == 0) {
+                      notify("你还没有选择要修改的值班日志", "warn");
+                      return;
+                  }
+                  var data = grid.dataItem(row);
+                  window.location.href = '$!{rc.contextPath}/duty/dutylog/edit?dutyType=$!dutyLog.dutyType&id='+data.id;
+                //  quick_dialog("dutyLog_add_dlg", "修改值班日志", "$!{rc.contextPath}/duty/dutyLog/edit?id=" + data.id, 585, 590, obj);
+              }
+          },
+          {
+              name: "删除",
+              icon: "fa fa-remove",
+              onclick: function (obj, grid) {
+                  singleDelete(grid,"$!{rc.contextPath}/duty/dutylog/delete?dutyType=$!dutyLog.dutyType");
+              }
+          }  */
+         #kendo_datagrid_btns("ROOT_ABGL_ZBGL_AFZB")#end 
+      ]);    
+		$('#resetBtn').click(function(){
+        	$("#queryForm :text").val('');  
+        });
+		
+    });
+    	
+</script>
+
+</body>
+</html>

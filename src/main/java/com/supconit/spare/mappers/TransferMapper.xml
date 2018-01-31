@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.spare.entities.Transfer">
+	<resultMap type="com.supconit.spare.entities.Transfer" id="TransferResultMap">      
+         <result property="id" column="ID" />
+        <result property="transferCode" column="TRANSFER_CODE" />
+        <result property="bpmKey" column="BPM_KEY" />
+        <result property="processId" column="PROCESS_ID" />
+        <result property="transferTime" column="TRANSFER_TIME" />
+        <result property="transferPersonId" column="TRANSFER_PERSON_ID" />
+        <result property="transferPersonName" column="TRANSFER_PERSON_NAME" />
+        <result property="outWarehouseId" column="OUT_WAREHOUSE_ID" />
+        <result property="inWarehouseId" column="IN_WAREHOUSE_ID" />
+        <result property="descripton" column="DESCRIPTON" />
+        <result property="status" column="STATUS" />
+        <result property="createId" column="CREATE_ID" />
+        <result property="creator" column="CREATOR" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="updateId" column="UPDATE_ID" />
+        <result property="updator" column="UPDATOR" />
+        <result property="updateDate" column="UPDATE_DATE" />
+        
+        <result property="outWarehouseName" column="outWarehouseName" />
+        <result property="inWarehouseName" column="inWarehouseName" />
+        <result property="statusName" column="statusName" />
+        
+        <collection 
+        property="transferDetailList" javaType="com.supconit.spare.entities.TransferDetail">
+        <result property="id" column="d_ID" />
+        <result property="transferId" column="d_TRANSFER_ID" />
+        <result property="spareId" column="d_SPARE_ID" />
+        <result property="quantity" column="d_QUANTITY" />
+        <result property="availableQty" column="d_AVAILABLE_QTY" />        
+        <result property="spareCode" column="d_SPARE_CODE" />
+        <result property="spareName" column="d_SPARE_NAME" />
+        <result property="spec" column="d_SPEC" />
+        <result property="model" column="d_MODEL" />
+        </collection>
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">TRANSFER</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	<sql id="select_pre" lang="velocity">
+		 select 
+	        ID,
+	        TRANSFER_CODE,
+	        BPM_KEY,
+	        PROCESS_ID,
+	        TRANSFER_TIME,
+	        TRANSFER_PERSON_ID,
+	        TRANSFER_PERSON_NAME,
+	        OUT_WAREHOUSE_ID,
+	        IN_WAREHOUSE_ID,
+	        DESCRIPTON,
+	        STATUS,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE,
+	        UPDATE_ID,
+	        UPDATOR,
+	        UPDATE_DATE,		
+			(select t1.WAREHOUSE_NAME from WAREHOUSE t1 where t1.id=OUT_WAREHOUSE_ID) outWarehouseName,
+			(select t2.WAREHOUSE_NAME from WAREHOUSE t2 where t2.id=in_WAREHOUSE_ID) inWarehouseName
+		FROM
+	    <include refid="TABLE_NAME"/> 
+	</sql>
+	
+	<sql id="count_pre" lang="velocity">SELECT COUNT(*) FROM <include refid="TABLE_NAME"/> </sql>
+	
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			#if($_p.id && $_p.id != '')
+				#set($_id = $_p.id)
+				AND ID LIKE @{_id}
+			#end
+			#if($_p.transferCode && $_p.transferCode != '')
+				#set($_transferCode = '%' + $_p.transferCode + '%')
+				AND TRANSFER_CODE LIKE @{_transferCode}
+			#end
+			#if($_p.bpmKey && $_p.bpmKey != '')
+				#set($_bpmKey = '%' + $_p.bpmKey + '%')
+				AND BPM_KEY LIKE @{_bpmKey}
+			#end
+			#if($_p.processId && $_p.processId != '')
+				#set($_processId = $_p.processId)
+				AND PROCESS_ID = @{_processId}
+			#end
+			
+			#if($_p.transferTime && $_p.transferTime != '')
+				#set($_transferTime = $_p.transferTime)
+				AND TRANSFER_TIME = @{_transferTime}
+			#end
+			#if($_p.startTransferTime && $_p.startTransferTime != '')
+				#set($_startTransferTime = $_p.startTransferTime)
+				AND TRANSFER_TIME >= @{_startTransferTime}
+			#end
+			#if($_p.endTransferTime && $_p.endTransferTime != '')
+				#set($_endTransferTime = $_p.endTransferTime)
+				AND TRANSFER_TIME <= @{_endTransferTime}
+			#end
+			
+			#if($_p.transferPersonId && $_p.transferPersonId != '')
+				#set($_transferPersonId = $_p.transferPersonId)
+				AND TRANSFER_PERSON_ID = @{_transferPersonId}
+			#end
+		
+			#if($_p.transferPersonName && $_p.transferPersonName != '')
+				#set($_transferPersonName = '%' + $_p.transferPersonName + '%')
+				AND TRANSFER_PERSON_NAME LIKE @{_transferPersonName}
+			#end
+			#if($_p.outWarehouseId && $_p.outWarehouseId != '')
+				#set($_outWarehouseId = $_p.outWarehouseId)
+				AND OUT_WAREHOUSE_ID = @{_outWarehouseId}
+			#end
+			#if($_p.inWarehouseId && $_p.inWarehouseId != '')
+				#set($_inWarehouseId = $_p.inWarehouseId)
+				AND IN_WAREHOUSE_ID = @{_inWarehouseId}
+			#end
+			#if($_p.status && $_p.status != '')
+				#set($_status = $_p.status)
+				AND STATUS = @{_status}
+			#end
+			
+			
+		
+		#end
+		]]>	
+    </sql>
+	
+    <!-- 插入记录-->
+    <sql id="insert_sql" lang="velocity">
+        INSERT INTO <include refid="TABLE_NAME"/>(
+	        #if($_databaseId == 'oracle') ID, #end
+		    TRANSFER_CODE,
+	        BPM_KEY,
+	        PROCESS_ID,
+	        TRANSFER_TIME,
+	        TRANSFER_PERSON_ID,
+	        TRANSFER_PERSON_NAME,
+	        OUT_WAREHOUSE_ID,
+	        IN_WAREHOUSE_ID,
+	        DESCRIPTON,
+	        STATUS,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE
+	       
+        ) VALUES (
+        	#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end
+	        @{_parameter.transferCode,jdbcType=VARCHAR},
+	        @{_parameter.bpmKey,jdbcType=VARCHAR},
+	        @{_parameter.processId,jdbcType=NUMERIC},
+	        @{_parameter.transferTime,jdbcType=TIMESTAMP},
+	        @{_parameter.transferPersonId,jdbcType=NUMERIC},
+	        @{_parameter.transferPersonName,jdbcType=VARCHAR},
+	        @{_parameter.outWarehouseId,jdbcType=NUMERIC},
+	        @{_parameter.inWarehouseId,jdbcType=NUMERIC},
+	        @{_parameter.descripton,jdbcType=VARCHAR},
+	        @{_parameter.status,jdbcType=NUMERIC},
+	        @{_parameter.createId,jdbcType=NUMERIC},
+	        @{_parameter.creator,jdbcType=VARCHAR},
+	        @{_parameter.createDate,jdbcType=TIMESTAMP}
+	       
+        )
+    </sql>
+    
+    <insert id="insert" parameterType="com.supconit.spare.entities.Transfer" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="insert_sql" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.spare.entities.Transfer" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    
+	<!-- 更新记录-->
+	<update id="update"  parameterType="com.supconit.spare.entities.Transfer" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+			#mset()
+				<![CDATA[
+			        #if($_parameter.transferCode && $_parameter.transferCode !='')TRANSFER_CODE = @{_parameter.transferCode,jdbcType=VARCHAR},#end
+			        #if($_parameter.bpmKey && $_parameter.bpmKey !='')BPM_KEY = @{_parameter.bpmKey,jdbcType=VARCHAR},#end
+			        #if($_parameter.processId)PROCESS_ID = @{_parameter.processId,jdbcType=NUMERIC},#end
+			        #if($_parameter.transferTime )TRANSFER_TIME = @{_parameter.transferTime,jdbcType=TIMESTAMP},#end
+			        #if($_parameter.transferPersonId)TRANSFER_PERSON_ID = @{_parameter.transferPersonId,jdbcType=NUMERIC},#end
+			        #if($_parameter.transferPersonName)TRANSFER_PERSON_NAME = @{_parameter.transferPersonName,jdbcType=VARCHAR},#end
+			        #if($_parameter.outWarehouseId)OUT_WAREHOUSE_ID = @{_parameter.outWarehouseId,jdbcType=NUMERIC},#end
+			        #if($_parameter.inWarehouseId)IN_WAREHOUSE_ID = @{_parameter.inWarehouseId,jdbcType=NUMERIC},#end
+			        #if($_parameter.descripton)DESCRIPTON = @{_parameter.descripton,jdbcType=VARCHAR},#end
+			        #if($_parameter.status)STATUS = @{_parameter.status,jdbcType=NUMERIC},#end
+			        #if($_parameter.descripton)DESCRIPTON = @{_parameter.descripton,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateId)UPDATE_ID = @{_parameter.updateId,jdbcType=NUMERIC},#end
+			        #if($_parameter.updator)UPDATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateDate)UPDATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+			       
+			    
+			    ]]>
+			#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+		<update id="updateSelective"  parameterType="com.supconit.spare.entities.Transfer" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+			#mset()
+				<![CDATA[
+			        #if($_parameter.transferCode && $_parameter.transferCode !='')TRANSFER_CODE = @{_parameter.transferCode,jdbcType=VARCHAR},#end
+			        #if($_parameter.bpmKey && $_parameter.bpmKey !='')BPM_KEY = @{_parameter.bpmKey,jdbcType=VARCHAR},#end
+			        #if($_parameter.processId)PROCESS_ID = @{_parameter.processId,jdbcType=NUMERIC},#end
+			        #if($_parameter.transferTime )TRANSFER_TIME = @{_parameter.transferTime,jdbcType=TIMESTAMP},#end
+			        #if($_parameter.transferPersonId)TRANSFER_PERSON_ID = @{_parameter.transferPersonId,jdbcType=NUMERIC},#end
+			        #if($_parameter.transferPersonName)TRANSFER_PERSON_NAME = @{_parameter.transferPersonName,jdbcType=VARCHAR},#end
+			        #if($_parameter.outWarehouseId)OUT_WAREHOUSE_ID = @{_parameter.outWarehouseId,jdbcType=NUMERIC},#end
+			        #if($_parameter.inWarehouseId)IN_WAREHOUSE_ID = @{_parameter.inWarehouseId,jdbcType=NUMERIC},#end
+			        #if($_parameter.descripton)DESCRIPTON = @{_parameter.descripton,jdbcType=VARCHAR},#end
+			        #if($_parameter.status)STATUS = @{_parameter.status,jdbcType=NUMERIC},#end
+			        #if($_parameter.descripton)DESCRIPTON = @{_parameter.descripton,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateId)UPDATE_ID = @{_parameter.updateId,jdbcType=NUMERIC},#end
+			        #if($_parameter.updator)UPDATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateDate)UPDATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+			        
+			    ]]>
+			#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+	<!-- 按条件查询记录-->
+    <select id="findByConditions"  resultMap="TransferResultMap" lang="velocity" databaseId="oracle">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+        #set($_p = $_parameter.condition)
+		select 
+         	t.ID,
+	        t.TRANSFER_CODE,
+	        t.BPM_KEY,
+	        t.PROCESS_ID,
+	        t.TRANSFER_TIME,
+	        t.TRANSFER_PERSON_ID,
+	        t.TRANSFER_PERSON_NAME,
+	        t.OUT_WAREHOUSE_ID,
+	        t.IN_WAREHOUSE_ID,
+	        t.DESCRIPTON,
+	        t.STATUS,
+	        t.CREATE_ID,
+	        t.CREATOR,
+	        t.CREATE_DATE,
+	        t.UPDATE_ID,
+	        t.UPDATOR,
+	        t.UPDATE_DATE,		
+			(select t1.WAREHOUSE_NAME from WAREHOUSE t1 where t1.id=t.OUT_WAREHOUSE_ID) outWarehouseName,
+			(select t2.WAREHOUSE_NAME from WAREHOUSE t2 where t2.id=t.in_WAREHOUSE_ID) inWarehouseName,
+			t3.ENUM_TEXT statusName
+		FROM
+		TRANSFER t left join ENUM_DETAIL t3 on t.STATUS=t3.ENUM_VALUE and t3.TYPE_ID=  @{_p.statusDictType,jdbcType=NUMERIC}
+		<![CDATA[
+		#where()
+			
+			#if($_p.id && $_p.id != '')
+				#set($_id = $_p.id)
+				AND t.ID LIKE @{_id}
+			#end
+			#if($_p.transferCode && $_p.transferCode != '')
+				#set($_transferCode = '%' + $_p.transferCode + '%')
+				AND t.TRANSFER_CODE LIKE @{_transferCode}
+			#end
+			#if($_p.bpmKey && $_p.bpmKey != '')
+				#set($_bpmKey = '%' + $_p.bpmKey + '%')
+				AND t.BPM_KEY LIKE @{_bpmKey}
+			#end
+			#if($_p.processId && $_p.processId != '')
+				#set($_processId = $_p.processId)
+				AND t.PROCESS_ID = @{_processId}
+			#end
+			
+			#if($_p.transferTime && $_p.transferTime != '')
+				#set($_transferTime = $_p.transferTime)
+				AND t.TRANSFER_TIME = @{_transferTime}
+			#end
+			#if($_p.startTransferTime && $_p.startTransferTime != '')
+				#set($_startTransferTime = $_p.startTransferTime)
+				AND t.TRANSFER_TIME >= @{_startTransferTime}
+			#end
+			#if($_p.endTransferTime && $_p.endTransferTime != '')
+				#set($_endTransferTime = $_p.endTransferTime)
+				AND t.TRANSFER_TIME <= @{_endTransferTime}
+			#end
+			
+			#if($_p.transferPersonId && $_p.transferPersonId != '')
+				#set($_transferPersonId = $_p.transferPersonId)
+				AND t.TRANSFER_PERSON_ID = @{_transferPersonId}
+			#end
+		
+			#if($_p.transferPersonName && $_p.transferPersonName != '')
+				#set($_transferPersonName = '%' + $_p.transferPersonName + '%')
+				AND t.TRANSFER_PERSON_NAME LIKE @{_transferPersonName}
+			#end
+			#if($_p.outWarehouseId && $_p.outWarehouseId != '')
+				#set($_outWarehouseId = $_p.outWarehouseId)
+				AND t.OUT_WAREHOUSE_ID = @{_outWarehouseId}
+			#end
+			#if($_p.inWarehouseId && $_p.inWarehouseId != '')
+				#set($_inWarehouseId = $_p.inWarehouseId)
+				AND t.IN_WAREHOUSE_ID = @{_inWarehouseId}
+			#end
+			#if($_p.status && $_p.status != '')
+				#set($_status = $_p.status)
+				AND t.STATUS = @{_status}
+			#end
+		#end
+		]]>	
+		#order($_parameter.condition,"t.ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.spare.entities.Transfer" resultMap="TransferResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+			#set($_p = $_parameter.condition)
+		select 
+            t.ID,
+	        t.TRANSFER_CODE,
+	        t.BPM_KEY,
+	        t.PROCESS_ID,
+	        t.TRANSFER_TIME,
+	        t.TRANSFER_PERSON_ID,
+	        t.TRANSFER_PERSON_NAME,
+	        t.OUT_WAREHOUSE_ID,
+	        t.IN_WAREHOUSE_ID,
+	        t.DESCRIPTON,
+	        t.STATUS,
+	        t.CREATE_ID,
+	        t.CREATOR,
+	        t.CREATE_DATE,
+	        t.UPDATE_ID,
+	        t.UPDATOR,
+	        t.UPDATE_DATE,		
+			(select t1.WAREHOUSE_NAME from WAREHOUSE t1 where t1.id=t.OUT_WAREHOUSE_ID) outWarehouseName,
+			(select t2.WAREHOUSE_NAME from WAREHOUSE t2 where t2.id=t.in_WAREHOUSE_ID) inWarehouseName,
+			t3.ENUM_TEXT statusName	
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"t.ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM
+		TRANSFER t left join ENUM_DETAIL t3 on t.STATUS=t3.ENUM_VALUE and t3.TYPE_ID= @{_p.statusDictType,jdbcType=NUMERIC}
+		<![CDATA[
+			#where()
+		
+			#if($_p.id && $_p.id != '')
+				#set($_id = $_p.id)
+				AND t.ID LIKE @{_id}
+			#end
+			#if($_p.transferCode && $_p.transferCode != '')
+				#set($_transferCode = '%' + $_p.transferCode + '%')
+				AND t.TRANSFER_CODE LIKE @{_transferCode}
+			#end
+			#if($_p.bpmKey && $_p.bpmKey != '')
+				#set($_bpmKey = '%' + $_p.bpmKey + '%')
+				AND t.BPM_KEY LIKE @{_bpmKey}
+			#end
+			#if($_p.processId && $_p.processId != '')
+				#set($_processId = $_p.processId)
+				AND t.PROCESS_ID = @{_processId}
+			#end
+			
+			#if($_p.transferTime && $_p.transferTime != '')
+				#set($_transferTime = $_p.transferTime)
+				AND t.TRANSFER_TIME = @{_transferTime}
+			#end
+			#if($_p.startTransferTime && $_p.startTransferTime != '')
+				#set($_startTransferTime = $_p.startTransferTime)
+				AND t.TRANSFER_TIME >= @{_startTransferTime}
+			#end
+			#if($_p.endTransferTime && $_p.endTransferTime != '')
+				#set($_endTransferTime = $_p.endTransferTime)
+				AND t.TRANSFER_TIME <= @{_endTransferTime}
+			#end
+			
+			#if($_p.transferPersonId && $_p.transferPersonId != '')
+				#set($_transferPersonId = $_p.transferPersonId)
+				AND t.TRANSFER_PERSON_ID = @{_transferPersonId}
+			#end
+		
+			#if($_p.transferPersonName && $_p.transferPersonName != '')
+				#set($_transferPersonName = '%' + $_p.transferPersonName + '%')
+				AND t.TRANSFER_PERSON_NAME LIKE @{_transferPersonName}
+			#end
+			#if($_p.outWarehouseId && $_p.outWarehouseId != '')
+				#set($_outWarehouseId = $_p.outWarehouseId)
+				AND t.OUT_WAREHOUSE_ID = @{_outWarehouseId}
+			#end
+			#if($_p.inWarehouseId && $_p.inWarehouseId != '')
+				#set($_inWarehouseId = $_p.inWarehouseId)
+				AND t.IN_WAREHOUSE_ID = @{_inWarehouseId}
+			#end
+			#if($_p.status && $_p.status != '')
+				#set($_status = $_p.status)
+				AND t.STATUS = @{_status}
+			#end
+		#end
+		]]>	
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countByConditions" resultType="long" lang="velocity">
+        <include refid="count_pre"/>
+        <include refid="condition_sql"/>
+    </select>
+    
+    <select id="getById" resultMap="TransferResultMap" parameterType="long" lang="velocity">
+		<include refid="select_pre"/>
+		WHERE ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+	<select id="findById" resultMap="TransferResultMap" parameterType="long" lang="velocity">
+		   select
+	        a.ID,
+	        a.TRANSFER_CODE,
+	        a.BPM_KEY,
+	        a.PROCESS_ID,
+	        a.TRANSFER_TIME,
+	        a.TRANSFER_PERSON_ID,
+	        a.TRANSFER_PERSON_NAME,
+	        a.OUT_WAREHOUSE_ID,
+	        a.IN_WAREHOUSE_ID,
+	        a.DESCRIPTON,
+	        a.STATUS,
+	        a.CREATE_ID,
+	        a.CREATOR,
+	        a.CREATE_DATE,
+	        a.UPDATE_ID,
+	        a.UPDATOR,
+	        a.UPDATE_DATE,
+	        b.ID d_ID,
+	        b.TRANSFER_ID d_TRANSFER_ID,
+	        b.SPARE_ID d_SPARE_ID,
+	        b.QUANTITY  d_QUANTITY,
+	        b.AVAILABLE_QTY d_AVAILABLE_QTY,
+	        c.spare_Code  d_SPARE_CODE,
+	        c.spare_Name  d_SPARE_NAME,
+	        c.spec d_SPEC,
+	        c.model d_MODEL             
+        from TRANSFER a 
+		left join TRANSFER_DETAIL b on a.ID = b.TRANSFER_ID LEFT JOIN SPARE c on c.id=b.SPARE_ID
+		WHERE a.ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+	<delete id="deleteById" parameterType="long" lang="velocity"> 
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</delete>
+	<delete id="deleteByIds">
+		DELETE FROM
+		<include refid="TABLE_NAME" />
+	    WHERE ID IN    
+	        <foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+				#{id,jdbcType=NUMERIC}
+			</foreach>
+	</delete>
+</mapper>

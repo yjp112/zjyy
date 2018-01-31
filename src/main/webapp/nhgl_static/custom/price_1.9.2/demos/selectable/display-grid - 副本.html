@@ -1,0 +1,180 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+	<meta charset="utf-8">
+	<title>jQuery UI Selectable - Display as grid</title>
+	<link rel="stylesheet" href="../../themes/base/jquery.ui.all.css">
+	<script src="../../jquery-1.8.3.js"></script>
+	<script src="../../ui/jquery.ui.core.js"></script>
+	<script src="../../ui/jquery.ui.widget.js"></script>
+	<script src="../../ui/jquery.ui.mouse.js"></script>
+	<script src="../../ui/jquery.ui.selectable.js"></script>
+	<link rel="stylesheet" href="../demos.css">
+
+	<style>
+	#feedback { font-size: 1.4em; }
+	#selectable1 .ui-selecting { background: #FECA40; }
+	#selectable1 .ui-selected { background: #F39814; color: white; }
+	#selectable1 { list-style-type: none; margin: 0; padding: 0;}
+	#selectable1 li { margin: 3px; padding: 1px; float: left; width: 80px; height: 60px; font-size: 2.5em; text-align: center; }
+	.divO{width: 380px;float:left }
+	.divN{text-align:center;font-size:16px;}
+	</style>
+	<script>
+	document.onselectstart = new Function('event.returnValue=false;'); 
+	$(function() {
+		$( "#selectable1" ).selectable();
+	});
+	</script>
+</head>
+<body>
+
+<ol id="selectable1">
+ <div class="divO">
+	<div class="divN">2014</div>
+	<li class="ui-state-default"><div>1月</div><div style="font-size:14px;color:green;padding-top:6px">1.1元/吨</div></li>
+	<li class="ui-state-default">2月</li>
+	<li class="ui-state-default">3月</li>
+	<li class="ui-state-default">4月</li>
+	<li class="ui-state-default">5月</li>
+	<li class="ui-state-default">6月</li>
+	<li class="ui-state-default">7月</li>
+	<li class="ui-state-default">8月</li>
+	<li class="ui-state-default">9月</li>
+	<li class="ui-state-default">10月</li>
+	<li class="ui-state-default">11月</li>
+	<li class="ui-state-default">12月</li>
+	 </div>
+ 	 <div  class="divO">
+	 
+	 <div class="divN">2015</div>
+	<li class="ui-state-default">1</li>
+	<li class="ui-state-default">2</li>
+	<li class="ui-state-default">3</li>
+	<li class="ui-state-default">4</li>
+	<li class="ui-state-default">5</li>
+	<li class="ui-state-default">6</li>
+	<li class="ui-state-default">7</li>
+	<li class="ui-state-default">8</li>
+	<li class="ui-state-default">9</li>
+	<li class="ui-state-default">10</li>
+	<li class="ui-state-default">11</li>
+	<li class="ui-state-default">12</li>
+	 </div>
+	  <div  class="divO">
+	 
+	 <div class="divN"> 2015</div>
+	<li class="ui-state-default">1</li>
+	<li class="ui-state-default">2</li>
+	<li class="ui-state-default">3</li>
+	<li class="ui-state-default">4</li>
+	<li class="ui-state-default">5</li>
+	<li class="ui-state-default">6</li>
+	<li class="ui-state-default">7</li>
+	<li class="ui-state-default">8</li>
+	<li class="ui-state-default">9</li>
+	<li class="ui-state-default">10</li>
+	<li class="ui-state-default">11</li>
+	<li class="ui-state-default">12</li>
+	 </div>
+	  <div  class="divO">
+	 
+	 <div class="divN">2015</div>
+	<li class="ui-state-default">1</li>
+	<li class="ui-state-default">2</li>
+	<li class="ui-state-default">3</li>
+	<li class="ui-state-default">4</li>
+	<li class="ui-state-default">5</li>
+	<li class="ui-state-default">6</li>
+	<li class="ui-state-default">7</li>
+	<li class="ui-state-default">8</li>
+	<li class="ui-state-default">9</li>
+	<li class="ui-state-default">10</li>
+	<li class="ui-state-default">11</li>
+	<li class="ui-state-default">12</li>
+	 </div>
+	  <div  class="divO">
+	 
+	 <div class="divN">2015</div>
+	<li class="ui-state-default">1</li>
+	<li class="ui-state-default">2</li>
+	<li class="ui-state-default">3</li>
+	<li class="ui-state-default">4</li>
+	<li class="ui-state-default">5</li>
+	<li class="ui-state-default">6</li>
+	<li class="ui-state-default">7</li>
+	<li class="ui-state-default">8</li>
+	<li class="ui-state-default">9</li>
+	<li class="ui-state-default">10</li>
+	<li class="ui-state-default">11</li>
+	<li class="ui-state-default">12</li>
+	 </div>
+	  <div  class="divO">
+	 
+	 <div class="divN">2015</div>
+	<li class="ui-state-default">1</li>
+	<li class="ui-state-default">2</li>
+	<li class="ui-state-default">3</li>
+	<li class="ui-state-default">4</li>
+	<li class="ui-state-default">5</li>
+	<li class="ui-state-default">6</li>
+	<li class="ui-state-default">7</li>
+	<li class="ui-state-default">8</li>
+	<li class="ui-state-default">9</li>
+	<li class="ui-state-default">10</li>
+	<li class="ui-state-default">11</li>
+	<li class="ui-state-default">12</li>
+	 </div> <div  class="divO">
+	 
+	 <div class="divN">2015</div>
+	<li class="ui-state-default">1</li>
+	<li class="ui-state-default">2</li>
+	<li class="ui-state-default">3</li>
+	<li class="ui-state-default">4</li>
+	<li class="ui-state-default">5</li>
+	<li class="ui-state-default">6</li>
+	<li class="ui-state-default">7</li>
+	<li class="ui-state-default">8</li>
+	<li class="ui-state-default">9</li>
+	<li class="ui-state-default">10</li>
+	<li class="ui-state-default">11</li>
+	<li class="ui-state-default">12</li>
+	 </div> <div  class="divO">
+	 
+	 <div class="divN">2015</div>
+	<li class="ui-state-default">1</li>
+	<li class="ui-state-default">2</li>
+	<li class="ui-state-default">3</li>
+	<li class="ui-state-default">4</li>
+	<li class="ui-state-default">5</li>
+	<li class="ui-state-default">6</li>
+	<li class="ui-state-default">7</li>
+	<li class="ui-state-default">8</li>
+	<li class="ui-state-default">9</li>
+	<li class="ui-state-default">10</li>
+	<li class="ui-state-default">11</li>
+	<li class="ui-state-default">12</li>
+	 </div> <div  class="divO">
+	 
+	 <div class="divN">2015</div>
+	<li class="ui-state-default">1</li>
+	<li class="ui-state-default">2</li>
+	<li class="ui-state-default">3</li>
+	<li class="ui-state-default">4</li>
+	<li class="ui-state-default">5</li>
+	<li class="ui-state-default">6</li>
+	<li class="ui-state-default">7</li>
+	<li class="ui-state-default">8</li>
+	<li class="ui-state-default">9</li>
+	<li class="ui-state-default">10</li>
+	<li class="ui-state-default">11</li>
+	<li class="ui-state-default">12</li>
+	 </div>
+</ol>
+
+<div class="demo-description">
+<p>To arrange selectable items as a grid, give them identical dimensions and float them using CSS.</p>
+</div>
+</body>
+</html>

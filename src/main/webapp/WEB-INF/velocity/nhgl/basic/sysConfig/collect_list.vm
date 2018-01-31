@@ -1,0 +1,149 @@
+<div class="ui-layout-center" id="subMain">
+	<div class="ui-layout-center">
+		<table id="collect_datalist" class="fn-hide"></table>
+	</div>
+	<div class="ui-layout-north">
+		<div class="ui-module-name">#crumbs("$!menu.code",1)</div>
+		<form id="collect_list_search" class="ui-form ui-form-search fn-clear">
+			<input id="locationId" type="hidden" name="locationId" value=""/>
+			<div class="ui-form-search-left">
+				<div class="ui-form-item">
+		            <label class="ui-label">电表编码：</label>
+		            <input class="ui-input" type="text" name="deviceCode"/>
+				</div>
+				<div class="ui-form-item">
+		    		<label class="ui-label">电表名称：</label>
+		    		<input class="ui-input" type="text" name="deviceName"/>
+				</div>
+				<div class="ui-form-item">
+			  		<label class="ui-label">分项名称：</label>
+			    	<select class="ui-select" name="subCode">
+					<option value=''>--请选择--</option>
+			    		${subSystemInfoOptions}
+			    	</select>
+				</div>
+				<div class="ui-form-item-larger">
+			  		<label class="ui-label">时间：</label>
+	          		<input id="startTime" type="text" name="startTime"  class="ui-input ui-input-small  Wdate"  onclick="WdatePicker({dateFmt:'yyyy-MM-dd',maxDate:'#F{$dp.$D(\'endTime\')}'})" value="#date_format($!device.startTime,'yyyy-MM-dd')"/>
+		      		<span class="ui-form-text">至</span> 
+					<input id="endTime" type="text" name="endTime"  class="ui-input ui-input-small  Wdate"  onclick="WdatePicker({dateFmt:'yyyy-MM-dd',minDate:'#F{$dp.$D(\'startTime\')}'})" value="#date_format($!device.endTime,'yyyy-MM-dd')"/>
+				</div>
+			</div>	
+			<div class="ui-form-search-right">
+					<button type="submit" id="subButton" class="btn btn-primary"><i class="iconfont icon-search"></i> 查&nbsp;询</button>
+			</div>
+		</form>
+	</div>
+</div>
+<!--<div class="ui-layout-north">
+	#bread_crumbs("NHGL_CJGL")
+</div>
+-->
+<div class="ui-layout-west ztree-box">
+	<div class="ztree-header">
+		<div class="ztree-title">机构树</div>
+	</div>
+    <div id="collectlist_box" class="ui-box">
+      <div class="ui-box-container">
+          <ul id="geoArea_tree" class="ztree"></ul>
+      </div>
+    </div>
+</div>
+  <script type="text/javascript">
+  	$(document).ready(function(){
+		if(T.innerLayout&&!T.innerLayout.destroyed){
+			T.innerLayout.destroy();
+		}
+		T.innerLayout = $("#centerMain").layout({
+        defaults : {
+            resizable : false,
+            closable : false,
+            spacing_open : 5
+        },
+        west : {
+            size : 250,
+            resizable : true,
+            resizerTip : "移动改变大小",
+            closable : true,
+            togglerTip_open : "隐藏",
+            togglerTip_closed : "打开"
+        },
+        onresize_end : function(){
+            $("#collectlist_box").box("resize");
+        }
+    });
+    	_content_layouts.push(T.innerLayout);
+		_inner_layout=$("#subMain").layout({
+			defaults:{
+				resizabel:false,
+				closable: false,
+				spacing_open:5
+			},
+			onresize_end:function(){
+				$("#collect_datalist").datagridResize({width:_inner_layout.state.center.innerWidth+20,height:_inner_layout.state.center.innerHeight});
+			}
+		});
+		$("#collectlist_box").box({
+        	width : function(){return 'auto';},
+        	height : function(){return T.innerLayout.state.west.innerHeight-26;}
+    	});
+		var collect_datagrid=$("#collect_datalist").datagrid({
+			url:'$!{rc.contextPath}/nhgl/basic/sysConfig/page',
+			dataType: "json",
+			method: "GET",
+			singleSelected : true,
+			striped : false,
+			height:  _inner_layout.center.state.innerHeight,
+			width :  _inner_layout.center.state.innerWidth,
+			showOrderNumber : true,
+			useRp : true,
+			usepager: true,
+    		rpOptions: [10, 20, 40, 50],
+    		pageSize: 20,
+    		searchFormId:"collect_list_search",
+    		searchCallback:function(datagrid){},
+    		onSuccess:function(table,grid){
+    			if(!grid)return ;
+    		},
+    		colModel:[
+    			{"display":"序号"},
+    			{display: "电表编码", name: "extended1"},
+    			{display: "电表名称", name: "deviceName"},
+	            {display: "安装位置", name: "locationName"},
+	            {display: "分项名称", name: "subName"},
+	            {display: "上次计数", name: "lastTotal"},
+	            {display: "本次计数", name: "total"},
+	            {display: "用电量", name: "incremental"},
+	            {display: "最近采集时间", name: "collectTime",width:"200"}
+    		],
+    		buttons : [
+	            #data_grid_buttons('NHGL_CJGL')#end
+	        ]
+		});
+	}); 
+  </script>
+  <script type="text/javascript">
+    var setting = {
+	data: {
+		simpleData: {enable: true}
+      },
+      callback: {
+			onClick: function(event, treeId, treeNode) {
+				if(treeNode.id==0){
+					$('#locationId').val(1)
+				}else{
+					 $('#locationId').val(treeNode.id);
+				}
+				 $('#subButton').click();
+			}
+		}
+    };
+	var zNodes = [];
+	zNodes.push({id:"0", pId:"-1", name:"地理区域簇",open:true});  
+	#foreach($!{treeNode} in $!{treeList})
+		zNodes.push({id:"$!{treeNode.id}", pId:"$!{treeNode.parentId}", name:"$!{treeNode.areaName}"});     
+	#end 
+	$(document).ready(function(){
+	        $.fn.zTree.init($("#geoArea_tree"), setting,zNodes).expandAll(true);
+	});
+  </script>

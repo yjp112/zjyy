@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.spare.entities.TransferDetail">
+	<resultMap type="com.supconit.spare.entities.TransferDetail" id="TransferDetailResultMap">
+        <result property="id" column="ID" />
+        <result property="transferId" column="TRANSFER_ID" />
+        <result property="spareId" column="SPARE_ID" />
+        <result property="quantity" column="QUANTITY" />
+        <result property="availableQty" column="AVAILABLE_QTY" />
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">TRANSFER_DETAIL</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	
+	 <!-- 插入记录-->
+    <insert id="insert" parameterType="java.util.List" databaseId="oracle">
+       INSERT INTO <include refid="TABLE_NAME"/>(  
+        ID,    
+        TRANSFER_ID,
+        SPARE_ID,
+        QUANTITY,
+        AVAILABLE_QTY
+		)        
+     	 SELECT SEQ_TRANSFER_DETAIL.NEXTVAL,A.* from(
+		<foreach collection="list" item="item" index="index"
+			separator="UNION">
+				SELECT
+		         #{item.transferId,jdbcType=NUMERIC},
+		        #{item.spareId,jdbcType=NUMERIC},
+		        #{item.quantity,jdbcType=NUMERIC},
+		        #{item.availableQty,jdbcType=NUMERIC}
+				FROM dual 
+             </foreach>
+		) A 
+	</insert>
+	
+	
+	
+    <!-- 插入记录-->
+    
+	<insert id="insert" parameterType="java.util.List"  databaseId="sqlserver">
+        INSERT INTO <include refid="TABLE_NAME"/>(        
+        TRANSFER_ID,
+        SPARE_ID,
+        QUANTITY,
+        AVAILABLE_QTY
+		) VALUES        
+        <foreach collection="list" item="item" separator="," >  
+		(
+        #{item.transferId,jdbcType=NUMERIC},
+        #{item.spareId,jdbcType=NUMERIC},
+        #{item.quantity,jdbcType=NUMERIC},
+        #{item.availableQty,jdbcType=NUMERIC}
+		)	
+     	</foreach>
+    </insert>
+   
+	
+	<delete id="deleteByTransferId" parameterType="long" lang="velocity"> 
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE Transfer_ID = @{_parameter.transferId,jdbcType=NUMERIC}
+	</delete>
+	
+</mapper>

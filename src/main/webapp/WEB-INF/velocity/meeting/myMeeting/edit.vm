@@ -1,0 +1,306 @@
+#parse("index/_header.vm")
+<style>
+	.k-webkit .k-combobox .k-dropdown-wrap:before, .k-webkit .k-picker-wrap:before, .k-webkit .k-numeric-wrap:before {
+  		padding-bottom: .2em;
+	}
+	.n-bottom .msg-wrap {
+      margin-top: -15px;
+    }
+</style>
+<script charset="utf-8" src="$!{rc.contextPath}/main_static/custom/js/ueditor/ueditor.config.js"></script>
+<script charset="utf-8" src="$!{rc.contextPath}/main_static/custom/js/ueditor/ueditor.all.js"></script>
+<script charset="utf-8" src="$!{rc.contextPath}/main_static/custom/js/ueditor/lang/zh-cn/zh-cn.js"></script>
+</head>
+<body>
+<form id="myform_id" method="post" action="$!{rc.contextPath}/meeting/myMeeting/save" class="ui-dialog-form">
+    <input type="hidden" name="id" value="$!{reserveMeeting.id}">
+    <input type="hidden" name="roomId" value="$!{meeting.id}">
+    <input type="hidden" name="deviceId" value="$!{meeting.deviceId}">
+    <div class="table-block ui-layout-center">
+        <div class="meeting-title">$!{reserveMeeting.meetingSubject}</div>
+        <div class="meeting-content">
+            <div class="top-options">
+                <table>
+                    <tr>
+                        <td class="label">会议主持人：</td>
+                        <td class="inputText">
+                            <input type="hidden" class="k-textbox" id="checkerId" name="meetingCompere" value="$!{reserveMeeting.meetingCompere}"/>
+                            <input readOnly type="text" class="k-textbox ui-input-choose" id="checkerName" name="meetingCompereName" value="$!{reserveMeeting.meetingCompereName}"/>
+                        </td>
+
+                        <td  class="label">实际开始时间：</td>
+                        <td>
+                            <input id="startTime1"  class="k-textbox"  name="actualMeetingStart" value="#date_format($!{reserveMeeting.actualMeetingStart},'yyyy-MM-dd HH:mm:ss')" onchange="updateMeetingTime()"/>
+                        </td>
+
+                        <td class="label">实际结束时间：</td>
+                        <td>
+                            <input id="endTime1"  class="k-textbox"  name="actualMeetingEnd" value="#date_format($!{reserveMeeting.actualMeetingEnd},'yyyy-MM-dd HH:mm:ss')" onchange="updateMeetingTime()"/>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="meeting-block">
+                <div class="arrive">
+                    <div class="left-block">
+                        <ul>
+                            <li>
+                                <span>已到</span>
+                            </li>
+                            <li>
+                                <span id="countArrive" class="num"></span>
+                                <span class="unit">(人)</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="right-block">
+                        <ul id="arrive">
+                        </ul>
+                    </div>
+                </div>
+                <div class="unarrive">
+                    <div class="left-block">
+                        <ul>
+                            <li>
+                                <span>未到</span>
+                            </li>
+                            <li>
+                                <span id="countUnArrive" class="num">3</span>
+                                <span class="unit">(人)</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="right-block">
+                        <ul id="unArrive">
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    #*<table width="100%" style="padding-right: 20px;">
+		<tr>
+            <td class="label"><span class="ui-form-required">*</span>会议主题：</td>
+            <td colspan="3"><textarea id="meetingSubject" name="meetingSubject" class="k-textbox k-textarea" style="height:60px">$!{reserveMeeting.meetingSubject}</textarea></td>
+		</tr>
+		
+		<tr>
+            <td class="label"><span class="ui-form-required">*</span>会议主持人：</td>
+            <td class="inputText">
+				#if(!$!viewOnly)<span class="k-textbox k-space-right" onclick="choosePersons(1,'checkerId','checkerName','reserveMeeting_add_dlg','','','','')">#end
+				<input type="hidden" class="k-textbox" id="checkerId" name="meetingCompere" value="$!{reserveMeeting.meetingCompere}"/>
+				<input type="text" class="k-textbox ui-input-choose" id="checkerName" name="meetingCompereName" value="$!{reserveMeeting.meetingCompereName}"/>
+				#if(!$!viewOnly)<a href="#" class="k-icon k-i-search">&nbsp;</a>
+				</span>#end
+			</td>
+        
+			<td  class="label">实际开始时间：</td>
+            <td>
+                <input  id="startTime1"  class="k-textbox"  name="actualMeetingStart" value="#date_format($!{reserveMeeting.actualMeetingStart},'yyyy-MM-dd HH:mm:ss')" onchange="updateMeetingTime()"/>
+            </td>
+			
+			<td class="label">实际结束时间：</td>
+            <td>
+				<input id="endTime1"  class="k-textbox"  name="actualMeetingEnd" value="#date_format($!{reserveMeeting.actualMeetingEnd},'yyyy-MM-dd HH:mm:ss')" onchange="updateMeetingTime()"/>
+            </td>
+		</tr>
+		<tr>
+            <td class="label"><span class="ui-form-required">*</span>应到人员(<a id="countAll"></a>)：</td>
+            <td>
+				<input id="all"  class="k-textbox" readonly />
+            </td>
+		</tr>
+		<tr>
+            <td class="label"><span class="ui-form-required">*</span>已到人员(<a id="countArrive"></a>)：</td>
+            <td>
+				<input id="arrive"  class="k-textbox" readonly />
+            </td>
+        
+		</tr>
+		<tr>
+            <td class="label"><span class="ui-form-required">*</span>未到人员(<a id="countUnArrive"></a>)：</td>
+            <td>
+				<input id="unArrive"  class="k-textbox" readonly />
+            </td>
+        
+		</tr>
+		
+    <tr style="display:none;">
+		<td colspan="5">
+    			<div class="ui-co-cont ui-co-nob">
+					#parse("meeting/myMeeting/person_grid.vm")
+				</div>
+		</td>
+	</tr>
+		
+    </table>*#
+    <div class="actions ui-layout-south">
+        ##<button class="k-primary hc_btn" id="save_button_id" type="submit"><i class="fa fa-save"></i>保 存</button>
+		<a class="k-primary hc_btn" onclick="exportMeetingInfo();"><i class="fa fa-download"></i>导出</a>
+	</div>
+	
+<input type="hidden" name="number" value="$!reserveMeeting.personDetailList.size()" id="number" />
+</form>
+<!-- 实例化编辑器 -->
+    #*<script type="text/javascript">
+		#if($!viewOnly)
+        	var ue = UE.getEditor('container', {
+                initialFrameWidth:851,
+            	initialFrameHeight:180,
+				wordCount:false,
+				elementPathEnabled : false,
+				readonly:true
+        	});
+		#else
+			var ue = UE.getEditor('container', {
+                initialFrameWidth:851,
+            	initialFrameHeight:180,
+				wordCount:false,
+				elementPathEnabled : false
+        	});
+        #end
+    </script>*#
+<script type="text/javascript">
+function closeErrors(){
+		return true;
+	}
+	window.onerror=closeErrors;
+
+    var _iframe_layout;
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+              defaults: {
+                resizable: false,
+                closable: false,
+                spacing_open: 0
+              },
+               south: {
+                   size: 43
+               }
+	    });
+		#if($!{meeting.isSign}==1)
+		queryCondition();
+		#end
+	});
+
+    //
+    $(document).ready(function () {
+        $("#parentName_choose").click(function () {
+            quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/base/geoArea/lookup?txtId=parentId&txtName=parentName&dialogId=meeting_add_dlg", 300, 300);
+        });
+
+
+        $("#myform_id").validator({
+    		#if(!$!viewOnly)
+                fields: {
+                    meetingCompereName: "会议主持人:required;",
+                    meetingStart: "开始时间:required;",
+                    meetingEnd: "结束时间:required;",
+                    meetingSubject: "会议主题:required; length[~100];",
+                    personName_id_1: "会议人员:required;",
+                },
+    		#end
+                valid: function (form) {
+                    form_btn_submit($("#save_button_id"), form, function (res) {
+                        validateCallback(res, "grid", "reserveMeeting_add_dlg");
+						close_dialog();
+                    });
+                }
+        });
+		
+    });
+	
+	/*function queryStatus(){
+		$.ajax({
+    	    	    'url': "$!{rc.contextPath}/meeting/myMeeting/queryStatus", 
+    	    	    'data': $('#myform_id').serialize(),  
+            		'dataType': "json",
+    	    	    'type': 'POST',
+    	    	    'error': function (data) {
+    	    	        return false;
+    	    	    },
+    	    	    'success': function (data) {
+    					$.each(data,function(i,item){
+            				$("#signStatus_id-"+(i+1)).val(item);
+            			});
+    	    	    }
+    	});
+		//setTimeout('queryStatus()',10000);
+	}*/
+	
+	function queryCondition(){
+		$.ajax({
+    	    	    'url': "$!{rc.contextPath}/meeting/roomReservation/queryCondition", 
+    	    	    'data': $('#myform_id').serialize(),  
+            		'dataType': "json",
+    	    	    'type': 'POST',
+    	    	    'error': function (data) {
+    	    	        return false;
+    	    	    },
+    	    	    'success': function (data) {
+						//$('#all').val(data.all);
+						//$('#countAll').text(data.countAll);
+						
+						$('#countArrive').empty().append(data.countArrive);
+						var arrives = data.arrive.split(',');
+						$('#arrive').empty();
+						for(var i=0;i<arrives.length;i++){
+							$('#arrive').append("<li>"+arrives[i]+"</li>");
+						}
+						//$('#arrive').val(data.arrive);
+						
+						$('#countUnArrive').empty().append(data.countUnArrive);
+						var unArrives = data.unArrive.split(',');
+						$('#unArrive').empty();
+						for(var i=0;i<unArrives.length;i++){
+							$('#unArrive').append("<li>"+unArrives[i]+"</li>");
+						}
+						//$('#unArrive').val(data.unArrive);
+						
+    	    	    }
+    	});
+		setTimeout('queryCondition()',10000);
+	}
+	
+        #if($!viewOnly)
+    		$("#checkerName").attr('readonly', true).unbind("click");
+    		$("#meetingSubject").attr('readonly', true).unbind("click");
+    		$("span").unbind("click").removeAttr("onclick");
+    		$(":input[id^='personName_id-']").attr('readonly', true).unbind("click");
+    		$("a.k-i-search").hide().parent("span").attr("readonly",true).css("padding-right","0");//选择框的放大镜
+    		$('.ui-form-required').hide();//必须输入的*标志
+    		$(":input[id='startTime1']").attr('readonly', false).bind("click").attr("onclick");
+			$('[type=button]').hide();
+	    	$('[type=submit]').hide();
+			#if(!$!readOnly)
+    		commonDate("startTime1","endTime1","yyyy-MM-dd HH:mm:ss","zh-CN");
+			#else
+				$("#startTime1").attr("readonly",true);
+				$("#endTime1").attr("readonly",true);
+			#end
+		#else
+			commonDate("startTime1","endTime1","yyyy-MM-dd HH:mm:ss","zh-CN");
+        #end
+
+		function updateMeetingTime(){
+    		$.ajax({
+        	    	    'url': "$!{rc.contextPath}/meeting/myMeeting/save", 
+        	    	    'data': $('#myform_id').serialize(),  
+                		'dataType': "json",
+        	    	    'type': 'POST',
+        	    	    'error': function (data) {
+        	    	        return false;
+        	    	    },
+        	    	    'success': function (data) {
+        					notify("操作成功！","success");
+        	    	    }
+        	});
+		}
+		
+		function exportMeetingInfo(){
+    		window.location.href="$!{rc.contextPath}/meeting/roomReservation/excelExport"; 
+		}
+</script>
+</body>
+</html>

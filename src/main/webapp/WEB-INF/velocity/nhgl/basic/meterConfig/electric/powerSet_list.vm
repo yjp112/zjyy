@@ -1,0 +1,186 @@
+<div class="ui-layout-center" id="subMain">
+	<form id="porwerSave_form"  method="post" action="$!{rc.contextPath}/nhgl/basic/meterConfig/electricConfig/savePower">
+	<div class="ui-layout-center">
+		<table id="power_datalist" class="fn-hide"></table>
+	</div>
+	</form>
+	<div class="ui-layout-north">
+		<div class="ui-module-name">
+			<label id="menuName">#crumbs("$!menu.code",1)</label>
+		</div>
+		<form id="power_list_search" class="ui-form ui-form-search fn-clear">
+			<input id="locationId" type="hidden" name="locationId" value=""/>
+			<div class="ui-form-search-left">
+				<div class="ui-form-item">
+		            <label class="ui-label">设备编码：</label>
+		            <input class="ui-input" type="text" name="deviceCode"/>
+				</div>
+				<div class="ui-form-item">
+		            <label class="ui-label">电表编号：</label>
+		            <input class="ui-input" type="text" name="extended1"/>
+				</div>
+				<div class="ui-form-item">
+		    		<label class="ui-label">电表名称：</label>
+		    		<input class="ui-input" type="text" name="deviceName"/>
+				</div>
+				<div class="ui-form-item">
+		    		<label class="ui-label">部门：</label>
+		    		<input class="ui-input ui-input-choose" readonly type="text" name="useDepartmentName" id="useDepartmentName" onclick="chooseDept('useDepartmentId','useDepartmentName')"/>
+					<input type="hidden" name="useDepartmentId" id="useDepartmentId"/>
+				</div>
+				<div class="ui-form-item">
+		    		<label class="ui-label">分项：</label>
+		    		<input class="ui-input ui-input-choose"readonly type="text" name="discipinesName" id="discipinesName" onclick="chooseSubSystem('discipinesCode','discipinesName','powerSet_list')"/>
+					<input type="hidden" name="discipinesCode" id="discipinesCode"/>
+				</div>
+			</div>	
+		    <div class="ui-form-search-right">
+					<button type="submit" id="subButton" class="btn btn-primary"><i class="iconfont icon-search"></i> 查&nbsp;询</button>
+		    </div>
+		</form>
+	</div>
+</div>
+<!--<div class="ui-layout-north">
+	#bread_crumbs("NHGL_DBJCSZ")
+</div>-->
+<div class="ui-layout-west">
+    <div id="powerlist_box" class="ui-box">
+		<div class="ztree-header">
+    		<div class="ztree-title">地理区域树</div>
+    	</div>
+        <div class="ui-box-container">
+            <ul id="geoArea_tree" class="ztree"></ul>
+        </div>
+    </div>
+</div>
+  <script type="text/javascript">
+	var row_no= 0;
+	function getSubSystemInfo(value,row){   		
+		var id = "subSystemId"+row.id;
+		var name = "subSystemName"+row.id;
+		return '<input type="hidden" name="subDeviceList['+row_no+'].subDeviceCode" id="'+id+'" value="'+row.discipinesCode+'"/>'
+			+'<input readonly  data-rule="分项:required" onclick="chooseSubSystem(\''+id+'\',\''+name+'\',\'powerSet_list\')" class="ui-input ui-input-choose"  type="text" id="'+name+'" value="'+value+'" />';	
+	}
+	function getExtended1(value,row){ 
+		row_no=row_no+1;
+		return  '<input type="text" data-rule="电表编号:required" name="subDeviceList['+row_no+'].subDeviceName" value="'+value+'" style="height:19px"/>';
+	}
+	
+	function getDept(value, row){
+		var id = "useDepartmentId"+row.id;
+		var name = "useDepartmentName"+row.id;
+		return '<input type="hidden" name="subDeviceList['+row_no+'].id" value="'+row.id+'"/>'
+		    +'<input type="hidden" name="subDeviceList['+row_no+'].num" id="'+id+'" value="'+row.useDepartmentId+'"/>'
+			+'<input readonly  data-rule="使用部门:required" onclick="chooseDept(\''+id+'\',\''+name+'\')" class="ui-input ui-input-choose" type="text" id="'+name+'" value="'+value+'" />';	
+	}	
+  	$(document).ready(function(){
+##		if(_inner_layout) _inner_layout.destory();
+
+		/*if(T.innerLayout&&!T.innerLayout.destroyed){
+			T.innerLayout.destroy();
+		}*/
+##		if(T.innerLayout&&!T.innerLayout.destroyed){
+##			T.innerLayout.destroy();
+##		}
+		T.nhInit();
+		 T.tabLayout = $("#chart_content_id").layout({
+        defaults : {
+            resizable : false,
+            closable : false,
+            spacing_open : 5
+        },
+        west : {
+            size : 250,
+            resizable : true,
+            resizerTip : "移动改变大小",
+            closable : true,
+            togglerTip_open : "隐藏",
+            togglerTip_closed : "打开"
+        },
+        onresize_end : function(){
+            $("#powerlist_box").box("resize");
+        }
+    });
+    	_content_layouts.push(T.innerLayout);
+		_inner_layout=$("#subMain").layout({
+			defaults:{
+				resizabel:false,
+				closable: false,
+				spacing_open:5
+			},
+			onresize_end:function(){
+				$("#power_datalist").datagridResize({width:_inner_layout.state.center.innerWidth,height:_inner_layout.state.center.innerHeight});
+			}
+		});
+		$("#powerlist_box").box({
+        	width : function(){return T.tabLayout .state.west.innerWidth;},
+        	height : function(){return T.tabLayout .state.west.innerHeight-26;}
+    	});
+		var power_datagrid=$("#power_datalist").datagrid({
+			url:'$!{rc.contextPath}/nhgl/basic/meterConfig/electricConfig/pagePower',
+			dataType: "json",
+			method: "GET",
+			singleSelected : true,
+			striped : false,
+			height:  _inner_layout.center.state.innerHeight,
+			width :  _inner_layout.center.state.innerWidth,
+			showOrderNumber : true,
+			useRp : true,
+			usepager: true,
+    		rpOptions: [10, 20, 40, 50],
+    		pageSize: 20,
+    		searchFormId:"power_list_search",
+    		searchCallback:function(datagrid){},
+    		onSuccess:function(table,grid){row_no= 0;
+    			if(!grid)return ;
+    		},
+    		colModel:[
+    			{"display":"序号"},
+				{display: "设备编码", name: "deviceCode",width:120},
+    			{display: "<span class='ui-form-required'>*</span>电表编号", name: "extended1",width:120,align:"center",format:getExtended1},
+    			{display: "电表名称", name: "deviceName",width:200},
+	            {display: "安装位置", name: "locationName",width:160},
+				{display: "<span class='ui-form-required'>*</span>使用部门", name: "useDepartmentName",width:160,align:"center",format:getDept},
+				{display: "<span class='ui-form-required'>*</span>分项", name: "subName",width:200,align:"center",format:getSubSystemInfo}
+    		],
+    		buttons : [
+	          {name: '保存', bclass: 'icon-save', onpress : btnClick}
+	        ]
+		});
+		function btnClick(com, grid,datagrid) {           
+		    var rows = datagrid.getSelectedRows();
+			if(datagrid.getAllRows().length>0){
+				$.forms.submits("#porwerSave_form",
+            		function() {
+            			$("#power_datalist").flexReload();
+            			return true;
+            		},
+            		null);
+		    }        
+
+        };    
+      
+	}); 
+
+  </script>
+  <script type="text/javascript">
+    var setting = {
+	data: {
+		simpleData: {enable: true}
+      },
+      callback: {
+			onClick: function(event, treeId, treeNode) {
+			 	 $('#locationId').val(treeNode.id);
+				 $('#subButton').click();
+			}
+		}
+    };
+	var zNodes = [];
+	zNodes.push({id:"0", pId:"-1", name:"地理区域簇",open:true});  
+	#foreach($!{treeNode} in $!{treeList})
+		zNodes.push({id:"$!{treeNode.id}", pId:"$!{treeNode.parentId}", name:"$!{treeNode.areaName}"});     
+	#end 
+	$(document).ready(function(){
+	        $.fn.zTree.init($("#geoArea_tree"), setting,zNodes).expandAll(true);
+	});
+  </script>

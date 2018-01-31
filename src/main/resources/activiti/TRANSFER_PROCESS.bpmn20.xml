@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
+  <process id="TRANSFER_PROCESS" name="备件调拨流程" activiti:processListUrl="/spare/transfer/go" isExecutable="true">
+    <documentation>备件调拨流程</documentation>
+    <startEvent id="sid-186CA2D0-54AB-4214-9BED-7D61965E987E" activiti:initiator="_initiator" activiti:formUrl="/spare/transfer/edit"></startEvent>
+    <endEvent id="sid-F3182D0B-09ED-4AE2-A6CE-5CF440B49435"></endEvent>
+    <userTask id="sid-9FCF77F5-97DA-47FC-A02D-0F4047DD7DE2" name="填写备件调拨单" activiti:assignUsers="${_initiator}" activiti:formUrl="/spare/transfer/edit?id=${transfer.id}"></userTask>
+    <sequenceFlow id="sid-D1AC9719-CC0B-4C1C-AAA0-3F50D10ACFE7" sourceRef="sid-186CA2D0-54AB-4214-9BED-7D61965E987E" targetRef="sid-9FCF77F5-97DA-47FC-A02D-0F4047DD7DE2"></sequenceFlow>
+    <userTask id="sid-86986E03-1A3D-47F0-8232-CC92AA8540D3" name="仓管员审批" activiti:assignRoles="CANGGUANYUAN" activiti:formUrl="/spare/transfer/edit?viewOnly=true&amp;id=${transfer.id}"></userTask>
+    <sequenceFlow id="submit_1" name="提交" sourceRef="sid-9FCF77F5-97DA-47FC-A02D-0F4047DD7DE2" targetRef="sid-86986E03-1A3D-47F0-8232-CC92AA8540D3"></sequenceFlow>
+    <sequenceFlow id="audit_reject_2" name="驳回" sourceRef="sid-86986E03-1A3D-47F0-8232-CC92AA8540D3" targetRef="sid-9FCF77F5-97DA-47FC-A02D-0F4047DD7DE2"></sequenceFlow>
+    <sequenceFlow id="submit_2" name="提交" sourceRef="sid-86986E03-1A3D-47F0-8232-CC92AA8540D3" targetRef="sid-F3182D0B-09ED-4AE2-A6CE-5CF440B49435"></sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_TRANSFER_PROCESS">
+    <bpmndi:BPMNPlane bpmnElement="TRANSFER_PROCESS" id="BPMNPlane_TRANSFER_PROCESS">
+      <bpmndi:BPMNShape bpmnElement="sid-186CA2D0-54AB-4214-9BED-7D61965E987E" id="BPMNShape_sid-186CA2D0-54AB-4214-9BED-7D61965E987E">
+        <omgdc:Bounds height="30.0" width="30.0" x="104.5" y="137.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-F3182D0B-09ED-4AE2-A6CE-5CF440B49435" id="BPMNShape_sid-F3182D0B-09ED-4AE2-A6CE-5CF440B49435">
+        <omgdc:Bounds height="28.0" width="28.0" x="675.0" y="138.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-9FCF77F5-97DA-47FC-A02D-0F4047DD7DE2" id="BPMNShape_sid-9FCF77F5-97DA-47FC-A02D-0F4047DD7DE2">
+        <omgdc:Bounds height="80.0" width="100.0" x="239.5" y="112.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-86986E03-1A3D-47F0-8232-CC92AA8540D3" id="BPMNShape_sid-86986E03-1A3D-47F0-8232-CC92AA8540D3">
+        <omgdc:Bounds height="80.0" width="100.0" x="444.5" y="112.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="audit_reject_2" id="BPMNEdge_audit_reject_2">
+        <omgdi:waypoint x="494.5" y="192.0"></omgdi:waypoint>
+        <omgdi:waypoint x="494.5" y="251.0"></omgdi:waypoint>
+        <omgdi:waypoint x="298.0" y="251.0"></omgdi:waypoint>
+        <omgdi:waypoint x="298.0" y="192.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sid-D1AC9719-CC0B-4C1C-AAA0-3F50D10ACFE7" id="BPMNEdge_sid-D1AC9719-CC0B-4C1C-AAA0-3F50D10ACFE7">
+        <omgdi:waypoint x="134.5" y="152.0"></omgdi:waypoint>
+        <omgdi:waypoint x="239.5" y="152.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="submit_1" id="BPMNEdge_submit_1">
+        <omgdi:waypoint x="339.5" y="152.0"></omgdi:waypoint>
+        <omgdi:waypoint x="444.5" y="152.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="submit_2" id="BPMNEdge_submit_2">
+        <omgdi:waypoint x="544.5" y="152.0"></omgdi:waypoint>
+        <omgdi:waypoint x="675.0" y="152.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

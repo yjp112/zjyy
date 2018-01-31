@@ -1,0 +1,308 @@
+#parse("index/_header.vm")
+<style>
+	.ui-composer .ui-co-table .ui-input-choose{
+		width:100%;
+	}
+</style>
+</head>
+<body style="padding-bottom:40px;">
+	<form id="myform_id" class="ui-layout-center ui-dialog-form" method="post" action="$!{rc.contextPath}/spare/inventory/save" >
+	     <input type="hidden" name="id" value="$!{inventory.id}">
+		 <input type="hidden" name="_bpm_param" value="$!{_bpm_param}"/>
+         <input type="hidden" name="_bpm_ts_id" value=""/>
+         <input type="hidden" name="_bpm_enabled" value="false"/>
+        <div class="ui-composer">
+    <div class="ui-co-seg">
+	   <table class="ui-co-table" width="100%" >
+        <tr>
+            <td  class="label input-num">#if(!$!viewOnly)<span class="ui-form-required">*</span>#end 盘点单号：</td>
+            <td class="inputText">
+				 <input readonly class="k-textbox readonly-normal" type="text"  name="inventoryCode" value="$!{inventory.inventoryCode}"  />
+            </td>
+            <td class="label input-num">#if(!$!viewOnly)<span class="ui-form-required">*</span>#end 盘点仓库：</td>
+            <td class="inputText">
+				 <select class="k-textbox" name="warehouseId" id="warehouseId">
+    		    	${warehouseOptions}
+    		    </select>
+			</td>
+       
+            <td  class="label input-num">#if(!$!viewOnly)<span class="ui-form-required">*</span>#end 盘点人：</td>
+            <td class="inputText">
+				#if(!$!viewOnly)<span class="k-textbox k-space-right" id="inventoryPersonNames">#end
+					 <input type="hidden" id="inventoryPersonId"  name="inventoryPersonId" value="$!{inventory.inventoryPersonId}"  />
+					 <input readonly class="k-textbox ui-input-choose"  type="text" id="inventoryPersonName" name="inventoryPersonName" value="$!{inventory.inventoryPersonName}"  />
+					 #if(!$!viewOnly)<a href="#" class="k-icon k-i-search">&nbsp;</a>
+                </span>#end
+
+			</td>
+            
+        </tr>
+		<tr>
+			<td class="label input-num">#if(!$!viewOnly)<span class="ui-form-required">*</span>#end 盘点日期：</td>
+			<td class="inputText">
+			 <input type="text" name="inventoryTime" class="k-textbox"  id="inventoryTime"  value="#date_format($!inventory.inventoryTime,'yyyy-MM-dd HH:mm:ss')" />
+			</td>
+		</tr>
+        <tr>
+            <td class="label input-num" class="inputText">盘点摘要：</td>
+            <td colspan="3">
+				<textarea  id="textAreaId" class="k-textbox k-textarea" type="text" name="remark">$!{inventory.remark}</textarea>
+			</td>
+        </tr>
+    </table>
+	<div class="ui-segline"></div>
+	<div id="stock">
+	<table  class="ui-table " id="tableId">
+        <thead>
+        <tr>
+            <th class="k-header input-equilong" width="30">序号</th>
+			<th class="k-header input-text">备件名称</th>
+			<th class="k-header input-text">备件编码</th>
+			<th class="k-header input-num">账面数量</th>
+			<th class="k-header input-num">盘点数量</th>
+			<th class="k-header input-num">盈亏数量</th>
+			<th class="k-header input-text" width="260">盈亏原因</th>
+        </tr>
+        </thead>
+        <tbody>
+			#set($index=0)
+			#foreach($list in $!inventory.inventoryDetailList)
+			#set($index=$index+1)
+				<tr>
+					<td class="input-equilong"><span class="rowNumber">$index</span></td>
+			        <td>
+			        	<input type="hidden" name="inventoryDetailList[$index].spareId" value="$!{list.spareId}" />
+			        	<input readonly type="text" name="inventoryDetailList[$index].spareName" value="$!{list.spareName}" class="k-textbox input-text"/>
+			        </td>
+			        <td><input readonly type="text" name="inventoryDetailList[$index].spareCode" value="$!{list.spareCode}" class="k-textbox input-text"/></td>
+			        <td><input readonly type="text" name="inventoryDetailList[$index].accountQty" value="$!{list.accountQty}" class='k-textbox input-num fInt'/></td>
+			        <td><input type="text" name="inventoryDetailList[$index].inventoryQty" value="$!{list.inventoryQty}" class='k-textbox input-num fInt'/></td>
+			        <td><input readonly type="text" name="inventoryDetailList[$index].balanceQty" value="$!{list.balanceQty}" class='k-textbox input-num fInt'/></td>
+			        <td><input valid="[{max_length: 100}]" ype="text" name="inventoryDetailList[$index].descripton" value="$!{list.descripton}" class="k-textbox"/></td>
+				</tr>
+			#end
+	            <tr id="lastTr">
+					<td width="30">合计</td>
+					<td></td>
+					<td></td>
+					<td><input readonly id='sumAccountQty' type="text" name="sumAccountQty"  class="k-textbox input-num fInt"/></td>
+					<td><input readonly id='sumInventoryQty' type="text" name="sumInventoryQty"  class="k-textbox input-num fInt"/></td>
+					<td><input readonly id='sumBalanceQty' type="text" name="sumBalanceQty"  class="k-textbox input-num fInt"/></td>
+					<td></td>
+	            </tr>
+		</tbody>
+    	</table>
+		</div>
+		</div>
+	 	#if($!inventory.processInstanceId!='')
+			<div class="ui-co-seg">
+			#parse("bpm/bpm_audit.vm")
+			</div>
+		#end
+	##默认来存储已经存在的行
+	<div class="actions">
+    	#foreach($ts in $!_bpm_transitions)
+        	#set($delete=false)
+            <button type="submit" class="k-primary hc_btn" id="st"onclick="doSubmit('processDone','$!ts.id',true)">
+           	#if($!ts.id.contains("reject"))
+           	<i class="fa fa-reply"></i>
+			#else
+            <i class="fa fa-upload"></i>
+			#end 
+			#if($!ts.id=="submit_1"&&$!{inventory.id})
+				#set($delete=true)
+			#end
+            $!ts.name</button>
+        #end
+        <button class="k-primary hc_btn" type="submit" id="bt" onclick="doSubmit('processDone');"><i class="fa fa-save"></i>保存</button>
+        #if($!delete)
+            <button class="k-primary hc_btn" type="submit" onclick="doSubmit('deleteProcessInstance');"><i class="fa fa-remove"></i>删除</button>
+        #end
+        <a class="k-primary hc_btn" onclick="window.location.href='$!{rc.contextPath}/spare/inventory/go';"><i class="fa fa-reply"></i>返回</a>
+		#if($!inventory.processInstanceId!='')
+                <ul class="ui-action">
+                    ##<li class="ui-action-item"><a href="#"><i class="iconfont icon-print"></i> </a> </li>
+                    <li class="ui-action-item"><a href="#"><i class="iconfont icon-list-alt"></i> </a> </li>
+                    <li class="ui-action-item"><a href="#" onclick="showFlowChart('$!inventory.processInstanceId',800,600);"><i class="iconfont icon-sitemap"></i> </a> </li>
+                </ul>
+        #end
+	</div>
+<input type="hidden" id="d"/>
+	</form>
+
+	<script type="text/javascript">
+	
+	$("#inventoryPersonNames").click(function() {
+			if("$!viewOnly" != "true")
+       		quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/choose/personPage?type=1&txtId=inventoryPersonId&txtName=inventoryPersonName",1135, 540);
+		});	
+	
+	function doSubmit(type,flowId,bpmEnabled) {
+        if(flowId){
+	        $("input[name='_bpm_ts_id']").val(flowId);
+        }
+        if(bpmEnabled){
+	        $("input[name='_bpm_enabled']").val(bpmEnabled);
+			$("#d").val(1);
+        }else{
+			$("#d").val(0);
+		}
+        var ctn = "$!rc.contextPath/spare/inventory/"+type;
+        $("#myform_id").attr("action", ctn);
+        return true;
+    }
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+              defaults: {
+                resizable: true,
+                closable: false,
+                spacing_open: 5
+              }
+            });
+		#if(!$!viewOnly)
+			commonSingleDate("inventoryTime","yyyy-MM-dd HH:mm:ss","zh-CN");
+		#end
+		
+		##改变仓库
+		$('#warehouseId').change(function(){
+            $.ajax({
+                type: "post",
+                cache:false,
+                url: '$!{rc.contextPath}/spare/inventory/loadSpare/'+$(this).val(),
+                success: function (response) {
+						rebuildTable(response);
+						caculate();
+            		}
+            	});     
+	    });
+		
+        $("#myform_id").validator({
+            fields:{
+				inventoryCode: "盘点单号:required; length[~20]",
+    		    warehouseId: "盘点仓库:required;",
+    		    inventoryTime: "盘点日期:required;",
+    		    inventoryPersonName: "盘点人: required;",
+    		    remark: "盘点摘要: length[~100];"
+            },
+            valid:function(form){
+				var id=$("#d").val(); 
+				var bt = "#st";
+				if('0'==id)bt = '#bt';
+                form_btn_submit($(bt),form,function(res){
+                    validateCallback(res);
+					
+                });
+            }
+        });
+		caculate();
+  });
+  ##这里进行表列表构造
+  function rebuildTable(dataRows){
+  		$("#tableId tbody tr").not($("#lastTr")).remove();
+  		var newRow='';
+		var j = 0;
+		$.each(dataRows,function(i,item){
+			i = i+1;
+			newRow+='<tr>'   
+					+'<td class="input-equilong"><span class="rowNumber">'+i+'</span></td>'
+					+'<td>'
+		            +'<input type="hidden" name="inventoryDetailList['+j+'].spareId" value="'+item.spareId+'"/>'
+				    +'<input readonly type="text" name="inventoryDetailList['+j+'].spareName"  value="'+item.spareName+'" class="k-textbox input-text"/>'
+					+'</td>'                   
+					+'<td><input readonly type="text" name="inventoryDetailList['+j+'].spareCode" value="'+item.spareCode+'" class="k-textbox input-text"/></td>'                   
+					+'<td><input readonly type="text" name="inventoryDetailList['+j+'].accountQty" value="'+item.accountQty+'" class="k-textbox input-num"/></td>'                   
+					+'<td><input type="text" name="inventoryDetailList['+j+'].inventoryQty" class="k-textbox input-num"/></td>'                   
+					+'<td><input readonly type="text" name="inventoryDetailList['+j+'].balanceQty" class="k-textbox input-num"/></td>'                   
+					+'<td><input type="text" name="inventoryDetailList['+j+'].descripton" class="k-textbox input-text"/></td>'                   
+					+'</tr>';
+			j++;		
+		})
+		$("#lastTr").before(newRow);
+			
+  }
+  
+   function caculate(){
+     var $table=$('#tableId');
+     var $sumAccountQty=$('#sumAccountQty');
+     var $sumInventoryQty=$('#sumInventoryQty');
+     var $sumBalanceQty=$('#sumBalanceQty');
+     
+     var $allAccountQty=$("input[name$='.accountQty']",$table);
+     var $allInventoryQty=$("input[name$='.inventoryQty']",$table);
+     var $allBalanceQty=$("input[name$='.balanceQty']",$table);
+     $('tr:gt(0):not(:last)',$table).each(function(i,tr){
+         var $accountQty=$("input[name$='.accountQty']",this);
+         var $inventoryQty=$("input[name$='.inventoryQty']",this);
+         var $balanceQty=$("input[name$='.balanceQty']",this);
+         $($inventoryQty).add($balanceQty).change(function(){
+            var v=subtract($inventoryQty,$accountQty);
+            $balanceQty.val(v);
+            var v1=sum($allInventoryQty);
+            $sumInventoryQty.val(v1);
+            var v2=sum($allBalanceQty);
+            $sumBalanceQty.val(v2);
+            var v3=sum($allAccountQty);
+            $sumAccountQty.val(v3);
+         });                
+     });
+            var v1=sum($allInventoryQty);
+            $sumInventoryQty.val(v1);
+            var v2=sum($allBalanceQty);
+            $sumBalanceQty.val(v2);
+            var v3=sum($allAccountQty);
+            $sumAccountQty.val(v3);
+    }
+    
+    function sum(arr){
+      var s=0;
+      $(arr).each(function(i,item){
+           var val=$.trim($(item).val());
+	       s=s+val*1.0
+      })
+      return formatNumber2(s);   
+    }
+    function subtract($a,$b){
+     var a=$.trim($a.val());
+     var b=$.trim($b.val());
+     try{
+      a=a*1.0;
+	  b=b*1.0    
+     }catch(err){
+      alert(err)
+     }
+     return formatNumber2(a-b);
+    }
+    
+    function compare($a,$b){
+     var a=$.trim($a.val());
+     var b=$.trim($b.val());
+     try{
+      a=a.parseDouble();
+	  b=b.parseDouble();    
+     }catch(err){
+      alert(err)
+     }
+     return a-b;
+    }
+  
+   $(document).ready(function(){
+        #if($!viewOnly)
+			fNumPage();
+        	#if(!$!_bpm_transitions)
+            $('[type=submit]').hide();
+            #end
+            $(':input:not(#_bpm_comment)').attr('readonly',true);
+            $('select').attr('disabled',true);
+            $("input[type=text]").unbind( "click" ).attr('onclick','');
+            $('#tableId tr').each(function(i,tr){
+                $('th:last',tr).remove();
+                $('td:last',tr).remove();
+            });
+		    /*var datetimepicker = $("#inventoryTime").data("kendoDateTimePicker");
+			datetimepicker.enable(false);*/
+        #end
+		
+    });
+  
+  </script>
+  #parse("index/_footer.vm")  

@@ -1,0 +1,66 @@
+<style>
+	a.ui-input-remove,
+	a.ui-input-icon {
+		right:13px;
+	}
+</style>		
+<form class="ui-form ui-form-search fn-clear" id='pagerForm'>
+	  <div>
+			<div class="ui-form-item">
+			  <label class="ui-label">电表编码：</label>
+			 <input class="ui-input" type="text"  name="deviceCode">
+			</div>
+			<div class="ui-form-item">
+			  <label class="ui-label">电表名称：</label>
+	          <input class="ui-input" type="text"  name="deviceName">
+			</div>
+			<div class="ui-form-item  ui-form-item-small">
+			  <button type="submit" class="btn ui-btn" id="queryBtn"><i class="iconfont icon-search"></i>查询</button>
+			  <button type="reset" class="btn ui-btn" id="resetBtn"><i class="iconfont icon-reset"></i>重置</button>
+			</div>
+	  </div>
+</form>
+<div>
+  <table id="pagerTable" style="display: none"></table> 
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        //列表
+        $("#pagerTable").datagrid({
+            url: "$!{rc.contextPath}/choose/devicePagerElectric?t=" + new Date().getTime(),
+            dataType: "json",
+            method: "GET",
+            usepager: true,
+            rpOptions: $!{rpOptions},rp:$!{rp},
+            singleSelect: true,
+            colModel: [
+                {display: "电表编码", name: "deviceCode", width: 150},
+                {display: "电表名称", name: "deviceName", width: 200},
+                {display: "安装位置", name: "locationName", width: 150},
+                {display: "管理部门", name: "managerDepartmentName", width: 100},
+				{display: "使用部门", name: "useDepartmentName", width: 100}
+            ],
+            buttons : [
+            {name: '选择', bclass: 'choose', onpress : bringback},
+            {separator: true}
+            ]
+          ,searchFormId:"pagerForm"
+            ,height: 350
+            ,onDoubleClick:function(a,grid,c){
+         	    bringback();
+            }
+        });
+
+        function bringback(){
+            var rows = $("#pagerTable").getSelectedRows();
+            if (rows.length == 0) {
+                $.message("请选择电表！", $.message.TYPE_ERROR, 4, false, true); 
+                return false;
+            }        
+		    //人员
+            $("#"+'$!{txtId}').val(rows[0].id);
+            $("#"+'$!{txtName}').val(rows[0].deviceCode);
+        	closeDialog();
+        }
+    });
+</script>

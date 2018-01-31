@@ -1,0 +1,122 @@
+  <style>
+  body #centerMain {
+	overflow: hidden !important;
+	}
+  </style> 
+<script type="text/javascript" src="$!{nhgl_static_custom_url}/echarts_2/esl.js"> </script>
+<script type="text/javascript" src="$!{nhgl_static_custom_url}/echarts_2/echartsUtil.js"> </script>
+
+<SCRIPT type="text/javascript">
+$(document).ready(function(){
+	showProgress("span_dept");
+	showProgress("span_dept_list",38);
+	$('#tab-containers').tabs();
+	$('#qy_accordion_area').accordion({
+            "handle": ".handle",
+            "panel": ".panel"
+      });
+	$("#tabBlock").load('$!{rc.contextPath}/nhgl/monitor/energy/discipine/toTab');
+});
+function toTab(name,code,eleTotal,isParent){
+	var dname=name;
+	if(name.length>8)
+		name = name.substring(0,8)+"...";
+	$("#subName1").text(name+" 白天总用能量");
+	$("#subName2").text(name+" 夜间总用能量");
+	var menuCode = '$!menu.code'
+	var url = "$!{rc.contextPath}/nhgl/monitor/energy/discipine/toTab?standardCode="+code+"&deptName="+encodeURIComponent(dname)+'&isParent='+isParent+'&menuCode='+encodeURIComponent(menuCode);
+	//console.info(url);
+	$("#tabBlock").load(url);
+}
+</SCRIPT>
+
+<div class="nh-header">
+	<span class="nh-tab-name">能量</span>
+	<span class="nh-menu-name">#crumbs("$!menu.code",1)</span>
+	<div class="nh-count">
+    		<div class="count-item count-item-rise" id="rudD">
+			<div class="item-data">
+				<span class="data-num fNum2" id="dayTimeEleTotal">$!dayTimeEle.total</span>
+				<span>同比昨日</span>
+					<span class="data-trend" id="percentD">增长$!dayTimeEle.percent%</span>
+			</div>
+			<div class="item-ratio">
+				<div class="item-ratio-i"></div>
+			</div>
+			<div class="item-info">
+				<span class="info-date">$!sTime</span>
+				<span class="info-name" id="subName1">$!subName 白天总用能量</span>
+			</div>
+		</div>
+    		<div class="count-item count-item-rise" id="rudN">
+			<div class="item-data">
+				<span class="data-num fNum2" id="nightEleTotal">$!nightEle.total</span>
+				<span>同比昨日</span>
+					<span class="data-trend" id="percentN">增长$!nightEle.percent%</span>
+			</div>
+			<div class="item-ratio">
+				<div class="item-ratio-i"></div>
+			</div>
+			<div class="item-info">
+				<span class="info-date">$!sTime</span>
+				<span class="info-name" id="subName2">$!subName 夜间总用能量</span>
+			</div>
+		</div>
+	</div>	
+</div>	
+<div id="tab-containers" class="nh-box ui-tab ui-tab-h">
+	<input id="name" type="hidden"/>
+	<ul class='ui-tab-items ui-tab-items-h'>
+       <li class='ui-tab-item'><a href="#tabSub"><span class="ui-tab-area"></span>分项</a></li>
+	</ul>
+	<div  class="ui-tab-panels" style="overflow:auto">
+		<div id="tabSub" class="ui-tab-panel">
+        	<ul id="qy_accordion_area" class="accordion">
+        		#foreach($me in $subTree)
+        			#if($me.parentCode == "0")
+        				<li name="subli" id="$me.id" isp="1">
+        					#if($me.tb==1)
+        						<h3 class="handle handle-rise" onclick="toTab('$!me.name','$!me.standardCode','$!me.dayofEnergyTotal','0')">
+        					#elseif($me.tb==0)
+        						<h3 class="handle handle-unchanged" onclick="toTab('$!me.name','$!me.standardCode','$!me.dayofEnergyTotal','0')">
+        					#else
+        						<h3 class="handle handle-decline" onclick="toTab('$!me.name','$!me.standardCode','$!me.dayofEnergyTotal','0')">
+        					#end
+        					    <span class="handle-name" title="$!me.name">$!me.name</span>
+        						<span class="handle-num fNum2">$!me.total</span>
+        						<span class="handle-bar" name="span_dept" num="$!me.dayofEnergyTotal"></span>
+        					</h3>
+        					<ul class="panel">
+        						#foreach($cm in $subTree)
+        							#if($me.standardCode == $cm.parentCode)
+        								#if($cm.tb==1)
+        									<li name="subli" isp="" id="$cm.id" onclick="toTab('$!cm.name','$!cm.standardCode','$!cm.dayofEnergyTotal','')" class="pitem-rise">
+        								#elseif($cm.tb==0)
+        									<li name="subli" isp="" id="$cm.id" onclick="toTab('$!cm.name','$!cm.standardCode','$!cm.dayofEnergyTotal','')" class="pitem-unchanged">
+        								#else
+        									<li name="subli" isp="" id="$cm.id" onclick="toTab('$!cm.name','$!cm.standardCode','$!cm.dayofEnergyTotal','')" class="pitem-decline">
+        								#end
+        									<a class="pitem-link" href="javascript:;">
+        										<span class="pitem-name" title="$!cm.name">$!cm.name</span>
+                        						<span class="pitem-num fNum2">$!cm.total</span>
+                        						<span class="pitem-bar" name="span_dept_list" num="$!cm.dayofEnergyTotal"></span>
+        									</a>
+        								</li>
+        							#end
+        						#end
+        					</ul>
+        				<li>
+        			#end
+        		#end
+        	</ul>
+		</div>
+	</div>
+</div>
+<div class="nh-content">
+	<div id="tabBlock" class="nh-ct">
+	</div>
+</div>
+<script type="text/javaScript">
+T.nhInit();
+</script>
+

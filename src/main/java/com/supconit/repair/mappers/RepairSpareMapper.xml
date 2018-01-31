@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.repair.entities.RepairSpare">
+    <resultMap type="com.supconit.repair.entities.RepairSpare" id="RepairSpareResultMap">     
+        <result property="id" column="ID"/>
+        <result property="repairCode" column="REPAIR_CODE"/>
+        <result property="spareType" column="SPARE_TYPE"/>
+        <result property="spareId" column="SPARE_ID"/>
+        <result property="spareCode" column="SPARE_CODE"/>
+        <result property="spareName" column="SPARE_NAME"/>
+        <result property="spareSpec" column="SPARE_SPEC"/>
+        <result property="stockTime" column="STOCK_TIME"/>
+        <result property="comeTime" column="COME_TIME"/>
+        <result property="qty" column="QTY"/>
+        <result property="money" column="MONEY"/>
+        <result property="remark" column="REMARK"/>
+    </resultMap>
+    
+    <sql id="TABLE_NAME" lang="velocity">REPAIR_SPARE</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	<insert id="insert" parameterType="com.supconit.repair.entities.RepairSpare" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="insert_sql" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.repair.entities.RepairSpare" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    
+    <sql id="insert_sql" lang="velocity">
+        INSERT INTO <include refid="TABLE_NAME"/>(
+        	#if($_databaseId == 'oracle') ID, #end
+            REPAIR_CODE,
+            SPARE_TYPE,
+            SPARE_ID,
+            SPARE_CODE,
+            SPARE_NAME,
+            SPARE_SPEC,
+            STOCK_TIME,
+            COME_TIME,
+            QTY,
+            MONEY,
+            REMARK
+	    ) VALUES (
+	        #if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end
+            @{_parameter.repairCode,jdbcType=VARCHAR},
+            @{_parameter.spareType,jdbcType=NUMERIC},
+            @{_parameter.spareId,jdbcType=NUMERIC},
+            @{_parameter.spareCode,jdbcType=VARCHAR},
+            @{_parameter.spareName,jdbcType=VARCHAR},
+            @{_parameter.spareSpec,jdbcType=VARCHAR},
+            @{_parameter.stockTime,jdbcType=TIMESTAMP},
+            @{_parameter.comeTime,jdbcType=TIMESTAMP},
+            @{_parameter.qty,jdbcType=NUMERIC},
+            @{_parameter.money,jdbcType=NUMERIC},
+            @{_parameter.remark,jdbcType=VARCHAR}
+        )
+    </sql>
+
+    <insert id="batch_insert" databaseId="oracle">
+       INSERT ALL 
+        <foreach collection="spareList"  separator=" " item="spare">
+            INTO <include refid="TABLE_NAME"/>(
+        	ID,
+            REPAIR_CODE,
+            SPARE_TYPE,
+            SPARE_ID,
+            SPARE_CODE,
+            SPARE_NAME,
+            SPARE_SPEC,
+            STOCK_TIME,
+            COME_TIME,
+            QTY,
+            MONEY,
+            REMARK
+	        ) VALUES
+            (
+            func_getseqval('SEQ_REPAIR_SPARE'),
+            #{orderCode,jdbcType=VARCHAR},
+            #{spare.spareType,jdbcType=NUMERIC},
+            #{spare.spareId,jdbcType=NUMERIC},
+            #{spare.spareCode,jdbcType=VARCHAR},
+            #{spare.spareName,jdbcType=VARCHAR},
+            #{spare.spareSpec,jdbcType=VARCHAR},
+            #{spare.stockTime,jdbcType=TIMESTAMP},
+            #{spare.comeTime,jdbcType=TIMESTAMP},
+            #{spare.qty,jdbcType=NUMERIC},
+            #{spare.money,jdbcType=NUMERIC},
+            #{spare.remark,jdbcType=VARCHAR}
+            )
+        </foreach>
+        SELECT * FROM dual
+    </insert>
+
+
+    <insert id="batch_insert" databaseId="sqlserver">
+       INSERT INTO <include refid="TABLE_NAME"/>(
+            REPAIR_CODE,
+            SPARE_TYPE,
+            SPARE_ID,
+            SPARE_CODE,
+            SPARE_NAME,
+            SPARE_SPEC,
+            STOCK_TIME,
+            COME_TIME,
+            QTY,
+            MONEY,
+            REMARK
+	    ) VALUES
+        <foreach collection="spareList"  separator="," item="spare">
+            (
+            #{orderCode,jdbcType=VARCHAR},
+            #{spare.spareType,jdbcType=NUMERIC},
+            #{spare.spareId,jdbcType=NUMERIC},
+            #{spare.spareCode,jdbcType=VARCHAR},
+            #{spare.spareName,jdbcType=VARCHAR},
+            #{spare.spareSpec,jdbcType=VARCHAR},
+            #{spare.stockTime,jdbcType=TIMESTAMP},
+            #{spare.comeTime,jdbcType=TIMESTAMP},
+            #{spare.qty,jdbcType=NUMERIC},
+            #{spare.money,jdbcType=NUMERIC},
+            #{spare.remark,jdbcType=VARCHAR}
+            )
+        </foreach>
+    </insert>
+    
+	<delete id="deleteById" parameterType="Long" lang="velocity">
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE ID = @{_parameter.id,jdbcType=BIGINT}
+	</delete>
+
+    <delete id="deleteByOrderCode" parameterType="string" lang="velocity">
+        DELETE FROM <include refid="TABLE_NAME"/> WHERE repair_code = @{_parameter.orderCode,jdbcType=VARCHAR}
+    </delete>
+
+    <select id="findListByOrderCode" parameterType="string" resultMap="RepairSpareResultMap" lang="velocity">
+        SELECT
+            ID,
+            REPAIR_CODE,
+            SPARE_TYPE,
+            SPARE_ID,
+            SPARE_CODE,
+            SPARE_NAME,
+            SPARE_SPEC,
+            STOCK_TIME,
+            COME_TIME,
+            QTY,
+            MONEY,
+            REMARK
+        FROM
+        REPAIR_SPARE
+        WHERE REPAIR_CODE = @{_parameter.orderCode,jdbcType=VARCHAR}
+    </select>
+
+
+</mapper>

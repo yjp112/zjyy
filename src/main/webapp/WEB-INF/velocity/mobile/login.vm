@@ -1,0 +1,142 @@
+
+#parse("mobile/_header.vm")
+<script type="text/javascript" src="$!{main_static_custom_url}/js/jquery.js"></script>
+<script type="text/javascript" src="$!{main_static_custom_url}/js/jquery.cookie.js"></script>
+<script type="text/javascript" src="$!{main_static_custom_url}/js/jquery.validate.js"></script>
+<script type="text/javascript" src="$!{main_static_custom_url}/js/jquery.validate.messages.js"></script>
+<script type="text/javascript" src="$!{main_static_custom_url}/js/jquery.metadata.js"></script>
+<script type="text/javascript" src="$!{main_static_custom_url}/js/jquery.validate.messages_cn.js"></script>
+<script type="text/javascript" src="$!{main_static_custom_url}/js/jquery.validate.rules.js"></script>
+<script language=javascript>
+    $("#loginform").validate({
+        meta:"validate",
+        errorElement:"em",
+        success:function(label){
+            label.text(" ").addClass("success");
+        }
+    });
+
+    function loginHandler() {
+        if (saveCookie()) {
+            $.ajax({
+                url: "$!rc.contextPath/login/mobile",
+                cache: false,
+                type: "POST",
+                data:'username=' + $("#username").val() + '&&password=' + $("#password").val(),
+                success: function (msg) {
+                    if (msg.status == 'success') {
+                        window.location.href = "$!rc.contextPath/mobile/index";
+                    } else {
+                        if (msg.message == "密码错误") {
+                            $("#password").focus();
+                        } else if (msg.exception == "用户不存在") {
+                            $("#username").focus();
+                        }
+                    }
+                }
+            });
+            return false;
+        }
+    }
+</script>
+</head>
+<body class="ui-login">
+<!-- Panels Overlay -->
+<div class="panel-overlay"></div>
+
+<div class="view">
+    <div class="page">
+        <!-- page-content has additional login-screen content -->
+        <div class="page-content login-screen-content">
+            <div class="login-title">
+                <div class="logo"></div>
+                <div class="title-name">中控信息大厦运维管理平台</div>
+            </div>
+            <!-- Login form -->
+            <div class="login-form">
+                <form class="form-signin" autocomplete="off" method="post">
+                    <div class="form-input">
+                        <div class="input-style">
+                            <i class="icon icon-user"></i>
+                            <input type="text" id="username" class="form-control" placeholder="请输入用户名" required autofocus autocomplete="off">
+                        </div>
+                        <div class="input-style">
+                            <i class="icon icon-pwd"></i>
+                            <input type="password" id="password" class="form-control" placeholder="请输入密码" required>
+                        </div>
+                    </div>
+                    <div class="form-button">
+                        <button class="button login-submit" type="submit" onclick="javascript:return loginHandler();">登&nbsp;&nbsp;&nbsp;录</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+<script>
+    $(document).ready(function(){
+
+        readCookie();
+
+    })
+    function readCookie() {
+        //从cookie中取得保存的用户信息
+        if ($.cookie("store") == "true") {
+            $("#username").val($.cookie("username"));
+            $("#freepassword").val($.cookie("password"));
+            $("#freepassword").siblings(".placeholder").css("display","none");
+            $("#store").attr("checked","true");
+        }
+
+    }
+    function saveCookie() {
+        $("#error").hide();//error消息隐藏
+        var username = $("#username").val();
+        var password = $("#password").val();
+
+        if (username == "") {
+            //$("em").css("display","none");
+            //$("#username").next("em").removeClass().addClass("error").show();
+            $("#username").focus();
+            return false;
+        }
+        if (password == "") {
+            //$("em").css("display","none");
+            //$("#username").next("em").removeClass().addClass("error success").show();
+            //$("#freepassword").next("em").removeClass().addClass("error").show();
+            $("#freepassword").focus();
+            return false;
+        }
+
+        //保存用户信息至cookie
+        if ($("#store").attr("checked")) {
+            $.cookie("store", "true", {
+                expires :30
+            }); // 存储一个带30天期限的 cookie
+
+            $.cookie("username", username, {
+                expires :30
+            });
+            $.cookie("password", password, {
+                expires :30
+            });
+
+            return true;
+        } else {//清除用户信息
+            $.cookie("store", "false", {
+                expires :-1
+            });
+            $.cookie("username", '', {
+                expires :-1
+            });
+            $.cookie("password", '', {
+                expires :-1
+            });
+            return true;
+        }
+
+        return true;
+    }
+</script>

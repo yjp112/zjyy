@@ -1,0 +1,53 @@
+<script type="text/javascript">
+	 $(document).ready(function(){
+	 	#if($!viewOnly)
+	    	$("[type=submit]", $("#myform_id")).hide();
+        	$(':input', $("#myform_id")).attr('readonly', true);
+        #end
+        $('#myform_id').valid({
+          rules: {
+            code: ['not_empty',{max_length: 10}], 
+            name: ['not_empty',{max_length: 10}],
+            remark:[{max_length: 100}]  
+          },onSuccess: function(response, validator, $form) {
+            validateCallback(response);
+			return false;
+          }
+        });	
+	 });
+</script>
+
+<form id="myform_id" method="post" action="$!{rc.contextPath}/nhgl/spa/save" class="ui-form">
+	<input type="hidden" name="id" value="$!{specialArea.id}">
+    <div class="ui-box ui-box-close">
+        <div class="ui-box-container">
+            <div class="ui-box-content">
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-small"><i
+                            class="iconfont icon-save"></i>保存
+                    </button>
+                </div>
+            </div> 
+        </div>
+    </div>
+    <div class="ui-box-container" >
+        <div class="ui-box-content" style="overflow:visible;">
+          <div class="row-fluid">  
+	      <div class="ui-form-item ">
+	        <label class="ui-label" for="" ><span class="ui-form-required">*</span>区域编码</label>
+	        <input class="ui-input" type="text"  name="code" value="$!{specialArea.code}"  />
+		  </div>
+		  </div>
+		  <div class="row-fluid">
+	      <div class="ui-form-item ">
+	        <label class="ui-label" for="" ><span class="ui-form-required">*</span>区域名称</label>
+			<input class="ui-input" type="text" name="name" value="$!{specialArea.name}" />
+	      </div>
+	      </div>
+		  <div class="ui-form-item ui-form-item-textarea">
+	        <label class="ui-label" for="" >备注</label>
+	        <textarea class="ui-textarea ui-textarea-small"  name="remark">$!{specialArea.remark}</textarea>
+	      </div>
+	     </div>
+	</div>
+</form>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
+  <process id="STOCKIN_PROCESS" name="备件入库流程" isExecutable="true">
+    <documentation>备件入库流程</documentation>
+    <startEvent id="sid-186CA2D0-54AB-4214-9BED-7D61965E987E" activiti:initiator="_initiator" activiti:formUrl="/spare/stockIn/edit"></startEvent>
+    <userTask id="sid-686B2D57-0918-4B97-8F5F-53C9CBE1AD7F" name="填写入库单" activiti:assignUsers="${_initiator}" activiti:formUrl="/spare/stockIn/edit?id=${stockIn.id}"></userTask>
+    <endEvent id="sid-A450DE0B-2E65-480F-BBB0-5293DF15422E"></endEvent>
+    <userTask id="sid-635DC838-11DE-49D9-9D80-4B4520061594" name="审核入库单" activiti:assignRoles="WJKF" activiti:formUrl="/spare/stockIn/edit?viewOnly=true&amp;id=${stockIn.id}"></userTask>
+    <sequenceFlow id="sid-834B019B-484E-4F77-B8CA-705B704F1F81" sourceRef="sid-186CA2D0-54AB-4214-9BED-7D61965E987E" targetRef="sid-686B2D57-0918-4B97-8F5F-53C9CBE1AD7F"></sequenceFlow>
+    <sequenceFlow id="audit_reject_2" name="驳回" sourceRef="sid-635DC838-11DE-49D9-9D80-4B4520061594" targetRef="sid-686B2D57-0918-4B97-8F5F-53C9CBE1AD7F"></sequenceFlow>
+    <sequenceFlow id="submit_2" name="提交" sourceRef="sid-635DC838-11DE-49D9-9D80-4B4520061594" targetRef="sid-A450DE0B-2E65-480F-BBB0-5293DF15422E"></sequenceFlow>
+    <sequenceFlow id="submit_1" name="提交" sourceRef="sid-686B2D57-0918-4B97-8F5F-53C9CBE1AD7F" targetRef="sid-635DC838-11DE-49D9-9D80-4B4520061594"></sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_STOCKIN_PROCESS">
+    <bpmndi:BPMNPlane bpmnElement="STOCKIN_PROCESS" id="BPMNPlane_STOCKIN_PROCESS">
+      <bpmndi:BPMNShape bpmnElement="sid-186CA2D0-54AB-4214-9BED-7D61965E987E" id="BPMNShape_sid-186CA2D0-54AB-4214-9BED-7D61965E987E">
+        <omgdc:Bounds height="30.0" width="30.0" x="30.0" y="130.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-686B2D57-0918-4B97-8F5F-53C9CBE1AD7F" id="BPMNShape_sid-686B2D57-0918-4B97-8F5F-53C9CBE1AD7F">
+        <omgdc:Bounds height="80.0" width="100.0" x="125.0" y="105.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-A450DE0B-2E65-480F-BBB0-5293DF15422E" id="BPMNShape_sid-A450DE0B-2E65-480F-BBB0-5293DF15422E">
+        <omgdc:Bounds height="28.0" width="28.0" x="650.0" y="131.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-635DC838-11DE-49D9-9D80-4B4520061594" id="BPMNShape_sid-635DC838-11DE-49D9-9D80-4B4520061594">
+        <omgdc:Bounds height="80.0" width="100.0" x="440.5" y="105.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="audit_reject_2" id="BPMNEdge_audit_reject_2">
+        <omgdi:waypoint x="465.5" y="185.0"></omgdi:waypoint>
+        <omgdi:waypoint x="465.5" y="265.0"></omgdi:waypoint>
+        <omgdi:waypoint x="175.0" y="265.0"></omgdi:waypoint>
+        <omgdi:waypoint x="175.0" y="185.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sid-834B019B-484E-4F77-B8CA-705B704F1F81" id="BPMNEdge_sid-834B019B-484E-4F77-B8CA-705B704F1F81">
+        <omgdi:waypoint x="60.0" y="145.0"></omgdi:waypoint>
+        <omgdi:waypoint x="125.0" y="145.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="submit_1" id="BPMNEdge_submit_1">
+        <omgdi:waypoint x="225.0" y="145.0"></omgdi:waypoint>
+        <omgdi:waypoint x="440.5" y="145.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="submit_2" id="BPMNEdge_submit_2">
+        <omgdi:waypoint x="540.5" y="145.0"></omgdi:waypoint>
+        <omgdi:waypoint x="650.0" y="145.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

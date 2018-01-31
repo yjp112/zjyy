@@ -1,0 +1,213 @@
+#parse("index/_header.vm")
+<link href="$!{rc.contextPath}/main_static/custom/js/uploadify/uploadify.css" rel="stylesheet">
+<script src="$!{rc.contextPath}/main_static/custom/js/uploadify/jquery.uploadify-3.1.min.js"></script>
+
+</head>
+
+<body style="padding-bottom:40px;">
+	<form id="myform_id" method="post" action="$!{rc.contextPath}/device/contract/save"  class="ui-layout-center ui-dialog-form">
+	    <input type="hidden" name="id" value="$!{contract.id}">
+     <div class="actions">
+		  
+	        <button class="k-primary hc_btn" id="contract_tb" type="submit"><i class="fa fa-save"></i>保 存</button>
+	 
+			<button class="hc_btn cancel" onclick="close_dialog('contract_add_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+			   
+	</div>
+          
+    <table width="100%">
+        <tr>
+            <td width="18%" class="label"><span class="ui-form-required">*</span><label>合同编码：</label></td>
+            <td width="30%">
+               <input class="k-textbox" type="text"  name="contractCode" value="$!{contract.contractCode}"  />
+     	    </td>
+     	   <td width="15%" class="label"><span class="ui-form-required">*</span><label>合同名称：</label></td>
+           <td width="30%">
+              <input  type="text"  class="k-textbox" name="contractName" value="$!{contract.contractName}"/>
+    	    </td>
+    	    <td width="7%"></td>
+        </tr>
+        <tr>
+            <td  class="label">合同甲方：</td>
+            <td >
+				 <input class="k-textbox"   type="text"   name="contractA" value="$!{contract.contractA}"  />
+			</td>
+			<td  class="label">合同乙方：</td>
+            <td >
+				 <input class="k-textbox"   type="text"    name="contractB" value="$!{contract.contractB}"/>
+			</td>
+			
+        </tr>
+        <tr>
+	        <td  class="label">合同状态：</td>
+	        <td >
+		        <select name="contractStatus"  class="k-textbox" >
+			        #foreach($!{e} in $!{lstStatus})
+			     	<option value="$!{e.enumValue}" #if($!{contract.contractStatus}==$!{e.enumValue}) selected="selected" #end>$!{e.enumText}</option>
+				  #end
+		      </select>
+			</td>
+			<td  class="label">开始时间：</td>
+            <td >
+                <input  id="startTime"  class="k-textbox"  name="beginDate" value="$!{contract.beginDate}"  />
+            </td>
+        </tr>
+        <tr>
+	        <td  class="label">结束时间：</td>
+	        <td >
+	        <input id="endTime"  class="k-textbox"  name="endDate"  value="$!{contract.endDate}"/>
+             
+			 </td> 	        
+	    </tr>
+        <tr>
+            <td valign="top" class="label">合同简介：</td>
+            <td colspan="3" >
+				<textarea  id="textAreaId" class="k-textbox k-textarea" style="height:50px"   name="contractDesc">#html_escape($!{contract.contractDesc})</textarea>
+			</td>
+            
+        </tr>
+        <tr>
+			       
+        			<td valign="top" class="label">合同附件：</td>
+			        <td colspan="3" >
+				        <table  class="ui-table"  width="100%" cellpadding="0" cellspacing="0" border="1" id="images_table_id">
+					        <div id="filehidden"></div>
+							  <thead>
+						        <tr>
+						          <th align="left" width="40%">附件名称</th>
+						          <th align="left" width="20%" >附件类型</th>
+						          <th align="left" width="20%" >附件大小</th>
+						          <th align="left" width="20%" >操作</th>
+						        </tr>
+							  </thead>
+							   <tbody>
+					        #set($index=1)
+					        #foreach($!{attach} in $!{listAttachments}) 
+					        <!--<tr id='alreadyfile$!{index}'><td>1</td>	<td>2</td><td></td><td></td>	</tr>
+										-->
+					        <tr id='alreadyfile$!{index}'>
+					          <td ><a id="showImageId_$velocityCount" 	href="${rc.contextPath}/device/attachment/download?fileName=$!{attach.fileName}&path=$!{attach.storePath}"> $!{attach.fileName}</a></td>
+					          <td > $!{attach.fileType}&nbsp; </td>
+					          <td >$!{attach.fileSize}KB</td>
+					          <td  name="tdControl"><a href="#" onclick="removealreadyfile('$!{index}','$!{attach.id}')">移除</a></td>
+					        </tr>
+					        #set($index=$index+1)
+							  #end
+							   </tbody>
+				      </table>
+
+                </td>
+        
+    </tr>
+    <tr>
+       <td></td>
+       <td><input type="file" name="file"  id="file_upload" style="height:30px;width:150px;"/>	</td>
+      ## <td><button class="k-primary " type="button" name="file"  id="file_upload" style="height:50px;width:200px;"/>	</td>
+     ## <td> <button class="k-primary hc_btn" id="file_upload" type="file" name="file"></button><td>
+      
+      </tr>
+    </table>
+     
+	</form>
+
+	
+</body>
+	<script type="text/javascript">
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+	          defaults: {
+	            resizable: true,
+	            closable: false,
+	            spacing_open: 5
+	          }
+	        });
+	});
+	</script>
+<script type="text/javascript">
+//文件上传
+var index = 1000;
+function initUpload(){    
+	
+	/*if ($('#file_upload').length > 0) { 
+		$('#file_upload').uploadify('destroy');
+	}*/
+	
+	$('#file_upload').uploadify({
+	    'buttonText' : '浏览',
+		buttonClass : 'k-primary fileUploadBtn',
+		'multi' : true,
+		'fileSizeLimit':'$!{fileLength}MB',   
+		'fileObjName' : 'file',
+		'cancelImg' : '$!{main_static_custom_url}/js/uploadify/cancel.png',
+        'swf'       : '$!{main_static_custom_url}/js/uploadify/uploadify.swf',
+        'uploader' : '${rc.contextPath}/fileupload/fileup',
+        'removeCompleted': true,
+		 onUploadSuccess:function(file,data,response){
+              if(response){  
+				var obj = eval('(' + data + ')');
+				var filedisplay ="<tr id='alreadyfile"+index+"'><td>"+obj.orignalname+"</td><td>"+obj.postfix+"</td><td>"+obj.filesize+"KB</td><td><a href='#'  onclick=removefile('"+index+"')>移除</a></td></tr>";
+				var filehidden ="<input type='hidden' name='fileorignal' value='"+obj.orignalname+"' id='fileorignal"+index+"'/><input type='hidden' name='filename' value='"+obj.filename+"' id='filename"+index+"'/>";
+				$("#images_table_id").append(filedisplay);
+				$("#filehidden").append(filehidden);
+				index++;
+              }else{
+    		  	 alert("文件上传失败！");
+              }
+  		}
+	})
+	
+	
+}
+
+function removefile(ind){
+	$("#attachment"+ind).remove();
+	$("#fileorignal"+ind).remove();
+	$("#filename"+ind).remove();
+	$("#alreadyfile"+ind).remove();
+}
+
+function removealreadyfile(index,fileid){
+		$("#alreadyfile"+index).remove();
+		var delfile ="<input type='hidden' name='delfiles' value='"+fileid+"'/>";
+	$("#filehidden").append(delfile);
+	}
+	//查看模式
+	#if($!{showFlag})
+		setAllReadonly("dialog");
+		$("#file_upload").hide();
+		$("td[name='tdControl']").html("移除");
+	#else
+		initUpload();
+		commonDateWithout("startTime","endTime","yyyy-MM-dd","zh-CN");
+	#end
+</script>
+
+<script type="text/javascript">
+   $(document).ready(function(){
+	   
+	   
+	   // commonDate("startTime","endTime","yyyy-MM-dd HH:mm:ss","zh-CN");
+	     $("#myform_id").validator({
+	            fields:{
+	                
+	    	 contractCode: "required; length[~32]",
+	    	 contractName: "required; length[~100]",
+	    	 contractA: "length[~50]",
+	    	 contractB: "length[~50]",
+	    	 contractDesc: "length[~1000]"
+	            },
+	            valid:function(form){
+	                form_btn_submit($("#contract_tb"),form,function(res){
+	                    //console.log(res);
+	                    validateCallback(res,"grid","contract_add_dlg");
+	                });
+	            }
+	        })
+ 
+
+
+
+  })
+</script>
+
+</html>

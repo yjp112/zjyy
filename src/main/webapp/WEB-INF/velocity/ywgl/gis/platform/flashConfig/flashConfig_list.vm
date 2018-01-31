@@ -1,0 +1,168 @@
+#parse("index/_header.vm")
+</head>
+<body>
+
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<form class="ui-form" id='queryForm'>
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+                <tr>
+	                <td class="ui-search-name first" style="padding-left: 20px;">系统编码：</td>
+	                <td class="ui-search-c">
+	                  <input name="fullCode" value="$!flashConfig.fullCode" class="k-textbox" type="text">
+	                </td>
+	                <td class="ui-search-name" style="padding-left: 20px;">Flash名：</td>
+	                <td class="ui-search-c">
+	                  <input name="flashName" value="$!flashConfig.flashName" class="k-textbox" type="text">
+	                </td>
+	                <td class="ui-search-name" style="padding-left: 20px;">模式：</td>
+	                <td>
+		                <select name="model" class="k-textbox">
+			                <option value=''>--请选择--</option>
+							${modelOptions}
+		               	</select>
+	               	</td>
+                </tr>
+              </table>
+            </td>
+            <td width="150" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+#parse("index/_footer.vm") 
+
+<script type="text/javascript">
+  var _iframe_layout, _inner_layout;
+	$(document).ready(function(){
+	
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      }
+     
+    });
+
+  
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+
+    $('#resetBtn').click(function(){
+      $("#queryForm :text").val('');  
+    });
+	
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/hl/gis/platform/flashConfig/list", [{
+              field: "id",
+              hidden: true
+          }, {
+              field: "fullCode",
+              title: "系统编码",
+              sortable: false,
+              template:"<a href=\"javascript:void(0)\" title=\"查看#: data.fullCode #的详细信息\" onclick=\"quick_dialog('flashConfig_add_dlg','查看#:data.fullCode #的信息','$!{rc.contextPath}/hl/gis/platform/flashConfig/edit?viewOnly=true&id=#: data.id #',650,410)\">#: data.fullCode #</a>",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              width: 150
+          }, {
+              field: "systemName",
+              title: "系统名称",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+    		  #*attributes: {"class": "k-grid-text"},*#
+              attributes: {     
+      		  	 title:"#: data.systemName==null? '':data.systemName #",
+      			 "class": "k-grid-text k-grid-nowrap"
+    		  },
+              width: 150
+          }, {
+              field: "flashName",
+              title: "Flash名",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+    		  #*attributes: {"class": "k-grid-text"},*#
+              attributes: {     
+      		  	 title:"#: data.flashName==null? '':data.flashName #",
+      			 "class": "k-grid-text k-grid-nowrap"
+    		  },
+              width: 150
+          },{
+              field: "model",
+              title: "模式",
+              sortable: false,
+              template:function(data){
+              		if(data.model == 'GIS_WINDOW'){ 
+              			return  'gis弹框' ;
+              		}else if(data.model == 'FLASH'){
+              			return  '单一模式' ;
+              		}else if(data.model == 'LAYOUT'){
+              			return  '左右模式' ;
+              		}else if(data.model == 'GIS_POP'){
+              			return  'gis飘窗' ;
+              		}else{
+              			return  '' ;
+              		}
+              },
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              width: 150
+          },{
+              field: "layoutDirection",
+              title: "位置",
+              sortable: false,
+              template:function(data){
+                    if(data.model == 'LAYOUT'){
+              			if(data.layoutDirection== 'RIGHT'){ 
+	              			return  '右' ;
+	              		}else if(data.layoutDirection == 'LEFT'){
+	              			return  '左' ;
+	              		}else{
+	              			return  '' ;
+	              		}
+              		}else{
+              			return  '' ;
+              		}
+              		
+              },
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              width: 60
+          }],
+      {
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          },resizable:true
+      }, {
+          serverSorting: true
+      }, [
+		#kendo_datagrid_btns("FLASHCONFIG")#end 
+      ]);
+		
+    });
+	
+</script>
+</body>
+</html>

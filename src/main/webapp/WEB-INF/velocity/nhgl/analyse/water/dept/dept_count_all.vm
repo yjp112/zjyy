@@ -1,0 +1,274 @@
+ <script type="text/javascript" src="$!{nhgl_static_custom_url}/echarts_2/esl.js"> </script>
+ <script type="text/javascript" src="$!{nhgl_static_custom_url}/echarts_2/echartsUtil.js"></script>
+ <div id="subButton" class="nh-ct" style="display:none">
+	<button type="button" onclick="reply()" class="btn btn-primary"><i class="iconfont icon-reply"></i>返&nbsp;回</button>
+ </div>
+ <div class="nh-chart" id="mix$!{num}">
+ </div>	
+ <div class="nh-grid">
+	<table class="nh-table" >
+    </table>
+  </div>	
+  <script type="text/javascript">
+  	var myChart;
+	var option;
+	var deptId="$!deptId"
+  $(document).ready(function(){
+  	var eleMonth = '$!nhMonth';
+  	if(eleMonth !=""){
+  		var eleMonth = '$!nhMonth';
+    	var percentD = '$!nhMonth.percentD';
+  		var percentN='$!nhMonth.percentN';
+		
+  		var dayTimeEleTotal='$!nhMonth.monthDaytimeValue';
+  		var nightEleTotal='$!nhMonth.monthNightValue';
+  		var sTime='$!sTime';
+  		$("#sTime1").text(sTime);
+  		$("#sTime2").text(sTime);
+		if(dayTimeEleTotal == 0)
+			$("#dayTimeTotal").text("0.00");
+		else
+			$("#dayTimeTotal").text(dayTimeEleTotal);
+		if(nightEleTotal==0)
+			$("#nightTotal").text("0.00");
+		else
+			$("#nightTotal").text(nightEleTotal);  		
+  		if(percentD > 0){
+			$("#percentD").text('增长'+percentD+'%');
+		}
+		else if(percentD == 0){
+			$("#percentD").text('持平');
+		}
+		else{
+			$("#percentD").text('下降'+(-percentD)+'%');
+		}
+		if(percentD == 0){
+			$("#rudD").removeClass();
+			$("#rudD").addClass("count-item count-item-unchanged");
+		}
+		else if(percentD > 0){
+			$("#rudD").removeClass();
+			$("#rudD").addClass("count-item count-item-rise");
+		}
+		else {
+			$("#rudD").removeClass();
+			$("#rudD").addClass("count-item count-item-decline");
+		}
+		if(percentN > 0){
+			$("#percentN").text('增长'+percentN+'%');
+		}
+		else if(percentN == 0){
+			$("#percentN").text('持平');
+		}
+		else{
+			$("#percentN").text('下降'+(-percentN)+'%');
+		}
+		if(percentN == 0){
+			$("#rudN").removeClass();
+			$("#rudN").addClass("count-item count-item-unchanged");
+		}
+		else if(percentN > 0){
+			$("#rudN").removeClass();
+			$("#rudN").addClass("count-item count-item-rise");
+		}
+		else {
+			$("#rudN").removeClass();
+			$("#rudN").addClass("count-item count-item-decline");
+		}
+  	}
+  		
+  
+  
+  
+  		var time = '$!{start}';
+		if(time != '')
+			$("#subButton").css("display","block");
+		else
+			$("#subButton").css("display","none");
+  		var contextPath = "$!{rc.contextPath}";
+		//混合图总量
+		option = {
+			 title : {
+        	        text: '$!{title}',
+        	        x:'center'
+        	    },
+			    tooltip : {
+			        trigger: 'axis',
+					formatter:function(params,ticket)
+					{
+						var str="";
+						for(var i=0;i<params.length;i++){
+							str = str + params[i][0]+" : "+params[i][2];
+							if(params[i][0] == "同比涨幅")
+								str = str + " %"+"</br>";
+							else
+								str = str +" "+water+"</br>";
+						}
+						return str;
+					}
+			    },
+			    legend: {
+				//orient : 'vertical',
+        	        x : 'right',
+        	        y : 'top',
+			        data:['当前用水量','同期用水量','同比涨幅']
+			    },
+			    xAxis : [
+			        {
+			            type : 'category',
+			            data : '$!new.month'.split(",")
+			        }
+			    ],
+			    yAxis : [
+			        {
+			            type : 'value',
+			            name : '水量('+water+')',
+##			            axisLabel : {
+##			                formatter: '{value}'//这里可以去掉ml
+##			            },
+			            splitArea : {show : true}
+			        },
+			        {
+			            type : 'value',
+			            name : '同比涨幅(%)',
+			            axisLabel : {
+			                formatter: '{value}%'//这里也可以去掉°C
+			            },
+			            splitLine : {show : false}
+			        }
+			    ],
+			    series : [
+			        {
+			            name:'当前用水量',
+			            type:'bar',
+			            data:'$!new.data'.split(",")
+			        },
+			        {
+			            name:'同期用水量',
+			            type:'bar',
+			            data:'$!new.lastData'.split(",")
+			        },
+			        {
+			            name:'同比涨幅',
+			            type:'line',
+			            yAxisIndex: 1,
+			            data:'$!new.percent'.split(",")
+			        }
+			    ]
+			};
+		initEcharts("mix$!{num}",option,function onclickWeek(chart){chart.on('click', eConsoleDept)});
+		
+		var content="<tbody>";
+        var first = "";
+		var total = 0.00;
+		var percent = "0.00";
+		var newData = '$!new.data';
+		var hisData = '$!new.lastData';
+		var pData = '$!new.percent';
+		var month = '$!new.month';//获取的日期
+		for(var i=0;i<newData.split(",").length;i++)
+		{
+			if(hisData.split(",").length-1 >= i)
+				total = hisData.split(",")[i];
+			else
+				total = "0.00";
+			if(pData.split(",").length-1 >= i)
+				percent = pData.split(",")[i];
+			else
+				percent = "0.00";
+			first = first+"<tr><td class=nh-table-num>"+month.split(",")[i]+"</td><td class=fInt style=\"text-align:center\">"+newData.split(",")[i]+"</td><td class=fInt style=\"text-align:center\">"+total+"</td><td style=\"text-align:center\">"+percent+"</td></tr>";
+		}
+		content = content+first+"</tbody>";
+		var head="<thead><tr><td class=nh-table-num>日期</td><td class=nh-table-num>当前用水量("+water+")</td><td class=nh-table-num>同期用水量("+water+")</td><td class=nh-table-num>同比涨幅(%)</td></tr></thead>";
+		head = head+"</tr></thead>";
+		$(".nh-table").html("").append(head).append(content);
+		fNumPage();
+		var allHeight = $("#chart_content_id").height();
+		var header = $(".nh-header").height();
+		var content = $(".nh-content").height();
+		if(content > allHeight-header-40)
+			$("#content").css("height",content);
+		else
+			$("#content").css("height",allHeight-header-40);
+		$(".ui-tab-panels").css("height",allHeight-header-40);
+	})
+	
+	
+	function eConsoleDept(param) {
+			//var value = param.value;
+    		var first = param.name.split(" ")[0];
+    		if(first.length==1){
+				first="0"+first;
+			}
+			var start = $("#start").val();
+			var year = $("#year").val();
+			if(start == ""){
+				start = first;
+			}
+			else if(start.length == 7){
+				start = start + "-" + first;
+			}
+    		var standardCode = $("#fxCode").val();
+    		//if(Number(value) == 0)
+    		//{
+			//	if(start.length == 7)
+    		//		alert(first + "月" + standardCode + "分项不存在数据");
+			//	else
+			//		alert(first + "月" + standardCode + "分项不存在数据");
+    		//	return false;
+    		//}
+    		var subId = $("#subId").val();
+    		var isp = $("#isp").val();
+    		var fname = $("#deptName").val();
+    		
+    		var title = first+name+"用水量统计";
+			var url = "";
+			if(start.length == 7 || start.length == 0)
+    			url = '$!{rc.contextPath}/nhgl/analyse/water/dept/nightAllYear?start='+start;
+			else
+				url = '$!{rc.contextPath}/nhgl/analyse/water/dept/dayAllYear?start='+start;
+    		$.ajax({
+               type: "POST",
+               url: url,
+               data: "deptName="+encodeURIComponent(fname)+'&id='+subId+'&isp='+isp+'&fxCode='+standardCode+"&deptId="+deptId,
+               success: function(responseText){
+    		   		$("#tabBlock").html(responseText);
+					$("#start").attr("value",start);
+    		   }
+            });
+		
+      }	
+	
+	function reply(){
+    		var standardCode = $("#fxCode").val();
+    		var subId = $("#subId").val();
+    		var isp = $("#isp").val();
+    		var fname = $("#deptName").val();
+			var start = $("#start").val();
+			var title = start+"月"+name+"用水量统计";
+			start = start.substring(0,start.length - 3);
+			var url = "";
+			if(start.length == 4){
+    			url = '$!{rc.contextPath}/nhgl/analyse/water/dept/allYear?year='+start;
+			}
+			else{
+				url = '$!{rc.contextPath}/nhgl/analyse/water/dept/nightAllYear?start='+start;
+			}
+    		$.ajax({
+               type: "POST",
+               url: url,
+               data: "deptName="+encodeURIComponent(fname)+'&id='+subId+'&isp='+isp+'&fxCode='+standardCode+"&deptId="+deptId,
+               success: function(responseText){
+    		   		$("#tabBlock").html(responseText);
+					if(start.length == 4)
+						$("#start").attr("value","");
+					else
+						$("#start").attr("value",start);
+    		   }
+            });
+	  	}
+	  
+	$(".nh-grid").circular();
+		
+  </script> 
+   

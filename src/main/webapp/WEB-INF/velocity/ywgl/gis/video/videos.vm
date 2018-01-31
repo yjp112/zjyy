@@ -1,0 +1,203 @@
+<!DOCTYPE html><html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="$!{rc.contextPath}/modules/hcstyle/hcstyle/1.0.0/hcstyle.css" rel="stylesheet" media="screen">
+<link href="$!{rc.contextPath}/modules/hcstyle/iconfont/1.0.0/iconfont.css" rel="stylesheet" media="screen">
+<link type="text/css" rel="stylesheet" href="$!{rc.contextPath}/modules/videoPlayer/css/common.css" />
+<link type="text/css" rel="stylesheet" href="$!{rc.contextPath}/modules/videoPlayer/css/videoPlay.css" />
+<style >
+.videoHCC{ width:1020px; height:768px; }
+.video_boxHCC{ width:49%; height:49%; border:#000 1px solid; float:left;}
+</style>
+<script type="text/javascript" src="${static_url}/js/jquery-1.11.1.js"></script>
+<script type="text/javascript" src="${projectName}/gis_server/flash/js/VLC.Plugin.js"></script>
+<script type="text/javascript" src="$!{rc.contextPath}/modules/videoPlayer/js/jquery.select-1.3.6.js"></script>
+<script type="text/javascript">
+ 
+	var videoTotal = 0;
+	//播放
+	function showView(videoId,num){
+		 $.ajax({
+             'url':"$!{rc.contextPath}/hl/video/show?videoId="+videoId+"&&time="+new Date().getTime(),
+             'data': '',
+             'dataType': 'json',
+             'type': 'get',
+    	      'error': function(data){
+			     return false;
+	           },
+             'success': function(data) {
+	        	   if(null != data && '' != data){	
+				       videoTotal++;
+	   			       Play(num,data.videoDetail.viewIp,data.videoDetail.channelNo,data.videoDetail.username,data.videoDetail.password);
+	   			    }					   
+				}
+        });
+	}
+	//是否已经播放过视频
+	var startPlayFlg = false;
+	//OCX 播放接口
+	function Play(i,viewIp,channelNo,username,password)
+	{
+	    try{	
+		//	var objid = i==0?"vlc":"vlc"+i;
+			if(i==0){
+				csharpActiveX.Init();
+				csharpActiveX.Play(viewIp,channelNo,username,password);
+			}else if(i==1){
+				csharpActiveX1.Init();
+				csharpActiveX1.Play(viewIp,channelNo,username,password);
+			}else if(i==2){
+				csharpActiveX2.Init();
+				csharpActiveX2.Play(viewIp,channelNo,username,password);
+			}else if(i==3){
+				csharpActiveX3.Init();
+				csharpActiveX3.Play(viewIp,channelNo,username,password);
+			}
+			
+		}catch(e){
+		    $("#id_video_box").html('<font color="red" style="font-weight: bold">提示：</font>您的电脑未安装视频插件或版本过低，请点击<a id="close" style="text-decoration:underline" color="red" href="http://$!{serverName}:$!{serverPort}$!{rc.contextPath}/download/SupconOCXSetUP_shikai_zsywgl.msi"><font color="blue" style="font-weight: bold">这里</font></a>安装。');
+		}
+	}
+	 
+	
+ 
+	$(document).ready(function() {
+		if("$!{videoIds}" != null && "$!{videoIds}" != ""){
+			var listIds=$!{videoIds};
+		//	debugger;
+			for(var i=0;i<listIds.length;++i){
+		//		var objid = i==0?"vlc":"vlc"+i;
+		//		init(objid);
+				showView(listIds[i],i);//播放
+			}
+		}
+	});
+	//------------------- 
+	function close_s(){
+		if("$!{videoIds}" != null && "$!{videoIds}" != ""){
+			var listIds=$!{videoIds};
+			for(var i=0;i<listIds.length;++i){
+				if(i==0){
+					csharpActiveX.Stop();
+					csharpActiveX.UnInit();
+				}else if(i==1){
+					csharpActiveX1.Stop();
+					csharpActiveX1.UnInit();
+				}else if(i==2){
+					csharpActiveX2.Stop();
+					csharpActiveX2.UnInit();
+				}else if(i==3){
+					csharpActiveX3.Stop();
+					csharpActiveX4.UnInit();
+				}
+			}
+		}
+	}
+</script>
+</head>
+<body  onunload="close_s();">
+    <div class="video_boxHCC">
+    <input type="hidden" id="videoCode_ids" name="videCode" value="$!{videoIds}">
+        <object id ="csharpActiveX" CODEBASE="$!{rc.contextPath}/download/VideoOcxSetUp.msi" 
+				classid ="clsid:B5669C37-066F-4ED7-B988-026C02749E73" 
+		        style="top: 0px; left: 0px; width: 100%; height: 100%;"
+		        id="vlc"
+		        events="True">
+			<param name="MRL" value="" />
+			<param name="ShowDisplay" value="True" />
+			<param name="AutoLoop" value="False" />
+			<param name="AutoPlay" value="False" />
+			<param name="Volume" value="50" />
+			<param name="Volume" value="50" />
+			<param name="toolbar" value="false" />
+			<param name="StartTime" value="0" />
+			<EMBED pluginspage="http://www.videolan.org"
+			       type="application/x-vlc-plugin"
+			       version="VideoLAN.VLCPlugin.2"
+				style="top: 0px; left: 0px;width: 100%; height: 100%;"
+			       toolbar="false"
+			       loop="true"
+			       text="Waiting for video"
+			       name="vlc">
+			</EMBED>
+		</object>
+    </div>
+   <div class="video_boxHCC">
+        <object id ="csharpActiveX1" CODEBASE="$!{rc.contextPath}/download/VideoOcxSetUp.msi" 
+				classid ="clsid:B5669C37-066F-4ED7-B988-026C02749E73" 
+		        style="top: 0px; left: 0px; width: 100%; height: 100%;"
+		        id="vlc"
+		        events="True">
+			<param name="MRL" value="" />
+			<param name="ShowDisplay" value="True" />
+			<param name="AutoLoop" value="False" />
+			<param name="AutoPlay" value="False" />
+			<param name="Volume" value="50" />
+			<param name="Volume" value="50" />
+			<param name="toolbar" value="false" />
+			<param name="StartTime" value="0" />
+			<EMBED pluginspage="http://www.videolan.org"
+			       type="application/x-vlc-plugin"
+			       version="VideoLAN.VLCPlugin.2"
+				style="top: 0px; left: 0px;width: 100%; height: 100%;"
+			       toolbar="false"
+			       loop="true"
+			       text="Waiting for video"
+			       name="vlc">
+			</EMBED>
+		</object>
+    </div>
+    <div class="video_boxHCC">
+        <object id ="csharpActiveX2" CODEBASE="$!{rc.contextPath}/download/VideoOcxSetUp.msi" 
+				classid ="clsid:B5669C37-066F-4ED7-B988-026C02749E73" 
+		        style="top: 0px; left: 0px; width: 100%; height: 100%;"
+		        id="vlc"
+		        events="True">
+			<param name="MRL" value="" />
+			<param name="ShowDisplay" value="True" />
+			<param name="AutoLoop" value="False" />
+			<param name="AutoPlay" value="False" />
+			<param name="Volume" value="50" />
+			<param name="Volume" value="50" />
+			<param name="toolbar" value="false" />
+			<param name="StartTime" value="0" />
+			<EMBED pluginspage="http://www.videolan.org"
+			       type="application/x-vlc-plugin"
+			       version="VideoLAN.VLCPlugin.2"
+				style="top: 0px; left: 0px;width: 100%; height: 100%;"
+			       toolbar="false"
+			       loop="true"
+			       text="Waiting for video"
+			       name="vlc">
+			</EMBED>
+		</object>
+    </div>
+    <div class="video_boxHCC">
+        <object id ="csharpActiveX3" CODEBASE="$!{rc.contextPath}/download/VideoOcxSetUp.msi" 
+				classid ="clsid:B5669C37-066F-4ED7-B988-026C02749E73" 
+		        style="top: 0px; left: 0px; width: 100%; height: 100%;"
+		        id="vlc"
+		        events="True">
+			<param name="MRL" value="" />
+			<param name="ShowDisplay" value="True" />
+			<param name="AutoLoop" value="False" />
+			<param name="AutoPlay" value="False" />
+			<param name="Volume" value="50" />
+			<param name="Volume" value="50" />
+			<param name="toolbar" value="false" />
+			<param name="StartTime" value="0" />
+			<EMBED pluginspage="http://www.videolan.org"
+			       type="application/x-vlc-plugin"
+			       version="VideoLAN.VLCPlugin.2"
+				style="top: 0px; left: 0px;width: 100%; height: 100%;"
+			       toolbar="false"
+			       loop="true"
+			       text="Waiting for video"
+			       name="vlc">
+			</EMBED>
+		</object>
+    </div>
+
+
+</body>
+</html>

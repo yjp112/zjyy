@@ -1,0 +1,34 @@
+        <div class="ui-form-item">
+            <label class="ui-label" for=""><span class="ui-form-required">*</span>名称:</label>
+            <input class="ui-input" type="text" name="task.taskName" value="$!{task.taskName}"
+             data-rule="名称: required;length[~50];"/>
+        </div>
+         
+        <div class="ui-form-item ">
+          <label class="ui-label" for=""><span class="ui-form-required">*</span>任务分类：</label>
+          	<input readonly class="ui-input ui-input-choose" id="categoryText" data-rule="任务分类:required" type="text" name="categoryText" value="$!{task.categoryText}" />
+			<input class="ui-input" type="hidden" id="taskType" name="task.taskType" value="$!{task.taskType}"  />
+        </div>        
+        <div class="ui-form-item ui-form-item-textarea colspan3" style="height:90px;width:800px;">
+            <label class="ui-label">描述:</label>
+            <textarea data-rule="描述: length[~50];" class="ui-textarea" style="width:600px;" name="task.taskDesc">#html_escape($!{task.taskDesc})</textarea>
+        </div>
+        <div class="ui-form-item ui-form-item-textarea colspan3" style="height:90px;width:800px;">
+            <label class="ui-label">通知信息模板:</label>
+            <textarea data-rule="通知信息模板: length[~200];" class="ui-textarea" style="width:600px;" name="task.noticeTmpl">#html_escape($!{task.noticeTmpl})</textarea>
+        </div>
+        <div class="ui-form-item ui-form-item-textarea colspan3" style="height:90px;width:800px;">
+            <label class="ui-label" style="padding-left:110px;width:auto;">通知信息模板可选参数:</label>
+        	<label class="ui-label" style="padding-left:0px;width:auto;">$taskName 任务名称 $taskCatagory 任务分类 </label>
+        	<label class="ui-label" style="padding-left:240px;width:auto;"> $deviceLocation 设备安装位置 $monitorObject 监控对象</label>
+        	<label class="ui-label" style="padding-left:240px;width:auto;">$alarmTime 报警时间 $monitorTime 监控时段 </label>
+        	<label class="ui-label" style="padding-left:240px;width:auto;">$deviceRuntimeStatus 设备运行状况 $scoreDeduction 扣分数</label>
+        </div>
+        
+<script type="text/javascript">
+$(document).ready(function(){
+	 	$("#categoryText").click(function(){
+			chooseTask("taskType","categoryText","task_edit");
+        });  
+});
+</script>

@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.spare.entities.PriceChange">
+	<resultMap type="com.supconit.spare.entities.PriceChange" id="PriceChangeResultMap">
+		<result property="id" column="ID" />
+        <result property="billNo" column="BILL_NO" />
+        <result property="bpmKey" column="BPM_KEY" />
+        <result property="processId" column="PROCESS_ID" />
+        <result property="spareId" column="SPARE_ID" />
+        <result property="changeDate" column="CHANGE_DATE" />
+        <result property="changePersonId" column="CHANGE_PERSON_ID" />
+        <result property="changePersonName" column="CHANGE_PERSON_NAME" />
+        <result property="changeType" column="CHANGE_TYPE" />
+        <result property="oldPrice" column="OLD_PRICE" />
+        <result property="newPrice" column="NEW_PRICE" />
+        <result property="remark" column="REMARK" />
+        <result property="status" column="STATUS" />
+        <result property="createId" column="CREATE_ID" />
+        <result property="creator" column="CREATOR" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="updateId" column="UPDATE_ID" />
+        <result property="updator" column="UPDATOR" />
+        <result property="updateDate" column="UPDATE_DATE" />
+
+        <result property="spareCode" column="SPARE_CODE" />
+        <result property="spareName" column="SPARE_NAME" />
+        <result property="spareCategoryId" column="SPARE_CATEGORY_ID" />
+        <result property="spec" column="SPEC" />
+        <result property="model" column="MODEL" />
+        <result property="price" column="PRICE" />
+        <result property="spareCategoryName" column="spareCategoryName" />
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">PRICE_CHANGE</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	<sql id="select_pre" lang="velocity">
+		SELECT
+			t.ID,
+	        t.BILL_NO,
+	        t.BPM_KEY,
+	        t.PROCESS_ID,
+	        t.SPARE_ID,
+	        t.CHANGE_DATE,
+	        t.CHANGE_PERSON_ID,
+	        t.CHANGE_PERSON_NAME,
+	        t.CHANGE_TYPE,
+	        t.OLD_PRICE,
+	        t.NEW_PRICE,
+	        t.REMARK,
+	        t.STATUS,
+	        t.CREATE_ID,
+	        t.CREATOR,
+	        t.CREATE_DATE,
+	        t.UPDATE_ID,
+	        t.UPDATOR,
+	        t.UPDATE_DATE,
+	        t1.SPARE_CODE,
+	        t1.SPARE_NAME,
+	        t1.SPARE_CATEGORY_ID,
+	        t1.SPEC,
+	        t1.MODEL,
+	        t1.PRICE,
+	        t2.CATEGORY_NAME spareCategoryName
+		FROM
+		<include refid="TABLE_NAME"/> t LEFT JOIN SPARE t1 ON t.SPARE_ID=t1.id LEFT JOIN SPARE_CATEGORY t2 ON t2.id=t1.SPARE_CATEGORY_ID
+	</sql>
+	
+	<sql id="count_pre" lang="velocity">
+		SELECT COUNT(*) 
+		FROM <include refid="TABLE_NAME"/> t 
+		LEFT JOIN SPARE t1 
+			ON t.SPARE_ID=t1.id 
+		LEFT JOIN SPARE_CATEGORY t2 
+			ON t2.id=t1.SPARE_CATEGORY_ID
+	</sql>
+	
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+		#where()
+		     #set($_p = $_parameter.condition)
+		    #if($_p.id && $_p.id != '')
+				#set($_id = $_p.id)
+				AND t.ID = @{_id}
+			#end
+			
+			#if($_p.billNo && $_p.billNo != '')
+				#set($_billNo = '%' + $_p.billNo + '%')
+				AND t.BILL_NO LIKE @{_billNo}
+			#end
+			#if($_p.bpmKey && $_p.bpmKey != '')
+				#set($_bpmKey = '%' + $_p.bpmKey + '%')
+				AND t.BPM_KEY LIKE @{_bpmKey}
+			#end
+			#if($_p.processId && $_p.processId != '')
+				#set($_processId = $_p.processId)
+				AND t.PROCESS_ID = @{_processId}
+			#end
+		
+			#if($_p.spareId && $_p.spareId != '')
+				#set($_spareId = $_p.spareId)
+				AND t.SPARE_ID = @{_spareId}
+			#end
+			#if($_p.changeDate && $_p.changeDate != '')
+				#set($_changeDate = $_p.changeDate)
+				AND t.CHANGE_DATE = @{_changeDate}
+			#end
+			#if($_p.changePersonId && $_p.changePersonId != '')
+				#set($_changePersonId = $_p.changePersonId)
+				AND t.CHANGE_PERSON_ID = @{_changePersonId}
+			#end
+			#if($_p.changePersonName && $_p.changePersonName != '')
+				#set($_changePersonName = '%' + $_p.changePersonName + '%')
+				AND t.CHANGE_PERSON_NAME LIKE @{_changePersonName}
+			#end
+			#if($_p.oldPrice && $_p.oldPrice != '')
+				#set($_oldPrice = $_p.oldPrice)
+				AND t.OLD_PRICE = @{_oldPrice}
+			#end
+			#if($_p.newPrice && $_p.newPrice != '')
+				#set($_newPrice = $_p.newPrice)
+				AND t.NEW_PRICE  = @{_newPrice}
+			#end
+			#if($_p.remark && $_p.remark != '')
+				#set($_remark = '%' + $_p.remark + '%')
+				AND t.REMARK LIKE @{_remark}
+			#end
+			#if($_p.status && $_p.status != '')
+				#set($_status = $_p.status)
+				AND t.STATUS = @{_status}
+			#end
+			#if($_p.createId && $_p.createId != '')
+				#set($_createId = $_p.createId)
+				AND t.CREATE_ID  = @{_createId}
+			#end
+			#if($_p.creator && $_p.creator != '')
+				#set($_creator = '%' + $_p.creator + '%')
+				AND t.CREATOR LIKE @{_creator}
+			#end
+			#if($_p.createDate && $_p.createDate != '')
+				#set($_createDate = $_p.createDate)
+				AND t.CREATE_DATE = @{_createDate}
+			#end
+			#if($_p.updateId && $_p.updateId != '')
+				#set($_updateId = $_p.updateId)
+				AND t.UPDATE_ID  = @{_updateId}
+			#end
+			#if($_p.updator && $_p.updator != '')
+				#set($_updator = '%' + $_p.updator + '%')
+				AND t.UPDATOR LIKE @{_updator}
+			#end
+			
+			#if($_p.spareCategoryIds && $_p.spareCategoryIds.size() > 0 )
+				#set($_spareCategoryIds =$_p.spareCategoryIds)
+				 AND
+				#repeat( $_spareCategoryIds $id "," " t2.ID  IN (" ")" )
+		    		@{id,jdbcType=NUMERIC}
+				#end
+				
+			#end
+			#if($_p.spareCode && $_p.spareCode != '')
+				#set($_spareCode = '%' + $_p.spareCode + '%')
+				AND t1.SPARE_CODE LIKE @{_spareCode}
+			#end
+			#if($_p.spareName && $_p.spareName != '')
+				#set($_spareName = '%' + $_p.spareName + '%')
+				AND t1.SPARE_NAME @{_spareName}
+			#end
+		#end
+		]]>	
+    </sql>
+	
+    <!-- 插入记录-->
+    <sql id="insert_sql" lang="velocity">
+        INSERT INTO <include refid="TABLE_NAME"/>(
+        	#if($_databaseId == 'oracle') ID, #end
+	        BILL_NO,
+	        BPM_KEY,
+	        PROCESS_ID,
+	        SPARE_ID,
+	        CHANGE_DATE,
+	        CHANGE_PERSON_ID,
+	        CHANGE_PERSON_NAME,
+	        CHANGE_TYPE,
+	        OLD_PRICE,
+	        NEW_PRICE,
+	        REMARK,
+	        STATUS,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE,
+	        UPDATE_ID,
+	        UPDATOR,
+	        UPDATE_DATE
+        ) VALUES (
+        	#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end
+	        @{_parameter.billNo,jdbcType=VARCHAR},
+	        @{_parameter.bpmKey,jdbcType=VARCHAR},
+	        @{_parameter.processId,jdbcType=NUMERIC},
+	        @{_parameter.spareId,jdbcType=NUMERIC},
+	        @{_parameter.changeDate,jdbcType=TIMESTAMP},
+	        @{_parameter.changePersonId,jdbcType=NUMERIC},
+	        @{_parameter.changePersonName,jdbcType=VARCHAR},
+	        @{_parameter.changeType,jdbcType=NUMERIC},
+	        @{_parameter.oldPrice,jdbcType=DECIMAL},
+	        @{_parameter.newPrice,jdbcType=DECIMAL},
+	        @{_parameter.remark,jdbcType=VARCHAR},
+	        @{_parameter.status,jdbcType=NUMERIC},
+	        @{_parameter.createId,jdbcType=NUMERIC},
+	        @{_parameter.creator,jdbcType=VARCHAR},
+	        @{_parameter.createDate,jdbcType=TIMESTAMP},
+	        @{_parameter.updateId,jdbcType=NUMERIC},
+	        @{_parameter.updator,jdbcType=VARCHAR},
+	        @{_parameter.updateDate,jdbcType=TIMESTAMP}
+        )
+    </sql>
+    
+    <insert id="insert" parameterType="com.supconit.spare.entities.PriceChange" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="insert_sql" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.spare.entities.PriceChange" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    
+	<!-- 更新记录-->
+	<update id="update"  parameterType="com.supconit.spare.entities.PriceChange" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+			#mset()
+				<![CDATA[
+			        #if($_parameter.billNo && $_parameter.billNo !='')BILL_NO = @{_parameter.billNo,jdbcType=VARCHAR},#end
+			        #if($_parameter.bpmKey && $_parameter.bpmKey !='')BPM_KEY = @{_parameter.bpmKey,jdbcType=VARCHAR},#end
+			        #if($_parameter.processId)PROCESS_ID = @{_parameter.processId,jdbcType=NUMERIC},#end
+			        #if($_parameter.spareId)SPARE_ID = @{_parameter.spareId,jdbcType=NUMERIC},#end
+			        #if($_parameter.changeDate && $_parameter.changeDate !=0)CHANGE_DATE = @{_parameter.changeDate,jdbcType=TIMESTAMP},#end
+			        #if($_parameter.changePersonId )CHANGE_PERSON_ID = @{_parameter.changePersonId,jdbcType=NUMERIC},#end
+			        #if($_parameter.changePersonName && $_parameter.changePersonName !='')CHANGE_PERSON_NAME = @{_parameter.changePersonName,jdbcType=VARCHAR},#end
+			        #if($_parameter.changeType)CHANGE_TYPE = @{_parameter.changeType,jdbcType=NUMERIC},#end
+			        OLD_PRICE = @{_parameter.oldPrice,jdbcType=DECIMAL},
+			        NEW_PRICE = @{_parameter.newPrice,jdbcType=DECIMAL},
+			        REMARK = @{_parameter.remark,jdbcType=VARCHAR},
+			        #if($_parameter.status)STATUS = @{_parameter.status,jdbcType=NUMERIC},#end
+			        #if($_parameter.updateId)UPDATE_ID = @{_parameter.updateId,jdbcType=NUMERIC},#end
+			        #if($_parameter.updator)UPDATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateDate)UPDATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+			    	#if($_parameter.createId)CREATE_ID = @{_parameter.createId,jdbcType=NUMERIC},#end
+			        #if($_parameter.updator)CREATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateDate)CREATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+			    
+			    ]]>
+			#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+	<update id="updateSelective"  parameterType="com.supconit.spare.entities.PriceChange" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+			#mset()
+				<![CDATA[
+			        #if($_parameter.billNo && $_parameter.billNo !='')BILL_NO = @{_parameter.billNo,jdbcType=VARCHAR},#end
+			        #if($_parameter.bpmKey && $_parameter.bpmKey !='')BPM_KEY = @{_parameter.bpmKey,jdbcType=VARCHAR},#end
+			        #if($_parameter.processId)PROCESS_ID = @{_parameter.processId,jdbcType=NUMERIC},#end
+			        #if($_parameter.spareId)SPARE_ID = @{_parameter.spareId,jdbcType=NUMERIC},#end
+			        #if($_parameter.changeDate && $_parameter.changeDate !=0)CHANGE_DATE = @{_parameter.changeDate,jdbcType=TIMESTAMP},#end
+			        #if($_parameter.changePersonId )CHANGE_PERSON_ID = @{_parameter.changePersonId,jdbcType=NUMERIC},#end
+			        #if($_parameter.changePersonName && $_parameter.changePersonName !='')CHANGE_PERSON_NAME = @{_parameter.changePersonName,jdbcType=VARCHAR},#end
+			        #if($_parameter.changeType)CHANGE_TYPE = @{_parameter.changeType,jdbcType=NUMERIC},#end
+			        OLD_PRICE = @{_parameter.oldPrice,jdbcType=DECIMAL},
+			        NEW_PRICE = @{_parameter.newPrice,jdbcType=DECIMAL},
+			        REMARK = @{_parameter.remark,jdbcType=VARCHAR},
+			        #if($_parameter.status)STATUS = @{_parameter.status,jdbcType=NUMERIC},#end
+			        #if($_parameter.updateId)UPDATE_ID = @{_parameter.updateId,jdbcType=NUMERIC},#end
+			        #if($_parameter.updator)UPDATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateDate)UPDATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+			    	#if($_parameter.createId)CREATE_ID = @{_parameter.createId,jdbcType=NUMERIC},#end
+			        #if($_parameter.updator)CREATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateDate)CREATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+			    
+			    ]]>
+			#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.spare.entities.PriceChange" resultMap="PriceChangeResultMap" lang="velocity" databaseId="oracle">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre"/>
+		<include refid="condition_sql"/>
+		#order($_parameter.condition,"t.ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.spare.entities.PriceChange" resultMap="PriceChangeResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			t.ID,
+	        t.BILL_NO,
+	        t.BPM_KEY,
+	        t.PROCESS_ID,
+	        t.SPARE_ID,
+	        t.CHANGE_DATE,
+	        t.CHANGE_PERSON_ID,
+	        t.CHANGE_PERSON_NAME,
+	        t.CHANGE_TYPE,
+	        t.OLD_PRICE,
+	        t.NEW_PRICE,
+	        t.REMARK,
+	        t.STATUS,
+	        t.CREATE_ID,
+	        t.CREATOR,
+	        t.CREATE_DATE,
+	        t.UPDATE_ID,
+	        t.UPDATOR,
+	        t.UPDATE_DATE,
+	        t1.SPARE_CODE,
+	        t1.SPARE_NAME,
+	        t1.SPARE_CATEGORY_ID,
+	        t1.SPEC,
+	        t1.MODEL,
+	        t1.PRICE,
+	        t2.CATEGORY_NAME spareCategoryName
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"t.ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/> t 
+		LEFT JOIN SPARE t1 ON t.SPARE_ID=t1.id LEFT JOIN SPARE_CATEGORY t2 ON t2.id=t1.SPARE_CATEGORY_ID
+		<include refid="condition_sql"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countByConditions" resultType="long" lang="velocity">
+        <include refid="count_pre"/>
+        <include refid="condition_sql"/>
+    </select>
+    
+    <select id="getById" resultMap="PriceChangeResultMap" parameterType="long" lang="velocity">
+		<include refid="select_pre"/>
+		WHERE t.ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+	
+	<delete id="deleteById" parameterType="long" lang="velocity"> 
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</delete>
+	<delete id="deleteByIds">
+		DELETE FROM
+		<include refid="TABLE_NAME" />
+	    WHERE ID IN    
+	        <foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+				#{id,jdbcType=NUMERIC}
+			</foreach>
+	</delete>
+</mapper>

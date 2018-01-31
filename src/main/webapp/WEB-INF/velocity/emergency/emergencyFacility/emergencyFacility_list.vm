@@ -1,0 +1,245 @@
+#parse("index/_header.vm")
+</head>
+<body>
+  <div class="ui-layout-west" style="border-right:solid 1px #e1e5e6;" id="leftTreeWrap">
+			<div class="ui-layout-north">
+				<div class="k-header k-grid-toolbar" style="padding-left:10px;">区域</div>
+			</div>
+      <div class="ui-layout-center">
+  		  <ul id="geoAreaTree" class="ztree"></ul>
+      </div>
+  </div>
+
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<form class="ui-form" id='queryForm'>
+    		<div class="ui-form-group" style="display:none" >
+    			<div class="ui-form-item ui-form-item-block">
+    			  <label class="ui-label">您已选择：</label>
+    				  <span class="ui-form-pick">
+    					   <input id="areaId" type="hidden" name="areaId" value="$!{emergencyFacility.areaId}">
+						   <strong>区域：</strong><em id='areaName'></em><i class="iconfont icon-remove-sign" name="i_g"></i>
+					 </span>
+    			</div>
+    		</div>	
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+                <tr>
+                  <td class="ui-search-name first">设施编号：</td>
+                  <td class="ui-search-c">
+					  <input class="k-textbox" type="text" name="facilityCode" value="$!emergencyFacility.facilityCode">
+                  </td>
+                  <td class="ui-search-name">设施名称：</td>
+                  <td class="ui-search-c">
+					 <input class="k-textbox" type="text" name="facilityName" value="$!emergencyFacility.facilityName">
+                  </td>
+                </tr>
+              </table>
+            </td>
+            <td width="180" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn" onclick="cancelLeftTreeSelected();"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+            <td></td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+ #parse("index/_footer.vm")  
+<script type="text/javascript">
+  var _iframe_layout, _left_layout, _inner_layout;
+	$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      },
+      west: {
+        size: 0.18
+      }
+    });
+
+    _left_layout = $("#leftTreeWrap").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      }
+    });
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+
+    $('#resetBtn').click(function(){
+      $("#queryForm :text").val('');  
+    });
+
+		$('.iconfont','.ui-form-pick').each(function(){
+      $(this).click(function(){
+      	$('#treeId').val('');
+      	$('#selectBlock').hide();
+        //$(this).parent().remove();
+      })
+    })
+	
+		//列表 "$!{rc.contextPath}/emergencyFacility/emergencyFacility/list?_t="+new Date().getTime()
+    quick_datagrid("#grid", "#queryForm",  "$!{rc.contextPath}/emergency/emergencyFacility/page?_t="+new Date().getTime(),
+		[{
+              field: "id",
+              hidden: true
+          }, {
+              field: "facilityCode",
+              title: "设施编号",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              sortable: false,
+			   template:"<a href=\"javascript:void(0)\" title=\"查看#: data.facilityCode #的详细信息\" onclick=\"quick_dialog('emergencyFacility_add_dlg','查看#:data.facilityCode #的信息','$!{rc.contextPath}/emergency/emergencyFacility/edit?viewOnly=true&id=#: data.id #',700,300)\">#: data.facilityCode #</a>"
+          }, {
+              field: "facilityName",
+              title: "设施名称",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              sortable: false, 
+              template:"<li alt=\"#: data.facilityName #\" title=\"#: data.facilityName #\" >#: data.facilityName #</li>"
+              
+          }, {
+              field: "facilityTypeName",
+              title: "设施类别",
+              headerAttributes: {"class": "k-grid-text"},
+			  attributes: {     
+  		  		"class": "k-grid-text k-grid-text"
+		  	  },
+              sortable: false, 
+          }, {
+              field: "facilityModel",
+              title: "型号",
+              headerAttributes: {"class": "k-grid-text"},
+               attributes: {     
+  		  		 title:"#: data.model==null? '':data.model #",
+  				 "class": "k-grid-text k-grid-text"
+		  	  },
+              sortable: false, 
+              
+          }, {
+              field: "areaName",
+              title: "区域",
+              headerAttributes: {"class": "k-grid-text"},
+               attributes: {     
+  		  		
+  				 "class": "k-grid-text k-grid-text"
+		  	  },
+              sortable: false, 
+              
+          },{
+              field: "location",
+              title: "位置",
+              headerAttributes: {"class": "k-grid-text"},
+               attributes: {     
+  		  		
+  				 "class": "k-grid-text k-grid-text"
+		  	  },
+              sortable: false, 
+              
+          }, {
+              field: "keeperName",
+              title: "保管员",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              sortable: false
+              
+          }
+		  , {
+              field: "remark",
+              title: "备注",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              sortable: false
+              
+          }],
+		  
+      	{
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          },resizable:true
+      }, {
+          serverSorting: true
+      }, [ {
+              name: "添加",
+              icon: "fa fa-plus",
+              onclick: function (obj) {
+                  quick_dialog("emergencyFacility_add_dlg", "添加应急设施", "$!{rc.contextPath}/emergency/emergencyFacility/edit", 700, 300, obj);
+              }
+          },
+          {
+              name: "修改",
+              icon: "fa fa-pencil",
+              onclick: function (obj, grid) {
+                  var row = grid.select();
+                  if (null == row || row.length == 0) {
+                      notify("请选择要修改的项", "warn");
+                      return;
+                  }
+                  var data = grid.dataItem(row);
+                  quick_dialog("emergencyFacility_add_dlg", "修改应急设施", "$!{rc.contextPath}/emergency/emergencyFacility/edit?id=" + data.id, 700, 300, obj);
+              }
+          },
+          {
+              name: "删除",
+              icon: "fa fa-remove",
+              onclick: function (obj, grid) {
+                  singleDelete(grid,"$!{rc.contextPath}/emergency/emergencyFacility/delete");
+              }
+          }
+      ]);
+		
+    });
+
+    /* zTree */
+    var setting = {
+    	data: {
+    		simpleData: {enable: true}
+          },
+          callback: {
+    			onClick: function(event, treeId, treeNode) {
+    				     $('#areaId').val(treeNode.id);
+	    			 	 $('#areaName').text(treeNode.name);
+	    			 	 $('#selectBlock').show();
+	    				 $('#queryBtn').click();
+    			}
+    		}
+    };
+  	var zNodes = [];  
+  	zNodes.push({id:"0", pId:"-1", name:"地理区域簇",open:true});   
+  	#foreach($!{treeNode} in $!{treeListLou})
+      	zNodes.push({id:$!{treeNode.id}, pId:$!{treeNode.parentId}, name:"$!{treeNode.areaName}"});      
+  	#end
+
+  	$(document).ready(function(){
+  		$.fn.zTree.init($("#geoAreaTree"), setting,zNodes);
+  	});
+	
+	function cancelLeftTreeSelected(){
+		$.fn.zTree.init($("#geoAreaTree"), setting,zNodes);//.expandAll(true)
+	}
+</script>
+</body>
+</html>

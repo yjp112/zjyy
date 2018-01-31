@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ECharts">
+
+    <style>
+        .main{
+            height: 400px;
+            border: 1px solid red;
+        }
+    </style>
+</head>
+  <body>
+  <div id="main" class="main">
+
+  </div>
+  <select id="theme_id">
+      <option selected="true" name="macarons">macarons</option>'
+      <option name="infographic">infographic</option>
+      <option name="shine">shine</option>
+      <option name="dark">dark</option>
+      <option name="blue">blue</option>
+      <option name="green">green</option>
+      <option name="red">red</option>
+      <option name="gray">gray</option>
+      <option name="default">default</option>
+  </select>
+
+  <div id="main2" class="main">
+
+  </div>
+  <select id="theme_id_2">
+      <option selected="true" name="macarons">macarons</option>'
+      <option name="infographic">infographic</option>
+      <option name="shine">shine</option>
+      <option name="dark">dark</option>
+      <option name="blue">blue</option>
+      <option name="green">green</option>
+      <option name="red">red</option>
+      <option name="gray">gray</option>
+      <option name="default">default</option>
+  </select>
+  <script type="text/javascript" src="../esl.js"></script>
+  <script type="text/javascript" src="../../js/jquery-1.7.2.min.js"></script>
+  <script type="text/javascript" src="../echartsUtil.js"></script>
+  <script type="text/javascript">
+      var contextPath = "$!{rc.contextPath}";
+      var option = {
+          title : {
+              text: '未来一周气温变化',
+              subtext: '纯属虚构'
+          },
+          tooltip : {
+              trigger: 'axis'
+          },
+          legend: {
+              data:['最高气温','最低气温']
+          },
+          toolbox: {
+              show : true,
+              feature : {
+                  mark : {show: true},
+                  dataView : {show: true, readOnly: false},
+                  magicType : {show: true, type: ['line', 'bar']},
+                  restore : {show: true},
+                  saveAsImage : {show: true}
+              }
+          },
+          calculable : true,
+          xAxis : [
+              {
+                  type : 'category',
+                  boundaryGap : false,
+                  data : ['周一','周二','周三','周四','周五','周六','周日']
+              }
+          ],
+          yAxis : [
+              {
+                  type : 'value',
+                  axisLabel : {
+                      formatter: '{value} °C'
+                  }
+              }
+          ],
+          series : [
+              {
+                  name:'最高气温',
+                  type:'line',
+                  data:[11, 11, 15, 13, 12, 13, 10],
+                  markPoint : {
+                      data : [
+                          {type : 'max', name: '最大值'},
+                          {type : 'min', name: '最小值'}
+                      ]
+                  },
+                  markLine : {
+                      data : [
+                          {type : 'average', name: '平均值'}
+                      ]
+                  }
+              },
+              {
+                  name:'最低气温',
+                  type:'line',
+                  data:[1, -2, 2, 5, 3, 2, 0],
+                  markPoint : {
+                      data : [
+                          {name : '周最低', value : -2, xAxis: 1, yAxis: -1.5}
+                      ]
+                  },
+                  markLine : {
+                      data : [
+                          {type : 'average', name : '平均值'}
+                      ]
+                  }
+              }
+          ]
+      };
+
+      initEcharts("main",option,THEME.DARK);
+
+      $("#theme_id").change(function(){
+          changeTheme( option.echart,$("#theme_id").val());
+      });
+
+
+
+      var option2 = {
+          title : {
+              text: '未来一周气温变化',
+              subtext: '纯属虚构'
+          },
+          tooltip : {
+              trigger: 'axis'
+          },
+          legend: {
+              data:['最高气温','最低气温']
+          },
+          toolbox: {
+              show : true,
+              feature : {
+                  mark : {show: true},
+                  dataView : {show: true, readOnly: false},
+                  magicType : {show: true, type: ['line', 'bar']},
+                  restore : {show: true},
+                  saveAsImage : {show: true}
+              }
+          },
+          calculable : true,
+          xAxis : [
+              {
+                  type : 'category',
+                  boundaryGap : false,
+                  data : ['周一','周二','周三','周四','周五','周六','周日']
+              }
+          ],
+          yAxis : [
+              {
+                  type : 'value',
+                  axisLabel : {
+                      formatter: '{value} °C'
+                  }
+              }
+          ],
+          series : [
+              {
+                  name:'最高气温',
+                  type:'line',
+                  data:[11, 11, 15, 13, 12, 13, 10],
+                  markPoint : {
+                      data : [
+                          {type : 'max', name: '最大值'},
+                          {type : 'min', name: '最小值'}
+                      ]
+                  },
+                  markLine : {
+                      data : [
+                          {type : 'average', name: '平均值'}
+                      ]
+                  }
+              },
+              {
+                  name:'最低气温',
+                  type:'line',
+                  data:[1, -2, 2, 5, 3, 2, 0],
+                  markPoint : {
+                      data : [
+                          {name : '周最低', value : -2, xAxis: 1, yAxis: -1.5}
+                      ]
+                  },
+                  markLine : {
+                      data : [
+                          {type : 'average', name : '平均值'}
+                      ]
+                  }
+              }
+          ]
+      };
+
+      initEcharts("main2",option2,THEME.DARK);
+      $("#theme_id_2").change(function(){
+          changeTheme( option2.echart,$("#theme_id_2").val());
+      });
+
+  </script>
+
+  </body>
+</html>

@@ -1,0 +1,360 @@
+#parse("index/_header.vm")
+<style>
+    .ztree {
+        overflow: auto;
+    }
+</style>
+</head>
+<body>
+  <div class="ui-layout-west" style="border-right:solid 1px #e1e5e6;" id="leftTreeWrap">
+			<div class="ui-layout-center">
+				    <div id="tabstrip" class="k-header k-grid-toolbar" style="padding-left:10px;">
+					    <ul>
+					        <li class="k-state-active">区域</li>
+					        <li>类别</li>
+					    </ul>
+						 <div id="tabstrip-1">
+						    <span class="k-header k-grid-toolbar" style="padding-left:10px;padding-top:10px;">地理区域</span>
+				  		  <ul id="geoAreaTree" class="ztree"></ul>
+				        </div>
+					    <div id="tabstrip-2">
+					       <span class="k-header k-grid-toolbar" style="padding-left:10px;padding-top:10px;">设备类别</span>
+				  		  <ul id="deviceTree" class="ztree"></ul>
+				        </div>
+				    </div >
+				    
+			        
+			</div>
+      
+  </div>
+
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<form class="ui-form" id='queryForm'>
+    		<div class="ui-form-group" style="display:none" id='selectBlock2'>
+    			<div class="ui-form-item ui-form-item-block">
+    			  <label class="ui-label">您已选择：</label>
+		    		 <span class="ui-form-pick"  id='selectBlock_g' style="display:none" >
+							  <input id="locationId" type="hidden" name="locationId" value="$!{device.locationId}">
+							  <strong>安装位置：</strong><em id='locationName'></em><i class="iconfont icon-remove-sign" name="i_g"></i>
+					  </span>
+    				  <span class="ui-form-pick"  id='selectBlock_c' style="display:none" >
+						  <input id="categoryId" type="hidden" name="categoryId" value="$!{device.categoryId}">
+						  <strong>设备类别：</strong><em id='categoryName'></em><i class="iconfont icon-remove-sign" name="i_c"></i>
+				    </span>
+    				  
+    			</div>
+    		</div>	
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+                <tr>
+                  <td class="ui-search-name first">设备编码：</td>
+                  <td class="ui-search-c">
+                      <input class="k-textbox" type="text" name="deviceCode" value="$!device.deviceCode"  maxlength="32">
+                  </td>
+                  <td class="ui-search-name">设备名称：</td>
+                  <td class="ui-search-c">
+                     <input class="k-textbox" type="text" name="deviceName" value="$!device.deviceName" maxlength="50">
+                  </td>
+                </tr>
+              </table>
+            </td>
+            <td width="150" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn" onclick="cancelLeftTreeSelected();"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+            <td></td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+  #parse("index//_footer.vm") 
+<script type="text/javascript">
+  var _iframe_layout, _left_layout, _inner_layout,containerHeight;
+	$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      },
+      west: {
+        size: 0.18
+      }
+    });
+
+    _left_layout = $("#leftTreeWrap").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+    	center: {
+    	  onresize_end:function(){
+              containerHeight = _left_layout.state.container.innerHeight-78;
+              $("#geoAreaTree").css("height",containerHeight);
+              $("#deviceTree").css("height",containerHeight);
+  		}
+      }
+    });
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+   
+
+    $('#resetBtn').click(function(){
+      $("#queryForm :text").val('');  
+    });
+
+		$('.iconfont','.ui-form-pick').each(function(){
+      $(this).click(function(){
+      	$('#treeId').val('');
+      	$('#selectBlock').hide();
+        //$(this).parent().remove();
+      })
+    });
+		 $("#tabstrip").hcTabStrip({
+	            animation: {
+	                // fade-out current tab over 1000 milliseconds
+	                close: {
+	                    duration: 1000,
+	                    effects: "fadeOut"
+	                },
+	               // fade-in new tab over 500 milliseconds
+	               open: {
+	                   duration: 500,
+	                   effects: "fadeIn"
+	               }
+	           }
+	        });
+		//列表
+        quick_treelist("#grid", "#queryForm", "$!{rc.contextPath}/device/device/tree", [ 
+			{field: "maitainCycle",hidden: true}, 
+			{field: "barcode",hidden: true}, 
+			{field: "assetsCode",hidden: true},
+			{field: "assetsCost",hidden: true},
+		     {field: "useDepartmentId",hidden: true}, 
+		     {field: "useDepartmentName",hidden: true}, 
+		     {field: "managePersonIds",hidden: true},
+			 {field: "manageDepartmentId",hidden: true},  
+			 {field: "manageDepartmentName",hidden: true}, 
+			 {field: "locationId",hidden: true},
+			 {field: "id",hidden: true},                                                                                
+          {
+                    field: "deviceName",
+                    sortable: false,
+                    title: "设备名称",
+                    expandable: true, width: 250, template:"<span title='#: data.deviceName #' > #: data.deviceName #</span>"
+          }, {
+              field: "deviceCode",
+              title: "设备编码",
+              sortable: false
+          }, {
+              field: "deviceSpec",
+              title: "规格型号",
+              sortable: false
+          }, {
+              field: "locationName",
+              sortable: false,
+              title: "安装位置"
+          }, {
+              field: "managePersonName",
+              title: "管理负责人",
+              sortable: false
+          }, {
+              field: "statusName",
+              sortable: false,
+              title: "使用状态"
+          }
+          
+          ], 
+          {sortable: {mode: "multiple",allowUnsort: true}}, 
+          {serverSorting: true}, 
+      [
+			{
+          		name: "选择",
+          		icon: "fa fa-plus",
+          		onclick: function (obj, grid) {
+          			debugger
+          			var rows = grid.select();
+        	        if (null == rows || rows.length == 0) {
+        	            notify("你还没有选择!", "warn");
+        	            return;
+        	        }
+           			var data = grid.dataItem(rows);
+           			debugger
+           		    if("$!{dialogId}"!=""){		    	
+           		    	    get_el_in_dialog("$!{dialogId}","#$!{txtId}").val(data.id);
+       	        			get_el_in_dialog("$!{dialogId}","#$!{txtName}").val(data.deviceName);				
+							resetfocus(get_el_in_dialog("$!{dialogId}","#$!{txtName}"));
+        			
+           			}else{
+           				var id_v = $("#"+"$!{txtId}",window.parent["_main_frame"].document);
+           				if("deviceChange"=="$!{type}"){
+							id_v.val(data.deviceCode);
+						}else{
+							id_v.val(data.id);
+						}
+						var id_t = $("#"+"$!{txtName}",window.parent["_main_frame"].document);
+						id_t.val(data.deviceName);
+						
+						if("deviceChange"=="$!{type}"){
+							var id_v = $("#"+"id",window.parent["_main_frame"].document);
+							id_v.val(data.id);
+							var id_v = $("#"+"useDepartmentId",window.parent["_main_frame"].document);
+							id_v.val(data.useDepartmentId);
+							var id_t = $("#"+"useDepartmentName",window.parent["_main_frame"].document);
+							id_t.val(data.useDepartmentName);
+							var id_v = $("#"+"managePersonIds",window.parent["_main_frame"].document);
+							id_v.val(data.managePersonIds);
+							var id_t = $("#"+"managePersonName",window.parent["_main_frame"].document);
+							id_t.val(data.managePersonName);
+							var id_v = $("#"+"manageDepartmentId",window.parent["_main_frame"].document);
+							id_v.val(data.manageDepartmentId);
+							var id_t = $("#"+"manageDepartmentName",window.parent["_main_frame"].document);
+							id_t.val(data.manageDepartmentName);
+							var id_v = $("#"+"locationId",window.parent["_main_frame"].document);
+							id_v.val(data.locationId);
+							var id_t = $("#"+"locationName",window.parent["_main_frame"].document);
+							id_t.val(data.locationName);
+							var id_t = $("#"+"assetsCode",window.parent["_main_frame"].document);
+							id_t.val(data.assetsCode);
+							var id_t = $("#"+"barcode",window.parent["_main_frame"].document);
+							id_t.val(data.barcode);
+							var id_t = $("#"+"assetsCost",window.parent["_main_frame"].document);
+							id_t.val(data.assetsCost);
+							var id_t = $("#"+"maitainCycle",window.parent["_main_frame"].document);
+							id_t.val(data.maitainCycle);
+							var id_t = $("#"+"deviceSpec",window.parent["_main_frame"].document);
+							id_t.val(data.deviceSpec);
+							var id_t = $("#"+"status",window.parent["_main_frame"].document);
+							id_t.val(data.status);
+						}
+						resetfocus($("#"+"$!{txtName}",window.parent["_main_frame"].document));	
+					}
+ 
+            	    close_dialog('selectDiloag');
+          		}
+      		},
+			{
+              		name: "清空",
+              		icon: "fa fa-remove",
+              		onclick: function (obj, grid) {
+            		    //人员
+            		    if(""!=""){
+	        				get_el_in_dialog("","#parentId").val("");
+	        				get_el_in_dialog("","#parentName").val("");  
+	        				resetfocus(get_el_in_dialog("","#parentName").val(""));
+            		    }else{
+            		    	//来自设备变更管理页面
+							if("deviceChange"=="1"){
+								$("#parentId",window.parent["_main_frame"].document).val("");
+								$("#parentName",window.parent["_main_frame"].document).val("");
+								$("#id",window.parent["_main_frame"].document).val("");
+								$("#enableDate",window.parent["_main_frame"].document).val("");
+								$("#useDepartmentId",window.parent["_main_frame"].document).val("");
+								$("#useDepartmentName",window.parent["_main_frame"].document).val("");
+								$("#managePersonIds",window.parent["_main_frame"].document).val("");
+								$("#managePersonName",window.parent["_main_frame"].document).val("");
+								$("#manageDepartmentId",window.parent["_main_frame"].document).val("");
+								$("#manageDepartmentName",window.parent["_main_frame"].document).val("");
+								$("#locationId",window.parent["_main_frame"].document).val("");
+								$("#locationName",window.parent["_main_frame"].document).val("");
+								resetfocus($("#"+"deviceCode",window.parent["_main_frame"].document));
+							}else if("maintainPlan"=="1"){
+	            		    	//来自设备保养计划
+	            		    	$("#"+"deviceCode_id"+"",window.parent["_main_frame"].document).val("");
+								$("#"+"deviceName_id"+"",window.parent["_main_frame"].document).val("");
+								$("#"+"location_id"+"",window.parent["_main_frame"].document).val("");
+								$("#"+"spec_id"+"",window.parent["_main_frame"].document).val("");
+								$("#"+"deviceId"+"",window.parent["_main_frame"].document).val("");
+								resetfocus($("#"+"deviceName_id"+"",window.parent["_main_frame"].document));
+	            		    }else if('spec_edit'=='1'){
+								$("#"+"parentId",window.parent["_main_frame"].document).val("");
+								$("#"+"parentName",window.parent["_main_frame"].document).val("");
+								$("#device_name_id",window.parent["_main_frame"].document).val("");
+								$("#device_spec_id",window.parent["_main_frame"].document).val("");
+								$("#location_name_id",window.parent["_main_frame"].document).val("");
+								$("#last_maintain_date",window.parent["_main_frame"].document).val("");
+								resetfocus($("#"+"parentName",window.parent["_main_frame"].document));
+								close_dialog('choose_deviceCategory');
+								return;
+							}else{
+								$("#"+"parentId",window.parent["_main_frame"].document).val("");
+								$("#"+"parentName",window.parent["_main_frame"].document).val("");
+								resetfocus($("#"+"parentName",window.parent["_main_frame"].document));
+							}
+							
+            		    }
+            	        close_dialog('selectDiloag');
+              		}
+          		} 
+			
+      	]);
+
+        $("#geoAreaTree").css("height", _left_layout.state.container.outerHeight - 78);
+        $("#deviceTree").css("height", _left_layout.state.container.outerHeight - 78);
+    }); 
+	
+    /* zTree */
+    var setting = {
+    	data: {
+    		simpleData: {enable: true}
+          },
+          callback: {
+    			onClick: function(event, treeId, treeNode, clickFlag) {
+    				if(treeId=="geoAreaTree"){
+    					$('#locationId').val(treeNode.id);
+	    			 	 $('#locationName').text(treeNode.name);
+	    			 	 $('#selectBlock').show();
+	    				 $('#queryBtn').click();
+    				}else{
+        	  
+	        	         $('#categoryId').val(treeNode.id);
+	    			 	 $('#categoryName').text(treeNode.name);
+	    			 	 $('#selectBlock').show();
+	    				 $('#queryBtn').click();
+    				 }
+    				$("#queryBtn").click();
+    			}
+    		}
+    };
+  	var zNodes1 = [];  
+  	zNodes1.push({id:"0", pId:"-1", name:"地理区域簇",open:true}); 
+  	#foreach($!{treeNode1} in $!{treeListLou})
+      	zNodes1.push({id:$!{treeNode1.id}, pId:$!{treeNode1.parentId}, name:"$!{treeNode1.areaName}"});      
+  	#end
+  	var zNodes2 = [];  
+  	zNodes2.push({id:"0", pId:"-1", name:"设备类别簇",open:true}); 
+  	#foreach($!{treeNode2} in $!{treeListType})
+      	zNodes2.push({id:$!{treeNode2.id}, pId:$!{treeNode2.parentId}, name:"$!{treeNode2.categoryName}"});      
+  	#end
+  	$(document).ready(function(){
+  		##$.fn.zTree.init($("#geoAreaTree"), setting,zNodes1).expandAll(true);
+  		$.fn.zTree.init($("#geoAreaTree"), setting,zNodes1);
+  		$.fn.zTree.init($("#deviceTree"), setting,zNodes2);
+  	});
+	
+	function cancelLeftTreeSelected(){
+		$.fn.zTree.init($("#geoAreaTree"), setting,zNodes1);
+  		$.fn.zTree.init($("#deviceTree"), setting,zNodes2);
+	}
+	
+</script>

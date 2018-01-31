@@ -1,0 +1,85 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<style type="text/css">
+			html, body {
+				width:99%;
+				height:96%;
+			}
+		</style>
+		<script type="text/javascript" src="http://10.10.77.2:8282/hospital/html/lib/OpenLayers.js"></script>
+		<script type="text/javascript" src="Supconmap.js"></script>
+		<script type="text/javascript">
+			var light=null;
+			function changeFloor(floor){
+				g_changeFloor(floor);
+				initLayer();
+				//light=new hightlight(g_map);  //new控件
+				//light.activate();  //激活控件
+			}
+			
+			function initLayer(){
+				g_addDeviceLayers("ceng_SXT",true);
+				g_addDeviceLayers("ceng_AHU",true);
+			}
+			
+			function show(evt){
+				g_changLayerVisibility("ceng_SXT",evt.checked);
+			}
+			
+			function geoquery(){
+				g_toggleControl("square");
+			}
+			
+			function fireAlarm(){
+				g_dcPoint("A_01F_BA_AHU_001,A_01F_BA_AHU_003",0);
+			}
+			
+			function state(){
+				g_dcPoint("A_01F_SA_HB_001",2);
+			}
+			
+			function showPopup(feature){
+				var title="标题";
+				var content="内容";
+				g_addPopUp(feature,title,content)
+			}
+
+			function showTmap(){
+				g_changeFloor("");
+			}
+			
+			function showpop(){
+				g_showDeviceState("ceng_SXT");
+				/*var arr=["A_01F_BA_AHU_001","A_01F_BA_AHU_003"]
+				for(var i=0;i<arr.length;i++){
+					g_addPopupById(arr[i],"flash内容html");
+				}*/
+			}
+			
+			function addqueryPoint(){
+				var objs=[{"modelCode":"A_01F_BA_AHU_001", "gisSort":"A"},{"modelCode":"A_01F_BA_AHU_003", "gisSort":"B"}];
+				g_idAddFeature(objs);
+			}
+			
+			function listClick(){
+				//g_queryListClick()
+				var objs=[{"modelCode":"A_01F_BA_AHU_001", "gisSort":"A"},{"modelCode":"A_01F_BA_AHU_003", "gisSort":"B"}];
+				g_queryListClick("A_01F_BA_AHU_001","ceng_AHU",objs)
+			}
+		</script>
+	</head>
+	<body onload="changeFloor('A_01F')">
+		<input id="filterButton" type="button" onclick="changeFloor('A_02F')" value="切换"/>
+		<input id="filterButton" type="checkbox" onclick="show(this)"/>图层控制
+		<input id="filterButton" type="button" onclick="geoquery()" value="几何查询"/>
+		<input id="filterButton" type="button" onclick="fireAlarm()" value="报警"/>
+		<input id="filterButton" type="button" onclick="state()" value="状态"/>
+		<input id="filterButton" type="button" onclick="showpop()" value="状态气泡"/>
+		<input id="filterButton" type="button" onclick="showTmap()" value="全院"/>
+		<input id="filterButton" type="button" onclick="addqueryPoint()" value="查询点添加"/>
+		<input id="filterButton" type="button" onclick="listClick()" value="列表点击"/>
+		<div id="map" style="width:100%;height:100%;border: 1px solid black;"></div>
+	</body>
+</html>

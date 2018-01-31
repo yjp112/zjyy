@@ -1,0 +1,134 @@
+ <script type="text/javascript" src="$!{nhgl_static_custom_url}/echarts_2/esl.js"> </script>
+  <script type="text/javascript" src="$!{nhgl_static_custom_url}/echarts_2/echartsUtil.js"></script>
+    <div class="nh-chart" id="mix$!{flag}" style="height:510px">
+    </div>	
+	##下方的列别
+	<div class="nh-grid">
+	<table class="nh-table">
+		<thead>
+		<tr>
+            <td class="nh-table-num">分项</td>
+			#foreach($ssi in $slist)
+				<td class="nh-table-num" style="text-align:center">
+					$!{ssi.itemName}(kWh)
+				</td>
+			#end
+        </tr>
+		  <tr>
+			<td style="text-align:center">
+				$start
+			</td>
+			#foreach($sub in $slist)
+    			<td class="fInt" style="text-align:center">
+    				$sub.total
+                </td>
+			#end
+		  </tr>	
+    </table>
+	</div>
+  <script type="text/javascript">
+  	var myChart;
+	var option;
+	var height = $(window).height();
+  	$(".out").height(height-160);
+      $(document).ready(function(){
+	  	fNumPage();
+        var percentD = '$!nhMonth.percentD';
+  		var percentN='$!nhMonth.percentN';
+  		var dayTimeEleTotal='$!nhMonth.MonthDaytimeValue';
+  		var nightEleTotal='$!nhMonth.MonthNightValue';
+  		var sTime='$!nhMonth.monthKey';
+  		$("#sTime1").text(sTime);
+  		$("#sTime2").text(sTime);
+		if(dayTimeEleTotal == 0)
+			$("#dayTimeTotal").text("0.00");
+		else
+			$("#dayTimeTotal").text(dayTimeEleTotal);
+		if(nightEleTotal==0)
+			$("#nightTotal").text("0.00");
+		else
+			$("#nightTotal").text(nightEleTotal);  		
+  		if(percentD >0){
+			$("#percentD").text('增长'+percentD+'%');
+		}
+		else if(percentD == 0){
+			$("#percentD").text('持平');
+		}
+		else{
+			$("#percentD").text('下降'+(-percentD)+'%');
+		}
+		if(percentD == 0){
+			$("#rudD").removeClass();
+			$("#rudD").addClass("count-item count-item-unchanged");
+		}
+		else if(percentD > 0){
+			$("#rudD").removeClass();
+			$("#rudD").addClass("count-item count-item-rise");
+		}
+		else {
+			$("#rudD").removeClass();
+			$("#rudD").addClass("count-item count-item-decline");
+		}
+		
+		fNumPage();
+		var allHeight = $("#chart_content_id").height();
+		var header = $(".nh-header").height();
+		var content = $(".nh-content").height();
+		if(content > allHeight-header-40)
+			$("#content").css("height",content);
+		else
+			$("#content").css("height",allHeight-header-40);
+		$(".ui-tab-panels").css("height",allHeight-header-40);
+		if(percentN >0){
+			$("#percentN").text('增长'+percentN+'%');
+		}
+		else if(percentN == 0){
+			$("#percentN").text('持平');
+		}
+		else{
+			$("#percentN").text('下降'+(-percentN)+'%');
+		}
+		if(percentN == 0){
+			$("#rudN").removeClass();
+			$("#rudN").addClass("count-item count-item-unchanged");
+		}
+		else if(percentN > 0){
+			$("#rudN").removeClass();
+			$("#rudN").addClass("count-item count-item-rise");
+		}
+		else {
+			$("#rudN").removeClass();
+			$("#rudN").addClass("count-item count-item-decline");
+		}
+      
+      
+      
+      
+	  		var contextPath = "$!{rc.contextPath}";
+    		//混合图总量
+    		option = {
+					
+					title : {
+                        text: '$!{title}',
+                        x:'center'
+                    },
+                    tooltip : {
+                        trigger: 'item',
+                        formatter: "{a} <br/>{b} : {c} kWh({d}%)"
+                    },
+                    series : [
+                        {	
+                			x : 'center',
+                            name:'用电量统计',
+                            type:'pie',
+                            radius : '70%',
+                            center: ['50%', '60%'],
+                            data:$!{pieString}
+                        }
+                    ]		
+            	};
+			initEcharts("mix$!{flag}",option);
+    	})
+		$(".nh-grid").circular();
+  </script> 
+   

@@ -1,0 +1,105 @@
+<script src="$!{main_static_hc_url}/framework/js/angular.min.js"></script>
+<form method="POST" id="myform_content">
+<table id='content_tableId' class="ui-table ">
+	<div id="grid"></div>
+            <script>
+                $(document).ready(function () {
+                    var crudServiceBaseUrl = "${rc.contextPath}/maintain/content",
+                        dataSource = new kendo.data.DataSource({
+                            transport: {
+                                read:  {
+                                    url: crudServiceBaseUrl + "/list?maintainCode="+'$!{task.maintainCode}',
+									type : "POST",
+                                    dataType: "json"
+                                },
+                                parameterMap: function(options, operation) {
+                                    if (operation !== "read" && options.models) {
+                                        return {models: kendo.stringify(options.models)};
+                                    }
+                                }
+                            },
+                            batch: true,
+                            pageSize: 10,
+							schema: {
+							 	type: "json",
+                                data: "rows",
+                                total: "total",
+                                model: {
+                                    fields: {
+                                        rowNum: { editable: false},
+                                        deviceName: { editable: false},
+                                        locationName: { editable: false},
+                                        itemContent: { editable: false},
+                                        deviceName: { editable: false},
+                                        result: { type: "boolean" ,editable: !$!{viewOnly}},
+										descripton: { editable: !$!{viewOnly}},
+                                    }
+                                }
+                            }
+                        });
+
+                    $("#grid").kendoGrid({
+                        dataSource: dataSource,
+                        navigatable: true,
+                        pageable: {
+                                refresh: true,
+                                input: true,
+                                buttonCount: 5,
+                                messages: {
+                                    empty: "没有数据",
+                                    display: "共{2}条数据，本页显示{0}-{1}条",
+                                    page: "",
+                                    of: "/ {0}",
+                                    itemsPerPage: "",
+                                    first: "首页",
+                                    last: "末页",
+                                    next: "下一页",
+                                    previous: "上一页",
+                                    refresh: "刷新",
+                                    morePages: "更多页"
+                                }
+                            },
+						//toolbar: [{ name: "save", text: "保存" }, { name: "cancel", text: "取消修改" }],
+                        height: 300,
+                        columns: [
+                            { field: "id",hidden:true },
+                            { field: "rowNum", title: "序号", width: 40 ,attributes: {"class": "k-grid-equilong"}},
+                            { field: "deviceName", title: "设备名称", width: 120 ,headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"}},
+                            { field: "locationName", title: "所在位置", width: 120 ,headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"}},
+                            { field: "itemContent", title: "保养内容", width: 120 ,headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"}},
+                            { field: "result", title: "保养结果", width: 120 ,headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"}},
+                            { field: "descripton", title: "保养结果说明", width: 120 ,headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"}}
+							],
+                        editable: true,
+						save: function(e) {
+								var id = e.model.id;
+								var result = e.values.result;
+								var descripton = e.values.descripton;
+								if(!result){
+									if(result == false){
+										result = 0;
+									}else{
+										result = 2;
+									}
+								}else{
+									result = 1;
+								}
+								if(!descripton){
+									descripton = null;
+								}
+								$.ajax({
+                                    type: "post",
+                                    cache: false,
+                                    url: "${rc.contextPath}/maintain/content/edit?id="+id+"&result="+result+"&descripton="+descripton,
+                                    dataType:'json',
+                                    success: function (res) {
+                                		console.log(res);
+									}
+                        		});
+								
+						}
+                    });
+                });
+            </script>
+</table>
+</form>

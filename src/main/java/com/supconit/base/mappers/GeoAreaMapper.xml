@@ -1,0 +1,478 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.base.entities.GeoArea">
+
+	<resultMap type="com.supconit.base.entities.GeoArea" id="GeoAreaResultMap">      
+        <result property="id" column="ID" />
+        <result property="areaCode" column="AREA_CODE" />
+        <result property="areaName" column="AREA_NAME" />
+        <result property="areaType" column="AREA_TYPE" />
+        <result property="parentId" column="PARENT_ID" />
+        <result property="fullLevelName" column="FULL_LEVEL_NAME" />
+        <result property="sort" column="SORT" />
+        <result property="remark" column="REMARK" />
+        <result property="createId" column="CREATE_ID" />
+        <result property="creator" column="CREATOR" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="updateId" column="UPDATE_ID" />
+        <result property="updator" column="UPDATOR" />
+        <result property="updateDate" column="UPDATE_DATE" />
+		<result property="name" column="name"/>
+        <result property="parentName" column="parentName" />
+	</resultMap>
+	
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+	<sql id="TABLE_NAME" lang="velocity">GEO_AREA</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+    <!-- 获取记录列表-->
+	<sql id="select_pre" lang="velocity">
+	
+    SELECT 
+		ID,
+		AREA_CODE,
+		AREA_NAME,
+		AREA_TYPE,
+		PARENT_ID,
+		FULL_LEVEL_NAME,
+		SORT,
+		REMARK,
+		CREATE_ID,
+		CREATOR,
+		CREATE_DATE,
+		UPDATE_ID,
+		UPDATOR,
+		UPDATE_DATE,
+		FULL_LEVEL_NAME as name
+	FROM GEO_AREA
+	</sql>
+	<sql id="select_pre2">
+	<![CDATA[
+    select 
+        A.ID,
+        A.AREA_CODE,
+        A.AREA_NAME,
+        A.AREA_TYPE,
+        A.PARENT_ID,
+        A.FULL_LEVEL_NODE,
+        A.SORT,
+        A.REMARK,
+        A.CREATE_ID,
+        A.CREATOR,
+        A.CREATE_DATE,
+        A.UPDATE_ID,
+        A.UPDATOR,
+        A.UPDATE_DATE,
+        #if($_databaseId=='oracle') 
+        	nvl(B.AREA_NAME,'地理区域簇') PARENT_NAME
+        #else 
+        	ISNULL(B.AREA_NAME,'地理区域簇') PARENT_NAME 
+        #end
+		FROM
+		GEO_AREA A
+		left join GEO_AREA B
+		on A.PARENT_ID = B.ID
+		]]>
+	</sql>
+	<select id="findByCodes_g" parameterType="hashmap" resultMap="GeoAreaResultMap">
+		SELECT A.ID
+		FROM GEO_AREA A
+		WHERE 
+		A.AREA_CODE IN 
+        <foreach item="item" index="index" collection="codes" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+	</select>
+	
+	<sql id="condition" lang="velocity">
+		#where()
+			#if($_parameter.areaCode)
+				AND AREA_CODE =@{_parameter.areaCode,jdbcType=VARCHAR}
+			#end
+			#if($_parameter.parentId)
+				AND PARENT_ID =@{_parameter.parentId,jdbcType=NUMERIC}
+			#end
+			AND A.ID = C.PARENT_ID OR A.ID = C.ID  
+		#end
+	</sql>
+	<select id="findByCon" resultMap="GeoAreaResultMap" parameterType="com.supconit.base.entities.GeoArea" lang="velocity">
+		WITH C AS (
+			SELECT G.ID,PARENT_ID FROM GEO_AREA G
+			WHERE G.ID IN (SELECT DISTINCT(LOCATION_ID) FROM DEVICE)
+		)
+		SELECT  DISTINCT A.*,A.FULL_LEVEL_NAME AS NAME FROM GEO_AREA A,C
+       	<include refid="condition"/>
+	</select>
+	<sql id="select_full_pre">
+    SELECT son.*,father.AREA_NAME AS parentName FROM GEO_AREA son LEFT JOIN GEO_AREA father
+	ON son.Parent_Id = father.ID
+	</sql>
+	<sql id="count_pre" lang="velocity">
+		SELECT
+		COUNT(*)
+		FROM
+		GEO_AREA
+	</sql>
+	<insert id="insert" parameterType="com.supconit.base.entities.GeoArea" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="INSERT_SQL"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    <insert id="insert" parameterType="com.supconit.base.entities.GeoArea" 
+		keyProperty="id" keyColumn="ID" 		lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>        
+		<include refid="INSERT_SQL" />
+	</insert>
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>
+		(#if($_databaseId=='oracle') ID,#end
+		AREA_CODE,
+        AREA_NAME,
+        AREA_TYPE,
+        PARENT_ID,
+        FULL_LEVEL_NAME,
+        SORT,
+        REMARK,
+        CREATE_ID,
+        CREATOR,
+        CREATE_DATE,
+        UPDATE_ID,
+        UPDATOR,
+        UPDATE_DATE
+        ) VALUES (        
+		#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end
+		@{_parameter.areaCode,jdbcType=VARCHAR},
+        @{_parameter.areaName,jdbcType=VARCHAR},
+        @{_parameter.areaType,jdbcType=NUMERIC},
+        @{_parameter.parentId,jdbcType=NUMERIC},
+        @{_parameter.fullLevelName,jdbcType=VARCHAR},
+        @{_parameter.sort,jdbcType=NUMERIC},
+        @{_parameter.remark,jdbcType=VARCHAR},
+        @{_parameter.createId,jdbcType=NUMERIC},
+        @{_parameter.creator,jdbcType=VARCHAR},
+        @{_parameter.createDate,jdbcType=TIMESTAMP},
+        @{_parameter.updateId,jdbcType=NUMERIC},
+        @{_parameter.updator,jdbcType=VARCHAR},
+        @{_parameter.updateDate,jdbcType=DATE}		
+		)
+		</sql>
+    <!-- 插入记录-->
+	<sql id="insert_sql">
+		INSERT INTO GEO_AREA(        
+        AREA_CODE,
+        AREA_NAME,
+        AREA_TYPE,
+        PARENT_ID,
+        FULL_LEVEL_NAME,
+        SORT,
+        REMARK,
+        CREATE_ID,
+        CREATOR,
+        CREATE_DATE,
+        UPDATE_ID,
+        UPDATOR,
+        UPDATE_DATE
+		) VALUES (        
+        #{areaCode,jdbcType=VARCHAR},
+        #{areaName,jdbcType=VARCHAR},
+        #{areaType,jdbcType=VARCHAR},
+        #{parentId,jdbcType=NUMERIC},
+        #{fullLevelName,jdbcType=VARCHAR},
+        #{sort,jdbcType=NUMERIC},
+        #{remark,jdbcType=VARCHAR},
+        #{createId,jdbcType=NUMERIC},
+        #{creator,jdbcType=VARCHAR},
+        #{createDate,jdbcType=TIMESTAMP},
+        #{updateId,jdbcType=NUMERIC},
+        #{updator,jdbcType=VARCHAR},
+        #{updateDate,jdbcType=DATE}		
+		)
+	</sql>
+
+	<select id="getById" resultMap="GeoAreaResultMap" parameterType="Long">
+		<include refid="select_full_pre" />        
+        WHERE son.ID = #{id}
+	</select>
+	
+	
+	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.base.entities.GeoArea">
+		UPDATE	GEO_AREA
+		<set>
+        <if test="areaCode != null">AREA_CODE = #{areaCode,jdbcType=VARCHAR},</if>
+        <if test="areaName != null">AREA_NAME = #{areaName,jdbcType=VARCHAR},</if>
+        <if test="areaType != null">AREA_TYPE = #{areaType,jdbcType=NUMERIC},</if>
+        <if test="parentId != null">PARENT_ID = #{parentId,jdbcType=NUMERIC},</if>
+        <if test="fullLevelName != null">FULL_LEVEL_NAME = #{fullLevelName,jdbcType=VARCHAR},</if>
+        <if test="sort != null">SORT = #{sort,jdbcType=NUMERIC},</if>
+        <if test="remark != null">REMARK = #{remark,jdbcType=VARCHAR},</if>
+        <if test="createId != null">CREATE_ID = #{createId,jdbcType=NUMERIC},</if>
+        <if test="creator != null">CREATOR = #{creator,jdbcType=VARCHAR},</if>
+        <if test="createDate != null">CREATE_DATE = #{createDate,jdbcType=TIMESTAMP},</if>
+        <if test="updateId != null">UPDATE_ID = #{updateId,jdbcType=NUMERIC},</if>
+        <if test="updator != null">UPDATOR = #{updator,jdbcType=VARCHAR},</if>
+        <if test="updateDate != null">UPDATE_DATE = #{updateDate,jdbcType=DATE},</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+	
+	<sql id="condition_sql" lang="velocity">
+	<![CDATA[
+		#where()
+				#set($_p = $_parameter.condition)
+				1=1
+				#if($_p.areaCode && $_p.areaCode!='')
+					#set($_areaCode='%' +$_p.areaCode+ '%')
+					and AREA_CODE LIKE @{_areaCode,jdbcType=VARCHAR}
+				#end
+				#if($_p.areaName && $_p.areaName!='')
+					#set($_areaName='%' +$_p.areaName+ '%')
+					and AREA_NAME LIKE @{_areaName,jdbcType=VARCHAR}
+				#end
+				#if($_p.areaType && $_p.areaType!='')
+					#set($_areaType=$_p.areaType)
+					and AREA_TYPE = @{$_areaType,jdbcType=NUMERIC}
+				#end
+				#if($_p.parentId)
+					#set($_parentId = $_p.parentId)
+					AND PARENT_ID= @{_parentId,jdbcType=BIGINT}
+				#end
+				#if($_p.fullLevelName && $_p.fullLevelName!='')
+					#set($_fullLevelName='%' +$_p.fullLevelName+ '%')
+					and FULL_LEVEL_NAME LIKE @{_fullLevelName,jdbcType=VARCHAR}
+				#end	
+				#if($_p.sort )
+					#set($_sort  = $_p.sort )
+					AND SORT= @{_sort ,jdbcType=NUMERIC}
+				#end
+				#if($_p.subGeoAreaList && $_p.subGeoAreaList.size()>0)	
+					#set($_subGeoAreaList =$_p.subGeoAreaList)
+					and 
+					#repeat( $_subGeoAreaList $subs "," " ID IN (" ")" )
+					    @{subs,jdbcType=BIGINT}
+					#end	
+				#end
+				#if($_p.remark && $_p.remark!='')
+					#set($_remark='%' +$_p.remark+ '%')
+					and REMARK LIKE @{_remark,jdbcType=VARCHAR}
+				#end
+	    #end
+		]]>	
+	</sql>
+    
+    <!-- 按条件查询记录-->
+	<select id="findByConditions" parameterType="com.supconit.base.entities.GeoArea" resultMap="GeoAreaResultMap" lang="velocity" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre" />
+		<include refid="condition_sql" />
+		#order($_parameter.condition,"CREATE_DATE DESC")
+ 		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+	<select id="findByConditions" parameterType="com.supconit.base.entities.GeoArea" resultMap="GeoAreaResultMap" lang="velocity" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT 
+			ID,
+			AREA_CODE,
+			AREA_NAME,
+			AREA_TYPE,
+			PARENT_ID,
+			FULL_LEVEL_NAME,
+			SORT,
+			REMARK,
+			CREATE_ID,
+			CREATOR,
+			CREATE_DATE,
+			UPDATE_ID,
+			UPDATOR,
+			UPDATE_DATE,
+			FULL_LEVEL_NAME as name
+			<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+	 		#order($_parameter.condition,"CREATE_DATE DESC")
+	 		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM GEO_AREA
+		<include refid="condition_sql" />
+ 		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+
+    <select id="countByConditions" parameterType="com.supconit.base.entities.GeoArea" resultType="long" lang="velocity">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+	
+	<select id="findAll" resultMap="GeoAreaResultMap" >
+		SELECT 
+			ID,
+			AREA_CODE,
+			AREA_NAME,
+			AREA_TYPE,
+			PARENT_ID,
+			FULL_LEVEL_NAME,
+			SORT,
+			REMARK,
+			CREATE_ID,
+			CREATOR,
+			CREATE_DATE,
+			UPDATE_ID,
+			UPDATOR,
+			UPDATE_DATE,
+			FULL_LEVEL_NAME as name
+		from geo_area
+			where 1=1
+	</select>
+	
+	<select id="findByRoot" resultMap="GeoAreaResultMap" parameterType="long">
+	  WITH A (ID,AREA_CODE,AREA_NAME,AREA_TYPE,PARENT_ID,FULL_LEVEL_NAME,SORT,REMARK,CREATE_ID,CREATOR,CREATE_DATE,UPDATE_ID,UPDATOR,UPDATE_DATE)
+		AS ( SELECT ID,AREA_CODE,AREA_NAME,AREA_TYPE,PARENT_ID,FULL_LEVEL_NAME,SORT,REMARK,CREATE_ID,CREATOR,CREATE_DATE,UPDATE_ID,UPDATOR,UPDATE_DATE
+		 	 FROM GEO_AREA  where PARENT_ID =  #{id}
+		UNION ALL SELECT B.ID,B.AREA_CODE,B.AREA_NAME,B.AREA_TYPE,B.PARENT_ID,B.FULL_LEVEL_NAME,B.SORT,B.REMARK,B.CREATE_ID,B.CREATOR,B.CREATE_DATE,B.UPDATE_ID,B.UPDATOR,B.UPDATE_DATE
+				 FROM GEO_AREA B,A where A.ID = B.PARENT_ID)
+		 SELECT * from A order by A.SORT
+	</select>
+	
+	<select id="findById" resultMap="GeoAreaResultMap" parameterType="long">
+	  WITH A (ID,AREA_CODE,AREA_NAME,AREA_TYPE,PARENT_ID,FULL_LEVEL_NAME,SORT,REMARK,CREATE_ID,CREATOR,CREATE_DATE,UPDATE_ID,UPDATOR,UPDATE_DATE)
+		AS ( SELECT ID,AREA_CODE,AREA_NAME,AREA_TYPE,PARENT_ID,FULL_LEVEL_NAME,SORT,REMARK,CREATE_ID,CREATOR,CREATE_DATE,UPDATE_ID,UPDATOR,UPDATE_DATE
+		 	 FROM GEO_AREA  where ID =  #{id}
+		UNION ALL SELECT B.ID,B.AREA_CODE,B.AREA_NAME,B.AREA_TYPE,B.PARENT_ID,B.FULL_LEVEL_NAME,B.SORT,B.REMARK,B.CREATE_ID,B.CREATOR,B.CREATE_DATE,B.UPDATE_ID,B.UPDATOR,B.UPDATE_DATE
+				 FROM GEO_AREA B,A where A.ID = B.PARENT_ID)
+		 SELECT * from A order by A.SORT ASC
+	</select>
+	
+	<select id="findByCode" resultMap="GeoAreaResultMap" parameterType="string">
+		<include refid="select_full_pre" />
+		where son.AREA_CODE = #{code}
+	</select>
+	
+	<select id="findByParentId" resultMap="GeoAreaResultMap" parameterType="long">
+		SELECT 
+			ID,
+			AREA_CODE,
+			AREA_NAME,
+			AREA_TYPE,
+			PARENT_ID,
+			FULL_LEVEL_NAME,
+			SORT,
+			REMARK,
+			CREATE_ID,
+			CREATOR,
+			CREATE_DATE,
+			UPDATE_ID,
+			UPDATOR,
+			UPDATE_DATE,
+			FULL_LEVEL_NAME as name
+		from geo_area
+		where PARENT_ID = #{parentId} order by SORT asc
+	</select>
+    
+    <select id="findBuildsGis3D" resultMap="GeoAreaResultMap" resultType="com.supconit.base.entities.GeoArea">
+        SELECT * FROM GEO_AREA g WHERE g.PARENT_ID=0 AND g.AREA_CODE !='F' AND g.AREA_CODE !='G' order by g.SORT asc
+	</select>
+	<select id="findFloorByParentId" resultMap="GeoAreaResultMap" resultType="com.supconit.base.entities.GeoArea">
+        SELECT * FROM GEO_AREA g WHERE g.PARENT_ID=#{id} order by g.SORT asc
+	</select>
+    <select id="findAllFullName"  resultMap="GeoAreaResultMap">
+        SELECT AREA_CODE,FULL_LEVEL_NAME FROM GEO_AREA  order by SORT
+	</select>
+	<!-- 按设备类别查询楼 gis-->
+    <select id="findLouByCategory_g" parameterType="hashmap" resultMap="GeoAreaResultMap">
+		SELECT DISTINCT GP.ID,GP.SORT,GP.AREA_CODE,GP.AREA_NAME
+		FROM DEVICE D,DEVICE_CATEGORY DC,GEO_AREA G,GEO_AREA GP
+		WHERE D.CATEGORY_ID=DC.ID AND G.ID =D.LOCATION_ID AND G.PARENT_ID =GP.ID
+		<if test="categoryCode != null and categoryCode != ''"> 
+		<if test="childIds != null and childIds.size()>0"> 
+		AND DC.ID IN 
+        <foreach item="item" index="index" collection="childIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        </if>
+        </if>
+		GROUP BY GP.ID,GP.SORT,GP.AREA_CODE,GP.AREA_NAME
+		ORDER BY GP.SORT
+	</select>	
+	<!-- 按设备类别查询层 gis-->
+	<select id="findCengByCategory_g" parameterType="hashmap" resultMap="GeoAreaResultMap">
+		SELECT DISTINCT G.ID,G.PARENT_ID,G.SORT
+		FROM DEVICE D,DEVICE_CATEGORY DC,GEO_AREA G
+		WHERE D.CATEGORY_ID=DC.ID AND G.ID = D.LOCATION_ID
+		<if test="categoryCode != null and categoryCode != ''"> 
+		<if test="childIds != null and childIds.size()>0"> 
+		AND DC.ID IN 
+        <foreach item="item" index="index" collection="childIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        </if>
+        </if>
+		ORDER BY G.SORT	
+	</select>
+	<!-- 递归查询子类别gis-->
+	<select id="findChildIds_g" parameterType="hashmap" resultType="long">
+		WITH TT(ID) AS ( 
+		SELECT ID FROM DEVICE_CATEGORY  WHERE CATEGORY_CODE=#{categoryCode}
+	    UNION ALL 
+		SELECT A.ID FROM DEVICE_CATEGORY A,TT B WHERE A.PARENT_ID = B.ID
+		) 
+		SELECT 	ID  FROM TT   	
+	</select> 
+	 
+	<!-- 递归查询子类别-->
+	<select id="findChildIds" parameterType="long" resultType="long">
+		WITH TT(ID) AS ( 
+		SELECT ID FROM GEO_AREA   WHERE ID =#{id}
+	    UNION ALL 
+		SELECT A.ID FROM GEO_AREA A,TT B WHERE A.PARENT_ID = B.ID
+		) 
+		SELECT 	ID  FROM TT   	
+	</select> 
+	<!-- 按报警楼层 gis-->
+	<select id="findAlarmFloor_g" parameterType="hashmap" resultMap="GeoAreaResultMap">
+	    SELECT DISTINCT G.ID
+	    FROM DEVICE D,GEO_AREA G,DEVICE_CATEGORY DC
+		WHERE D.LOCATION_ID = G.ID AND D.CATEGORY_ID =DC.ID 
+		<if test="parentId != null"> 
+		AND G.PARENT_ID =#{parentId} 
+		</if>
+		AND ( 
+		    instr( ',ceng_'+DC.CATEGORY_CODE+',' ,#{tuCeng} ) >0
+			OR DC.ID IN(SELECT CHILD.ID FROM  DEVICE_CATEGORY P,DEVICE_CATEGORY CHILD
+						WHERE instr( ',ceng_'+P.CATEGORY_CODE+',' ,#{tuCeng} ) >0
+						AND CHILD.PARENT_ID = P.ID
+						)<!-- 消防图层包含烟感温感等子类别 -->
+			)
+		AND D.HPID IN (
+			SELECT A.OBJECTID FROM M_REALALARM A WHERE A.ALARMSTATE!=2
+	    )
+	</select> 
+    <!-- 删除多条记录-->
+	<delete id="deleteByIds">
+        DELETE FROM GEO_AREA WHERE ID in 
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<!-- DElETE -->
+	<delete id="deleteById" parameterType="long">
+		delete from GEO_AREA where  ID = #{id}
+	</delete>
+	
+	<select id="findFirstLevel" resultMap="GeoAreaResultMap" lang="velocity">
+    	select * 
+    	from GEO_AREA g 
+    	where g.PARENT_ID=0
+    </select>
+    
+    <!-- 递归查询子类别-->
+	<select id="findAreaChildIdsByName" parameterType="string" resultType="Long" lang="velocity">
+		WITH TT(ID) AS ( 
+		SELECT ID FROM GEO_AREA WHERE AREA_NAME = @{_parameter.name,jdbcType=VARCHAR}
+		UNION ALL 
+		SELECT A.ID FROM GEO_AREA A,TT B WHERE A.PARENT_ID = B.ID
+		) 
+		SELECT 	ID  FROM TT   	
+	</select>  
+</mapper>

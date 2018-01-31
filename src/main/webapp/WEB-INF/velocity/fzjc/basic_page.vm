@@ -1,0 +1,77 @@
+#parse("nhgl/_header.vm")
+</head>
+<body>
+##左侧的菜单栏
+<div id="loading" class="ui-loading" style="position:absolute;left:0;right:0;top:-90px;bottom:0;display:none;z-index:9999;background-color:#FFF;filter:alpha(opacity=100);opacity:1.0;width:100%;"></div>
+<div class="ui-layout-west" id="operator_id">
+    <ul class="ui-links" id="left-menu" style="display:none;">
+        #foreach($operator in $!operators)
+      		#if($!operator.listButton)
+            <li class="ui-links-item ">
+                <a href="javascript:;" data-url="$!rc.contextPath$!operator.resources">
+						<i class="tab-icons $!operator.icon"></i>$!operator.name
+                </a>
+            </li>
+        	#end
+        #end
+    </ul>
+</div>
+<div id="chart_content_id" class="ui-layout-center nh-container">
+</div>
+
+#parse("nhgl/_footer.vm")
+<script type="text/javascript">
+     var _iframe_layout;
+	$(document).ready(function(){
+		_iframe_layout = $('body').layout({
+		      defaults: {
+		        resizable: false,
+		        closable: false,
+		        spacing_open: 0
+		      },
+		      west: {
+		        size: 0.03
+		      }
+    		});
+
+        $(".ui-links-item > a").on("click", function (event) {
+            var url = $(this).attr("data-url");
+			var arr = url.split("?");
+			if(arr.length<2)
+				url = url + "?menuName="+encodeURI('$!menuName');
+			else
+				url = url + "&menuName="+encodeURI('$!menuName');
+         	var menuCode = '$!menu.code';
+	        if(menuCode){
+	            if (url.indexOf("?") > 0)
+	                url += "&";
+	            else
+	                url += "?";
+	
+	            url +="menuCode="+menuCode;
+	        }
+	        url+="&code=fzjc";
+           $("#chart_content_id").load(url, function() {
+			      $('#loading').hide();
+			      $('#left-menu').show();
+				  //$('#menuName').text($('#currentMenueName').text());
+             });
+            //event.target.parentNode.setAttribute("class","ui-links-item current");
+            changeCurrent($(this).parent());
+        });
+
+        try {
+		   $('#loading').show();
+            $(".ui-links-item > a").first().click();
+        } catch (e) {
+
+        }
+    });
+
+    function changeCurrent(obj){
+        $(".ui-links-item,.current").removeClass("current");
+        $(obj).addClass("current");
+    }
+</script>
+</body>
+</html>

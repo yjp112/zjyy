@@ -1,0 +1,24 @@
+
+
+<script type="text/javascript">
+        var setting = {
+           data: {simpleData: {enable: true}},
+            callback: {
+                onClick : function(event, treeId, treeNode) {
+                    $("#subName").val(treeNode.name);
+                    $("#subCode").val(treeNode.id);
+                    closeDialog();
+                }
+            }
+        };
+         var zNodes = [];
+        #foreach($!{treeNode} in $!{subList})
+			zNodes.push({id:"$!{treeNode.standardCode}", pId:"$!{treeNode.parentId}", name:"$!{treeNode.name}"});     
+		#end
+    $(document).ready(function(){
+    	$.fn.zTree.init($("#documentCategoryTree"), setting,zNodes).expandAll(true);
+    });
+</script>
+  <div class="tree">
+	<ul id="documentCategoryTree" class="ztree"></ul>
+  </div>

@@ -1,0 +1,272 @@
+#parse("index/_header.vm")
+</head>
+<body>
+	<div class="ui-layout-west" style="border-right:solid 1px #e1e5e6;" id="leftTreeWrap">
+		<div class="ui-layout-north">
+			<div class="k-header k-grid-toolbar" style="padding-left:10px;">
+				<ul class="grid_operates">
+				    <!-- <li>值班分组</li> -->
+	    			<li><a href="javascript:void(0)" class="" onclick="addGroup()"><i class="fa fa-plus"></i>添加</a></li>
+	    			<li><a href="javascript:void(0)" emergencyGroupId="" id="editGroupId" onclick="editGroup()"><i class="fa fa-pencil"></i>修改</a></li>
+	    			<li><a href="javascript:void(0)" emergencyGroupId="" id="deleteGroupId" onclick="deleteGroup()"><i class="fa fa-remove"></i>删除</a></li>
+	    		</ul>
+			</div>
+		</div>
+    	<div class="ui-layout-center">
+  			<ul id="emergencyGroupTree" class="ztree"></ul>
+    	</div>
+	</div>  
+	<div class="ui-layout-center" id="subMain">
+    	<div class="ui-layout-north"><form class="ui-form" id='queryForm'>
+    		<div class="ui-form-group" style="display:none" id='selectBlock2'>
+    			<div class="ui-form-item ui-form-item-block">
+    			  <label class="ui-label">您已选择：</label>
+    				  <span class="ui-form-pick">
+						  <input id="flag" type="hidden" name="flag" value="$!{flag}">
+    					  <input id="treeId" type="hidden" name="treeId" value="$!{treeId}">
+    					  <strong>应急分组：</strong><em id='treeNodeText'></em><i class="iconfont icon-remove-sign"></i>
+    				  </span>
+    			</div>
+    		</div>		 		
+        	<table width="100%"><tr>
+        		<td><table class="ui-search-table"><tr>
+                	<td class="ui-search-name first">姓名：</td>
+                  	<td class="ui-search-c">
+                    	<input name="personName" value="$!emergencyPerson.personName" class="k-textbox" type="text">
+                 	</td>
+                  	
+                </tr></table></td>
+            	<td width="180" valign="top" style="padding-top:4px;">
+              		<button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              		<button type="reset" class="hc_btn" id="resetBtn" onclick="cancelLeftTreeSelected();"><i class="fa fa-refresh"></i>重置</button>
+            	</td>
+            	<td></td>
+            </tr></table>
+    	</form></div>
+  		<div class="ui-layout-center">
+  	  		<div id="grid"></div> 
+    	</div>
+	</div>	 
+ #parse("index/_footer.vm")    
+<script type="text/javascript">
+  var flag = $('#flag').val();
+  var _iframe_layout, _left_layout, _inner_layout;
+	$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      },
+      west: {
+        size: 0.18
+      }
+    });
+
+    _left_layout = $("#leftTreeWrap").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      }
+    });
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+
+    $('#resetBtn').click(function(){
+      $("#queryForm :text").val(''); 
+    });
+
+	$('.iconfont','.ui-form-pick').each(function(){
+      $(this).click(function(){
+      	$('#treeId').val('');
+      	$('#selectBlock').hide();
+        //$(this).parent().remove();
+      })
+    })
+    
+	//列表
+    quick_datagrid(
+    		"#grid", 
+    		"#queryForm", 
+    		"$!{rc.contextPath}/emergency/emergencyPerson/list/"+flag, 
+    		[
+    			{field: "id",hidden: true,sortable:false}, 
+				{field: "personName",title: "姓名",sortable: false,headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"},template:"<a href=\"javascript:void(0)\" title=\"查看#: data.personName #的详细信息\" onclick=\"quick_dialog('emergencyPerson_add_dlg','查看#:data.personName #的信息','$!{rc.contextPath}/emergency/emergencyPerson/edit?viewOnly=true&id=#: data.id #',400,260)\">#: data.personName #</a>"}, 
+    			{field: "groupName",title: "所属分组",sortable: false,headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"}}, 
+    			{field: "headerText",title: "是否组长",sortable: false,headerAttributes: {"class": "k-grid-equilong"},attributes: {"class": "k-grid-equilong"}},
+				{field: "remark",title: "备注",sortable: false,headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"}}
+            ], 
+      		{sortable: {mode: "multiple",allowUnsort: true},resizable:true},  
+      		{serverSorting: true}, 
+      		[
+      			{
+              		name: "添加",
+              		icon: "fa fa-plus",
+              		onclick: function (obj) {              			
+                  		quick_dialog("emergencyPerson_add_dlg", "添加组员", "$!{rc.contextPath}/emergency/emergencyPerson/edit", 400, 300, obj);
+              		}
+          		},
+          		{
+              		name: "修改",
+              		icon: "fa fa-pencil",
+              		onclick: function (obj, grid) {         			
+                  		var row = grid.select();
+                  		if (null == row || row.length == 0) {
+                      		notify("请选择要修改的项！", "warn");
+                      		return;
+                  		} 
+                  		var data = grid.dataItem(row);
+                  		quick_dialog("emergencyPerson_add_dlg", "修改组员", "$!{rc.contextPath}/emergency/emergencyPerson/edit?id=" + data.id, 400, 300, obj);
+              		}
+          		},
+          		{
+             		name: "删除",
+              		icon: "fa fa-remove",
+              		onclick: function (obj, grid) {
+                  		var row = grid.select();
+                  		if (null == row || row.length == 0) {
+                      		notify("请选择要删除的项！", "warn");
+                      		return;
+                  		}               			
+                  		singleDelete(grid,"$!{rc.contextPath}/emergency/emergencyPerson/delete");
+              		}
+          		}    
+          	]
+      	);
+		
+    });
+</script>
+<script type="text/javascript">
+    /* zTree */ 
+    var setting = {   		
+    	data: {
+    		simpleData: {enable: true}
+          },
+          callback: {
+    			onClick: function(event, treeId, treeNode) {   				 
+				     //操作分组
+					 $('#editGroupId').attr('emergencyGroupId',treeNode.id);
+					 $('#deleteGroupId').attr('emergencyGroupId',treeNode.id);
+					 //查询组员
+					 //alert(treeNode.id);
+					 $('#treeId').val(treeNode.id);
+				 	 $('#treeNodeText').text(treeNode.name);
+				 	 $('#selectBlock').show();
+					 $('#queryBtn').click();
+    			}
+    		}
+    };
+  	var zNodes = [];  
+  	zNodes.push({id:"0", pId:"-1", name:"应急分组",open:true});   
+  	#foreach($!{treeNode} in $!{emergencyGroup_tree})
+      	zNodes.push({id:$!{treeNode.id}, pId:$!{treeNode.parentId}, name:"$!{treeNode.groupName}"});     
+  	#end
+	#foreach($!{leefNode} in $!{emergencyPerson_tree})
+		zNodes.push({id:"leef"+$!{leefNode.id}, pId:$!{leefNode.groupId}, name:"$!{leefNode.personName}"});     
+	#end
+  	$(document).ready(function(){
+  		$.fn.zTree.init($("#emergencyGroupTree"), setting,zNodes);//.expandAll(true)
+  	});
+	
+	function cancelLeftTreeSelected(){
+		$.fn.zTree.init($("#emergencyGroupTree"), setting,zNodes);//.expandAll(true)
+	}
+</script>
+<script type="text/javascript">
+	  // 分组操作
+	  function addGroup(){
+	  	quick_dialog("emergencyGroup_add_dlg", "添加分组", "$!{rc.contextPath}/emergency/emergencyGroup/edit", 400, 300);
+	  }
+	  function editGroup(){
+	  	 var a = $("#editGroupId").attr("emergencyGroupId");
+		 if(a==""){
+			notify("请选择要修改的项！", "warn");
+	        return;
+		 }
+		 if(a.substring(0,4)=="leef"){
+		 	b = a.substring(4,a.length)
+		 	quick_dialog("emergencyPerson_add_dlg", "修改组员", "$!{rc.contextPath}/emergency/emergencyPerson/edit?id="+b, 400, 300);
+		 }else{
+			if(a == 0){
+				notify("根节点不能修改！","warn");
+			}
+			else{
+		 		quick_dialog("emergencyGroup_add_dlg", "修改分组", "$!{rc.contextPath}/emergency/emergencyGroup/edit?id="+a, 400, 300);
+			}
+		 }
+	  }
+	  function deleteGroup(){
+	  	var a = $("#deleteGroupId").attr("emergencyGroupId");
+		 if(a==""){
+			 notify("请选择要删除的项！", "warn");
+	        return;
+		 }
+		 if(a.substring(0,4)=="leef"){
+		 	b = a.substring(4,a.length)
+		 	singleTreeDelete(b,'$!{rc.contextPath}/emergency/emergencyPerson/delete');
+		 }else{
+		 	singleTreeDelete(a,'$!{rc.contextPath}/emergency/emergencyGroup/delete');
+		 }
+	  }	  
+	  function singleTreeDelete(id, url) { 
+	        
+    		if (!confirm("确定删除吗？"))return;
+            $.ajax({
+                type: "post",
+                cache:false,
+                url: url,
+                data: "ids=" + id,
+                success: function (response) {
+                	//alert(response.status);
+                    if (response.status == "error") {
+                    	alert("该分组有子分组或组员，不能删除!");
+                    	//$.message(response.message, $.message.TYPE_ERROR);
+                        //showErrorMsg(response.message);
+                        //notify("该分组有子分组或组员，不能删除!","warn");
+                        return false;
+                    } else if (response.status == "success") {
+                    	notify("删除成功!","success");
+                        //$.message(response.data.message, $.message.TYPE_OK);
+                        if (response.data.next) {
+                            if (response.data.next == ".") {//刷新datagrid
+                                
+								obj.flexReload();
+                            } 
+                            else {//刷新页面
+                                window.location.href="$!{rc.contextPath}/emergency/emergencyGroup/go/"+flag;
+                            	//parent.location.reload();
+                            }                            
+                        }
+						
+						if (response.data.message) {
+							//$.message(response.data.message, $.message.TYPE_OK);
+                            //showSuccessMsg(response.data.message);
+						}
+                    }
+                },
+                error:function(xhr, status, error){
+					var response=$.parseJSON(xhr.responseText);
+					if(response.error){
+						response=response.error;
+					}
+					//$.message(response.message, $.message.TYPE_ERROR);
+                    //showErrorMsg(response.message);                  
+				}
+            });
+	  }
+</script>
+</body>
+</html>

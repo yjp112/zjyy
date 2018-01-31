@@ -1,0 +1,109 @@
+#parse("index/_header.vm")
+<!-- <style type="text/css">
+span{color:red;}
+</style> -->
+</head>
+<body>		
+	<form id="myform_id" method="post" action="$!{rc.contextPath}/emergency/emergencyFacility/save" class="ui-dialog-form">
+		<input type="hidden" name="id" value="$!{emergencyFacility.id}">
+	    <table width="100%">   
+			     #set($readonly='')
+    	         #if($!{viewOnly})
+    	         #set($readonly='readonly')
+    	         #end
+	        <tr>
+	            <td  class="label"><span class="ui-form-required">*</span><label>设施编号：</label></td>
+	            <td ><input  type="text" class="k-textbox" name="facilityCode" value="$!{emergencyFacility.facilityCode}" maxlength="10"></td>
+	           
+				<td  class="label"><span class="ui-form-required">*</span><label>设施名称：</label></td>
+	            <td ><input  type="text" class="k-textbox" name="facilityName" value="$!{emergencyFacility.facilityName}" maxlength="10"></td>
+	           
+	            <td width="5%"></td>
+	        </tr> 	
+			<tr>
+	            <td  class="label"><span class="ui-form-required">*</span><label>设施类别：</label></td>
+			    <td class="inputText">
+		             <select name="facilityType"  class="k-textbox" >
+						<option value="" >--请选择--</option>
+    			        #foreach($!{e} in $!{lstStatus})
+    			     	<option value="$!{e.enumValue}" #if($!{emergencyFacility.facilityType}==$!{e.enumValue}) selected="selected" #end>$!{e.enumText}</option>
+    				    #end
+					 </select>
+			    </td>
+				<td  class="label"><span class="ui-form-required">*</span><label>设施型号：</label></td>
+	            <td ><input  type="text" class="k-textbox" name="facilityModel" value="$!{emergencyFacility.facilityModel}" maxlength="10"></td>
+	           
+	            <td ></td>
+	        </tr> 	
+	        <tr>
+	            <td  class="label" ><span class="ui-form-required">*</span> 区域：</td>
+    			 <td class="inputText">
+                   <span class="k-textbox k-space-right"   onclick="chooseGeoarea1('areaId','areaName','emergencyFacility_add_dlg')" >
+                    <input readonly type="text" class="k-textbox #if(!$!{viewOnly}) ui-input-choose #end""  id="areaName" name="areaName" value="$!{emergencyFacility.areaName}" />
+                    <a href="#" class="k-icon k-i-search">&nbsp;</a>
+    	           </span>
+    
+    	            <input class="k-textbox" type="hidden" id="areaId" name="areaId" value="$!{emergencyFacility.areaId}"/>
+    
+                </td>
+				<td class="label"><span class="ui-form-required">*</span><label>保管员：</label></td>
+	            <td>
+	            	<input type="hidden" class="k-textbox" id="personId" name="keeperId" value="$!{emergencyFacility.keeperId}" >
+	            	<span class="k-textbox k-space-right" id="personNames">
+	            		<input readonly type="text" class="k-textbox" id="personName" name="keeperName" value="$!{emergencyFacility.keeperName}" >
+	            		<a href="#" class="k-icon k-i-search" >&nbsp;</a>
+                	</span>	 
+	            </td>
+	            <td></td>
+	        </tr> 
+			<tr>
+                <td  class="label"><span class="ui-form-required">*</span><label>位置：</label></td>
+	            <td ><input  type="text" class="k-textbox" name="location" value="$!{emergencyFacility.location}" maxlength="10"></td>
+	           
+			</tr>						
+	        <tr>
+	            <td class="label">备注：</td>
+	            <td colspan="3" ><textarea  id="textAreaId"  name="remark" class="k-textbox k-textarea" style="height:60px">$!{emergencyFacility.remark}</textarea></td>
+	            <td></td>
+	        </tr>  	        
+	    </table>
+	    <div class="actions">
+			#if( $!{readonly} != 'readonly')
+	        <button class="k-primary hc_btn" id="emergencyFacilitySave" type="submit"><i class="fa fa-save"></i>保 存</button>
+	        <button class="hc_btn cancel" onclick="close_dialog('emergencyFacility_add_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+			#end
+		</div> 	            
+	</form>
+<script type="text/javascript">
+	$(document).ready(function(){
+		
+		
+		$("#personNames").click(function() {
+			if("$!viewOnly" != "true")
+       		quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/choose/personPage?type=1&txtId=personId&txtName=personName&dialogId=emergencyFacility_add_dlg&personId=0",1135, 540);
+		});	
+        $("#myform_id").validator({
+            fields:{
+            	facilityCode: "设施编号:required; length[~20]",
+            	facilityName: "设施名称:required; lenght[~30]",
+            	facilityType: "设施类别:required;",
+				facilityModel: "型号:required; length[~30]",
+				areaName:"区域:required; length[~30]",
+            	location: "位置:required; lenght[~100]",
+            	keeperName: "保管员:required; length[~30];",
+				remark: "备注:length[~200];"
+            },
+            valid:function(form){
+                form_btn_submit($("#emergencyFacilitySave"),form,function(res){
+                    // 关闭窗口
+                    validateCallback(res,"grid","emergencyFacility_add_dlg");
+                });
+            }
+        }); 
+        #if($!viewOnly)
+        	setAllReadonly();
+        #end     		
+  });
+</script>
+</body>
+</html>

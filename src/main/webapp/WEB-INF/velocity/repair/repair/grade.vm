@@ -1,0 +1,221 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<div class="ui-layout-center" id="subMain">
+	<div class="ui-layout-north">
+		 <form class="ui-form" id='queryForm'>
+	     <table width="100%">
+	       <tr>
+	         <td>
+	           <table class="ui-search-table">
+	             <tr>
+	               <td class="ui-search-name first" style="width: 100px;">统计时间：</td>
+                   <td class="ui-search-c" >
+					 <input id="startTime"  class="k-textbox" type="text" name="startTime" value=""/>
+					 <span class="ui-form-text">至</span> 
+					 <input class="k-textbox" id="endTime" type="text" name="endTime" value=""/>
+                   </td>
+	             </tr>
+	           </table>
+	         </td>
+	         <td width="150" valign="top" style="padding-top:4px;">
+	           <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+	           <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+	         </td>
+	         <td></td>
+	       </tr>
+	     </table>
+	 	</form>
+	</div>
+	<div class="ui-layout-center">
+	  <div id="grid" style="display:none;"></div> 
+	  <div id="mode_id" style="height:500px"></div> 
+     </div>
+</div>
+#parse("index/_footer.vm")  
+<script src="$!{main_static_custom_url}/js/echarts/echarts.js"></script>
+<script type="text/javascript">
+var myRateChart = null;
+     var _iframe_layout,_inner_layout;
+	$(document).ready(function(){
+		_iframe_layout = $('body').layout({
+		      defaults: {
+		        resizable: false,
+		        closable: false,
+		        spacing_open: 5
+		      }
+		    });
+		 _inner_layout = $("#subMain").layout({
+		      defaults: {
+		        resizable: false,
+		        closable: false,
+		        spacing_open: 0
+		      },
+		      center: {
+		          onresize_end: function () {
+##		              var grid = $("#grid").data("kendoGrid");
+##		              grid.resize();
+		          }
+		      }
+     })
+	//列表
+	quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/repair/repair/grade", [
+	      {
+	          field: "id",
+	          hidden: true
+	      }
+		  ], 
+	  {
+	      sortable: {
+	          mode: "multiple",
+	          allowUnsort: true
+	      },
+	      pageable:false, 
+	      showNumber:false,
+	      resizable:true
+	      
+	  },{
+		  change:generateRateChart
+	  }, {
+	      serverSorting: true
+	  });     
+	  $('#resetBtn').click(function(){
+		clearDateWithout("startTime", "endTime");
+		$("#queryForm :text").val('');  
+    });
+	
+//加载时间控件
+ commonMonthWithout("startTime", "endTime", "yyyy-MM", "zh-CN");
+});
+//加载chart
+function loadEchart(option){
+        require.config({
+            packages: [
+                {
+                    name: 'echarts',
+                    location: '$!{main_static_custom_url}/js/echarts',
+                    main: 'echarts'
+                }
+            ]
+        });
+        require(
+                [
+                    'echarts',
+                    'echarts/chart/bar',
+                    'echarts/chart/pie'
+                ],
+                function(ec) {
+                    myRateChart = ec.init(document.getElementById('mode_id'));
+                    myRateChart.setOption(option);
+                }
+        )
+    }
+function generateRateChart(grid,g) {
+	var datas = new Array();
+    var shortcut = new Array();
+    var data = grid.items;
+    var g1=0;
+    var g2=0;
+    var g3=0;
+    var g4=0;
+    var g5=0;
+    if(data[0]!=undefined){
+    	if(data[0].grade1!=undefined)
+    		g1=data[0].grade1;
+		if(data[0].grade2!=undefined)    		
+    		g2=data[0].grade2;
+		if(data[0].grade3!=undefined)
+    		g3=data[0].grade3;
+    	if(data[0].grade4!=undefined)
+    		g4=data[0].grade4;
+    	if(data[0].grade5!=undefined)
+    		g5=data[0].grade5;
+    }
+    $.each(data,function(index,o){
+        datas.push(formatNumber2(o.avgGrade));
+        shortcut.push(o.repairGroupName);
+    });    
+    
+    option = {
+    tooltip : { 
+        trigger: 'axis'
+    },
+    title : {
+        text: '外委满意度统计',
+        x:'center'
+    },
+    legend: {
+        x : 'right',
+        y : 'top',
+        data:['外委满意度','1星','2星','3星','4星','5星']
+    },
+    xAxis : [
+        {
+            type : 'category',
+            splitLine : {show : false},
+            data : shortcut
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value',
+            position: 'right',
+            name:'满意度'
+        }
+    ],
+    series : [
+
+        {
+            name:'外委满意度',
+            type:'bar',
+            tooltip : {trigger: 'item'},
+            data:datas,
+            markPoint : {
+                data : [
+                    {type : 'max', name: '最大值'},
+                    {type : 'min', name: '最小值'}
+                ]
+            }
+        },
+
+        {
+            name:'维修单满意度占比',
+            type:'pie',
+            tooltip : {
+                trigger: 'item',
+                formatter: '{a} <br/>{b} : {c} ({d}%)'
+            },
+            center: [160,70],
+            radius : [0, 50],
+            itemStyle :　{
+                normal : {
+                    labelLine : {
+                        length : 20
+                    }
+                }
+            },
+            data:[
+                {value:g1, name:'1星'},
+                {value:g2, name:'2星'},
+                {value:g3, name:'3星'},
+                {value:g4, name:'4星'},
+                {value:g5, name:'5星'}
+            ]
+        }
+    ]
+	};
+ 	if(myRateChart==null){
+        loadEchart(option);
+    }else{
+        if(data.length!=0){
+			loadEchart(option);
+            myRateChart.setOption(option);
+        }else{
+            myRateChart.clear();
+			myRateChart.setOption(option);
+        }
+    }
+}    
+</script>
+</body>
+</html>

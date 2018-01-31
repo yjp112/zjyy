@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.schedule.entites.CriteriaDetail">
+
+	<resultMap type="com.supconit.nhgl.schedule.entites.CriteriaDetail" id="BzmxResultMap">
+					<id property="id" column="ID" />
+							<result property="taskCode" column="TASK_CODE" />
+							<result property="crCondition" column="CR_CONDITION" />
+							<result property="crScore" column="CR_SCORE" />
+							<result property="crLevel" column="CR_LEVEL"/>
+				</resultMap>
+	
+	
+	<sql id="TABLE_NAME" lang="velocity">NH_CRITERIA_DETAIL</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	<sql id="SELECT_PRE" lang="velocity">SELECT * FROM <include refid="TABLE_NAME"/></sql>
+	<sql id="COUNT_PRE" lang="velocity">SELECT COUNT(1) FROM <include refid="TABLE_NAME"/></sql>
+
+	<sql id="SEARCH_CONDITION_SQL" lang="velocity">
+		<![CDATA[
+		#where()
+																																		#end
+		]]>	
+	</sql>
+	
+	<select id="getById" resultMap="BzmxResultMap" parameterType="long" lang="velocity">
+		<include refid="SELECT_PRE" />
+				WHERE ID = @{_parameter, jdbcType=NUMERIC}
+			</select>
+	
+	<select id="selectPager" lang="velocity" resultMap="BzmxResultMap">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="SELECT_PRE"/>
+		<include refid="SEARCH_CONDITION_SQL"/>
+		#order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	
+	<select id="selectPager" lang="velocity" resultMap="BzmxResultMap" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT * 
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/>
+		<include refid="SEARCH_CONDITION_SQL"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+
+	<select id="countPager" lang="velocity" resultType="long">
+		<include refid="COUNT_PRE"/><include refid="SEARCH_CONDITION_SQL"/>
+	</select>
+	
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>(
+															#if($_databaseId == 'oracle') ID,#end
+																TASK_CODE
+																					,CR_CONDITION
+																					,CR_SCORE
+																					,CR_LEVEL
+														) VALUES (
+															#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end
+																@{_parameter.taskCode,jdbcType=VARCHAR}
+																					,@{_parameter.crCondition,jdbcType=VARCHAR}
+																					,@{_parameter.crScore,jdbcType=NUMERIC}
+																					,@{_parameter.crLevel,jdbcType=NUMERIC}
+														)
+	</sql>
+	
+	<insert id="insert" parameterType="com.supconit.nhgl.schedule.entites.CriteriaDetail" 
+		keyProperty="id" keyColumn="ID" 		lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>        <include refid="INSERT_SQL" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.nhgl.schedule.entites.CriteriaDetail" 
+		keyProperty="id" keyColumn="ID" 		 lang="velocity">
+        <include refid="INSERT_SQL"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>    </insert>
+    
+	<update id="update" parameterType="com.supconit.nhgl.schedule.entites.CriteriaDetail" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/> 
+		#mset()
+		<![CDATA[
+																							#if($_parameter.taskCode)TASK_CODE = @{_parameter.taskCode,jdbcType=VARCHAR},#end
+																#if($_parameter.crCondition)CR_CONDITION = @{_parameter.crCondition,jdbcType=VARCHAR},#end
+																#if($_parameter.crScore)CR_SCORE = @{_parameter.crScore,jdbcType=NUMERIC},#end
+																#if($_parameter.crLevel)CR_LEVEL=@{_parameter.crLevel,jdbcType=NUMERIC},#end
+									]]>
+		#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+	
+	<delete id="deleteById" parameterType="long" lang="velocity">
+		DELETE FROM <include refid="TABLE_NAME" /> WHERE ID = @{_parameter,jdbcType=NUMERIC}
+	</delete>
+	<delete id="deleteByTaskCode" parameterType="string" lang="velocity">
+		DELETE FROM <include refid="TABLE_NAME" /> WHERE TASK_CODE=@{_parameter,jdbcType=VARCHAR}
+	</delete>	    		
+	<select id="selectByTaskCode" parameterType="string" lang="velocity" resultMap="BzmxResultMap">
+		select * FROM <include refid="TABLE_NAME"/>
+		WHERE TASK_CODE=@{_parameter,jdbcType=VARCHAR} 
+	</select>
+	<select id="selectByTaskCodeAndScore" parameterType="com.supconit.nhgl.schedule.entites.CriteriaDetail" lang="velocity" resultMap="BzmxResultMap">
+		select * FROM <include refid="TABLE_NAME"/>
+		WHERE 
+		#if($_parameter.taskCode)TASK_CODE = @{_parameter.taskCode,jdbcType=VARCHAR}#end
+		#if($_parameter.crScore)and CR_SCORE = @{_parameter.crScore,jdbcType=NUMERIC}#end
+	</select>
+</mapper>

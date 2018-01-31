@@ -1,0 +1,38 @@
+<script type="text/javascript">
+$(document).ready(function(){
+ 	$("#parentCode").click(function(){
+	    dialog({
+	        id:'selectDiloagTask',
+	        content: "load:"+$.CONTEXT_PATH+"/choose/taskCategory?txtId=parentCode&txtName=parentName",
+	        title: '选择任务分类',
+	        lock: true,
+	        width: 300,
+	        height: 550
+	    }); 		
+ 	})
+})
+</script>
+<form class="ui-form" id="taskCatagory_add_form" action="$!{rc.contextPath}/nhgl/schedule/controller/taskCatagory/add" method="post">
+	<input type="hidden" name="taskCatagory.id" value="$!taskCatagory.id"/>
+	<fieldset>
+		<div class="ui-form-item" >
+			<label class="ui-label" ><span class="ui-form-required">*</span>任务分类：</label>
+			<input class="ui-input" type="text" data-rule="任务分类:required" name="taskCatagory.catagoryText" value="$!taskCatagory.catagoryText">
+		</div>
+		<div class="ui-form-item" style="width: 320px;">
+			<label class="ui-label"  style="text-align:left;width:120px;"><span class="ui-form-required">*</span>任务分类父类编码：</label>
+			<input type="text" class="ui-input ui-input-choose" name="taskCatagory.parentCode" id="parentCode" value="$!taskCatagory.parentCode"/>
+			<input type="hidden" id="parentName" />
+		</div>
+		<div class="ui-form-item" >
+			<label class="ui-label" ><span class="ui-form-required">*</span>任务分类编码：</label>
+			<input class="ui-input" type="text" data-rule="任务分类编码:required" name="taskCatagory.catagoryCode" value="$!taskCatagory.catagoryCode">
+		</div>
+		<div class="ui-form-item ui-form-item-textarea" >
+			<label class="ui-label" >备注：</label>
+			<textarea class="ui-textarea"  name="taskCatagory.remark">
+				$!taskCatagory.remark
+       	 	</textarea>
+		</div>
+	</fieldset>
+</form>

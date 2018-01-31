@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.analyse.electric.entities.ElectricMeterRealTime">
+
+	<resultMap type="com.supconit.nhgl.analyse.electric.entities.ElectricMeterRealTime" id="ElectricMeterRealTimeResultMap">
+        <result property="id" column="ID" />
+        <result property="bitNo" column="BIT_NO" />
+        <result property="total" column="TOTAL" />
+        <result property="collectTime" column="COLLECT_TIME" />
+
+	</resultMap>
+
+    <resultMap id="MinCollectTimeResultMap" type="com.supconit.nhgl.analyse.electric.entities.StatisticalPropDay">
+        <result column="collect_time" property="dayOfMonthKey"/>
+    </resultMap>
+	
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+	<sql id="select_pre">
+		SELECT id,BIT_NO,total,COLLECT_TIME FROM NH_D_METER_REALTIME
+	</sql>
+	<sql id="condition" lang="velocity">
+		<![CDATA[
+		#where()
+			1=1
+			#if($_parameter.bitNo)
+				AND BIT_NO = @{_parameter.bitNo,jdbcType=VARCHAR}
+			#end
+			#if($_parameter.collect)
+				AND COLLECT_TIME >= @{_parameter.collect,jdbcType=VARCHAR}
+			#end
+			#if($_parameter.endTime)
+				AND COLLECT_TIME <= @{_parameter.endTime,jdbcType=VARCHAR}
+			#end
+			#if($_parameter.bitNo)
+				and id in(select id from NH_D_METER_REALTIME 
+				where BIT_NO = @{_parameter.bitNo,jdbcType=VARCHAR})
+			#end
+		#end
+		]]>
+	</sql>
+	
+	<select id="findByCon" resultMap="ElectricMeterRealTimeResultMap" parameterType="com.supconit.nhgl.analyse.electric.entities.ElectricMeterRealTime" lang="velocity" >
+		<include refid="select_pre" />        
+       	<include refid="condition"/>
+	</select>
+	<select id="findByBitNoMax" resultMap="ElectricMeterRealTimeResultMap" parameterType="com.supconit.nhgl.analyse.electric.entities.ElectricMeterRealTime"  lang="velocity">
+		SELECT max(TOTAL) TOTAL FROM NH_D_METER_REALTIME 
+		#if($_parameter.bitNo)
+			where BIT_NO = @{_parameter.bitNo,jdbcType=VARCHAR}
+		#end
+	</select>
+
+    <select id="findMinCollectTimeaaa" resultType="com.supconit.nhgl.analyse.electric.entities.StatisticalPropDay" >
+        select MIN(COLLECT_TIME) as startTime FROM NH_D_METER_REALTIME
+    </select>
+
+</mapper>

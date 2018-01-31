@@ -1,0 +1,12 @@
+<form id="taskPlan_edit_form">
+	<div class="ui-form-item" style="margin-top:20px">
+	     <label class="ui-label" for="" ><span class="ui-form-required">*</span>任务归属</label>
+		 <select class="ui-select" id="taskVesting">
+			#foreach($tc in $edlist)
+				<option value="$tc.enumValue" >$tc.enumText</option>
+			#end
+         </select>
+	</div>
+	##<a class="btn" style="margin-left:40px;float:left;margin-top:20px" onclick="closeDia()" href="#">新增</a>
+</form>
+

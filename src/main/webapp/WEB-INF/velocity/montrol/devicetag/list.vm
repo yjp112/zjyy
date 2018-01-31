@@ -1,0 +1,204 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<div class="ui-layout-north">
+    <form class="ui-form" id='queryForm'>
+        <table width="100%">
+            <tr>
+                <td>
+                    <table class="ui-search-table" style="width: 100%;">
+                        <tr>
+                            <td class="ui-search-name first" style="text-align: right;">位号名称：</td>
+                            <td class="ui-search-c">
+                                <input id="tagName" class="k-textbox" type="text" name="tagName" style="width: 150px;">
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td width="200" valign="top" style="padding-top:4px;">
+                    <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+                    <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+                </td>
+                <td></td>
+            </tr>
+        </table>
+    </form>
+</div>
+<div class="ui-layout-center">
+    <div id="grid"></div>
+</div>
+    #parse("index/_footer.vm")
+<script>
+    var _iframe_layout, _left_layout, _inner_layout;
+    $(document).ready(function () {
+        _iframe_layout = $('body').layout({
+            defaults: {
+                resizable: false,
+                closable: false,
+                spacing_open: 5
+            },
+            center: {
+                onresize_end: function () {
+                    var grid = $("#grid").data("kendoGrid");
+                    grid.resize();
+                }
+            }
+        });
+        $("#resetBtn").click(function () {
+            $("#tagName").val("");
+            return false;
+        });
+        //表格
+        quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/hl/montrol/alarm/deviceTag/list?monitorID=$!{hpid}", [
+            {
+                field: "id",
+                hidden: true,
+                width: 20
+            },
+            {
+                field: "tagName",
+                title: "位号名",
+                attributes: {style: "text-align: center"},
+                sortable: false
+
+            },
+            {
+                field: "tagTypeStr",
+                title: "位号类型",
+                attributes: {style: "text-align: center"},
+                sortable: false
+            },
+            {
+                field: "alarmPonitStr",
+                sortable: false,
+                attributes: {style: "text-align: center"},
+                title: "是否报警点"
+            },
+            {
+                field: "isWriteStr",
+                title: "是否可写",
+                attributes: {style: "text-align: center"},
+                sortable: false
+            },
+            {
+                field: "tagDesc",
+                title: "位号描述",
+                attributes: {style: "text-align: center"},
+                sortable: false
+            },
+            {
+                field: "extension1",
+                title: "操作",
+                sortable: false,
+                attributes: {style: "text-align: center"},
+                template:"",
+                width:"100px;"
+            }
+        ], {
+            sortable: {
+                mode: "single",
+                allowUnsort: true
+            },
+            pageable: true,
+            showNumber: false, resizable: true,
+            dataBound: function (e) {
+                var data = e.sender._data;
+                for (var i = 0; i < data.length; i++) {
+                    var html = "";
+                    if (data[i].extension1 == "1") {
+                        html += " <a  href='#' class=\"k-button   k-primary\"  onclick='doquxiao(\"" + data[i].id + "\")'>取消忽略</a> ";
+                    }
+                    $(e.sender.tbody[0].childNodes[i].childNodes[6]).html(html);
+                }
+            }
+        }, {
+            serverSorting: true
+        }, [
+            #if($!{viewOnly} != true)
+            {
+                name: "添加",
+                icon: "fa fa-plus",
+                onclick: function (obj, grid) {
+                    var url = "$!{rc.contextPath}/hl/montrol/alarm/deviceTag/edit?monitorId=$!{hpid}";
+                    quick_dialog("editMonitorTag", "添加位号", url, 700, 450, obj);
+                }
+            }, {
+                name: "修改",
+                icon: "fa fa-pencil",
+                onclick: function (obj, grid) {
+                    var row = grid.select();
+                    if (null == row || row.length == 0) {
+                        notify("请选择要修改的项！", "error");
+                        return;
+                    }
+                    var data = grid.dataItem(row);
+                    var url = "$!{rc.contextPath}/hl/montrol/alarm/deviceTag/edit?monitorId=$!{hpid}" + "&id=" + data.id;
+                    quick_dialog("editMonitorTag", "修改位号", url, 700, 450, obj);
+                }
+            } , {
+                name: "删除",
+                icon: "fa fa-remove",
+                onclick: function (obj, grid) {
+                    var row = grid.select();
+                    if (null == row || row.length == 0) {
+                        notify("请选择要删除的项！", "warn");
+                        return;
+                    }
+                    if (!confirm("确定要删除吗？"))
+                        return;
+                    else {
+                        var data = grid.dataItem(row);
+                        $.ajax({
+                            type: 'post',
+                            url: "$!{rc.contextPath}/hl/montrol/alarm/deviceTag/delete",
+                            data: {
+                                id: data.id
+                            },
+                            dataType: 'json',
+                            success: function (msg) {
+                                if (msg.status == "fail") {
+                                    notify(msg.message,"fail");
+                                } else {
+                                    notify("删除成功", "success");
+                                    edited_callback(grid);
+                                }
+                            },
+                            error: function () {
+                                notify("删除失败，请检查网络！", "error");
+                            }
+                        });
+                    }
+                }
+            }
+            #end
+        ]);
+
+    });
+
+    function  doquxiao(id){
+        $.ajax({
+            type: 'post',
+            url: "$!{rc.contextPath}/hl/montrol/alarm/deviceTag/quxiaohulue",
+            data: {
+                id: id
+            },
+            dataType: 'json',
+            success: function (msg) {
+                if (msg.status == "fail") {
+                    notify(msg.message,"fail");
+                } else {
+                    notify("取消忽略成功", "success");
+                    var grid = $("#grid").data("kendoGrid");
+                    edited_callback(grid);
+                }
+            },
+            error: function () {
+                notify("取消忽略失败，请检查网络！", "error");
+            }
+        });
+    }
+
+</script>
+
+</body>
+</html>

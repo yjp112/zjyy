@@ -1,0 +1,40 @@
+ <script type="text/javascript" src="$!{nhgl_static_hc_url}/echarts_2/esl.js"> </script>
+ <script type="text/javascript" src="$!{nhgl_static_hc_url}/echarts_2/echartsUtil.js"></script>
+ <style>
+	.nh-content{
+		margin-left:0px;
+	}
+	.nh-content .nh-ct .nh-chart{
+		border:1px;
+	}
+ </style>
+ <SCRIPT type="text/javascript">
+	$(document).ready(function(){
+		$("#tabBlock").load('$!{rc.contextPath}/nhgl/basic/basicInfo/view');
+	 });
+	 function search(){
+	 	var start = $("#start").val();
+	 	$("#tabBlock").load('$!{rc.contextPath}/nhgl/basic/basicInfo/view?start='+start);
+	 }
+</SCRIPT>
+  <div class="ui-layout-center" id="subMain">
+	<div class="ui-layout-north">
+		<div class="ui-module-name">#crumbs("$!menu.code",1)</div>
+		<form id="medical_list_search" class="ui-form ui-form-search fn-clear">
+			<div class="ui-form-search-left">
+				<div class="ui-form-item">
+		            <label class="ui-label">年份：</label>
+		            <input id="start" type="text" name="start"  class="ui-input ui-input-small  Wdate"  onclick="WdatePicker({dateFmt:'yyyy',maxDate:'%y'})" value="$!year"/>
+				</div>
+			</div>	
+			<div class="ui-form-search-right">
+					<button type="button" id="subButton" onclick="search()" class="btn btn-primary"><i class="iconfont icon-search"></i> 查&nbsp;询</button>
+			</div>
+		</form>
+	</div>
+</div>
+<div class="nh-content">
+    <div id="tabBlock" class="nh-ct">
+    </div>
+</div>
+   

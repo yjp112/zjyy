@@ -1,0 +1,19 @@
+INSERT INTO dbo.IMP_ALARMTYPE (
+	ALARM_TYPE,
+	PARENT_TYPE,
+	TYPE_REMARK,
+	LOW_MESSAGE,
+	COLLECT_ALARM_NAME,
+	AREA_NAME,
+	IMPORT_NUM
+)
+VALUES
+	(
+		?,
+		?,
+		?,
+		?,
+		?,
+		?,
+		?
+	)

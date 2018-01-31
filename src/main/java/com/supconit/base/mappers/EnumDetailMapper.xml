@@ -1,0 +1,158 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.base.entities.EnumDetail">
+
+	<resultMap type="com.supconit.base.entities.EnumDetail" id="EnumDetailResultMap">      
+        <result property="id" column="ID" />
+        <result property="typeId" column="TYPE_ID" />
+        <result property="typeName" column="TYPE_NAME" />
+        <result property="enumText" column="ENUM_TEXT" />
+        <result property="enumValue" column="ENUM_VALUE" />
+        <result property="sortIndex" column="SORT_INDEX" />
+        <result property="int1" column="INT1" />
+        <result property="int2" column="INT2" />
+        <result property="int3" column="INT3" />
+        <result property="str1" column="STR1" />
+        <result property="str2" column="STR2" />
+        <result property="str3" column="STR3" />
+	</resultMap>
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+    <!-- 获取记录列表-->
+	<sql id="select_pre">
+    select 
+        ID,
+        TYPE_ID,
+        TYPE_NAME,
+        ENUM_TEXT,
+        ENUM_VALUE,
+        SORT_INDEX,
+        INT1,
+        INT2,
+        INT3,
+        STR1,
+        STR2,
+        STR3		
+		FROM
+		ENUM_DETAIL
+	</sql>
+	<sql id="count_pre">
+		SELECT
+		COUNT(*)
+		FROM
+		ENUM_DETAIL
+	</sql>
+	<sql id="sequence">SELECT SEQ_HO_USER.NEXTVAL FROM DUAL</sql>
+    <insert id="insert" parameterType="com.supconit.base.entities.EnumDetail" keyProperty="id" keyColumn="ID" databaseId="sqlserver">
+		<include refid="insert_sql" />
+        <!-- 获取记录主键 microsoft sql server -->
+		<selectKey keyProperty="id" resultType="Long" order="AFTER">
+			select @@identity
+		</selectKey>
+	</insert>
+    
+    <!-- 插入记录-->
+	<sql id="insert_sql">
+		INSERT INTO ENUM_DETAIL(        
+        TYPE_ID,
+        TYPE_NAME,
+        ENUM_TEXT,
+        ENUM_VALUE,
+        SORT_INDEX,
+        INT1,
+        INT2,
+        INT3,
+        STR1,
+        STR2,
+        STR3
+		) VALUES (        
+        #{typeId,jdbcType=NUMERIC},
+        #{typeName,jdbcType=VARCHAR},
+        #{enumText,jdbcType=VARCHAR},
+        #{enumValue,jdbcType=VARCHAR},
+        #{sortIndex,jdbcType=NUMERIC},
+        #{int1,jdbcType=NUMERIC},
+        #{int2,jdbcType=NUMERIC},
+        #{int3,jdbcType=NUMERIC},
+        #{str1,jdbcType=VARCHAR},
+        #{str2,jdbcType=VARCHAR},
+        #{str3,jdbcType=VARCHAR}		
+		)
+	</sql>
+
+	<select id="getById" resultMap="EnumDetailResultMap" parameterType="Long">
+		<include refid="select_pre" />        
+        WHERE ID = #{id}
+	</select>
+	
+	
+	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.base.entities.EnumDetail">
+		UPDATE	ENUM_DETAIL
+		<set>
+        <if test="typeId != null">TYPE_ID = #{typeId,jdbcType=NUMERIC},</if>
+        <if test="typeName != null">TYPE_NAME = #{typeName,jdbcType=VARCHAR},</if>
+        <if test="enumText != null">ENUM_TEXT = #{enumText,jdbcType=VARCHAR},</if>
+        <if test="enumValue != null">ENUM_VALUE = #{enumValue,jdbcType=VARCHAR},</if>
+        <if test="sortIndex != null">SORT_INDEX = #{sortIndex,jdbcType=NUMERIC},</if>
+        <if test="int1 != null">INT1 = #{int1,jdbcType=NUMERIC},</if>
+        <if test="int2 != null">INT2 = #{int2,jdbcType=NUMERIC},</if>
+        <if test="int3 != null">INT3 = #{int3,jdbcType=NUMERIC},</if>
+        <if test="str1 != null">STR1 = #{str1,jdbcType=VARCHAR},</if>
+        <if test="str2 != null">STR2 = #{str2,jdbcType=VARCHAR},</if>
+        <if test="str3 != null">STR3 = #{str3,jdbcType=VARCHAR},</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+    <!-- 通过 ID 获取对象-->
+	<delete id="deleteById" parameterType="Long">
+		DELETE FROM ENUM_DETAIL WHERE ID = #{id}
+	</delete>
+	<sql id="condition_sql">
+		<where>
+        <if test="id != null "> ID = #{id} and </if>
+        <if test="typeId != null "> TYPE_ID = #{typeId} and </if>
+        <if test="typeName != null and typeName != ''">	TYPE_NAME like '%'+#{typeName}+'%' and </if>
+        <if test="enumText != null and enumText != ''">	ENUM_TEXT like '%'+#{enumText}+'%' and </if>
+        <if test="enumValue != null and enumValue != ''">	ENUM_VALUE like '%'+#{enumValue}+'%' and </if>
+        <if test="sortIndex != null "> SORT_INDEX = #{sortIndex} and </if>
+        <if test="int1 != null "> INT1 = #{int1} and </if>
+        <if test="int2 != null "> INT2 = #{int2} and </if>
+        <if test="int3 != null "> INT3 = #{int3} and </if>
+        <if test="str1 != null and str1 != ''">	STR1 like '%'+#{str1}+'%' and </if>
+        <if test="str2 != null and str2 != ''">	STR2 like '%'+#{str2}+'%' and </if>
+        1=1 
+		</where>
+	</sql>
+    
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.base.entities.EnumDetail" resultMap="EnumDetailResultMap">
+		<include refid="select_pre" />
+		<include refid="condition_sql" />
+		ORDER BY ID DESC
+	</select>	
+	<select id="selectByTypeId" parameterType="long" resultMap="EnumDetailResultMap">
+		<include refid="select_pre" />
+		where TYPE_ID = #{typeId}
+		ORDER BY SORT_INDEX ASC
+	</select>	
+
+    <select id="countByCondition" parameterType="com.supconit.base.entities.EnumDetail" resultType="long">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+    
+    <!-- 删除多条记录-->
+	<delete id="deleteByIds">
+        DELETE FROM ENUM_DETAIL WHERE ID in 
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+
+	</delete>
+
+</mapper>

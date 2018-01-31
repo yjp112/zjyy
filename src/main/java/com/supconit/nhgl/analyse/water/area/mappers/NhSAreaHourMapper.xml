@@ -1,0 +1,316 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.analyse.water.area.entities.NhSAreaHour">
+	<resultMap type="com.supconit.nhgl.analyse.water.area.entities.NhSAreaHour" id="NhSAreaHourMap">
+		<result property="id" column="ID" />
+		<result property="areaId" column="AREA_ID" />
+		<result property="itemCode" column="ITEM_CODE" />
+		<result property="total" column="TOTAL" />
+		<result property="incremental" column="INCREMENTAL" />
+		<result property="collectDate" column="COLLECT_DATE" jdbcType="DATE" javaType="java.util.Date"/>
+		<result property="collectHour" column="COLLECT_HOUR" />
+		<result property="collectTime" column="COLLECT_TIME" />
+		
+		<result property="standardCode" column="STANDARD_CODE" />
+		<result property="parentCode" column="PARENT_CODE" />
+		
+        <result property="start" column="START"/>
+        <result property="end" column="END"/>
+        <result property="name" column="name"/>
+        <result property="parentId" column="parentId"/>
+        <result property="areaName" column="AREA_NAME"/>
+        <result property="parentId" column="PARENT_ID"/>
+        
+	</resultMap>
+	<select id="getAllSubWater" resultMap="NhSAreaHourMap"
+		parameterType="com.supconit.nhgl.analyse.water.area.entities.NhSAreaHour" lang="velocity">
+		<![CDATA[
+		SELECT
+			t.ID,
+			t.STANDARD_CODE,
+			t.PARENT_CODE,
+			t.NAME,
+			#if($_databaseId=='oracle')
+			nvl(
+			(
+				SELECT
+					SUM (d.INCREMENTAL)
+				FROM
+					NH_S_AREA_HOUR d
+				INNER JOIN 
+				#if($_databaseId=='oracle')
+					TABLE(func_getnhitem(2, t.STANDARD_CODE))
+				#else
+					func_getnhitem(2, t.STANDARD_CODE)
+				#end
+				i ON d.ITEM_CODE = i.STANDARD_CODE
+				INNER JOIN 
+					 VIEW_NH_S_AREA A ON d.AREA_ID=A.ID
+		    where 1=1
+		    	#if($_parameter.collectDate)
+  					and d.COLLECT_DATE>=@{_parameter.collectDate,jdbcType=DATE}
+				    and d.COLLECT_TIME<=@{_parameter.collectTime,jdbcType=TIMESTAMP}
+			    #end
+			    AND A.area_code='ROOT'
+			),0)
+			#else
+			ISNULL((
+				SELECT
+					SUM (d.INCREMENTAL)
+				FROM
+					NH_S_AREA_HOUR d
+				INNER JOIN 
+				#if($_databaseId=='oracle')
+					TABLE(func_getnhitem(2, t.STANDARD_CODE))
+				#else
+					func_getnhitem(2, t.STANDARD_CODE)
+				#end
+				i ON d.ITEM_CODE = i.STANDARD_CODE
+				INNER JOIN 
+					 VIEW_NH_S_AREA A ON d.AREA_ID=A.ID
+		    where 1=1
+				#if($_parameter.collectDate)
+  					and d.COLLECT_DATE>=@{_parameter.collectDate,jdbcType=DATE}
+				    and d.COLLECT_TIME<=@{_parameter.collectTime,jdbcType=TIMESTAMP}
+			    #end
+			    AND A.area_code='ROOT'
+			),0)
+			#end
+			TOTAL
+		FROM
+			NH_ITEM t
+		WHERE
+			t.NH_TYPE = @{_parameter.nhType,jdbcType=NUMERIC} 
+			order by t.STANDARD_CODE
+		]]>
+	</select>
+	<select id="getDayofSubWater" resultMap="NhSAreaHourMap"
+		parameterType="com.supconit.nhgl.analyse.water.area.entities.NhSAreaHour" lang="velocity">
+		<![CDATA[
+		SELECT
+			d.COLLECT_HOUR,
+			#if($_databaseId=='oracle')
+				nvl(sum(d.INCREMENTAL),0)
+			#else
+				isnull(sum(d.INCREMENTAL),0)
+			#end	
+			TOTAL
+		FROM
+			NH_S_AREA_HOUR d
+			INNER JOIN 
+			#if($_databaseId=='oracle')
+				TABLE(func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.standardCode,jdbcType=VARCHAR}))
+			#else
+				func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.standardCode,jdbcType=VARCHAR})
+			#end
+			i ON d.ITEM_CODE = i.STANDARD_CODE
+   		where d.COLLECT_DATE=@{_parameter.now,jdbcType=DATE}
+				#if($_parameter.start)
+						AND d.COLLECT_HOUR >=@{_parameter.start,jdbcType=NUMERIC}
+				#end
+				#if($_parameter.end)
+						AND d.COLLECT_HOUR <=@{_parameter.end,jdbcType=NUMERIC}
+				#end
+        GROUP BY d.COLLECT_HOUR
+		]]>
+	</select>
+	<select id="getSumDayofSubWater" resultMap="NhSAreaHourMap"
+		parameterType="com.supconit.nhgl.analyse.water.area.entities.NhSAreaHour" lang="velocity">
+		<![CDATA[
+		SELECT
+			#if($_databaseId=='oracle')
+				nvl(sum(d.INCREMENTAL),0)
+			#else
+				isnull(sum(d.INCREMENTAL),0)
+			#end	
+			TOTAL
+		FROM
+			NH_S_AREA_HOUR d
+			INNER JOIN 
+			#if($_databaseId=='oracle')
+				TABLE(func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR}))
+			#else
+				func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR})
+			#end
+			i ON d.ITEM_CODE = i.STANDARD_CODE
+   		where d.COLLECT_DATE=@{_parameter.now,jdbcType=DATE}
+				#if($_parameter.start)
+						AND d.COLLECT_HOUR >=@{_parameter.start,jdbcType=NUMERIC}
+				#end
+				#if($_parameter.end)
+						AND d.COLLECT_HOUR <=@{_parameter.end,jdbcType=NUMERIC}
+				#end
+		]]>
+	</select>
+	<select id="getTwoDayofSubWater" resultMap="NhSAreaHourMap"
+		parameterType="com.supconit.nhgl.analyse.water.area.entities.NhSAreaHour" lang="velocity">
+		<![CDATA[
+		SELECT
+			COLLECT_DATE,
+			#if($_databaseId=='oracle')
+				nvl(sum(d.INCREMENTAL),0)
+			#else
+				isnull(sum(d.INCREMENTAL),0)
+			#end	
+			TOTAL
+		FROM
+			NH_S_AREA_HOUR d
+			INNER JOIN 
+			#if($_databaseId=='oracle')
+				TABLE(func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.standardCode,jdbcType=VARCHAR}))
+			#else
+				func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.standardCode,jdbcType=VARCHAR})
+			#end
+			i ON d.ITEM_CODE = i.STANDARD_CODE
+   		where d.COLLECT_DATE  in (@{_parameter.now,jdbcType=DATE},@{_parameter.lastDay,jdbcType=DATE})
+				#if($_parameter.start)
+						AND d.COLLECT_HOUR >=@{_parameter.start,jdbcType=NUMERIC}
+				#end
+				#if($_parameter.end)
+						AND d.COLLECT_HOUR <=@{_parameter.end,jdbcType=NUMERIC}
+				#end
+		GROUP BY d.COLLECT_DATE
+		order by collect_Date
+		]]>
+	</select>
+	
+	<select id="getAllAreaWater" resultMap="NhSAreaHourMap"
+		parameterType="com.supconit.nhgl.analyse.water.area.entities.NhSAreaHour" lang="velocity">
+		<![CDATA[
+		SELECT 
+			A.ID AREA_ID,
+			A.AREA_NAME AREA_NAME, 
+			#if($_databaseId=='oracle')
+				NVL(SUM(B.INCREMENTAL),0)
+			#else
+				ISNULL(SUM(B.INCREMENTAL),0)
+			#end
+			TOTAL,
+			A.PARENT_ID
+		FROM 
+			VIEW_NH_S_AREA A
+		LEFT JOIN(
+			SELECT t.* FROM NH_S_AREA_HOUR t 
+			INNER JOIN 
+			#if($_databaseId=='oracle')
+				TABLE(func_getnhitem(2,@{_parameter.standardCode,jdbcType=VARCHAR}))
+			#else
+				func_getnhitem(2,@{_parameter.standardCode,jdbcType=VARCHAR})
+			#end
+			t2 ON t.ITEM_CODE=t2.standard_code
+			where 1=1
+				#if($_parameter.collectDate)
+					and t.COLLECT_DATE>=@{_parameter.collectDate,jdbcType=DATE}
+					and t.COLLECT_TIME<=@{_parameter.collectTime,jdbcType=TIMESTAMP}
+				#end
+		) B ON B.AREA_ID=A.ID
+		GROUP BY A.ID,A.AREA_NAME,A.PARENT_ID,A.SORT
+		ORDER BY A.SORT
+		]]>
+	</select>
+	<select id="getDayofAreaWater" resultMap="NhSAreaHourMap"
+		parameterType="com.supconit.nhgl.analyse.water.area.entities.NhSAreaHour" lang="velocity">
+		<![CDATA[
+		SELECT
+			d.COLLECT_HOUR,
+			#if($_databaseId=='oracle')
+				nvl(sum(d.INCREMENTAL),0)
+			#else
+				isnull(sum(d.INCREMENTAL),0)
+			#end	
+			TOTAL
+		FROM
+			NH_S_AREA_HOUR d
+			INNER JOIN NH_ITEM I ON d.ITEM_CODE = i.STANDARD_CODE 
+			AND I.NH_TYPE=@{_parameter.nhType,jdbcType=NUMERIC}
+			#if($_databaseId=='oracle')
+				#if($_parameter.standardCode)
+					and I.STANDARD_CODE LIKE @{_parameter.standardCode,jdbcType=VARCHAR}||'%'
+				#end
+			#else
+				#if($_parameter.standardCode)
+					and I.STANDARD_CODE LIKE @{_parameter.standardCode,jdbcType=VARCHAR}+'%'
+				#end
+			#end
+			INNER JOIN 
+				VIEW_NH_S_AREA A ON d.AREA_ID=A.ID
+   		where 1=1
+				#if($_parameter.collectDate)
+  					and d.COLLECT_DATE>=@{_parameter.collectDate,jdbcType=DATE}
+				    and d.COLLECT_TIME<=@{_parameter.collectTime,jdbcType=TIMESTAMP}
+			    #end
+	   			#if($_parameter.areaId)
+						AND A.ID =@{_parameter.areaId,jdbcType=NUMERIC}
+				#else
+						AND A.area_code='ROOT'
+				#end
+        GROUP BY d.COLLECT_HOUR
+		]]>
+	</select>
+	<select id="getTwoDayofAreaWater" resultMap="NhSAreaHourMap"
+		parameterType="com.supconit.nhgl.analyse.water.area.entities.NhSAreaHour" lang="velocity">
+		<![CDATA[
+		SELECT
+			COLLECT_DATE,
+			#if($_databaseId=='oracle')
+				nvl(sum(d.INCREMENTAL),0) TOTAL,
+				(SELECT
+					NVL(SUM(Y.INCREMENTAL),0)
+				FROM NH_S_AREA_HOUR Y
+				INNER JOIN 
+					TABLE(func_getnhitem(2,@{_parameter.standardCode,jdbcType=VARCHAR}))F ON Y.ITEM_CODE = F.STANDARD_CODE
+				INNER JOIN 
+					VIEW_NH_S_AREA U ON U.ID=Y.AREA_ID
+				WHERE Y.COLLECT_TIME > @{_parameter.lastDay,jdbcType = TIMESTAMP}-1
+					AND Y.COLLECT_TIME <= @{_parameter.now,jdbcType = TIMESTAMP}-1
+					#if($_parameter.areaId)
+							AND U.ID =@{_parameter.areaId,jdbcType=NUMERIC}
+					#else
+							AND U.area_code='ROOT'
+					#end
+				) AS lastTotal
+			#else
+				isnull(sum(d.INCREMENTAL),0) TOTAL,
+				(SELECT 
+					ISNULL(SUM(Y.INCREMENTAL),0) 
+				FROM NH_S_AREA_HOUR Y
+				INNER JOIN 
+					func_getnhitem(2,@{_parameter.standardCode,jdbcType=VARCHAR})F ON Y.ITEM_CODE = F.STANDARD_CODE
+				INNER JOIN 
+					VIEW_NH_S_AREA U ON U.ID=Y.AREA_ID
+				WHERE Y.COLLECT_TIME > dateadd(day , -1, @{_parameter.lastDay,jdbcType = TIMESTAMP})
+					AND Y.COLLECT_TIME <= dateadd(day , -1, @{_parameter.now,jdbcType = TIMESTAMP})
+					#if($_parameter.areaId)
+							AND U.ID =@{_parameter.areaId,jdbcType=NUMERIC}
+					#else
+							AND U.area_code='ROOT'
+					#end
+				)AS lastTotal
+			#end	
+			
+		FROM
+			NH_S_AREA_HOUR d
+			INNER JOIN 
+			#if($_databaseId=='oracle')
+				TABLE(func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.standardCode,jdbcType=VARCHAR}))
+			#else
+				func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.standardCode,jdbcType=VARCHAR})
+			#end
+			i ON d.ITEM_CODE = i.STANDARD_CODE
+			INNER JOIN 
+				VIEW_NH_S_AREA A ON A.ID=d.AREA_ID
+   		where 1=1
+				AND d.COLLECT_TIME > @{_parameter.lastDay,jdbcType = TIMESTAMP}
+				AND d.COLLECT_TIME <= @{_parameter.now,jdbcType = TIMESTAMP}
+				#if($_parameter.areaId)
+						AND A.ID =@{_parameter.areaId,jdbcType=NUMERIC}
+				#else
+						AND A.area_code='ROOT'
+				#end
+		GROUP BY d.COLLECT_DATE
+		]]>
+	</select>
+</mapper>

@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.repair.entities.DeviceGoodRate">
+    <resultMap id="deviceGoodRateResultMap" type="com.supconit.repair.entities.DeviceGoodRate">
+        <result column="category_Id" property="categoryId"/>
+        <result column="category_name" property="categoryName"/>
+        <result column="device_num" property="deviceNum"/>
+        <result column="device_fault_num" property="deviceFaultNum"/>
+    </resultMap>
+    <select id="queryDeviceGoodRate" resultMap="deviceGoodRateResultMap" parameterType="com.supconit.repair.entities.DeviceGoodRate">
+        SELECT
+        dc.id as category_id,
+        dc.category_name,
+        count(d.category_id) AS device_num,
+        (select
+        count(r.device_id)
+        from repair r left join device dd on dd.id = r.device_id
+        where dd.category_id = dc.id
+        <if test="null!=beginDate and ''!=beginDate ">
+
+            and r.create_date > #{beginDate}
+        </if>
+        <if test="null!=endDate and ''!=endDate">
+            <![CDATA[ and r.create_date <= #{endDate} ]]>
+        </if>
+        )
+        as device_fault_Num
+        FROM device d LEFT JOIN device_category dc ON d.category_id = dc.id
+        where dc.id is not null
+        GROUP BY dc.id, dc.category_name
+        ORDER BY dc.id
+    </select>
+</mapper>

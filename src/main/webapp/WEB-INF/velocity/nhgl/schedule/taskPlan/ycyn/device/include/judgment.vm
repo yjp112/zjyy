@@ -1,0 +1,30 @@
+        <div id="deviceRuntime" class="ui-form-item">
+            <label class="ui-label" for=""><span class="ui-form-required">*</span>监控运行状态:</label>
+            <input class="ui-radio" type="radio"  name="task.criteriaDetails[0].crCondition" value='#tagValue=="ON"' checked />
+			<span class="ui-form-text" style="color: #fff;">开</span>
+            <input class="ui-radio" type="radio"  name="task.criteriaDetails[0].crCondition" value='#tagValue=="OFF"'/>
+			<span class="ui-form-text" style="color: #fff;">关</span>
+        </div>
+         
+        <div class="ui-form-item ">
+          <label class="ui-label" for=""><span class="ui-form-required">*</span>扣分：</label>
+            <input class="ui-input" type="input" name="task.criteriaDetails[0].crScore" 
+		      #if($task.criteriaDetails && $task.criteriaDetails.size()>0)
+			  value="$!task.criteriaDetails[0].crScore"
+			  #end
+             data-rule="扣分: required; int;length[~50];"  data-rule-int="[/^\d+(\.\d{1,2})?$/, '请输入正数']"/>       
+		</div>        
+<script type="text/javascript">
+$(document).ready(function(){
+  #if($task.criteriaDetails && $task.criteriaDetails.size()>0)
+    var v='$!task.criteriaDetails[0].crCondition'
+    $('#deviceRuntime [type=radio]').each(function(idx,item){
+	   if($(this).val()==v){
+	    $(this).attr('checked',true);
+	   }else{
+	   $(this).attr('checked',false);
+	   }
+	});
+  #end
+});//ready
+</script>

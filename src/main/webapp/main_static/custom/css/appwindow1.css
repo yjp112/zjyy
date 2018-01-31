@@ -1,0 +1,244 @@
+@charset "utf-8";
+a{
+  cursor: pointer;
+  text-decoration: none;
+}
+img{
+	border: none;
+}
+html,
+body{
+	margin: 0;
+	padding:0;
+	height:100%;
+}
+/* -- app -- */
+.ui-app-body{
+	position:relative;
+	width: 100%;
+	height:100%;
+    background: #0e6393 url(images/app-body-bg.jpg) no-repeat 50% 50%;
+}
+.app-content {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	margin: auto;
+	width: 900px;
+	height: 640px;
+}
+.app-content .logo {
+	width: 100%;
+	height: 90px;
+	background: url(images/logo.png) no-repeat 0 50%;
+}
+.app-content .app-items{
+	width: 100%;
+	height: 500px;
+	position: relative;
+}
+.app-items .app-item {
+	position: absolute;
+}
+.app-items .item1 {
+	top: 254px;
+	left: 68px;
+	width: 230px;
+	height: 92px;
+	background: url(images/item1.png) no-repeat 0 50%;
+}
+.app-items .item1.hover1 {
+	background: url(images/item1-hover1.png) no-repeat 0 50%;
+}
+.app-items .item1.hover2 {
+	background: url(images/item1-hover2.png) no-repeat 0 50%;
+}
+.item1 .item-AB {
+    position: absolute;
+    top: 26px;
+    left: 0px;
+    width: 118px;
+    height: 51px;
+}
+.item1 .item-FK1 {
+    position: absolute;
+    top: 0px;
+    left: 36px;
+    width: 142px;
+    height: 25px;
+}
+.item1 .item-FK2 {
+    position: absolute;
+    top: 26px;
+    left: 119px;
+    width: 59px;
+    height: 25px;
+}
+
+.app-items .item2 {
+    top: 86px;
+    left: 86px;
+    width: 251px;
+    height: 153px;
+	background: url(images/item2.png) no-repeat 0 50%;
+    z-index: 99;
+}
+.app-items .item2.hover1 {
+	background: url(images/item2-hover1.png) no-repeat 0 50%;
+}
+.app-items .item2.hover2 {
+	background: url(images/item2-hover2.png) no-repeat 0 50%;
+}
+.item2 .item-NH {
+    position: absolute;
+    top: 8px;
+    left: 0px;
+    width: 115px;
+    height: 52px;
+}
+.item2 .item-JD {
+    position: absolute;
+    top: 34px;
+    left: 118px;
+    width: 131px;
+    height: 52px;
+}
+
+.app-items .item3 {
+    top: 10px;
+    left: 233px;
+    width: 266px;
+    height: 152px;
+	background: url(images/item3.png) no-repeat 0 50%;
+}
+.app-items .item3.hover1 {
+	background: url(images/item3-hover1.png) no-repeat 0 50%;
+}
+.app-items .item3.hover2 {
+	background: url(images/item3-hover2.png) no-repeat 0 50%;
+}
+.item3 .item-SBXJ {
+    position: absolute;
+    top: 16px;
+    left: 0px;
+    width: 128px;
+    height: 52px;
+}
+.item3 .item-SBWX {
+    position: absolute;
+    top: 0;
+    left: 131px;
+    width: 133px;
+    height: 42px;
+}
+
+.app-items .item4 {
+    top: 34px;
+    left: 472px;
+    width: 254px;
+    height: 103px;
+	background: url(images/item4.png) no-repeat 0 50%;
+}
+.app-items .item4.hover1 {
+	background: url(images/item4-hover1.png) no-repeat 0 50%;
+}
+.app-items .item4.hover2 {
+	background: url(images/item4-hover2.png) no-repeat 0 50%;
+}
+.item4 .item-SBDA {
+    position: absolute;
+    top: 32px;
+    left: 0px;
+    width: 117px;
+    height: 51px;
+}
+.item4 .item-SBBY {
+    position: absolute;
+    top: 7px;
+    left: 120px;
+    width: 134px;
+    height: 52px;
+}
+
+.app-items .item5 {
+    top: 138px;
+    left: 538px;
+    width: 262px;
+    height: 101px;
+	background: url(images/item5.png) no-repeat 0 50%;
+}
+.app-items .item5.hover1 {
+	background: url(images/item5-hover1.png) no-repeat 0 50%;
+}
+.app-items .item5.hover2 {
+	background: url(images/item5-hover2.png) no-repeat 0 50%;
+}
+.item5 .item-YKT {
+    position: absolute;
+    top: 30px;
+    left: 12px;
+    width: 112px;
+    height: 52px;
+}
+.item5 .item-YG {
+    position: absolute;
+    top: 5px;
+    left: 126px;
+    width: 134px;
+    height: 52px;
+}
+
+.app-items .item6 {
+    top: 238px;
+    left: 590px;
+    width: 283px;
+    height: 120px;
+	background: url(images/item6.png) no-repeat 0 50%;
+}
+.app-items .item6.hover1 {
+	background: url(images/item6-hover1.png) no-repeat 0 50%;
+}
+.app-items .item6.hover2 {
+    background: url(images/item6-hover2.png) no-repeat 0 50%;
+}
+.item6 .item-JC {
+    position: absolute;
+    top: 0px;
+    left: 140px;
+    width: 136px;
+    height: 52px;
+}
+.item6 .item-SW {
+    position: absolute;
+    top: 52px;
+    left: 62px;
+    width: 136px;
+    height: 52px;
+}
+
+.app-footer{
+    width:100%;
+    height:42px;
+    _overflow:hidden;
+    position:fixed;
+    left:0;
+    bottom:0;
+    text-align: center;
+    background:url(images/app-footer-bg.png) left top repeat-x;
+}
+
+
+.ui-app-copyright{
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 37px;
+    line-height: 37px;
+    color: #fff;
+    font-size: 14px;
+    text-align: center;
+    background: url(images/app-body-bottom-bg.jpg) no-repeat;
+}

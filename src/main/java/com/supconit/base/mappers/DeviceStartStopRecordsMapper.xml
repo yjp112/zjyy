@@ -1,0 +1,195 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.base.entities.DeviceStartStopRecords">
+
+	<resultMap type="com.supconit.base.entities.DeviceStartStopRecords" id="DeviceStartStopRecordsResultMap">      
+        <result property="id" column="ID" />
+        <result property="deviceId" column="DEVICE_ID" />
+        <result property="startTime" column="START_TIME" />
+        <result property="stopTime" column="STOP_TIME" />
+        <result property="runTimes" column="RUN_TIMES" />
+        <result property="updateTime" column="UPDATE_TIME" />
+	</resultMap>
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+    <!-- 获取记录列表-->
+	<sql id="select_pre" lang="velocity">
+    select 
+        ID,
+        DEVICE_ID,
+        START_TIME,
+        STOP_TIME,
+        RUN_TIMES,
+        UPDATE_TIME		
+		FROM
+		DEVICE_START_STOP_RECORDS
+	</sql>
+	<sql id="count_pre" lang="velocity">
+		SELECT
+		COUNT(*)
+		FROM
+		DEVICE_START_STOP_RECORDS
+	</sql>
+	<sql id="TABLE_NAME" lang="velocity">DEVICE_START_STOP_RECORDS</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>	
+	<insert id="insert" parameterType="com.supconit.base.entities.DeviceStartStopRecords" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    <insert id="insert" parameterType="com.supconit.base.entities.DeviceStartStopRecords" 
+		keyProperty="id" keyColumn="ID" 		lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>        
+		<include refid="INSERT_SQL" />
+	</insert>    
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>
+		(#if($_databaseId=='oracle') ID,#end    
+	        DEVICE_ID,
+	        START_TIME,
+	        STOP_TIME,
+	        RUN_TIMES,
+	        UPDATE_TIME		
+		) VALUES (        
+		 #if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end
+	        @{_parameterdeviceId,jdbcType=NUMERIC},
+	        @{_parameterstartTime,jdbcType=TIMESTAMP},
+	        @{_parameterstopTime,jdbcType=TIMESTAMP},
+	        @{_parameterrunTimes,jdbcType=NUMERIC},
+	        @{_parameterupdateTime,jdbcType=TIMESTAMP}		
+		)
+	</sql>		 	        
+    <!-- 插入记录-->
+	<sql id="insert_sql">
+		INSERT INTO DEVICE_START_STOP_RECORDS(        
+        DEVICE_ID,
+        START_TIME,
+        STOP_TIME,
+        RUN_TIMES,
+        UPDATE_TIME
+		) VALUES (        
+        #{deviceId,jdbcType=NUMERIC},
+        #{startTime,jdbcType=TIMESTAMP},
+        #{stopTime,jdbcType=TIMESTAMP},
+        #{runTimes,jdbcType=NUMERIC},
+        #{updateTime,jdbcType=TIMESTAMP}		
+		)
+	</sql>
+
+	<select id="getById" resultMap="DeviceStartStopRecordsResultMap" parameterType="Long">
+		 select 
+        ID,
+        DEVICE_ID,
+        START_TIME,
+        STOP_TIME,
+        RUN_TIMES,
+        UPDATE_TIME		
+		FROM
+		DEVICE_START_STOP_RECORDS    
+        WHERE ID = #{id}
+	</select>
+	
+	
+	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.base.entities.DeviceStartStopRecords">
+		UPDATE	DEVICE_START_STOP_RECORDS
+		<set>
+        <if test="deviceId != null">DEVICE_ID = #{deviceId,jdbcType=NUMERIC},</if>
+        <if test="startTime != null">START_TIME = #{startTime,jdbcType=TIMESTAMP},</if>
+        <if test="stopTime != null">STOP_TIME = #{stopTime,jdbcType=TIMESTAMP},</if>
+        <if test="runTimes != null">RUN_TIMES = #{runTimes,jdbcType=NUMERIC},</if>
+        <if test="updateTime != null">UPDATE_TIME = #{updateTime,jdbcType=TIMESTAMP},</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+    <!-- 通过 ID 获取对象-->
+	<delete id="deleteById" parameterType="Long">
+		DELETE FROM DEVICE_START_STOP_RECORDS WHERE ID = #{id}
+	</delete>
+	<sql id="condition_sql" lang="velocity">
+	<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			1=1 		
+			#if($_p.id)
+				#set($_id = $_p.id)
+				AND ID = @{_id,jdbcType=BIGINT}
+			#end	
+			#if($_p.deviceId)
+				#set($_deviceId = $_p.deviceId)
+				AND DEVICE_ID = @{_deviceId,jdbcType=BIGINT}
+			#end	
+			#if($_p.startTime)
+				#set($_startTime = $_p.startTime)
+				AND START_TIME = @{_startTime,jdbcType=TIMESTAMP}
+			#end	
+			#if($_p.stopTime)
+				#set($_stopTime = $_p.stopTime)
+				AND STOP_TIME = @{_stopTime,jdbcType=TIMESTAMP}
+			#end
+			#if($_p.runTimes)
+				#set($_runTimes = $_p.runTimes)
+				AND RUN_TIMES = @{_runTimes,jdbcType=NUMERIC}
+			#end	
+        #end							
+		]]>
+	</sql>
+    
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.base.entities.DeviceStartStopRecords" resultMap="DeviceStartStopRecordsResultMap" lang="velocity" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>	
+		<include refid="select_pre" />
+		<include refid="condition_sql" />
+		#order($_parameter.condition,"START_TIME DESC")
+ 		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+	<select id="findByCondition" parameterType="com.supconit.base.entities.DeviceStartStopRecords" resultMap="DeviceStartStopRecordsResultMap" lang="velocity" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		 select 
+        ID,
+        DEVICE_ID,
+        START_TIME,
+        STOP_TIME,
+        RUN_TIMES,
+        UPDATE_TIME		
+		FROM
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+ 		#order($_parameter.condition,"START_TIME")
+ 		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		DEVICE_START_STOP_RECORDS
+		<include refid="condition_sql" />
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+
+    <select id="countByCondition" parameterType="com.supconit.base.entities.DeviceStartStopRecords" resultType="long" lang="velocity">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+    
+    <!-- 删除多条记录-->
+	<delete id="deleteByIds">
+        DELETE FROM DEVICE_START_STOP_RECORDS WHERE ID in 
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+
+	</delete>
+	<!-- 查询上次未完的记录-->
+	<select id="findLastData" resultMap="DeviceStartStopRecordsResultMap" parameterType="Long">
+		SELECT         
+		ID,
+        DEVICE_ID,
+        START_TIME,
+        STOP_TIME,
+        RUN_TIMES,
+        UPDATE_TIME		 
+        FROM DEVICE_START_STOP_RECORDS 
+        WHERE STOP_TIME IS NULL 
+        ORDER BY DEVICE_ID
+	</select>
+</mapper>

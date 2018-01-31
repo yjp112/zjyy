@@ -1,0 +1,178 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<div class="ui-layout-center" id="subMain">
+	<div class="ui-layout-north">
+		 <form class="ui-form" id='queryForm'>
+			
+	     <table width="100%">
+	       <tr>
+	         <td>
+	           <table class="ui-search-table">
+	             <tr>
+	               <td class="ui-search-name first">HPID：</td>
+	               <td class="ui-search-c">
+	                 <input   type="text" name="hpid" value="$!videoDetail.hpid" class="k-textbox"  maxlength="32">
+	               </td>
+	               <td class="ui-search-name">摄像头编码：</td>
+	               <td class="ui-search-c">
+	                 <input name="videoCode" value="$!videoDetail.videoCode"  class="k-textbox" type="text" maxlength="50">
+	               </td>
+	               <td class="ui-search-name">设备名称：</td>
+	               <td class="ui-search-c">
+	                 <input name="deviceName" value="$!videoDetail.deviceName"  class="k-textbox" type="text" maxlength="50">
+	               </td>
+	             </tr>
+	           </table>
+	         </td>
+	         <td width="150" valign="top" style="padding-top:4px;">
+	           <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+	           <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+	         </td>
+	         <td></td>
+	       </tr>
+	     </table>
+	 	</form>
+	</div>
+	<div class="ui-layout-center">
+	  <div id="grid"></div> 
+     </div>
+</div>
+#parse("index/_footer.vm") 
+
+<script type="text/javascript">
+     var _iframe_layout,_inner_layout;
+	$(document).ready(function(){
+		_iframe_layout = $('body').layout({
+		      defaults: {
+		        resizable: false,
+		        closable: false,
+		        spacing_open: 5
+		      }
+		    });
+		 _inner_layout = $("#subMain").layout({
+		      defaults: {
+		        resizable: false,
+		        closable: false,
+		        spacing_open: 0
+		      },
+		      center: {
+		          onresize_end: function () {
+		              var grid = $("#grid").data("kendoGrid");
+		              grid.resize();
+		          }
+		      }
+     })
+
+    $('#resetBtn').click(function(){
+      $("#queryForm :text").val('');  
+    });
+
+		
+	
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/videoDetail/page", [{
+              field: "id",
+              hidden: true
+          }, {
+              field: "hpid",
+              title: "HPID",
+              sortable: false,
+              template:"<a href=\"javascript:void(0)\" title=\"查看#: data.hpid #的详细信息\" onclick=\"quick_dialog('addVD','查看#:data.hpid #的信息','$!{rc.contextPath}/videoDetail/edit?showFlag=1&id=#: data.id #',650,300)\">#: data.hpid #</a>",
+              width: 150,
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"}
+          }, {
+              field: "deviceName",
+              title: "设备名称",
+              sortable: false,
+              width: 100,
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"}
+             
+          }, {
+              field: "videoCode",
+              title: "摄像头编号",
+			   sortable: false,
+              width: 180,
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"}
+           
+          }, {
+              field: "viewIp",
+              sortable: false,
+              title: "摄像头IP",
+              width: 200,
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"}
+             
+          }, {
+              field: "viewPort",
+              title: "摄像头端口",
+              sortable: false,
+              width: 80,
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"}
+              
+             
+          }, {
+              field: "channelNo",
+              title: "通道号",
+			   sortable: false,
+              width: 60,
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"}
+           
+          }, {
+              field: "controlIp",
+              title: "控制IP",
+              sortable: false,
+              width: 180,
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"}
+             
+          }, {
+              field: "controlPort",
+              title: "控制端口",
+              sortable: false,
+              width: 80,
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"}
+              
+             
+          }, {
+              field: "username",
+              title: "用户名",
+			   sortable: false,
+              width: 60,
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"}
+           
+          }, {
+              field: "password",
+              sortable: false,
+              title: "密码",
+              width: 90,
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"}
+             
+          }
+          
+          ], 
+      {
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          },resizable:true
+      }, {
+          serverSorting: true
+      }, [
+      #kendo_datagrid_btns("SXTIPSZ")#end
+      ]);
+		
+    });
+	  
+	 
+</script>
+</body>
+</html>

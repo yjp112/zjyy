@@ -1,0 +1,28 @@
+
+<form class="ui-form" id="taskCatagory_add_form" action="$!{rc.contextPath}/nhgl/task/taskCatagory/add" method="post">
+	<input type="hidden" name="taskCatagory.id" value="$!taskCatagory.id"/>
+	<fieldset>
+		<div class="ui-form-item" >
+			<label class="ui-label" ><span class="ui-form-required">*</span>任务分类：</label>
+			<input class="ui-input" type="text" readonly="readonly" data-rule="任务分类:required" name="taskCatagory.catagoryText" value="$!taskCatagory.catagoryText">
+		</div>
+		<div class="ui-form-item" style="width: 320px;">
+			<label class="ui-label" style="text-align:left;width:120px;"><span class="ui-form-required">*</span>任务分类父类编码：</label>
+			<select class="ui-select" name="taskCatagory.parentCode" disabled="disabled">
+				#foreach($tc in $tclist)
+					<option value="$!tc.id" #if($!taskCatagory.parentCode == $tc.catagoryCode) selected #end>$tc.catagoryCode</option>
+				#end
+	        </select>
+		</div>
+		<div class="ui-form-item" >
+			<label class="ui-label" ><span class="ui-form-required">*</span>任务分类编码：</label>
+			<input class="ui-input" type="text" readonly data-rule="任务分类编码:required" name="taskCatagory.catagoryCode" value="$!taskCatagory.catagoryCode">
+		</div>
+		<div class="ui-form-item ui-form-item-textarea" >
+			<label class="ui-label" >备注：</label>
+			<textarea class="ui-textarea ui-textarea-small" readonly name="taskCatagory.remark" >
+				$!taskCatagory.remark
+	        </textarea>
+		</div>
+	</fieldset>
+</form>

@@ -1,0 +1,719 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.spare.entities.Stock">
+	<resultMap type="com.supconit.spare.entities.Stock" id="StockResultMap">      
+        <result property="id" column="ID" />
+        <result property="spareId" column="SPARE_ID" />
+        <result property="warehouseId" column="WAREHOUSE_ID" />
+        <result property="qty" column="QTY" />
+        <result property="availableQty" column="AVAILABLE_QTY" />
+        <result property="backupQty" column="BACKUP_QTY" />
+        <result property="freezeQty" column="FREEZE_QTY" />
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">STOCK</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	<sql id="select_pre" lang="velocity">
+		 select 
+         	ID,
+	        SPARE_ID,
+	        WAREHOUSE_ID,
+	        QTY,
+	        AVAILABLE_QTY,
+	        BACKUP_QTY,
+	        FREEZE_QTY		
+		FROM
+	    <include refid="TABLE_NAME"/> 
+	</sql>
+	
+	<sql id="count_pre" lang="velocity">SELECT COUNT(*) FROM <include refid="TABLE_NAME"/> </sql>
+	
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			#if($_p.id && $_p.id != '')
+				#set($_id = $_p.id)
+				AND ID LIKE @{_id}
+			#end
+			
+			#if($_p.spareId && $_p.spareId != '')
+				#set($_spareId = $_p.spareId)
+				AND SPARE_ID = @{_spareId}
+			#end
+			#if($_p.warehouseId && $_p.warehouseId != '')
+				#set($_warehouseId = $_p.warehouseId)
+				AND WAREHOUSE_ID = @{_warehouseId}
+			#end
+			#if($_p.qty && $_p.qty != '')
+				#set($_qty = $_p.qty)
+				AND QTY = @{_qty}
+			#end
+			
+			#if($_p.availableQty && $_p.availableQty != '')
+				#set($_availableQty = $_p.availableQty)
+				AND AVAILABLE_QTY = @{_availableQty}
+			#end
+			
+			#if($_p.backupQty && $_p.backupQty != '')
+				#set($_backupQty = $_p.backupQty)
+				AND BACKUP_QTY = @{_backupQty}
+			#end
+			
+			
+		#end
+		]]>	
+    </sql>
+	
+    <!-- 插入记录-->
+    <sql id="insert_sql" lang="velocity">
+        INSERT INTO <include refid="TABLE_NAME"/>(
+	        #if($_databaseId == 'oracle') ID, #end
+		     SPARE_ID,
+	        WAREHOUSE_ID,
+	        QTY,
+	        AVAILABLE_QTY,
+	        BACKUP_QTY,
+	        FREEZE_QTY
+        ) VALUES (
+        	#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end
+	        @{_parameter.spareId,jdbcType=NUMERIC},
+	        @{_parameter.warehouseId,jdbcType=NUMERIC},
+	        @{_parameter.qty,jdbcType=NUMERIC},
+	        @{_parameter.availableQty,jdbcType=NUMERIC},
+	        @{_parameter.backupQty,jdbcType=NUMERIC},
+	        @{_parameter.freezeQty,jdbcType=NUMERIC}
+        )
+    </sql>
+    
+    <insert id="insert" parameterType="com.supconit.spare.entities.Stock" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="insert_sql" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.spare.entities.Stock" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    
+	<!-- 更新记录-->
+	<update id="update"  parameterType="com.supconit.spare.entities.Stock" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+			#mset()
+				<![CDATA[
+			        #if($_parameter.spareId)SPARE_ID = @{_parameter.spareId,jdbcType=NUMERIC},#end
+			        #if($_parameter.warehouseId )WAREHOUSE_ID = @{_parameter.warehouseId,jdbcType=NUMERIC},#end
+			        #if($_parameter.qty )QTY = @{_parameter.qty,jdbcType=NUMERIC},#end
+			        #if($_parameter.availableQty)AVAILABLE_QTY = @{_parameter.availableQty,jdbcType=NUMERIC},#end
+			        #if($_parameter.backupQty)BACKUP_QTY = @{_parameter.backupQty,jdbcType=NUMERIC},#end
+			        #if($_parameter.supplierId)SUPPLIER_ID = @{_parameter.supplierId,jdbcType=NUMERIC},#end
+			    
+			    ]]>
+			#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+		
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.spare.entities.Stock" resultMap="BaseResultMap" lang="velocity" databaseId="oracle">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			t.ID,
+			t.SPARE_ID,
+			t.WAREHOUSE_ID,
+			t.QTY,
+			t.AVAILABLE_QTY,
+			t.BACKUP_QTY,
+			t.FREEZE_QTY,
+			t1.SPARE_CODE spareCode,
+			t1.SPARE_NAME spareName,
+			t1.SPARE_CATEGORY_ID,
+			t1.spec,
+			t1.model,
+			t2.CATEGORY_NAME categoryName,
+			t3.SIMPLE_NAME supplyName,
+			t4.WAREHOUSE_NAME warehouseName
+		FROM STOCK t
+		LEFT JOIN SPARE t1 ON t.SPARE_ID = t1.ID
+		LEFT JOIN SPARE_CATEGORY t2 ON t1.SPARE_CATEGORY_ID=t2.ID
+		LEFT JOIN SUPPLIER t3 on t1.SUPPLIER_ID=t3.id
+		LEFT JOIN WAREHOUSE t4 on t.WAREHOUSE_ID=t4.id
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			#if($_p.id && $_p.id != '')
+				#set($_id = $_p.id)
+				AND t.ID LIKE @{_id}
+			#end
+			
+			#if($_p.spareId && $_p.spareId != '')
+				#set($_spareId = $_p.spareId)
+				AND t.SPARE_ID = @{_spareId}
+			#end
+			#if($_p.warehouseId && $_p.warehouseId != '')
+				#set($_warehouseId = $_p.warehouseId)
+				AND t.WAREHOUSE_ID = @{_warehouseId}
+			#end
+			
+			
+			#if($_p.spareCode && $_p.spareCode != '')
+				#set($_spareCode = '%' + $_p.spareCode + '%')
+				AND t1.SPARE_CODE LIKE @{_spareCode}
+			#end
+			
+			
+			#if($_p.spareName && $_p.spareName != '')
+				#set($_spareName = '%' + $_p.spareName + '%')
+				AND t1.SPARE_NAME LIKE @{_spareName}
+			#end
+			
+			#if($_p.spareCategoryIds && $_p.spareCategoryIds.size() > 0 )
+				#set($_spareCategoryIds =$_p.spareCategoryIds)
+				AND 
+				#repeat( $_spareCategoryIds $id "," " t1.SPARE_CATEGORY_ID IN (" ")" )
+		    		@{id,jdbcType=NUMERIC}
+				#end
+			#end
+			#if($_p.categoryIds && $_p.categoryIds.size() > 0 )
+				#set($_categoryIds =$_p.categoryIds)
+				AND 
+				#repeat( $_categoryIds $id "," " t1.SPARE_CATEGORY_ID IN (" ")" )
+		    		@{id,jdbcType=NUMERIC}
+				#end
+			#end
+		#end
+		]]>	
+		#order($_parameter.condition,"t.ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.spare.entities.Stock" resultMap="BaseResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			t.ID,
+			t.SPARE_ID,
+			t.WAREHOUSE_ID,
+			t.QTY,
+			t.AVAILABLE_QTY,
+			t.BACKUP_QTY,
+			t.FREEZE_QTY,
+			t1.SPARE_CODE spareCode,
+			t1.SPARE_NAME spareName,
+			t1.SPARE_CATEGORY_ID,
+			t1.spec,
+			t1.model,
+			t2.CATEGORY_NAME categoryName,
+			t3.SIMPLE_NAME supplyName,
+			t4.WAREHOUSE_NAME warehouseName
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"t.ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM
+		STOCK t
+		LEFT JOIN SPARE t1 ON t.SPARE_ID = t1.ID
+		LEFT JOIN SPARE_CATEGORY t2 ON t1.SPARE_CATEGORY_ID=t2.ID
+		LEFT JOIN SUPPLIER t3 on t1.SUPPLIER_ID=t3.id
+		LEFT JOIN WAREHOUSE t4 on t.WAREHOUSE_ID=t4.id
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			#if($_p.id && $_p.id != '')
+				#set($_id = $_p.id)
+				AND t.ID LIKE @{_id}
+			#end
+			
+			#if($_p.spareId && $_p.spareId != '')
+				#set($_spareId = $_p.spareId)
+				AND t.SPARE_ID = @{_spareId}
+			#end
+			#if($_p.warehouseId && $_p.warehouseId != '')
+				#set($_warehouseId = $_p.warehouseId)
+				AND t.WAREHOUSE_ID = @{_warehouseId}
+			#end
+			
+			
+			#if($_p.spareCode && $_p.spareCode != '')
+				#set($_spareCode = '%' + $_p.spareCode + '%')
+				AND t1.SPARE_CODE LIKE @{_spareCode}
+			#end
+			
+			
+			#if($_p.spareName && $_p.spareName != '')
+				#set($_spareName = '%' + $_p.spareName + '%')
+				AND t1.SPARE_NAME LIKE @{_spareName}
+			#end
+			
+			#if($_p.categoryIds && $_p.categoryIds.size() > 0 )
+				#set($_categoryIds =$_p.categoryIds)
+				AND 
+				#repeat( $_categoryIds $id "," " t1.SPARE_CATEGORY_ID IN (" ")" )
+		    		@{id,jdbcType=NUMERIC}
+				#end
+			#end
+		#end
+		]]>	
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countByConditions" parameterType="com.supconit.spare.entities.Stock" resultType="long" lang="velocity">
+        SELECT count(*)
+		FROM STOCK t
+		LEFT JOIN SPARE t1 ON t.SPARE_ID = t1.ID
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			#if($_p.id && $_p.id != '')
+				#set($_id = $_p.id)
+				AND t.ID LIKE @{_id}
+			#end
+			
+			#if($_p.spareId && $_p.spareId != '')
+				#set($_spareId = $_p.spareId)
+				AND t.SPARE_ID = @{_spareId}
+			#end
+			#if($_p.warehouseId && $_p.warehouseId != '')
+				#set($_warehouseId = $_p.warehouseId)
+				AND t.WAREHOUSE_ID = @{_warehouseId}
+			#end
+			
+			
+			#if($_p.spareCode && $_p.spareCode != '')
+				#set($_spareCode = '%' + $_p.spareCode + '%')
+				AND t1.SPARE_CODE LIKE @{_spareCode}
+			#end
+			
+			
+			#if($_p.spareName && $_p.spareName != '')
+				#set($_spareName = '%' + $_p.spareName + '%')
+				AND t1.SPARE_NAME LIKE @{_spareName}
+			#end
+			
+			
+			#if($_p.categoryIds && $_p.categoryIds.size() > 0 )
+				#set($_categoryIds =$_p.categoryIds)
+				AND 
+				#repeat( $_categoryIds $id "," " t1.SPARE_CATEGORY_ID IN (" ")" )
+		    		@{id,jdbcType=NUMERIC}
+				#end
+			#end
+		#end
+		]]>	
+    </select>
+    <select id="selectBySpareIds" parameterType="com.supconit.spare.entities.Stock" resultMap="BaseResultMap"  >
+        
+		SELECT
+			t.ID,
+			t.SPARE_ID,
+			t.WAREHOUSE_ID,
+			t.QTY,
+			t.AVAILABLE_QTY,
+			t.BACKUP_QTY,
+			t.FREEZE_QTY
+		FROM STOCK t
+		<where>
+			t.WAREHOUSE_ID = #{warehouseId,jdbcType=NUMERIC} and
+		    t.SPARE_ID in 
+        	<foreach item="item" index="index" collection="spareIds" open="(" separator="," close=")">
+					#{item,jdbcType=NUMERIC}
+			</foreach>
+		</where>
+		
+    </select>
+    
+	
+    
+    <select id="selectByWarehouseId"  resultMap="BaseResultMap" parameterType="long" lang="velocity" >
+		SELECT
+			t.ID,
+			t.SPARE_ID,
+			t.WAREHOUSE_ID,
+			t.QTY,
+			t.AVAILABLE_QTY,
+			t.BACKUP_QTY,
+			t.FREEZE_QTY,
+			t1.SPARE_CODE spareCode,
+			t1.SPARE_NAME spareName
+		FROM STOCK t LEFT JOIN SPARE t1 ON t.SPARE_ID = t1.ID
+		WHERE t.WAREHOUSE_ID = @{_parameter, jdbcType=NUMERIC}
+		#order($_parameter.condition,"t.ID DESC")
+    </select>
+    
+	
+    
+    <select id="getById" resultMap="StockResultMap" parameterType="long" lang="velocity">
+		<include refid="select_pre"/>
+		WHERE ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+
+	<delete id="deleteById" parameterType="long" lang="velocity"> 
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</delete>
+	<delete id="deleteByIds">
+		DELETE FROM
+		<include refid="TABLE_NAME" />
+	    WHERE ID IN    
+	        <foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+				#{id,jdbcType=NUMERIC}
+			</foreach>
+	</delete>
+	<sql id="Base_Column_List" >
+        t.ID,
+        t.SPARE_ID,
+        t.WAREHOUSE_ID,
+        t.QTY,
+        t.AVAILABLE_QTY,
+        t.BACKUP_QTY,
+        t.FREEZE_QTY
+    </sql>
+	<resultMap type="com.supconit.spare.entities.Stock" id="BaseResultMap">      
+	        <result property="id" column="ID" />
+	        <result property="spareId" column="SPARE_ID" />
+	        <result property="warehouseId" column="WAREHOUSE_ID" />
+	        <result property="qty" column="QTY" />
+	        <result property="availableQty" column="AVAILABLE_QTY" />
+	        <result property="backupQty" column="BACKUP_QTY" />
+	        <result property="freezeQty" column="FREEZE_QTY" />
+	        
+	        <result property="costsQty" column="costsQty" />
+	        
+	        <result property="spareName" column="spareName" />
+	        <result property="safeQty" column="safeQty" />
+	        <result property="upperQty" column="upperQty" />
+	        <result property="lowerQty" column="lowerQty" />
+	
+	        <result property="spareCode" column="spareCode" />
+	        <result property="supplyName" column="supplyName" />
+	        <result property="categoryName" column="categoryName" />
+	        <result property="spec" column="spec" />        
+	        <result property="model" column="model" /> 
+	        <result property="unit" column="unit" /> 
+	        <result property="warehouseName" column="warehouseName" />       
+	</resultMap>
+    <select id="selectStockWaring" resultMap="BaseResultMap" lang="velocity" databaseId="oracle" > 
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+        
+		select 
+	    <include refid="Base_Column_List" />,
+	    t2.SPARE_NAME spareName,
+	    t2.SPARE_CODE spareCode,
+		t2.SAFE_QTY safeQty,
+		t2.upper_Qty upperQty,
+		t2.LOWER_QTY lowerQty,
+		t3.WAREHOUSE_CODE warehouseCode,
+		T3.WAREHOUSE_NAME warehouseName
+		from STOCK t LEFT JOIN SPARE t2 ON t.SPARE_ID = t2.ID LEFT JOIN WAREHOUSE t3 on t.WAREHOUSE_ID=t3.id
+			<![CDATA[
+				#where()
+				    #set($_p = $_parameter.condition)
+					#if($_p.spareCategoryIds && $_p.spareCategoryIds.size() > 0 )
+						#set($_spareCategoryIds =$_p.spareCategoryIds)
+						AND 
+						#repeat( $_spareCategoryIds $id "," " t2.SPARE_CATEGORY_ID IN (" ")" )
+				    		@{id,jdbcType=NUMERIC}
+						#end
+					#end
+					AND (t.AVAILABLE_QTY < t2.SAFE_QTY OR t.AVAILABLE_QTY < t2.LOWER_QTY OR t.AVAILABLE_QTY > t2.UPPER_QTY)
+				#end
+			]]>	
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	 <select id="selectStockWaring" resultMap="BaseResultMap" parameterType="com.supconit.spare.entities.Stock" lang="velocity" databaseId="sqlserver"  >
+	   <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+	  
+	   select 
+	    <include refid="Base_Column_List" />,
+	    t2.SPARE_NAME spareName,
+	    t2.SPARE_CODE spareCode,
+		t2.SAFE_QTY safeQty,
+		t2.upper_Qty upperQty,
+		t2.LOWER_QTY lowerQty,
+		t3.WAREHOUSE_CODE warehouseCode,
+		T3.WAREHOUSE_NAME warehouseName
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"t.ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		from STOCK t LEFT JOIN SPARE t2 ON t.SPARE_ID = t2.ID LEFT JOIN WAREHOUSE t3 on t.WAREHOUSE_ID=t3.id
+			<![CDATA[
+				#where()
+				      #set($_p = $_parameter.condition)
+					#if($_p.spareCategoryIds && $_p.spareCategoryIds.size() > 0 )
+						#set($_spareCategoryIds =$_p.spareCategoryIds)
+						AND 
+						#repeat( $_spareCategoryIds $id "," " t2.SPARE_CATEGORY_ID IN (" ")" )
+				    		@{id,jdbcType=NUMERIC}
+						#end
+					#end
+					AND (t.AVAILABLE_QTY < t2.SAFE_QTY OR t.AVAILABLE_QTY < t2.LOWER_QTY OR t.AVAILABLE_QTY > t2.UPPER_QTY)
+				#end
+			]]>	
+			<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	  </select> 
+	  
+	 
+		
+   
+	 <select id="countStockWaring" resultType="long"   >
+	   
+	   select count(*) from STOCK t INNER JOIN SPARE t2 ON t.SPARE_ID = t2.ID
+		<![CDATA[
+				#where()
+				 #set($_p = $_parameter.condition)
+					#if($_p.spareCategoryIds && $_p.spareCategoryIds.size() > 0 )
+						#set($_spareCategoryIds =$_p.spareCategoryIds)
+						AND 
+						#repeat( $_spareCategoryIds $id "," " t2.SPARE_CATEGORY_ID IN (" ")" )
+				    		@{id,jdbcType=NUMERIC}
+						#end
+					#end
+					AND (t.AVAILABLE_QTY < t2.SAFE_QTY OR t.AVAILABLE_QTY < t2.LOWER_QTY OR t.AVAILABLE_QTY > t2.UPPER_QTY)
+				#end
+			]]>	
+	 </select>
+	  <select id="selectWarehouseWaring" resultMap="BaseResultMap" lang="velocity"  databaseId="sqlserver">
+		 <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		  select 
+		    t.WAREHOUSE_ID,t.AVAILABLE_QTY,t.QTY,t2.WAREHOUSE_NAME warehouseName,
+			t2.SAFE_QTY safeQty,
+			t2.upper_Qty upperQty,
+			t2.LOWER_QTY lowerQty,
+			t2.WAREHOUSE_CODE warehouseCode
+			<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+			#order($_parameter.condition,"t2.ID DESC")
+			<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		from (select tmp.WAREHOUSE_ID,sum(tmp.AVAILABLE_QTY)AVAILABLE_QTY,SUM(TMP.QTY)QTY from STOCK tmp GROUP BY tmp.WAREHOUSE_ID
+	           		
+	           		<![CDATA[
+					
+					    #set($_p = $_parameter.condition)
+						#if($_p.warhouseIds && $_p.warhouseIds.size() > 0 )
+							#set($_warhouseIds =$_p.warhouseIds)
+							#repeat( $_warhouseIds $id "," " having tmp.WAREHOUSE_ID not in (" ")" )
+					    		@{id,jdbcType=NUMERIC}
+							#end
+						#end
+					
+				]]>	
+		) t LEFT JOIN WAREHOUSE t2 on t.WAREHOUSE_ID=t2.ID
+			
+		       <![CDATA[ #where() (t.AVAILABLE_QTY < t2.SAFE_QTY OR t.AVAILABLE_QTY < t2.LOWER_QTY OR t.AVAILABLE_QTY > t2.UPPER_QTY) #end]]> 
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>	
+	  </select>
+	   <select id="selectWarehouseWaring" resultMap="BaseResultMap" lang="velocity"  databaseId="oracle">
+		 <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		  select 
+		    t.WAREHOUSE_ID,t.AVAILABLE_QTY,t.QTY,t2.WAREHOUSE_NAME warehouseName,
+			t2.SAFE_QTY safeQty,
+			t2.upper_Qty upperQty,
+			t2.LOWER_QTY lowerQty,
+			t2.WAREHOUSE_CODE warehouseCode
+		from (select tmp.WAREHOUSE_ID,sum(tmp.AVAILABLE_QTY)AVAILABLE_QTY,SUM(TMP.QTY)QTY from STOCK tmp GROUP BY tmp.WAREHOUSE_ID
+	           		
+	           		<![CDATA[
+					
+					    #set($_p = $_parameter.condition)
+						#if($_p.warhouseIds && $_p.warhouseIds.size() > 0 )
+							#set($_warhouseIds =$_p.warhouseIds)
+							#repeat( $_warhouseIds $id "," " having tmp.WAREHOUSE_ID not in (" ")" )
+					    		@{id,jdbcType=NUMERIC}
+							#end
+						#end
+					
+				]]>	
+		) t LEFT JOIN WAREHOUSE t2 on t.WAREHOUSE_ID=t2.ID
+			
+		       <![CDATA[ #where() (t.AVAILABLE_QTY < t2.SAFE_QTY OR t.AVAILABLE_QTY < t2.LOWER_QTY OR t.AVAILABLE_QTY > t2.UPPER_QTY) #end]]> 
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>	
+	  </select>
+	   <select id="countWarehouseWaring" resultType="long" parameterType="list">
+	   
+		    select count(*)
+		from (select tmp.WAREHOUSE_ID,sum(tmp.AVAILABLE_QTY)AVAILABLE_QTY from STOCK tmp GROUP BY tmp.WAREHOUSE_ID
+	           		<![CDATA[
+					
+					    #set($_p = $_parameter.condition)
+						#if($_p.warhouseIds && $_p.warhouseIds.size() > 0 )
+							#set($_warhouseIds =$_p.warhouseIds)
+							
+							#repeat( $_warhouseIds $id "," " having tmp.WAREHOUSE_ID not in (" ")" )
+					    		@{id,jdbcType=NUMERIC}
+							#end
+						#end
+					
+				]]>	
+		) t INNER JOIN WAREHOUSE t2 on t.WAREHOUSE_ID=t2.ID
+			 <![CDATA[ #where() (t.AVAILABLE_QTY < t2.SAFE_QTY OR t.AVAILABLE_QTY < t2.LOWER_QTY OR t.AVAILABLE_QTY > t2.UPPER_QTY) #end]]> 
+			
+	   </select>
+	   
+	    <select id="selectWarehouseId" resultType="long">
+	   		 select distinct t.WAREHOUSE_ID from STOCK  t INNER JOIN SPARE t1 on t.spare_id=t1.id where t1.SAFE_QTY is not null or t1.UPPER_QTY is not null or t1.LOWER_QTY is not null
+ 
+	    </select>
+	    <update id="inCreaseStock" parameterType="com.supconit.spare.entities.Stock" databaseId="oracle">
+				    MERGE into STOCK t
+			USING (
+					SELECT  #{spareId,jdbcType=NUMERIC} as SPARE_ID, #{warehouseId,jdbcType=NUMERIC} as WAREHOUSE_ID, #{qty,jdbcType=NUMERIC} as QTY, #{availableQty,jdbcType=NUMERIC} as AVAILABLE_QTY, #{backupQty,jdbcType=NUMERIC} as BACKUP_QTY, #{freezeQty,jdbcType=NUMERIC} as FREEZE_QTY from dual) s
+				 ON (
+						t.SPARE_ID = s.SPARE_ID
+					   AND t.WAREHOUSE_ID = s.WAREHOUSE_ID
+					)
+					WHEN MATCHED THEN
+						UPDATE
+					SET t.QTY = t.QTY + s.QTY,
+					 t.AVAILABLE_QTY = t.AVAILABLE_QTY + s.AVAILABLE_QTY,
+					 t.BACKUP_QTY = t.BACKUP_QTY + s.BACKUP_QTY,
+					 t.FREEZE_QTY = t.FREEZE_QTY + s.FREEZE_QTY
+					WHEN not matched THEN
+						INSERT(
+			        ID,
+						  SPARE_ID,
+							WAREHOUSE_ID,
+							QTY,
+							AVAILABLE_QTY,
+							BACKUP_QTY,
+							FREEZE_QTY
+						)
+			      VALUES
+						(
+			                SEQ_STOCK.NEXTVAL,
+						    s.SPARE_ID,
+							s.WAREHOUSE_ID,
+							s.QTY,
+							s.AVAILABLE_QTY,
+							s.BACKUP_QTY,
+							s.FREEZE_QTY
+						)
+	    </update>
+	    <update id="inCreaseStock" parameterType="com.supconit.spare.entities.Stock">
+	    
+	    	MERGE STOCK AS Target USING (
+		SELECT #{spareId,jdbcType=NUMERIC}, #{warehouseId,jdbcType=NUMERIC}, #{qty,jdbcType=NUMERIC}, #{availableQty,jdbcType=NUMERIC}, #{backupQty,jdbcType=NUMERIC}, #{freezeQty,jdbcType=NUMERIC}) 
+		AS Source (
+			SPARE_ID,
+			WAREHOUSE_ID,
+			QTY,
+			AVAILABLE_QTY,
+			BACKUP_QTY,
+			FREEZE_QTY
+		) ON (
+			Target.SPARE_ID = Source.SPARE_ID
+			AND Target.WAREHOUSE_ID = Source.WAREHOUSE_ID
+		)
+		WHEN MATCHED THEN
+			UPDATE
+		SET TARGET.QTY = TARGET.QTY + Source.QTY,
+		 TARGET.AVAILABLE_QTY = TARGET.AVAILABLE_QTY + Source.AVAILABLE_QTY,
+		 TARGET.BACKUP_QTY = TARGET.BACKUP_QTY + Source.BACKUP_QTY,
+		 TARGET.FREEZE_QTY = TARGET.FREEZE_QTY + Source.FREEZE_QTY
+		WHEN NOT MATCHED BY TARGET THEN
+			INSERT (
+				SPARE_ID,
+				WAREHOUSE_ID,
+				QTY,
+				AVAILABLE_QTY,
+				BACKUP_QTY,
+				FREEZE_QTY
+			)
+		VALUES
+			(
+				SPARE_ID,
+				WAREHOUSE_ID,
+				QTY,
+				AVAILABLE_QTY,
+				BACKUP_QTY,
+				FREEZE_QTY
+			);
+	    </update>
+	    
+	    <update id="reduceStock" parameterType="com.supconit.spare.entities.Stock">
+	    	UPDATE	STOCK
+			<set>
+	        <if test="qty != null">QTY = QTY-#{qty,jdbcType=NUMERIC},</if>
+	        <if test="availableQty != null">AVAILABLE_QTY = AVAILABLE_QTY-#{availableQty,jdbcType=NUMERIC},</if>
+	        <if test="backupQty != null">BACKUP_QTY = BACKUP_QTY-#{backupQty,jdbcType=NUMERIC},</if>
+	        <if test="freezeQty != null">FREEZE_QTY = FREEZE_QTY-#{freezeQty,jdbcType=NUMERIC},</if>
+			</set>
+			WHERE WAREHOUSE_ID = #{warehouseId,jdbcType=NUMERIC} and SPARE_ID=#{spareId,jdbcType=NUMERIC}
+	    	
+	    </update>
+	    
+	    <select id="findCostsQtyByCondition" parameterType="com.supconit.spare.entities.Stock" resultMap="BaseResultMap">
+	    		SELECT
+					t.ID,
+					t.SPARE_ID,
+					t.WAREHOUSE_ID,
+					t.QTY,
+					t.AVAILABLE_QTY,
+					t.BACKUP_QTY,
+					t.FREEZE_QTY,
+					t2.SPARE_CODE spareCode,
+					t2.SPARE_NAME spareName,
+					t2.SPARE_CATEGORY_ID,
+					t2.spec,
+					t2.model,
+					t2.unit,
+					t3.CATEGORY_NAME categoryName,
+					t1.costsQty
+				FROM
+					STOCK t
+				LEFT JOIN (
+					SELECT
+						COUNT (d.qty) costsQty,
+						d.SPARE_ID
+					FROM
+						STOCK_OUT_DETAIL d 
+						<if test="startCreateDate!=null or endCreateDate!=null">
+						INNER JOIN STOCK_OUT d1 on d.STOCK_OUT_ID=d1.ID 
+						<where>
+							<if test="startCreateDate!=null">
+								d1.CREATE_DATE &gt;=#{startCreateDate} and
+							</if>
+							<if test="endCreateDate!=null">
+								d1.CREATE_DATE &lt;=#{endCreateDate} and
+							</if>
+							1=1
+						</where> 
+						</if>
+					GROUP BY
+						d.SPARE_ID
+				) t1 ON t.SPARE_ID = t1.SPARE_ID INNER JOIN SPARE t2 on t.SPARE_ID=t2.id 
+				LEFT JOIN SPARE_CATEGORY t3 ON t2.SPARE_CATEGORY_ID=t3.ID
+			<where>
+		        <if test="spareCode != null and spareCode!=''"> t2.SPARE_CODE like '%'+#{spareCode}+'%' and </if>
+		        <if test="spareName != null  and spareName!=''"> t2.SPARE_NAME like '%'+#{spareName}+'%' and </if>
+		        <if test="categoryIds != null and categoryIds.size>0"> t2.SPARE_CATEGORY_ID in
+		        	<foreach item="item" index="index" collection="categoryIds" open="(" separator="," close=")">
+							#{item}
+					</foreach>
+		         	and 
+		         </if>
+		         1=1
+			</where>
+				ORDER BY t.ID DESC
+	    
+	    </select>
+	    
+	     <select id="countCostQtyByCondition" parameterType="com.supconit.spare.entities.Stock" resultType="long">
+	     
+	     		SELECT count(*)
+			FROM STOCK t
+			LEFT JOIN SPARE t1 ON t.SPARE_ID = t1.ID
+			<where>
+	        <if test="id != null "> t.ID = #{id} and </if>
+	        <if test="spareId != null "> t.SPARE_ID = #{spareId} and </if>
+	        <if test="warehouseId != null "> t.WAREHOUSE_ID = #{warehouseId} and </if>
+	        
+	        <if test="spareCode != null and spareCode!=''"> t1.SPARE_CODE like '%'+#{spareCode}+'%' and </if>
+	        <if test="spareName != null and spareName!=''"> t1.SPARE_NAME like '%'+#{spareName}+'%' and </if>
+	        <if test="categoryIds != null and categoryIds.size()>0"> t1.SPARE_CATEGORY_ID in
+	        	<foreach item="item" index="index" collection="categoryIds" open="(" separator="," close=")">
+						#{item}
+				</foreach>
+	         	and 
+	         </if>
+	         1=1
+			</where>
+	     </select>
+</mapper>

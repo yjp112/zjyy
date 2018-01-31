@@ -1,0 +1,262 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.base.entities.DeviceChange">
+
+	<resultMap type="com.supconit.base.entities.DeviceChange" id="DeviceChangeResultMap">      
+        <result property="id" column="ID" />
+        <result property="deviceId" column="DEVICE_ID" />
+        <result property="changeProperty" column="CHANGE_PROPERTY" />
+        <result property="oldValue" column="OLD_VALUE" />
+        <result property="newValue" column="NEW_VALUE" />
+        <result property="changeDate" column="CHANGE_DATE" />
+        <result property="createId" column="CREATE_ID" />
+        <result property="creator" column="CREATOR" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="updateId" column="UPDATE_ID" />
+        <result property="updator" column="UPDATOR" />
+        <result property="updateDate" column="UPDATE_DATE" />
+        
+        <result property="deviceCode" column="DEVICE_CODE" />
+        <result property="deviceName" column="DEVICE_NAME" />
+        <result property="categoryName" column="CATEGORY_NAME" />
+        
+	</resultMap>
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+	<sql id="TABLE_NAME" lang="velocity">DEVICE_CHANGE</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>		
+    <!-- 获取记录列表-->
+	<sql id="select_pre" lang="velocity">
+    select 
+        A.ID,
+        A.DEVICE_ID,
+        A.CHANGE_PROPERTY,
+        A.OLD_VALUE,
+        A.NEW_VALUE,
+        A.CHANGE_DATE,
+        A.CREATE_ID,
+        A.CREATOR,
+        A.CREATE_DATE,
+        A.UPDATE_ID,
+        A.UPDATOR,
+        A.UPDATE_DATE,
+        D.DEVICE_CODE,
+        D.DEVICE_NAME,
+        DC.CATEGORY_NAME		
+		FROM
+		DEVICE_CHANGE A
+		INNER JOIN DEVICE D
+        ON A.DEVICE_ID = D.ID 
+		INNER JOIN DEVICE_CATEGORY DC
+        ON D.CATEGORY_ID = DC.ID 
+        
+	</sql>
+    <!-- 获取记录列表-->
+	<sql id="select1_pre" lang="velocity">
+    select 
+        A.ID,
+        A.DEVICE_ID,
+        A.CHANGE_PROPERTY,
+        A.OLD_VALUE,
+        A.NEW_VALUE,
+        A.CHANGE_DATE,
+        A.CREATE_ID,
+        A.CREATOR,
+        A.CREATE_DATE,
+        A.UPDATE_ID,
+        A.UPDATOR,
+        A.UPDATE_DATE,
+        D.DEVICE_CODE,
+        D.DEVICE_NAME,
+        DC.CATEGORY_NAME		
+		FROM
+		DEVICE_CHANGE A
+		INNER JOIN DEVICE D
+        ON A.DEVICE_ID = D.ID 
+		INNER JOIN DEVICE_CATEGORY DC
+        ON D.CATEGORY_ID = DC.ID 
+        
+	</sql>
+	<sql id="count_pre" lang="velocity">
+		SELECT
+		COUNT(*)
+		FROM
+		DEVICE_CHANGE A
+		INNER JOIN DEVICE D
+        ON A.DEVICE_ID = D.ID 
+        INNER JOIN DEVICE_CATEGORY DC
+        ON D.CATEGORY_ID = DC.ID 
+	</sql>
+	<insert id="insert" parameterType="com.supconit.base.entities.DeviceChange" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    <insert id="insert" parameterType="com.supconit.base.entities.DeviceChange" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>        
+		<include refid="insert_sql" />
+	</insert>    
+	<sql id="insert_sql" lang="velocity">
+		INSERT INTO DEVICE_CHANGE
+		(#if($_databaseId=='oracle') ID,#end
+	        DEVICE_ID,
+	        CHANGE_PROPERTY,
+	        OLD_VALUE,
+	        NEW_VALUE,
+	        CHANGE_DATE,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE,
+	        UPDATE_ID,
+	        UPDATOR,
+	        UPDATE_DATE		
+		) VALUES (        
+		 #if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end	 
+	        @{_parameter.deviceId,jdbcType=NUMERIC},
+	        @{_parameter.changeProperty,jdbcType=VARCHAR},
+	        @{_parameter.oldValue,jdbcType=VARCHAR},
+	        @{_parameter.newValue,jdbcType=VARCHAR},
+	        @{_parameter.changeDate,jdbcType=TIMESTAMP},
+	        @{_parameter.createId,jdbcType=NUMERIC},
+	        @{_parameter.creator,jdbcType=VARCHAR},
+	        @{_parameter.createDate,jdbcType=TIMESTAMP},
+	        @{_parameter.updateId,jdbcType=NUMERIC},
+	        @{_parameter.updator,jdbcType=VARCHAR},
+	        @{_parameter.updateDate,jdbcType=TIMESTAMP}		
+		)
+	</sql>		            
+    
+
+	<select id="getById" resultMap="DeviceChangeResultMap" parameterType="Long" >
+		<include refid="select1_pre" />        
+        WHERE A.ID = #{id}
+	</select>
+	
+	
+	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.base.entities.DeviceChange">
+		UPDATE	DEVICE_CHANGE
+		<set>
+        <if test="deviceId != null">DEVICE_ID = #{deviceId,jdbcType=NUMERIC},</if>
+        <if test="changeProperty != null">CHANGE_PROPERTY = #{changeProperty,jdbcType=VARCHAR},</if>
+        <if test="oldValue != null">OLD_VALUE = #{oldValue,jdbcType=VARCHAR},</if>
+        <if test="newValue != null">NEW_VALUE = #{newValue,jdbcType=VARCHAR},</if>
+        <if test="createId != null">CREATE_ID = #{createId,jdbcType=NUMERIC},</if>
+        <if test="creator != null">CREATOR = #{creator,jdbcType=VARCHAR},</if>
+        <if test="createDate != null">CREATE_DATE = #{createDate,jdbcType=TIMESTAMP},</if>
+        <if test="updateId != null">UPDATE_ID = #{updateId,jdbcType=NUMERIC},</if>
+        <if test="updator != null">UPDATOR = #{updator,jdbcType=VARCHAR},</if>
+        <if test="updateDate != null">UPDATE_DATE = #{updateDate,jdbcType=TIMESTAMP},</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+    <!-- 通过 ID 获取对象-->
+	<delete id="deleteById" parameterType="Long">
+		DELETE FROM DEVICE_CHANGE WHERE ID = #{id}
+	</delete>
+	<sql id="condition_sql" lang="velocity">
+	<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			1=1 		
+			#if($_p.id)
+				#set($_id = $_p.id)
+				AND A.ID = @{_id,jdbcType=BIGINT}
+			#end	
+			#if($_p.deviceId)
+				#set($_deviceId = $_p.deviceId)
+				AND A.DEVICE_ID = @{_deviceId,jdbcType=BIGINT}
+			#end	
+			#if($_p.changeProperty && $_p.changeProperty != '')
+				#set($_changeProperty = '%' + $_p.changeProperty + '%')
+				AND A.CHANGE_PROPERTY LIKE @{_changeProperty,jdbcType=VARCHAR}
+			#end				
+			#if($_p.oldValue && $_p.oldValue != '')
+				#set($_oldValue = '%' + $_p.oldValue + '%')
+				AND A.OLD_VALUE LIKE @{_oldValue,jdbcType=VARCHAR}
+			#end				
+			#if($_p.newValue && $_p.newValue != '')
+				#set($_newValue = '%' + $_p.newValue + '%')
+				AND A.NEW_VALUE LIKE @{_newValue,jdbcType=VARCHAR}
+			#end	
+			#if($_p.changeDateFrom)
+				#set($_changeDateFrom = $_p.changeDateFrom)
+				AND A.CREATE_DATE >= @{_changeDateFrom,jdbcType=TIMESTAMP}
+			#end			
+			#if($_p.changeDateTo)
+				#set($_changeDateTo = $_p.changeDateTo)
+				AND A.CREATE_DATE <= @{_changeDateTo,jdbcType=TIMESTAMP}
+			#end
+			#if($_p.deviceCode && $_p.deviceCode != '')
+				#set($_deviceCode = '%' + $_p.deviceCode + '%')
+				AND D.DEVICE_CODE LIKE @{_deviceCode,jdbcType=VARCHAR}
+			#end			
+			#if($_p.deviceName && $_p.deviceName != '')
+				#set($_deviceName = '%' + $_p.deviceName + '%')
+				AND D.DEVICE_NAME  LIKE @{_deviceName,jdbcType=VARCHAR}
+			#end			
+		#end							
+		]]>	
+	</sql>
+    
+    <!-- 按条件查询记录--> 
+	<select id="findByCondition" parameterType="com.supconit.base.entities.DeviceChange" resultMap="DeviceChangeResultMap" lang="velocity" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre" />
+		<include refid="condition_sql" />
+		#order($_parameter.condition,"A.ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.base.entities.DeviceChange" resultMap="DeviceChangeResultMap" lang="velocity" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>		
+		 select 
+        A.ID,
+        A.DEVICE_ID,
+        A.CHANGE_PROPERTY,
+        A.OLD_VALUE,
+        A.NEW_VALUE,
+        A.CHANGE_DATE,
+        A.CREATE_ID,
+        A.CREATOR,
+        A.CREATE_DATE,
+        A.UPDATE_ID,
+        A.UPDATOR,
+        A.UPDATE_DATE,
+        D.DEVICE_CODE,
+        D.DEVICE_NAME,
+        DC.CATEGORY_NAME
+        <include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+ 		#order($_parameter.condition,"A.ID DESC")
+ 		<include refid="_PUBLIC_V.AS_ROW_NUM" />	
+		FROM
+		DEVICE_CHANGE A
+		INNER JOIN DEVICE D
+        ON A.DEVICE_ID = D.ID 
+		INNER JOIN DEVICE_CATEGORY DC
+        ON D.CATEGORY_ID = DC.ID 
+		<include refid="condition_sql" />
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+
+    <select id="countByCondition" parameterType="com.supconit.base.entities.DeviceChange" resultType="long" lang="velocity">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+    
+    <!-- 删除多条记录-->
+	<delete id="deleteByIds">
+        DELETE FROM DEVICE_CHANGE WHERE ID in 
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+
+	</delete>
+    <!-- 通过 ID 获取对象-->
+	<delete id="deleteByDeviceId" parameterType="Long">
+		DELETE FROM DEVICE_CHANGE WHERE DEVICE_ID = #{deviceId}
+	</delete>
+</mapper>

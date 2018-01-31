@@ -1,0 +1,29 @@
+<div>
+  <table id="pagerTable1" style="display: none"></table> 
+</div>		
+<script type="text/javascript">
+    $(document).ready(function () {
+        //列表
+        $("#pagerTable1").datagrid({
+            url: "$!{rc.contextPath}/nhgl/basic/areaConfig/ftxspager?nhType=$!{nhtype}",
+            dataType: "json",
+            method: "GET",
+            usepager: true,
+            rpOptions: [10, 20, 40, 50],
+    		pageSize: 10,
+            singleSelect: true,
+            showCheckbox: true,
+            colModel: [
+                {display: "$!deviceName编码", name: "deviceCode", width: 150},
+                {display: "$!deviceName名称", name: "deviceName", width: 200},
+                {display: "服务区域", name: "serviceArea", width: 200}
+            ], 
+            buttons : [
+            ]
+            ,searchFormId:"pagerForm"
+            ,height: 230
+            ,onSuccess: successFunc
+        });
+        
+    });
+</script>

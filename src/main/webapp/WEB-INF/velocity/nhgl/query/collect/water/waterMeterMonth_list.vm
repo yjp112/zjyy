@@ -1,0 +1,238 @@
+<script type="text/javascript" src="$!{nhgl_static_custom_url}/js/tabs.min.js"> </script>
+
+  <SCRIPT type="text/javascript">
+		var flag = '$!{flag}';
+	$(document).ready(function(){
+
+		if(flag == 2){
+			$('#waterMeterMonth_tab').tabs({
+				defaultTab: 'li:nth-child(2)'
+			});
+		}else{
+			$('#waterMeterMonth_tab').tabs();
+		}
+	});
+  </SCRIPT>
+  <style>
+  	a.ui-input-remove, a.ui-input-icon{
+  		right:3px;
+  	}
+	.panel li.current a{
+		background: #06251d;
+	}
+	.nh-box .ui-tab-panels{
+		border-bottom: 0px;// solid #25e949;
+	}
+  </style>
+ <div class="ui-layout-center" id="subMain">
+	<div class="ui-layout-center" id="div_waterMeterMonth_datalist">
+		<table id="waterMeterMonth_datalist"  class="fn-hide" ></table>
+	</div>
+	<div class="ui-layout-north" id="div_form">
+		<div class="ui-module-name"><label id="menuName">#crumbs("$!menu.code",1)</label></div>
+		<form id="waterMeterMonth_list_search" class="ui-form ui-form-search fn-clear">
+		    <input type="hidden" id="areaId"  value="$!area.areaId" name="areaId"/>
+		    <input type="hidden" id="deptId" value="$!dept.deptId" name="deptId"/>
+			<input type="hidden" id="nhType" value="$!nhType" name="nhType"/>
+			<input id="flag" type="hidden" value="$!{flag}"/>
+			<div class="ui-form-search-left">
+				<div class="ui-form-item">
+			  		<label class="ui-label">分项名称：</label>
+			  		<input class="ui-input ui-input-choose"readonly type="text" emptyFunc="clearItemCode" name="itemCodeName" value="$!itemCodeName" id="itemCodeName" onclick="chooseSubSystem('itemCode','itemCodeName','waterMeterMonth_list','$!{nhType}')"/>
+					<input type="hidden" name="itemCode" id="itemCode" value="$!area.itemCode"/>
+				</div>
+				<div class="ui-form-item">
+			  		<label class="ui-label">时间：</label>
+			  		<input id="monthKey" type="text" name="monthKey"  value="$!area.monthKey" class="ui-input ui-input-small  Wdate"  onclick="WdatePicker({dateFmt:'yyyy-MM',maxDate:'#F{\'%y-{%M}\'}'})" />
+				</div>
+			</div>
+			<div class="ui-form-search-right" id="search">
+				<button type="button" id="subButton" class="btn btn-primary"><i class="iconfont icon-search"></i> 查&nbsp;询</button>
+			</div>
+		</form>
+	</div>
+</div>
+<!--
+<div class="ui-layout-north">
+	#bread_crumbs("NHGL_ZHCX")
+</div>-->
+<div class="ui-layout-west" >
+	<div id="waterMeterMonth_tab" class="nh-box ui-tab ui-tab-h" >
+		##切换时需要更新地址
+		<ul class='ui-tab-items ui-tab-items-h'>
+		   <li class='ui-tab-item'><a href="#tabDept" onclick="changeTab('1')"><span class="ui-tab-area"></span>部门</a></li>
+		   <li class='ui-tab-item'><a href="#tabArea" onclick="changeTab('2')"><span class="ui-tab-type"></span>区域</a></li>
+		</ul>
+		<div  class="ui-tab-panels">
+			<div id="tabDept" class="ui-tab-panel">
+				<ul id="qy_accordion" class="accordion">
+				</ul>
+			</div>
+			<div id="tabArea" class="ui-tab-panel" >
+				<ul id="qy_accordion_area" class="accordion">
+				</ul>
+			</div>
+		</div>
+	</div>
+</div> 
+<script type="text/javascript">
+		var url='';
+		var	col_Model= "";
+	$(document).ready(function(){
+		T.nhInit();
+		 T.tabLayout = $("#chart_content_id").layout({
+        defaults : {
+            resizable : false,
+            closable : false,
+            spacing_open : 5
+        },
+        west : {
+            size : 343,
+            resizable : false,
+            resizerTip : "移动改变大小",
+            closable : true,
+            togglerTip_open : "隐藏",
+            togglerTip_closed : "打开"
+        },
+        onresize_end : function(){
+            $("#waterMeterMonth_tab").box("resize");
+        }
+    });
+    	_content_layouts.push(T.tabLayout);
+		_inner_layout=$("#subMain").layout({
+			defaults:{
+				resizabel:false,
+				closable: false,
+				spacing_open:5
+			},
+			onresize_end:function(){
+				$("#waterMeterMonth_datalist").datagridResize({width:_inner_layout.state.center.innerWidth,height:_inner_layout.state.center.innerHeight});
+			}
+		});
+		$("#waterMeterMonth_tab").box({
+        	width : function(){return T.tabLayout .state.west.innerWidth;},
+        	height : function(){return T.tabLayout .state.west.innerHeight;}
+    	});
+		//刷新切换页
+		$("#qy_accordion").load('$!{rc.contextPath}/nhgl/query/collect/water/treeTab?monthKey='+$("#monthKey").val()+"&flag="+flag+"&itemCode="+$("#itemCode").val());
+		//更新grid
+		refreshDatalist(flag);
+		$("#subButton").bind("click",function(){
+			var f=$("#flag").val();
+			if(f==1){
+				$("#qy_accordion").load('$!{rc.contextPath}/nhgl/query/collect/water/treeTab?monthKey='+$("#monthKey").val()+"&flag="+f+"&itemCode="+$("#itemCode").val());
+			}else{
+				$("#qy_accordion_area").load('$!{rc.contextPath}/nhgl/query/collect/water/treeTab?monthKey='+$("#monthKey").val()+"&flag="+f+"&itemCode="+$("#itemCode").val());
+			}
+			$("#waterMeterMonth_datalist").flexReload();
+		})
+		
+	}); 
+	
+	
+		//重新load右边的tab
+		function toTab(id,flag)
+		{
+			if('1'==flag){
+				$('#deptId').val(id);
+			}else{
+				$('#areaId').val(id);
+			}
+			
+			$("#waterMeterMonth_datalist").flexReload();
+		}
+
+		
+		
+					//切换tab
+		function changeTab(flag)
+		{
+			$("#areaId").val('');
+			$("#deptId").val('');
+			$("#flag").attr("value",flag);
+			if(1==flag){
+				$("#qy_accordion").empty();
+			}else{
+				$("#qy_accordion_area").empty();
+			}
+			$("#div_waterMeterMonth_datalist").empty().append('<table id="waterMeterMonth_datalist"  class="fn-hide" ></table>');
+			//切换左边树
+			searchData(flag);
+
+		}
+	
+	function getColModel(flag){
+		if(1==flag){
+				url='$!{rc.contextPath}/nhgl/query/collect/water/deptlist';
+				col_Model=[
+					{"display":"序号"},
+					{display: "部门", name: "deptFullName",width:250},
+					{display: "分项名称",name:"itemName"},
+					{display: "月份",name:"monthKey"},
+					{display: "用水量", name: "totalMonthValue",format:function(totalMonthValue){ return fInt(totalMonthValue)},align:"right"},
+					{display: "去年同比", name: "totalYoy",format:function(totalYoy){ return fInt(totalYoy)},align:"right"},
+					{display: "上月环比", name: "lastMonth",format:function(lastMonth){ return fInt(lastMonth)},align:"right"}
+				];
+			}else{
+				url='$!{rc.contextPath}/nhgl/query/collect/water/arealist';
+				col_Model=[
+					{"display":"序号"},
+					{display: "服务区域", name: "areaName"},
+				{display: "分项名称",name:"itemName"},
+					{display: "月份",name:"monthKey"},
+					{display: "用水量", name: "totalMonthValue",format:function(totalMonthValue){ return fInt(totalMonthValue)},align:"right"},
+					{display: "去年同比", name: "totalYoy",format:function(totalYoy){ return fInt(totalYoy)},align:"right"},
+					{display: "上月环比", name: "lastMonth",format:function(lastMonth){ return fInt(lastMonth)},align:"right"}
+				];
+			}
+	}
+	
+	function refreshDatalist(flag)
+	{	
+		 getColModel(flag);
+		 $("#waterMeterMonth_datalist").datagrid({
+			url:url,
+			dataType: "json",
+			method: "GET",
+			singleSelected : true,
+			striped : false,
+			height:  _inner_layout.center.state.innerHeight,
+			width :  _inner_layout.center.state.innerWidth,
+			showOrderNumber : true,
+			useRp : true,
+			usepager: true,
+    		rpOptions: [10, 20, 40, 50],
+    		pageSize: 20,
+    		searchFormId:"waterMeterMonth_list_search",
+    		searchCallback:function(datagrid){},
+    		onSuccess:function(table,grid){
+    			if(!grid)return ;
+    		},
+    		colModel:col_Model
+		});
+	}
+	
+	function searchData(flag){
+		var flag=$("#flag").val();
+		var areaId=$("#areaId").val();
+		var deptId=$("#deptId").val();
+		var itemCode=$("#itemCode").val();
+		var monthKey = $("#monthKey").val();
+		var treeUrl = '$!{rc.contextPath}/nhgl/query/collect/water/treeTab?areaId='
+			+areaId+"&deptId="+deptId+"&itemCode="+itemCode+"&monthKey="+monthKey+"&flag="+flag;
+		if(flag == 1){
+			$("#qy_accordion").load(treeUrl);
+		}else{
+			$("#qy_accordion_area").load(treeUrl);
+		}
+		refreshDatalist(flag);
+		
+		
+	}
+	function clearItemCode(){
+		$("#itemCodeName").attr("value","");
+		$("#itemCode").attr("value","");
+	}
+</script> 
+
+ 

@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.meeting.entities.RoomInfo">
+	<resultMap type="com.supconit.meeting.entities.RoomInfo" id="roomInfoResultMap">
+		<result property="id" column="ID"/>
+        <result property="roomName" column="ROOM_NAME"/>
+        <result property="roomType" column="ROOM_TYPE"/>
+        <result property="capacityPerson" column="CAPACITY_PERSON"/>
+        <result property="useDeptId" column="USE_DEPT_ID"/>
+        <result property="location" column="LOCATION"/>
+        <result property="network" column="NETWORK"/>
+        <result property="projector" column="PROJECTOR"/>
+        <result property="multiFunctional" column="MULTI_FUNCTIONAL"/>
+        <result property="remark" column="REMARK"/>
+        <result property="isSign" column="ISSIGN"/>
+        <result property="hpid" column="HPID"/>
+        <result property="deviceId" column="DEVICE_ID"/>
+        <result property="createId" column="CREATE_ID"/>
+        <result property="creator" column="CREATOR"/>
+        <result property="createDate" column="CREATE_DATE"/>
+        <result property="updateId" column="UPDATE_ID"/>
+        <result property="updator" column="UPDATOR"/>
+        <result property="updateDate" column="UPDATE_DATE"/>
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">ROOM_INFO</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	<sql id="select_pre" lang="velocity">
+		SELECT
+			a.ID,
+			a.ROOM_NAME,
+			a.ROOM_TYPE,
+	        a.CAPACITY_PERSON,
+	        a.USE_DEPT_ID,
+	        a.LOCATION,
+	        a.NETWORK,
+	        a.PROJECTOR,
+	        a.MULTI_FUNCTIONAL,
+	        a.REMARK,
+	        a.ISSIGN,
+	        a.HPID,
+	        d.ID DEVICE_ID
+		FROM  <include refid="TABLE_NAME"/> a
+		LEFT JOIN DEVICE d ON a.HPID = d.HPID
+	</sql>
+	
+	<sql id="count_pre" lang="velocity">SELECT COUNT(*) FROM <include refid="TABLE_NAME"/> a </sql>
+	
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			#if($_p.roomName && $_p.roomName != '')
+				#set($_roomName = '%' + $_p.roomName + '%')
+				AND ROOM_NAME LIKE @{_roomName}
+			#end
+			#if($_p.roomType && $_p.roomType != '')
+				#set($_roomType = $_p.roomType)
+				AND ROOM_TYPE = @{_roomType}
+			#end
+			#if($_p.useDeptId)
+				#set($_useDeptId =$_p.useDeptId)
+				AND
+				#if($_databaseId == 'oracle')
+					exists (select 1 from table(func_dept_children(@{_useDeptId})) t where t.id=USE_DEPT_ID)
+				#end
+				#if($_databaseId == 'sqlserver')
+					exists (select 1 from func_dept_children(@{_useDeptId}) t where t.id=USE_DEPT_ID)
+				#end
+			#end
+			#if($_p.multiFunctional)
+				#set($_multiFunctional =$_p.multiFunctional)
+				AND MULTI_FUNCTIONAL = @{_multiFunctional}
+			#end
+			#if($_p.network)
+				#set($_network =$_p.network)
+				AND a.NETWORK = @{_network}
+			#end
+			#if($_p.capacity)
+				#set($_capacity =$_p.capacity)
+				#if($_capacity == 0)
+					AND a.CAPACITY_PERSON < 5
+				#end
+				#if($_capacity == 1)
+					AND a.CAPACITY_PERSON >= 5 AND a.CAPACITY_PERSON < 10
+				#end
+				#if($_capacity == 2)
+					AND a.CAPACITY_PERSON >= 10 and a.CAPACITY_PERSON < 20 
+				#end
+				#if($_capacity == 3)
+					AND a.CAPACITY_PERSON >= 20
+				#end
+			#end
+		#end
+		]]>	
+    </sql>
+	
+    <!-- 插入记录-->
+    <sql id="insert_sql" lang="velocity">
+        INSERT INTO <include refid="TABLE_NAME"/>(
+        	#if($_databaseId == 'oracle') ID, #end
+	        ROOM_NAME,
+	        ROOM_TYPE,
+	        CAPACITY_PERSON,
+	        USE_DEPT_ID,
+	        LOCATION,
+	        NETWORK,
+	        PROJECTOR,
+	        MULTI_FUNCTIONAL,
+	        REMARK,
+	        ISSIGN,
+	        HPID,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE
+        ) VALUES (
+        	#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end
+	        @{_parameter.roomName,jdbcType=VARCHAR},
+	        @{_parameter.roomType,jdbcType=VARCHAR},
+	        @{_parameter.capacityPerson,jdbcType=INTEGER},
+	        @{_parameter.useDeptId,jdbcType=BIGINT},
+	        @{_parameter.location,jdbcType=VARCHAR},
+	        @{_parameter.network,jdbcType=INTEGER},
+	        @{_parameter.projector,jdbcType=INTEGER},
+	        @{_parameter.multiFunctional,jdbcType=INTEGER},
+	        @{_parameter.remark,jdbcType=VARCHAR},
+	        @{_parameter.isSign,jdbcType=INTEGER},
+	        @{_parameter.hpid,jdbcType=VARCHAR},
+	        @{_parameter.createId,jdbcType=NUMERIC},
+	        @{_parameter.creator,jdbcType=VARCHAR},
+	        @{_parameter.createDate,jdbcType=TIMESTAMP}
+        )
+    </sql>
+    
+    <insert id="insert" parameterType="com.supconit.meeting.entities.RoomInfo" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="insert_sql" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.meeting.entities.RoomInfo" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    
+	<!-- 更新记录-->
+	<update id="update"  parameterType="com.supconit.meeting.entities.RoomInfo" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+			#mset()
+				<![CDATA[
+			        #if($_parameter.roomName && $_parameter.roomName !='')ROOM_NAME = @{_parameter.roomName,jdbcType=VARCHAR},#end
+			        #if($_parameter.roomType && $_parameter.roomType !='')ROOM_TYPE = @{_parameter.roomType,jdbcType=VARCHAR},#end
+			        #if($_parameter.capacityPerson)CAPACITY_PERSON = @{_parameter.capacityPerson,jdbcType=INTEGER},#end
+			        USE_DEPT_ID = @{_parameter.useDeptId,jdbcType=BIGINT},
+			        #if($_parameter.location && $_parameter.location !='')LOCATION = @{_parameter.location,jdbcType=VARCHAR},#end
+			        #if($_parameter.network)NETWORK = @{_parameter.network,jdbcType=INTEGER},#end
+			        #if($_parameter.projector)PROJECTOR = @{_parameter.projector,jdbcType=INTEGER},#end
+			        #if($_parameter.multiFunctional)MULTI_FUNCTIONAL = @{_parameter.multiFunctional,jdbcType=INTEGER},#end
+			        REMARK = @{_parameter.remark,jdbcType=VARCHAR},
+			        #if($_parameter.isSign)ISSIGN = @{_parameter.isSign,jdbcType=INTEGER},#end
+			        #if($_parameter.hpid)HPID = @{_parameter.hpid,jdbcType=INTEGER},#end
+			        #if($_parameter.updateId)UPDATE_ID = @{_parameter.updateId,jdbcType=NUMERIC},#end
+			        #if($_parameter.updator)UPDATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateDate)UPDATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+			    ]]>
+			#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+	
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.meeting.entities.RoomInfo" resultMap="roomInfoResultMap" lang="velocity" databaseId="oracle">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre"/>
+		<include refid="condition_sql"/>
+		#order($_parameter.condition,"a.ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.meeting.entities.RoomInfo" resultMap="roomInfoResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			a.ID,
+			a.ROOM_NAME,
+			a.ROOM_TYPE,
+	        a.CAPACITY_PERSON,
+	        a.USE_DEPT_ID,
+	        a.LOCATION,
+	        a.NETWORK,
+	        a.PROJECTOR,
+	        a.MULTI_FUNCTIONAL,
+	        a.REMARK,
+	        a.ISSIGN,
+	        a.HPID
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"a.ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/> a
+		<include refid="condition_sql"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countByConditions" resultType="long" lang="velocity">
+        <include refid="count_pre"/>
+        <include refid="condition_sql"/>
+    </select>
+    
+    <select id="getById" resultMap="roomInfoResultMap" parameterType="long" lang="velocity">
+		<include refid="select_pre"/>
+		WHERE a.ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+	
+	<delete id="deleteById" parameterType="long" lang="velocity"> 
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</delete>
+	
+	<select id="selectDeptChildren" resultType="long" lang="velocity" databaseId="oracle">
+		select id from table(func_dept_children(@{_parameter.useDeptId}))
+	</select>
+	
+	<select id="selectDeptChildren" resultType="long" lang="velocity" databaseId="sqlserver">
+		select id from func_dept_children(@{_parameter.useDeptId})
+	</select>
+	
+</mapper>

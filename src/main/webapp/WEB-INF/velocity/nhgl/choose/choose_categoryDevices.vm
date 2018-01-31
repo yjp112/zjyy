@@ -1,0 +1,99 @@
+<style>
+	a.ui-input-remove,
+	a.ui-input-icon {
+		right:13px;
+	}
+</style>		
+<form class="ui-form ui-form-search fn-clear" id='pagerForm'>
+	<input type="hidden" name="category" id="category"/>
+	  <div>
+			<div class="ui-form-item">
+			  <label class="ui-label">$!deviceName编码：</label>
+			 <input class="ui-input" type="text"  name="deviceCode">
+			</div>
+			<div class="ui-form-item">
+			  <label class="ui-label">$!deviceName名称：</label>
+	          <input class="ui-input" type="text"  name="deviceName">
+			</div>
+			<div class="ui-form-search-right">
+			  <button type="submit" class="btn btn-primary" id="queryBtn"><i class="iconfont icon-search"></i>搜索</button>
+			  <button type="reset" class="btn btn-primary" id="resetBtn"><i class="iconfont icon-reset"></i>重置</button>
+	  		</div>
+	  </div>
+	  
+</form>
+<div>
+  <table id="pagerTable" style="display: none"></table> 
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+    
+    	var category='$!{category}';
+        //列表
+        $("#pagerTable").datagrid({
+            url: "$!{rc.contextPath}/nhgl/choose/devicePage?categoryCode="+category,
+            dataType: "json",
+            method: "GET",
+            usepager: true,
+            rpOptions: [10, 20, 40, 50],rp:20,
+            singleSelect: true,
+            showCheckbox: true,
+            colModel: [
+            	{display:"checkbox",width:10},
+                {display: "$!deviceName编码", name: "deviceCode", width: 200},
+                {display: "$!deviceName名称", name: "deviceName", width: 300},
+                {display: "安装位置", name: "locationName", width: 235}
+            ],
+            buttons : [
+            {name: '选择', bclass: 'choose', onpress : bringback},
+            {separator: true}
+            ]
+            ,searchFormId:"pagerForm"
+            ,height: 458
+        });
+
+        function bringback(){
+        	debugger
+            var rows = $("#pagerTable").getSelectedRows();
+            if (rows.length == 0) {
+                $.message("没有选择电表，请选择！", $.message.TYPE_ERROR, 4, false, true); 
+                return false;
+            }
+             var html='';   
+             var rule='$!{rule}';
+             var tabLength=$("#$!{txtId} tr").length;
+             if(rule=='1'){
+	            $.each(rows,function(index,item){
+	            html="<tr>"+
+				          "<td ><input type='hidden' name='subLeftOtherCategoryConfigList["+(index+tabLength)+"].deviceCode' value='"+item.deviceCode+"'>"+
+				          "<input type='hidden' name='subLeftOtherCategoryConfigList["+(index+tabLength)+"].extended1' value='"+item.extended1+"'>"+
+				          "<input type='hidden'  name='subLeftOtherCategoryConfigList["+(index+tabLength)+"].id' value='"+item.id+"'>"+
+				          "<input type='hidden'  name='subLeftOtherCategoryConfigList["+(index+tabLength)+"].ruleFlag' value='1'><span title='"+item.deviceCode+"' style='width:120px'>"+item.deviceCode+"</span></td>"+
+	    				  "<td ><input type='hidden' name='subLeftOtherCategoryConfigList["+(index+tabLength)+"].deviceName' value='"+item.deviceName+"'><span style='width:130px' title='"+item.deviceName+"'>"+item.deviceName+"</span></td>"+
+						  "<td ><input type='hidden'  name='subLeftOtherCategoryConfigList["+(index+tabLength)+"].locationName' value='"+item.locationName+"'><span style='width:80px' title='"+item.locationName+"'>"+item.locationName+"</span></td>"+
+						  "<td ><input type='text' style='text-align:right' class='ui-input' name='subLeftOtherCategoryConfigList["+(index+tabLength)+"].ftxs' value='1' onblur='finish()'></td>"+
+						  "<td ><a  href='#' class='removedevice'><span style='width:35px;text-align:center'>删除</span></a></td>"+
+	        			"</tr>"
+	            	$("#"+'$!{txtId}').append(html);
+	            })
+            }else{
+            	 $.each(rows,function(index,item){
+	            	
+	            	html="<tr>"+
+				          "<td ><input type='hidden' name='subRightOtherCategoryConfigList["+(index+tabLength)+"].deviceCode' value='"+item.deviceCode+"'>"+
+				          "<input type='hidden' name='subRightOtherCategoryConfigList["+(index+tabLength)+"].extended1' value='"+item.extended1+"'>"+
+				          "<input type='hidden'  name='subRightOtherCategoryConfigList["+(index+tabLength)+"].id' value='"+item.id+"'>"+
+				          "<input type='hidden'  name='subRightOtherCategoryConfigList["+(index+tabLength)+"].ruleFlag' value='0'><span title='"+item.deviceCode+"' style='width:120px'>"+item.deviceCode+"</span></td>"+
+	    				  "<td ><input type='hidden' name='subRightOtherCategoryConfigList["+(index+tabLength)+"].deviceName' value='"+item.deviceName+"'><span style='width:130px' title='"+item.deviceName+"'>"+item.deviceName+"</span></td>"+
+						  "<td ><input type='hidden'  name='subRightOtherCategoryConfigList["+(index+tabLength)+"].locationName' value='"+item.locationName+"'><span style='width:80px' title='"+item.locationName+"'>"+item.locationName+"</span></td>"+
+						  "<td ><input type='text' style='text-align:right' class='ui-input' name='subRightOtherCategoryConfigList["+(index+tabLength)+"].ftxs' value='1' onblur='finish()'></td>"+
+						  "<td ><a  href='#' class='removedevice'><span style='width:35px;text-align:center'>删除<span></a></td>"+
+	        			"</tr>"
+	            	$("#$!{txtId}").append(html);
+	            })
+            }
+            finish();
+        	closeDialog();
+        }
+    });
+</script>

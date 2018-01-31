@@ -1,0 +1,212 @@
+#parse("index/_header.vm")
+</head>
+<body>	
+	<div class="ui-layout-center" id="subMain">
+    	<div class="ui-layout-north"><form class="ui-form" id='pagerForm'>	 		
+        	<table width="100%"><tr>
+        		<td><table class="ui-search-table"><tr>
+                	<td class="ui-search-name first">人员编码：</td>
+                  	<td class="ui-search-c">
+                    	<input name="code" value="" class="k-textbox" type="text">
+                 	</td>
+                  	<td class="ui-search-name">人员姓名：</td>
+                  	<td class="ui-search-c">
+                    	<input  name="name" value="" class="k-textbox" type="text">
+                  	</td>
+                </tr></table></td>
+            	<td width="150" valign="top" style="padding-top:4px;">
+              		<button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              		<button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+            	</td>
+            	<td></td>
+            </tr></table>
+    	</form></div>
+  		<div class="ui-layout-center">
+  	  		<div id="grid"></div> 
+    	</div>
+	</div>	 
+#parse("index/_footer.vm") 
+<script type="text/javascript">
+  var _iframe_layout, _left_layout, _inner_layout;
+	$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      }
+    });
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+
+    $('#resetBtn').click(function(){
+      $("#pagerForm :text").val('');  
+    }); 
+	
+	//列表
+    quick_datagrid(
+    		"#grid", 
+    		"#pagerForm", 
+    		"$!{rc.contextPath}/choose/person?t=" + new Date().getTime(),
+    		[
+    			{field: "id",hidden: true}, 
+    			{field: "code",title: "人员编码",headerAttributes: {"class": "k-grid-text"},sortable: false,width: 200},
+              	{field: "name",title: "人员姓名",attributes: {"class": "k-grid-equilong"},sortable: false,width: 200}, 
+              	{field: "personTelephone",title: "电话",headerAttributes: {"class": "k-grid-num"},attributes: {"class": "k-grid-num"},sortable: false,width: 150}, 
+              	{field: "deptId",hidden: true},
+              	{field: "deptName",title: "部门",headerAttributes: {"class": "k-grid-text"},sortable: false,width: 300}, 
+            ],                 
+      		{sortable: {mode: "multiple",allowUnsort: true}}, 
+      		{serverSorting: true}, 
+      		[
+      			{
+              		name: "选择",
+              		icon: "fa fa-plus",
+              		onclick: function (obj, grid) {
+              			var ids = [];
+              			var names = [];
+              			var row = grid.select();
+              			if (null == row || row.length == 0) {
+		                  notify("请选择要处理的项", "error");
+		                  return;
+		              	}
+              			if("$!{dialogId}"!=""){
+              				if(get_el_in_dialog("$!{dialogId}","#$!{txtId}").val()!=""){
+	              				ids = stringToArray(get_el_in_dialog("$!{dialogId}","#$!{txtId}").val());
+	        					names = stringToArray(get_el_in_dialog("$!{dialogId}","#$!{txtName}").val());
+	        				}
+              			}else{
+	              			if($("#"+"$!{txtId}",window.parent["_main_frame"].document).val()!=""){
+	              				ids = stringToArray($("#"+"$!{txtId}",window.parent["_main_frame"].document).val());
+	        					names = stringToArray($("#"+"$!{txtName}",window.parent["_main_frame"].document).val());
+	        				}
+              			}
+              			for(var i=0; i<row.length; i++){
+		            	  var data = grid.dataItem(row[i]);
+		            	  if(!isExist(ids,data.id)){				
+		                        ids.push(data.id);
+		                        names.push(data.name);
+		    					deptId=data.deptId;
+		    					deptName=data.deptName;
+							}
+		            	  //ids.push(data.id);
+		            	  //names.push(data.name)
+		              	}
+            	         
+            		    //人员
+            		    if("$!{dialogId}"!=""){
+	        				get_el_in_dialog("$!{dialogId}","#$!{txtId}").val(ids);
+	        				get_el_in_dialog("$!{dialogId}","#$!{txtName}").val(names);  
+	        				resetfocus(get_el_in_dialog("$!{dialogId}","#$!{txtName}"));
+            		    }else{
+							var id_v = $("#"+"$!{txtId}",window.parent[1].document);
+							id_v.val(ids);
+							var id_t = $("#"+"$!{txtName}",window.parent[1].document);
+							id_t.val(names);
+							resetfocus($("#"+"$!{txtName}",window.parent[1].document));
+						}
+            			//部门
+            			if("$!{deptId}"!=""){
+            				//$("#$!{deptId}").val(data.deptId);
+            	        	//$("#$!{deptName}").val(data.deptName);
+            	        	if("$!{dialogId}"!=""){
+	        					get_el_in_dialog("$!{dialogId}","#$!{deptId}").val(data.deptId);
+	        					get_el_in_dialog("$!{dialogId}","#$!{deptName}").val(data.deptName); 
+	        					resetfocus(get_el_in_dialog("$!{dialogId}","#$!{deptName}"));
+	        				} else{
+								var id_v = $("#"+"$!{deptId}",window.parent[1].document);
+								id_v.val(data.deptId);
+								var id_t = $("#"+"$!{deptName}",window.parent[1].document);
+								id_t.val(data.deptName);
+								resetfocus($("#"+"$!{deptName}",window.parent[1].document));
+							}          	        	
+            			}
+            	        try{
+            	            if(typeof(extendFunc) == "function" ){
+            	                extendFunc(rows);
+            	            }
+            	        }catch(e){
+            	
+            	        }
+            	        close_dialog('selectDiloag');
+              		}
+          		} ,
+          		{
+              		name: "清空",
+              		icon: "fa fa-remove",
+              		onclick: function (obj, grid) {
+              			   
+            		    //人员
+            		    if("$!{dialogId}"!=""){
+	        				get_el_in_dialog("$!{dialogId}","#$!{txtId}").val("");
+	        				get_el_in_dialog("$!{dialogId}","#$!{txtName}").val("");  
+	        				resetfocus(get_el_in_dialog("$!{dialogId}","#$!{txtName}"));
+            		    }else{
+							var id_v = $("#"+"$!{txtId}",window.window.parent[1].document);
+							id_v.val("");
+							var id_t = $("#"+"$!{txtName}",window.window.parent[1].document);
+							id_t.val("");
+							resetfocus($("#"+"$!{txtName}",window.window.parent[1].document));
+						}
+            			//部门
+            			if("$!{deptId}"!=""){
+            	        	if("$!{dialogId}"!=""){
+	        					get_el_in_dialog("$!{dialogId}","#$!{deptId}").val("");
+	        					get_el_in_dialog("$!{dialogId}","#$!{deptName}").val(""); 
+	        					resetfocus(get_el_in_dialog("$!{dialogId}","#$!{deptName}"));
+	        				} else{
+								var id_v = $("#"+"$!{deptId}",window.window.parent[1].document);
+								id_v.val("");
+								var id_t = $("#"+"$!{deptName}",window.window.parent[1].document);
+								id_t.val("");
+								resetfocus($("#"+"$!{deptName}",window.window.parent[1].document));
+							}          	        	
+            			}
+            	        try{
+            	            if(typeof(extendFunc) == "function" ){
+            	                extendFunc(rows);
+            	            }
+            	        }catch(e){
+            	
+            	        }
+            	        close_dialog('selectDiloag');
+              		}
+          		} 
+          	]
+      	);
+	    
+        $("#selectButton").click(function () {
+            var ids = new Array();
+            var names = new Array();
+            var data = $("#grid").getSelectedRows();
+            if (data.length == 0) {
+                alert("未选择");
+                return false;
+            } else {
+                $.each(data, function (i,p) {
+                    ids.push(p.id);
+                    names.push(p.name);
+                });
+                $("#$!{txtId}").val(ids);
+                $("#$!{txtName}").val(names);
+            	closeDialog();
+            }
+        });  
+        
+        
+    });	
+</script>
+</body>
+</html>		

@@ -1,0 +1,103 @@
+<div class="ui-layout-north">
+  <!-- header start -->
+  <div class="ui-header ui-header_txgl">
+      <div class="ui-header-left ">
+      	<div class="header-logo"></div>
+      	<div class="header-title"></div>
+  	  </div>
+      <div class="ui-header-right">
+          <ul class='ui-header-info'>
+          	#current_user()
+          	  <li class="ui-header-info-item">
+          		<i class="usericon"></i>
+          	  </li>
+              <li class="ui-header-info-item">
+              	<span class="userwlc">
+              	欢迎您：尊敬的
+              	<a href="javascript:void(0)">#if($_user.person.name)$!{_user.person.name}#{else}$!{_user.username}#{end}</a>
+              	！
+              	</span>
+              </li>
+			  <li class="ui-header-info-item">
+                  <a href="javascript:window.open('$!rc.contextPath/index/platform')" title="系统设置">
+                  <i class="settingicon"></i>
+                  </a>
+              </li>
+              <li class="ui-header-info-item">
+                  <a href="javascript:updatePass()" title="更改密码">
+                  <i class="reseticon"></i>
+                  </a>
+              </li>
+			  <li class="ui-header-info-item">
+                  <a href="$!{rc.contextPath}/index/logout/$!rootMenuCode" title="退出">
+                  <i class="logouticon"></i>
+                  </a>
+              </li>
+
+          </ul>
+      </div>
+  </div>
+  <!-- header end -->
+  <!-- menu start -->
+  <div class="ui-menu-warp">
+  	<ul id="function_menus" class="ui-menu fn-hide">
+	#_menu("menu","$!rootMenuCode")#end
+                #if($!menu.children && !$!menu.children.isEmpty())
+                    #foreach($!fmenu in $!menu.children)
+                        <li>
+                            #if($!fmenu.display)
+								<a code="$!{fmenu.code}" menuId="$!fmenu.id" href="javascript:void(0)" #if($fmenu.linkUrl && $fmenu.linkUrl != "")onclick="customLoadUrl(this,'$!{rc.contextPath}$!{fmenu.linkUrl}')"#{end}>$!{fmenu.name}</a>
+                                #if($!fmenu.children && !$!fmenu.children.isEmpty())
+                                    <ul>
+                                        #foreach($!smenu in $!fmenu.children)
+                                            <li>
+                                                #if($!smenu.display)
+													<a code="$!{smenu.code}" menuId="$!smenu.id" href="javascript:void(0)" #if($smenu.linkUrl && $smenu.linkUrl != "")onclick="customLoadUrl(this,'$!{rc.contextPath}$!{smenu.linkUrl}')"#{end}>$!{smenu.name}</a>
+                                                    #if($!smenu.children && !$!smenu.children.isEmpty())
+                                                        <ul>
+                                                            #foreach($!tmenu in $!smenu.children)
+                                                                <li>
+                                                                    #if($!tmenu.display)
+																		<a code="$!{tmenu.code}" menuId="$!tmenu.id" href="javascript:void(0)" #if($tmenu.linkUrl && $tmenu.linkUrl != "")onclick="customLoadUrl(this,'$!{rc.contextPath}$!{tmenu.linkUrl}')"#{end}>$!{tmenu.name}</a>
+																	#end
+                                                                </li>
+                                                            #end
+                                                        </ul>
+                                                    #end
+                                                #end
+                                            </li>
+                                        #end
+                                    </ul>
+                                #end
+                            #end
+                        </li>
+                    #end
+                #end
+            </ul>
+    <ul class="ui-action">
+      <li class="ui-action-item"><a href="javascript:void(0)" onclick="load_index_page()"><i class="iconfont icon-home"></i></a></li>
+            <li class="ui-action-item"><a href="javascript:newDialog('handle','load:$!{rc.contextPath}/userInfo/edit', '用户信息', false, 600,500)"><i class="iconfont icon-user"></i></a></li>
+      <li class="ui-action-item"><a href="$!rc.contextPath/index/platform" target="_blank"><i class="iconfont icon-cog"></i></a></li>
+    </ul>
+  </div>
+  <!--menu end -->
+</div>
+<script type="text/javascript">
+    function customLoadUrl(obj,url){
+        var menuId = $(obj).attr("menuid");
+		var menuName=$(obj).text();
+        if(menuId){
+            if (url.indexOf("?") > 0)
+                url += "&";
+            else
+                url += "?";
+
+            url +="menuId="+menuId;
+        }
+		//alert(url)
+        loadUrl(url,null,function(responseText, textStatus, xhr){
+		   //$('#currentMenueName').text(menuName);
+		   //$('#menuName','#centerMain').text(menuName);
+		});
+    }
+</script>

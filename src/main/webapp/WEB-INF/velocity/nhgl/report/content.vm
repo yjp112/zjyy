@@ -1,0 +1,240 @@
+<script type="text/javascript">
+    var chart1;
+    $(document).ready(function () {
+        //chart1 = echarts.init(document.getElementById('chart1'));
+        option= {
+            title : {
+                text: '某地区蒸发量和降水量',
+                subtext: '纯属虚构'
+            },
+            tooltip : {
+                trigger: 'axis'
+            },
+            legend: {
+                data:['蒸发量','降水量']
+            },
+            toolbox: {
+                show : true,
+                feature : {
+                    mark : {show: true},
+                    dataView : {show: true, readOnly: false},
+                    magicType : {show: true, type: ['line', 'bar']},
+                    restore : {show: true},
+                    saveAsImage : {show: true}
+                }
+            },
+            calculable : true,
+            xAxis : [
+                {
+                    type : 'category',
+                    data : ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月']
+                }
+            ],
+            yAxis : [
+                {
+                    type : 'value'
+                }
+            ],
+            series : [
+                {
+                    name:'蒸发量',
+                    type:'bar',
+                    data:[2.0, 4.9, 7.0, 23.2, 25.6, 76.7, 135.6, 162.2, 32.6, 20.0, 6.4, 3.3],
+                    markPoint : {
+                        data : [
+                            {type : 'max', name: '最大值'},
+                            {type : 'min', name: '最小值'}
+                        ]
+                    },
+                    markLine : {
+                        data : [
+                            {type : 'average', name: '平均值'}
+                        ]
+                    }
+                },
+                {
+                    name:'降水量',
+                    type:'bar',
+                    data:[2.6, 5.9, 9.0, 26.4, 28.7, 70.7, 175.6, 182.2, 48.7, 18.8, 6.0, 2.3],
+                    markPoint : {
+                        data : [
+                            {name : '年最高', value : 182.2, xAxis: 7, yAxis: 183, symbolSize:18},
+                            {name : '年最低', value : 2.3, xAxis: 11, yAxis: 3}
+                        ]
+                    },
+                    markLine : {
+                        data : [
+                            {type : 'average', name : '平均值'}
+                        ]
+                    }
+                }
+            ]
+        };
+        //chart1.setOption(option)
+        changesnapshot("$!{content1}", 1);
+        changesnapshot("$!{content2}", 2);
+    });
+
+    initEcharts("chart1",option,callback);
+
+
+    function callback(echart,option){
+        chart1 = echart;
+    }
+
+    function savesnapshot() {
+
+        $.ajax({
+            type: "post",
+            url: "${rc.contextPath}/nhgl/report/save",
+            data:$("#sform").serialize(),
+            async: false,
+            dataType: "json",
+            success: function(data, textStatus){
+                tongji();
+            }
+        });
+    }
+
+    function deletesnapshot() {
+        dialog.confirm(
+                "确定还原成模板吗？",
+                function(){
+                    $.ajax({
+                        type: "post",
+                        url: "${rc.contextPath}/nhgl/report/restore",
+                        data:$("#sform").serialize(),
+                        async: false,
+                        dataType: "json",
+                        success: function(data, textStatus){
+                            tongji();
+                        }
+                    });
+                },
+                function(){}
+        );
+    }
+
+    function changesnapshot(v, n) {
+        if(v!=null && v!="") {
+            $("#text"+n).html("&nbsp;&nbsp;&nbsp;&nbsp;"+v);
+            $("#textarea"+n).text(v);
+        }
+    }
+
+    function showsnapshot(n) {
+        $("#text"+n).hide();
+        $("#textarea"+n).show();
+    }
+
+    function exportword() {
+        $(":hidden[name='pic']").val(chart1.getDataURL("jpeg"));
+        //alert($(":hidden[name='pic']").val());
+        var from = document.getElementById("sform");
+        var url = "${rc.contextPath}/nhgl/report/export";
+        from.action = url;
+        from.type = "http";
+        from.submit();
+    }
+
+</script>
+
+<form id="sform" action="" method="post">
+
+    <input type="button" class="btn btn-primary" onclick="savesnapshot()" value="保存" />
+    <input type="button" class="btn btn-primary" onclick="deletesnapshot()" value="还原" />
+    <input type="button" class="btn btn-primary" onclick="exportword()" value="导出" />
+
+    <input type="hidden" name="code" value="$!rt.code"/>
+    <input type="hidden" name="type" value="$!rt.type"/>
+
+    <input type="hidden" name="pic" value=""/>
+
+    <table class="ui-report-ptable" width="100%" border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td>
+                <span class="ui-report-title-h4">二、供给情况</span>
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <div id="text1" class="ui-report-text" ondblclick="showsnapshot(1)">&nbsp;&nbsp;&nbsp;&nbsp;截至本月底，主城区共有出租汽车$!{gjqk.tdata.czcsl}辆，出租车经营业户数$!{gjqk.tdata.czcyh}家（其中企业经营户$!{gjqk.tdata.czcqyyh}家，个体化经营$!{gjqk.tdata.czcgtyh}家），$!{gjqk.tdata.czcry}名从业人员（其中司机$!{gjqk.tdata.czcsj}名）。万人出租车拥有量为$!{gjqk.tdata.czcyyl}辆。无障碍车有$!{gjqk.tdata.czcwza}辆，新能源车有$!{gjqk.tdata.czcxny}辆，安装了GPS的出租车有$!{gjqk.tdata.czcgps}辆，未安装的有$!{gjqk.tdata.czcgpsm}辆，主城区安装了GPS的出租车有$!{gjqk.tdata.czcgpsz}辆（不含下沙）。</div>
+                <textarea id="textarea1" style="display: none; width: 98%;" data-rule="文字描述: length[~800];" class="ui-textarea ui-report-text" name="contents">截至本月底，主城区共有出租汽车$!{gjqk.tdata.czcsl}辆，出租车经营业户数$!{gjqk.tdata.czcyh}家（其中企业经营户$!{gjqk.tdata.czcqyyh}家，个体化经营$!{gjqk.tdata.czcgtyh}家），$!{gjqk.tdata.czcry}名从业人员（其中司机$!{gjqk.tdata.czcsj}名）。万人出租车拥有量为$!{gjqk.tdata.czcyyl}辆。无障碍车有$!{gjqk.tdata.czcwza}辆，新能源车有$!{gjqk.tdata.czcxny}辆，安装了GPS的出租车有$!{gjqk.tdata.czcgps}辆，未安装的有$!{gjqk.tdata.czcgpsm}辆，主城区安装了GPS的出租车有$!{gjqk.tdata.czcgpsz}辆（不含下沙）。</textarea>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span class="ui-report-title-h4">五、实载率分析</span>
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <div id="text2" class="ui-report-text" ondblclick="showsnapshot(2)">&nbsp;&nbsp;&nbsp;&nbsp;分时段统计出租车的实载率如表8、图9所示。</div>
+                <textarea id="textarea2" style="display: none; width: 98%;" data-rule="文字描述: length[~800];" class="ui-textarea ui-report-text" name="contents">分时段统计出租车的实载率如表8、图9所示。</textarea>
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <div class="ui-report-stext">表8.本月出租汽车实载率分时段统计</div>
+                <table id="table1" class="ui-report-table" width="100%" cellpadding="0" cellspacing="0" border="1">
+                    <tr>
+                        <th>统计时段</th>
+                        <th>本月</th>
+                        <th>上月</th>
+                        <th>环比变化量</th>
+                        <th>环比变化率</th>
+                    </tr>
+
+
+                        <tr>
+                            <td>2</td>
+                            <td>23%</td>
+                            <td>33%</td>
+                            <td>44%</td>
+                            <td>55</td>
+                        </tr>
+                    <tr>
+                            <td>2</td>
+                            <td>23%</td>
+                            <td>33%</td>
+                            <td>44%</td>
+                            <td>55</td>
+                        </tr>
+                    <tr>
+                            <td>2</td>
+                            <td>23%</td>
+                            <td>33%</td>
+                            <td>44%</td>
+                            <td>55</td>
+                        </tr>
+                      <tr>
+                            <td>2</td>
+                            <td>23%</td>
+                            <td>33%</td>
+                            <td>44%</td>
+                            <td>55</td>
+                        </tr>
+                      <tr>
+                            <td>2</td>
+                            <td>23%</td>
+                            <td>33%</td>
+                            <td>44%</td>
+                            <td>55</td>
+                        </tr>
+
+                </table>
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <div id="chart1" style="width: 98%; height: 400px; margin: 0 auto; border: 1px #000000 solid;"></div>
+                <div class="ui-report-stext">图9.本月出租汽车实载率分时段统计</div>
+            </td>
+        </tr>
+
+    </table>
+</form>

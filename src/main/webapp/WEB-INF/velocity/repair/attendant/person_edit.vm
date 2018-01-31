@@ -1,0 +1,193 @@
+#parse("index/_header.vm")
+<html>
+    <head>
+        <title>服务人员配置</title>
+    </head>	
+    <body style="padding-bottom:40px;overflow-y:hidden">
+		<form id="selectperson" method="post" class="ui-layout-center ui-dialog-form"  method="POST" action="$!{rc.contextPath}/repair/repairDeviceCategoryPerson/save" >
+			<input type="hidden"  name="id" value="$!{repairEvtCategoryPerson.id}"  />
+			<input type="hidden"  name="categoryType" value="$!{repairEvtCategoryPerson.categoryType}"  />
+			<input type="hidden"  name="oldPersonId" value="$!{repairEvtCategoryPerson.personId}"  />
+			<input type="hidden"  name="oldRepairMode" value="$!{repairEvtCategoryPerson.repairMode}"  />
+			<input type="hidden"  name="oldRepairGroupId" value="$!{repairEvtCategoryPerson.repairGroupId}"  />
+			<input type="hidden"  name="oldCategoryType" value="$!{repairEvtCategoryPerson.categoryType}"  />
+			<input type="hidden"  name="oldCategoryId" value="$!{repairEvtCategoryPerson.categoryId}"  />
+			<table class="ui-co-table"  width="99%"  style="margin-left: -6px;">
+			   <tr>			  
+				<td class="label"><span class="ui-form-required">*</span><label>维修模式：</label></td>
+				<td class="inputText">
+				    #foreach($!rMode in $!listRepairMode)
+				    <input type="radio"  name="repairMode" value="$!{rMode.enumValue}" #if($!{rMode.enumValue}==$!{repairEvtCategoryPerson.repairMode}) checked #end >$!{rMode.enumText}							
+				    #end
+				</td>
+		        </tr>
+			    <tr>			  
+					<td class="label"><span class="ui-form-required">*</span><label id="pName">选择人员：</label></td>
+					<td class="inputText">
+						<span class="k-textbox k-space-right"  onclick="chooserepairPerson('personId','personName',2,'','departmentId','departmentName')" >
+							<input class="k-textbox #if(!$!{viewOnly}) ui-input-choose #end"" onmouseover="this.title=this.value" readonly type="text" id="personName" name="personName" value="$!repairEvtCategoryPerson.personName" />	
+							<input  type="hidden" id="personId" name="personId" value="$!repairEvtCategoryPerson.personId"/>
+							<input  type="hidden" id="departmentId" name="departmentId" value="$!repairEvtCategoryPerson.departmentId"/>
+							<a href="#" class="k-icon k-i-search">&nbsp;</a>
+						</span> 
+					</td>
+					<td class="label"><span class="ui-form-required">*</span><label>所属部门：</label></td>
+			        <td >		        	
+			        	<input  type="text" class="k-textbox" id="departmentName" name="departmentName" value="$!repairEvtCategoryPerson.departmentName" readonly/>                          
+			        </td>
+		        </tr>
+		        <tr>
+		            <td class="label"><span class="ui-form-required">*</span><label>维修班组：</label></td>
+			        <td >		        	
+			        	<span class="k-textbox k-space-right" #if($!{viewOnly} != true) onclick="chooseDutyGroup('repairGroupId','repairGroupName','person_add_dlg')" #end>
+		                     <input class="k-textbox" id="repairGroupId" type="hidden" name="repairGroupId" type="text"  value="$!{repairEvtCategoryPerson.repairGroupId}">
+		                     <input class="k-textbox" id="repairGroupName" name="repairGroupName" type="text" value="$!{repairEvtCategoryPerson.repairGroupName}" readonly >
+							 <a href="#" class="k-icon k-i-search">&nbsp;</a>
+		                </span>                                
+			        </td>
+					<td class="label"><span class="ui-form-required">*</span><label>维修类别：</label></td>
+			        <td >		        	
+			        	<span class="k-textbox k-space-right" #if($!{viewOnly} != true) onclick="chooseDeviceCategory('categoryId','categoryName','person_add_dlg',1)" #end>
+		                     <input class="k-textbox" id="categoryId" type="hidden" name="categoryId" type="text"  value="$!{repairEvtCategoryPerson.categoryId}">
+		                     <input class="k-textbox" id="categoryName" name="categoryName" type="text" value="$!{repairEvtCategoryPerson.categoryName}" readonly >
+							 <a href="#" class="k-icon k-i-search">&nbsp;</a>
+		                </span>                                
+			        </td>
+		        </tr>
+			</table>							
+			<div style="height:480px;overflow-y:auto;">
+				<div id="tabstrip-1" style="height:400px;float:left;width:99%;">
+					<span class="k-header k-grid-toolbar" style="padding-left:10px;padding-top:10px;"><span class="ui-form-required">*</span>地理区域</span>
+					<ul id="geoAreaTree" class="ztree"></ul>
+				</div>
+		    </div>
+			<div class="actions" style="width:98%;text-align:right;">
+	            <button class="k-primary hc_btn" id="personSave" onclick="before()" type="submit"><i class="fa fa-save"></i>保 存</button>
+	            <button class="hc_btn cancel" onclick="close_dialog('person_add_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+	        </div>
+			<input type="hidden" id="categoryIds" name="categoryIds" value="$!categoryIds"/>
+			<input type="hidden" id="categoryId" name="categoryId" value="$!{repairEvtCategoryPerson.categoryId}"/>
+			<input type="hidden" id="areaIds" name="areaIds" value="$!areaIds"/>
+			<input type="hidden" id="areaName" name="areaName" value="$!{repairEvtCategoryPerson.areaName}"/>
+			<input type="hidden" id="areaId" name="areaId" value="$!{repairEvtCategoryPerson.areaId}"/>
+    	</form>
+	</body>
+</html>
+#parse("index/_footer.vm") 
+<script type="text/javascript"> 
+    /* zTree */
+    var setting1 = {
+		check:{
+			enable: true,
+			chkboxType : { "Y" : "s", "N" : "s" }
+		},
+    	data: {
+    		simpleData: {enable: true}
+    	},
+    	callback: {
+    		onClick: function(event, treeId, treeNode, clickFlag) {
+    				$('#locationId').val(treeNode.id);
+    				$('#locationName').text(treeNode.name);
+    				$('#selectBlock').show();
+    				$('#queryBtn').click();
+    		}
+    	}
+    };
+	    
+    var zNodes1 = [];  
+    zNodes1.push({id:"0", pId:"-1", name:"地理区域簇",open:true}); 
+	#if(${repairEvtCategoryPerson.categoryId})
+    #foreach($!{treeNode1} in $!{treeListLou})
+        zNodes1.push({id:$!{treeNode1.id}, pId:$!{treeNode1.parentId}, name:"$!{treeNode1.areaName}",open:false,checked:$!{treeNode1.checked}});    
+    #end
+	#else
+	#foreach($!{treeNode1} in $!{treeListLou})
+        zNodes1.push({id:$!{treeNode1.id}, pId:$!{treeNode1.parentId}, name:"$!{treeNode1.areaName}",open:false,checked:$!{treeNode1.checked}});    
+    #end
+	#end
+
+	
+   
+    $(document).ready(function(){
+	    ##$.fn.zTree.init($("#geoAreaTree"), setting1,zNodes1).expandAll(true);
+	    $.fn.zTree.init($("#geoAreaTree"), setting1,zNodes1);
+    });
+    function cancelLeftTreeSelected(){
+    $.fn.zTree.init($("#geoAreaTree"), setting1,zNodes1);
+    }
+	
+	function chooserepairPerson(txtId, txtName, type, dialogId, deptId, deptName) {
+    if (deptId == null)deptId = "";
+    if (deptName == null)deptName = "";
+    quick_dialog(
+		"selectDiloag", 
+        "选择人员",
+        "$!{rc.contextPath}/repair/repairEvtCategoryPerson/chooseperson/" + (type ? type : 1) + "/" + txtId + "/" + txtName + "?deptId=" + deptId + "&deptName=" + deptName + "&dialogId=" + dialogId,
+        950,
+        450 
+        //inputChooseClear()
+    );
+}
+
+
+ function before(){
+	//获取类别属性信息
+	var geoAreaIds = getZTreeSelectId("geoAreaTree") ;
+	$("#areaIds").val(geoAreaIds);
+	$("#categoryIds").val($("#categoryId").val());
+ }
+ 
+ 
+ 
+  $(document).ready(function(){
+	  
+	  $("#selectperson :radio").click(function(){
+		  var repairMode = $(this).val();
+          if("0" == repairMode)  {
+              $("#pName").html("维修负责人：");
+          }else{
+              $("#pName").html("主管工程师：");
+          }
+	  });
+	  
+	  var rMode = '$!{repairEvtCategoryPerson.repairMode}';
+	  if(rMode=="0"){
+          $("#pName").html("维修负责人：");
+      }else{
+          $("#pName").html("主管工程师：");
+      }
+	  
+	  $('#selectperson').validator({
+	        fields: {
+	        	personName: "人员:required",
+				categoryName: "维修类别:required",
+				repairGroupName: "维修班组:required"
+	          },
+	            valid:function(form){
+	                form_btn_submit($("#personSave"),form,function(res){
+	                    //console.log(res);
+	                    validateCallback(res,"grid","person_add_dlg");
+	                    return false;
+	                });
+	            }
+	        });
+      });
+ 
+ function getZTreeSelectId(id){
+ 	var ids = "";
+	var treeObj = $.fn.zTree.getZTreeObj(id) ;
+	var selectNodes = treeObj.getCheckedNodes(true);
+	if(selectNodes.length > 0){
+		for(var i=0; i<selectNodes.length; i++){
+			ids = ids + selectNodes[i].id ;
+			if(i < selectNodes.length - 1){
+				ids = ids + "," ;
+			}
+		}
+	}
+	return ids ;
+ }
+ 
+ 
+	
+</script>

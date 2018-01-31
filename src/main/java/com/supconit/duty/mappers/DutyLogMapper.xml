@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconicom/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.duty.entities.DutyLog">
+    
+   <resultMap type="DutyLog" id="dutyLogResultMap">
+       <result property="id" column="ID"/>
+       <result property="dutyType" column="DUTY_TYPE"/>
+       <result property="dutyDate" column="DUTY_DATE"/>
+       <result property="orderType" column="ORDER_TYPE"/>
+       <result property="groupType" column="GROUP_TYPE"/>
+       <result property="startTime" column="START_TIME"/>
+       <result property="endTime" column="END_TIME"/>
+       <result property="replaceTime" column="REPLACE_TIME"/>
+       <result property="replacePersonId" column="REPLACE_PERSON_ID"/>
+       <result property="replacePersonName" column="REPLACE_PERSON_NAME"/>
+       <result property="personId" column="PERSON_ID"/>
+       <result property="personName" column="PERSON_NAME"/>
+       <result property="replaceDesc" column="REPLACE_DESC"/>
+       <result property="dutyDesc1" column="DUTY_DESC1"/>
+       <result property="dutyDesc2" column="DUTY_DESC2"/>
+       <result property="dutyDesc3" column="DUTY_DESC3"/>
+       <result property="dutyDesc4" column="DUTY_DESC4"/>
+       <result property="status" column="STATUS"/>
+       <result property="createId" column="CREATE_ID"/>
+       <result property="creator" column="CREATOR"/>
+       <result property="createDate" column="CREATE_DATE"/>
+       <result property="updateId" column="UPDATE_ID"/>
+       <result property="updateName" column="UPDATOR"/>
+       <result property="updatedate" column="UPDATE_DATE"/>
+       
+   </resultMap>
+   <sql id="TABLE_NAME" lang="velocity">DUTY_LOG_NEW</sql>
+   <sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+   <sql id="select_pre" lang="velocity">
+     select
+      A.ID,
+      A.DUTY_TYPE,
+      A.DUTY_DATE,
+      A.ORDER_TYPE,
+      A.GROUP_TYPE,
+      A.START_TIME,
+      A.END_TIME,
+      A.REPLACE_TIME,
+      A.REPLACE_PERSON_ID,
+      A.REPLACE_PERSON_NAME,
+      A.PERSON_ID,
+      A.PERSON_NAME,
+      A.REPLACE_DESC,
+      A.DUTY_DESC1,
+      A.DUTY_DESC2,
+      A.DUTY_DESC3,
+      A.DUTY_DESC4,
+      A.STATUS,
+      A.CREATE_ID,
+      A.CREATOR,
+      A.CREATE_DATE,
+      A.UPDATE_ID,
+      A.UPDATOR,
+      A.UPDATE_DATE
+      FROM  DUTY_LOG_NEW A 
+        
+   </sql>
+  
+	 <sql id="count_pre" lang="velocity">
+		SELECT COUNT(*) FROM <include refid="TABLE_NAME"/> 
+	</sql>
+    <select id="findByConditions" parameterType="DutyLog" resultMap="dutyLogResultMap" lang="velocity" databaseId="oracle">
+       <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre"/>
+		<include refid="condition_sql"/>
+		#order($_parameter.condition,"A.ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+    <!-- 按条件查询记录-->
+	<select id="findByConditions" parameterType="DutyLog" resultMap="dutyLogResultMap" lang="velocity" databaseId="sqlserver">
+	    <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		select
+      A.ID,
+      A.DUTY_TYPE,
+      A.DUTY_DATE,
+      A.ORDER_TYPE,
+      A.GROUP_TYPE,
+      A.START_TIME,
+      A.END_TIME,
+      A.REPLACE_TIME,
+      A.REPLACE_PERSON_ID,
+      A.REPLACE_PERSON_NAME,
+      A.PERSON_ID,
+      A.PERSON_NAME,
+      A.REPLACE_DESC,
+      A.DUTY_DESC1,
+      A.DUTY_DESC2,
+      A.DUTY_DESC3,
+      A.DUTY_DESC4,
+      A.STATUS,
+      A.CREATE_ID,
+      A.CREATOR,
+      A.CREATE_DATE,
+      A.UPDATE_ID,
+      A.UPDATOR,
+      A.UPDATE_DATE 
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"A.ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/> A
+		<include refid="condition_sql" />
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+    <select id="countByConditions" parameterType="DutyLog" resultType="long" lang="velocity">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+    
+	 <select id="getById" resultMap="dutyLogResultMap" parameterType="long" lang="velocity">
+		<include refid="select_pre"/>
+		WHERE A.ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+	
+	 <insert id="insert" parameterType="DutyLog" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="insert_sql" />
+	</insert>
+	 <insert id="insert" parameterType="DutyLog" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+  		<include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+     </insert>
+	     <!-- 插入记录-->
+    <sql id="insert_sql" lang="velocity">
+        INSERT INTO <include refid="TABLE_NAME"/>(
+        	#if($_databaseId == 'oracle') ID, #end
+        	DUTY_TYPE,
+	        DUTY_DATE,
+			ORDER_TYPE,
+	        GROUP_TYPE,
+	        START_TIME,
+	        END_TIME,
+	        REPLACE_TIME,
+	        REPLACE_PERSON_ID,
+	        REPLACE_PERSON_NAME,
+	        PERSON_ID,
+	        PERSON_NAME,
+	        REPLACE_DESC,
+		    DUTY_DESC1,
+		    DUTY_DESC2,
+		    DUTY_DESC3,
+		    DUTY_DESC4,
+	        STATUS,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE,
+	        UPDATE_ID,
+     		UPDATOR,
+      		UPDATE_DATE
+        ) VALUES (
+        	#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end
+	        @{_parameter.dutyType,jdbcType=NUMERIC},
+	        @{_parameter.dutyDate,jdbcType=TIMESTAMP},
+	        @{_parameter.orderType,jdbcType=NUMERIC},
+	        @{_parameter.groupType,jdbcType=NUMERIC},
+	        @{_parameter.startTime,jdbcType=TIMESTAMP},
+	        @{_parameter.endTime,jdbcType=TIMESTAMP},
+	        @{_parameter.replaceTime,jdbcType=TIMESTAMP},
+	        @{_parameter.replacePersonId,jdbcType=NUMERIC},
+	        @{_parameter.replacePersonName,jdbcType=VARCHAR},
+	        @{_parameter.personId,jdbcType=NUMERIC},
+            @{_parameter.personName,jdbcType=VARCHAR},
+            @{_parameter.replaceDesc,jdbcType=VARCHAR},
+            @{_parameter.dutyDesc1,jdbcType=VARCHAR},
+            @{_parameter.dutyDesc2,jdbcType=VARCHAR},
+            @{_parameter.dutyDesc3,jdbcType=VARCHAR},
+            @{_parameter.dutyDesc4,jdbcType=VARCHAR},
+            @{_parameter.status,jdbcType=NUMERIC},
+	        @{_parameter.createId,jdbcType=NUMERIC},
+	        @{_parameter.creator,jdbcType=VARCHAR},
+	        @{_parameter.createDate,jdbcType=TIMESTAMP},
+	        @{_parameter.updateId,jdbcType=NUMERIC},
+	        @{_parameter.updateName,jdbcType=VARCHAR},
+	        @{_parameter.updatedate,jdbcType=TIMESTAMP}
+
+        )
+    </sql>
+    <!-- 更新记录-->
+	<update id="update" parameterType="DutyLog" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+		#mset()
+		<![CDATA[
+        #if($_parameter.dutyType && $_parameter.dutyType !='')DUTY_TYPE = @{_parameter.dutyType,jdbcType=NUMERIC},#end
+        #if($_parameter.dutyDate && $_parameter.dutyDate !='') DUTY_DATE = @{_parameter.dutyDate,jdbcType=TIMESTAMP},#end
+        #if($_parameter.orderType && $_parameter.orderType !='') ORDER_TYPE = @{_parameter.orderType,jdbcType=NUMERIC},#end
+        #if($_parameter.groupType && $_parameter.groupType !='') GROUP_TYPE = @{_parameter.groupType,jdbcType=NUMERIC},#end
+        #if($_parameter.startTime && $_parameter.startTime !='') START_TIME = @{_parameter.startTime,jdbcType=TIMESTAMP},#end
+        #if($_parameter.endTime && $_parameter.endTime !='') END_TIME = @{_parameter.endTime,jdbcType=TIMESTAMP},#end
+        #if($_parameter.replaceTime && $_parameter.replaceTime !='')REPLACE_TIME = @{_parameter.replaceTime,jdbcType=TIMESTAMP},#end
+        #if($_parameter.replacePersonId)REPLACE_PERSON_ID = @{_parameter.replacePersonId,jdbcType=NUMERIC},#end
+        #if($_parameter.replacePersonName)REPLACE_PERSON_NAME = @{_parameter.replacePersonName,jdbcType=VARCHAR},#end
+        #if($_parameter.personId && $_parameter.personId !='')PERSON_ID = @{_parameter.personId,jdbcType=NUMERIC},#end
+        #if($_parameter.personName && $_parameter.personName !='')PERSON_NAME = @{_parameter.personName,jdbcType=VARCHAR},#end
+        #if($_parameter.replaceDesc)REPLACE_DESC = @{_parameter.replaceDesc,jdbcType=VARCHAR},#end
+        #if($_parameter.dutyDesc1)DUTY_DESC1 = @{_parameter.dutyDesc1,jdbcType=VARCHAR},#end
+        #if($_parameter.dutyDesc2)DUTY_DESC2 = @{_parameter.dutyDesc2,jdbcType=VARCHAR},#end
+        #if($_parameter.dutyDesc3)DUTY_DESC3 = @{_parameter.dutyDesc3,jdbcType=VARCHAR},#end
+        #if($_parameter.dutyDesc4)DUTY_DESC4 = @{_parameter.dutyDesc4,jdbcType=VARCHAR},#end
+		#if($_parameter.status && $_parameter.status !='')STATUS = @{_parameter.status,jdbcType=NUMERIC},#end
+        #if($_parameter.updateId && $_parameter.updateId !='')UPDATE_ID = @{_parameter.updateId,jdbcType=NUMERIC},#end
+        #if($_parameter.updateName && $_parameter.updateName !='')UPDATOR = @{_parameter.updateName,jdbcType=VARCHAR},#end
+		#if($_parameter.updatedate && $_parameter.updatedate !='')UPDATE_DATE = @{_parameter.updatedate,jdbcType=TIMESTAMP},#end
+		]]>
+		#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			1=1 		
+			#if($_p.id && $_p.id != '')
+				#set($_id = $_p.id)
+				AND A.ID = @{_id}
+			#end
+			#if($_p.dutyType && $_p.dutyType != '')
+				#set($_dutyType = $_p.dutyType)
+				AND DUTY_TYPE =@{_dutyType}
+			#end
+       		#if($_p.dutyDate && $_p.dutyDate != '')
+				#set($_dutyDate =$_p.dutyDate)
+				AND DUTY_DATE =@{_dutyDate}
+			#end
+			#if($_p.personName && $_p.personName != '')
+				#set($_personName = '%' + $_p.personName + '%')
+				AND PERSON_NAME LIKE @{_personName}
+			#end
+			#if($_p.replacePersonName && $_p.replacePersonName != '')
+				#set($_replacePersonName = '%' + $_p.replacePersonName + '%')
+				AND REPLACE_PERSON_NAME LIKE @{_replacePersonName}
+			#end
+			#if($_p.status && $_p.status != '')
+				#set($_status = $_p.status)
+				AND STATUS =@{_status}
+			#end
+		#end
+		]]>	
+	</sql>
+     <!-- 通过 ID 获取对象-->
+	<delete id="deleteById" parameterType="Long" lang="velocity">
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</delete>
+	<!-- 删除多条记录-->
+	<delete id="deleteByIds">
+       DELETE FROM
+		<include refid="TABLE_NAME" />
+	    WHERE ID IN    
+	        <foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+				#{id,jdbcType=NUMERIC}
+			</foreach>
+
+	</delete>
+</mapper>

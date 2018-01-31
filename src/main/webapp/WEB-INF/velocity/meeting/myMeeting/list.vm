@@ -1,0 +1,236 @@
+#parse("index/_header.vm")
+</head>
+<body>
+
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+		<div id="tabstrip" style="margin-left:5px;">
+    		<ul>
+    			<li class="k-state-active" id="li_reservation">预定的会议</li>
+    			<li id="li_attendee">参加的会议</li>
+    		</ul>
+		</div >
+    	<form class="ui-form" id='queryForm'>
+			<input type="hidden" name="type" value="$!{type}">
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+                <tr>
+					<td class="ui-search-name first">会议主题：</td>
+					<td class="ui-search-c">
+						<input name="meetingSubject" value="$!meeting.meetingSubject" class="k-textbox" type="text">
+                  	</td>
+				  
+					<td class="ui-search-name">会议室类别：</td>
+					<td class="ui-search-c">
+		               <select  class="k-textbox" name="roomType">
+						<option value=''>--请选择--</option>
+				    	${roomTypeList}
+				       </select>
+					</td>
+				  
+					<td class="ui-search-name first">预定时段：</td>
+					<td class="ui-search-c">
+						<input  id="startTime"  class="k-textbox"  name="meetingStart" value="#date_format($!{reserveMeeting.meetingStart},'yyyy-MM-dd HH:mm:ss')"  />
+						至
+						<input id="endTime"  class="k-textbox"  name="meetingEnd" value="#date_format($!{reserveMeeting.meetingEnd},'yyyy-MM-dd HH:mm:ss')"/>
+					</td>
+                </tr>
+              </table>
+            </td>
+            <td width="180" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn" ><i class="fa fa-refresh"></i>重置</button>
+            </td>
+            <td></td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+  #parse("index/_footer.vm") 
+<script type="text/javascript">
+  var _iframe_layout, _left_layout, _inner_layout,containerHeight;
+	$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      }
+    });
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+   
+	$('#resetBtn').click(function(){
+		clearDate("startTime", "endTime");
+		$("#queryForm :text").val('');  
+    });
+	
+    $('#li_reservation').click(function(){
+		$("input[name='type']").val("1");
+		$(".k-grid-toolbar .toolbar .grid_operates").show();
+		$('#queryBtn').click();
+	});
+	
+    $('#li_attendee').click(function(){
+		$("input[name='type']").val("2");
+		$(".k-grid-toolbar .toolbar .grid_operates").hide();
+		$('#queryBtn').click();
+	});
+	
+		 $("#tabstrip").hcTabStrip({
+	            animation: {
+	                // fade-out current tab over 1000 milliseconds
+	                close: {
+	                    duration: 100,
+	                    effects: "fadeOut"
+	                },
+	               // fade-in new tab over 500 milliseconds
+	               open: {
+	                   duration: 100,
+	                   effects: "fadeIn"
+	               }
+	           }
+	        });
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/meeting/myMeeting/list?r=" + new Date(), [{
+              field: "id",
+              hidden: true
+          }, {
+              field: "meetingSubject",
+              title: "会议主题",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+          	  attributes: {     
+  		  		title:"#: data.meetingSubject==null? '':data.meetingSubject #",
+  				"class": "k-grid-text k-grid-nowrap"
+		  	  },
+			  template:"<a href=\"javascript:void(0)\" title=\"#: data.meetingSubject #\" onclick=\"editResever(#:id#,#:roomInfo.id#)\">#: data.meetingSubject #</a>",
+			  width: 240
+          }, {
+              field: "roomInfo.roomName",
+              title: "会议室名称",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "meetingStart",
+              sortable: false,
+              title: "预定时段",
+              headerAttributes: {"class": "k-grid-equilong"},
+		  	  attributes: {"class": "k-grid-equilong"},
+			  template:"#: data.meetingStart +'~'+ data.meetingEnd #",
+			  width: 280
+          }, {
+              field: "attendeePersonNum",
+              sortable: false,
+              title: "参会人数",
+              headerAttributes: {"class": "k-grid-num"},
+              attributes: {"class": "k-grid-num"},
+			  width: 76
+          }, {
+              field: "roomInfo.roomTypeName",
+              title: "会议室类别",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+			  width: 100
+          }, {
+              field: "roomInfo.capacityPerson",
+              title: "可容纳人数",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-num"},
+              attributes: {"class": "k-grid-num"},
+			  width: 76
+          },  {
+              field: "roomInfo.location",
+              title: "地理位置",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }
+          
+          ], 
+      {
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          },resizable:true
+      }, {
+          serverSorting: true
+      }, [
+          #kendo_datagrid_btns("MEETING_MY")#end
+      ]);
+	
+    }); 
+	
+	commonDate("startTime","endTime","yyyy-MM-dd HH:mm:ss","zh-CN");
+	
+	function editResever(val,meetingId){
+    	quick_dialog("reserveMeeting_add_dlg", "会议信息", "$!{rc.contextPath}/meeting/roomReservation/edit?way=2&mId="+meetingId+"&id=" + val, 1000, 600);
+    }
+	
+	function singleCancelAndOver(grid, url, tips) {
+    var row = grid.select();
+    var data = grid.dataItem(row);
+    if (!data) {
+        notify("请选择要"+tips+"的项", "warn");
+        return;
+    } else {
+        if (!confirm("确定"+tips+"吗？"))return;
+            $.ajax({
+                type: "post",
+                cache: false,
+                url: url ? url : "delete",
+                data: "ids=" + data.id,
+                success: function (response) {
+                    if (response.status == "error") {
+                        //$.message(response.message, $.message.TYPE_ERROR);
+                        //showErrorMsg(response.message);
+                        notify(response.message || "操作失败！","error");
+                    } else if (response.status == "success") {
+                        if (response.data.next) {
+                            if (response.data.next == ".") {//刷新datagrid
+                                edited_callback(grid);
+                            } else if (response.data.next == "x") {
+                                edited_callback(grid);
+                            } else {//刷新maincontent  例子：response.data.next：  相对路径
+                                parent.loadFrame(getContext()+response.data.next);
+                            }
+                        }
+                        notify(response.data.message || "操作成功！","success");
+                            //$.message(response.data.message, $.message.TYPE_OK);
+                           // showSuccessMsg(response.data.message);
+
+                    }
+                }, error: function (xhr, status, error) {
+                    var response = $.parseJSON(xhr.responseText);
+                    if (response.error) {
+                        response = response.error;
+                    }
+                    //$.message(response.message, $.message.TYPE_ERROR);
+                    ///showErrorMsg(response.message);
+                    notify(response.message || "操作失败！","error");
+                }
+            });
+
+    }
+}
+</script>

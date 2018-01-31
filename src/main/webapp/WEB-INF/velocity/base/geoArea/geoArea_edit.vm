@@ -1,0 +1,111 @@
+#parse("index/_header.vm")
+</head>
+<body style="padding-bottom:40px;">
+<form id="myform_id" method="post" action="$!{rc.contextPath}/base/geoArea/save" class="ui-layout-center ui-dialog-form">
+    <input type="hidden" name="id" value="$!{geoArea.id}">
+    <input  type="hidden"  name="menuCode" value="$!{menu.code}">
+    <table width="100%">
+        <tr>
+            <td class="label"><span class="ui-form-required">*</span><label>区域编码：</label></td>
+            <td width="66%"><input type="text" class="k-textbox" name="areaCode" value="$!{geoArea.areaCode}"></td>
+            <td width="8%"></td>
+        </tr>
+        <tr>
+            <td class="label"><span class="ui-form-required">*</span>区域名称：</td>
+            <td><input type="text" class="k-textbox" name="areaName" value="$!{geoArea.areaName}"></td>
+            <td></td>
+        </tr>
+         <tr>
+            <td class="label"><span class="ui-form-required">*</span>区域类别：</td>
+            <td><select id="areaType_id" name="areaType" class="k-textbox">
+						#foreach($!lType in $!listAreaType)
+							<option value="$!{lType.enumValue}" #if($!{lType.enumValue}==$!{geoArea.areaType}) selected #end>$!{lType.enumText}</option>
+						#end
+				</select></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td class="label">父区域：</td>
+            <td>
+                <input class="k-textbox" type="hidden" name="parentId" id="parentId" value="$!{geoArea.parentId}"/>
+	            	<span id="parentName_choose" class="k-textbox k-space-right">
+                                     <input readonly type="text" name="parentName" id="parentName" value="$!{geoArea.parentName}"  />
+                    <a href="#" class="k-icon k-i-search">&nbsp;</a>
+                </span>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td class="label"><span class="ui-form-required">*</span>序号：</td>
+            <td><input type="text" class="k-textbox" name="sort" value="$!{geoArea.sort}"></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td class="label">备注：</td>
+            <td><textarea  name="remark" class="k-textbox k-textarea" style="height:60px">$!{geoArea.remark}</textarea></td>
+            <td></td>
+        </tr>
+    </table>
+    <div class="actions">
+        <button class="k-primary hc_btn" id="save_button_id" type="submit"><i class="fa fa-save"></i>保 存</button>
+        <button class="hc_btn cancel" onclick="close_dialog('geoArea_add_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+    </div>
+
+</form>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+	      defaults: {
+	        resizable: true,
+	        closable: false,
+	        spacing_open: 5
+	      }
+	    });
+	});
+
+    //
+    $(document).ready(function () {
+        $("#parentName_choose").click(function () {
+            quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/base/geoArea/lookup?txtId=parentId&txtName=parentName&dialogId=geoArea_add_dlg", 300, 300);
+        });
+
+
+        $("#myform_id").validator({
+            fields: {
+                areaCode: "区域编码:required; length[~10]",
+                areaName: "区域名称:required; length[~15]",
+                areaType: "区域类别:required",
+                sort: "序号:required; length[~5]; digits",
+                remark: "length[~100]"
+            },
+            valid: function (form) {
+                form_btn_submit($("#save_button_id"), form, function (res) {
+                    //console.log(res);
+                    validateCallback(res, "grid", "geoArea_add_dlg");
+                });
+            }
+        });
+    #*
+            $('#myform_id').validator({
+              rules: {
+                areaCode: ['not_empty',{max_length: 20},'alpha_dash'],
+                areaName: ['not_empty',{max_length: 30}],
+                sort:['not_empty',{max_length: 5},'digit'],
+                remark: [{max_length: 200}]
+              },onSuccess: function(response, validator, $form) {
+                    alert(1);
+                validateCallback(response);
+                return false;
+              }
+            });
+    *#
+
+    });
+
+        #if($!viewOnly)
+        setAllReadonly();
+        #end
+</script>
+</body>
+</html>

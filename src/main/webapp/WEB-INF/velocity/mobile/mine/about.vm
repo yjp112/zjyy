@@ -1,0 +1,31 @@
+<div data-page="about" class="page page-about">
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="navbar-inner">
+                <div class="navbar-left">
+                    <a href="#" class="link back">
+                        <i class="icon icon-c-back only-icon"></i>
+                    </a>
+                </div>
+                <div class="navbar-center">关于中控运维平台</div>
+                <div class="navbar-right"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-content">
+        <div class="list-block">
+            <div class="top-logo">
+                <div class="app-logo"></div>
+                <div class="title">中控运维平台</div>
+                <div class="version">
+                    版&nbsp;本&nbsp;号：1.0
+                </div>
+            </div>
+            <div class="copyright">
+                <div class="text">版权所有：浙江浙大中控信息技术有限公司</div>
+                <div class="cr">Copyright &copy; 2003-2016</div>
+            </div>
+        </div>
+    </div>
+</div>

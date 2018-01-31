@@ -1,0 +1,288 @@
+#parse("index/_header.vm")
+<style>
+ a.k-button.k-button-icontext.k-grid-复制地址{
+ 	background-color: #1ab38d;
+ }
+</style>
+</head>
+<body>
+
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<form class="ui-form" id='queryForm'>
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+                <tr>
+                  <td class="ui-search-name first" style="padding-left: 20px;">菜单编码：</td>
+                  <td class="ui-search-c">
+                    <input name="menuType" value="$!menuLayer.menuType" class="k-textbox" type="text">
+                  </td>
+                  <td class="ui-search-name" style="padding-left: 20px;">图层类型：</td>
+                  <td class="ui-search-c">
+                  	<select id="model_id" name="modelType" onchange="typeChange()" class="k-textbox">
+                  			<option value="">--请选择--</option>
+      						<option value="1">flash模式</option>
+      						<option value="2">gis模式</option>
+                    </select>
+                  </td>
+                  <td class="ui-search-name" style="padding-left: 20px;">图层模式：</td>
+                  <td class="ui-search-c">
+                  	<select id="layer_id" name="layerModel" class="k-textbox">
+                  			<option value="">--请选择--</option>
+                    </select>
+                  </td>
+                </tr>
+              </table>
+            </td>
+            <td width="150" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+
+ #parse("index/_footer.vm")
+<script type="text/javascript">
+  var _iframe_layout, _inner_layout;
+	$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      }
+     
+    });
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+
+    $('#resetBtn').click(function(){
+      $("#queryForm :text").val('');  
+    });
+	
+		//列表
+    quick_datagrid_self("#grid", "#queryForm", "$!{rc.contextPath}/hl/gis/platform/menuLayer/list", [{
+              field: "id",
+              hidden: true
+          }, {
+              field: "menuType",
+              title: "菜单",
+              sortable: false,
+              template:"<a href=\"javascript:void(0)\" title=\"查看#: data.menuType #的详细信息\" onclick=\"quick_dialog('menuLayer_add_dlg','查看#:data.menuType #的信息','$!{rc.contextPath}/hl/gis/platform/menuLayer/edit?viewOnly=true&id=#: data.id #',350,380)\">#: data.menuName #(#: data.menuType #)</a>",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              width: 200
+          }, {
+              field: "gisLayerNames",
+              title: "GIS图层名",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {     
+      		  	 title:"#: data.gisLayerNames==null? '':data.gisLayerNames #",
+      			 "class": "k-grid-text k-grid-nowrap"
+    		  },
+    		  template:function(dataItem){
+ 		    	 var gisLayerNames = dataItem.gisLayerNames;
+ 		    	 var modelType = dataItem.modelType;
+ 		    	 if(modelType == '2'){
+	 	    	 	return gisLayerNames;
+ 		    	 }else{
+ 		    	 	return "";
+ 		    	 }
+ 		    	 
+ 		     },
+              width: 350
+          }, {
+              field: "layerModel",
+              title: "图层模式",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"},
+              template:function(dataItem){
+ 		    	 var type = dataItem.layerModel;
+ 		    	 var modelType = dataItem.modelType;
+ 		    	 if(modelType == '2'){
+ 		    	 	if(type == '1')
+	 	    		 {
+	 			    	 return "楼层图";
+	 	    		 }else{
+	 	    			 return "系统图";
+	 	    		 }
+ 		    	 }else{
+ 		    	 	return "";
+ 		    	 }
+ 		    	 
+ 		     },
+              width: 150
+          },{
+              field: "systemCode",
+              title: "系统图层",
+              template:function(dataItem){
+                 var modelType = dataItem.modelType;//flash模式和gis模式
+ 		    	 var type = dataItem.layerModel;
+ 		    	 if(modelType == '1'){
+ 		    	 	return "";
+ 		    	 }else{
+ 		    	 	if(type == '1')
+	 	    		 {
+	 			    	 return "";
+	 	    		 }else{
+	 	    			 return dataItem.systemName+"("+dataItem.systemCode+")";
+	 	    		 }
+ 		    	 }
+ 		    	 
+ 		     },
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          },{
+              field: "flashCodeName",
+              title: "系统编码",
+              template:function(dataItem){
+                 var modelType = dataItem.modelType;//flash模式和gis模式
+ 		    	 if(modelType == '1'){
+		   			return dataItem.flashCodeName;
+ 		    	}
+ 		    	return "";
+ 		     },
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          },{ command: [{ text: "复制地址", click: copy}], title: "操作", width: "100px" }],
+      {
+          
+      }, {
+           
+      }, [
+	  #kendo_datagrid_btns("MENULAYER")#end 
+      ]);
+		
+    });
+	
+	
+	function typeChange(){
+		var type = $("#model_id").val();
+		var select = $("#layer_id");
+		$(select).empty();
+		var aa = '<option value="">--请选择--</option>';
+		if(type == '2'){//gis模式
+			#foreach($!lsLayerModel in $!listLayerModel)
+				aa = aa+'<option value="$!{lsLayerModel.enumValue}">$!{lsLayerModel.enumText}</option>';
+			#end
+		}
+		$(select).append(aa);
+	}
+  function copy(e){
+      e.preventDefault();
+      var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+      var copycode="hl/gis/index/"+dataItem.menuType;
+      $.ajax({
+          'url': "$!{rc.contextPath}/hl/gis/platform/menuLayer/copyCode",
+          'dataType': 'json',
+          'type': 'post',
+          'data': {'code':copycode},
+          'success': function (res) {
+              notify("复制成功", "success");
+          }
+      })
+
+      return false;
+  }
+  
+  function quick_datagrid_self(el,formId,readUrl,columns,options,dsOptions,operates,toolbarId){
+	options = options || {};
+	toolbarId  = toolbarId || "#grid_toolbar_template";
+	var _dbopt = {
+		transport: {
+			read: {
+				url : readUrl,
+				type : "POST",
+				dataType: "json",
+				cache: false,
+				data : function(p){
+					if(formId){
+						var arr = $(formId).serializeArray();
+						if(arr && arr.length > 0){
+							var d = {};
+							$.each(arr,function(idx,it){
+								if(it.value) {
+									d[it.name] = it.value;
+								}
+							});
+							return d;
+						}
+					}
+					return {};
+				}
+			}
+		}
+	};
+	if(dsOptions){
+		_dbopt = $.extend(_dbopt,dsOptions);
+	}
+	var _opt = {
+		dataSource: new kendo.data.DataSource(_dbopt),
+		toolbar: hc.template($(toolbarId).html().replace(/&lt;/g, '<').replace(/&gt;/g, '>')),
+		height: "100%",
+		groupable: false,
+		selectable : true,
+		columns : columns
+	};
+	if(options){
+		_opt = $.extend(_opt,options);
+	}
+	$(el).hcGrid(_opt);
+
+	var $toolbar = $(".k-grid-toolbar .toolbar .grid_operates",el);
+	if(operates && operates.length > 0){
+		$.each(operates,function(idx,it){
+			var $oper = $('<li><a href="javascript:void(0)">' + (it.icon ? '<i class="' + it.icon + '"></i>' : '') + it.name + '</a></li>');
+			if(it.onclick && $.isFunction(it.onclick)){
+				$("a",$oper).bind("click.toolbar",function(e){
+					it.onclick(this,$(el).data("kendoGrid"));
+				});
+			}
+			$toolbar.append($oper);
+		});
+	}
+
+	if(formId){
+		$(formId).submit(function(event){
+  			var _this = this;
+  			var grid = $(el).data("kendoGrid");
+  			btn_running($("*[type='submit']",_this));
+
+  			grid.dataSource.xquery({
+  				 
+  			},function(){
+  				btn_enabled($("button[type='submit']",_this));
+  			});
+  			event.preventDefault();
+  			return false;
+  		});
+	}
+
+}
+</script>
+</body>
+</html>

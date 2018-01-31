@@ -1,0 +1,366 @@
+#parse("index/_header.vm")
+<link href="$!{rc.contextPath}/main_static/custom/js/uploadify/uploadify.css" rel="stylesheet">
+<script src="$!{rc.contextPath}/main_static/custom/js/uploadify/jquery.uploadify-3.1.min.js"></script>
+</head>
+<body>
+<form id="task_edit_form_id" method="post" action="" class="ui-layout-center ui-dialog-form">
+    <input type="hidden"  name="id" value="$!{leave.id}">
+    <input type="hidden"  name="leaveCode" value="$!{leave.leaveCode}">
+    <input type="hidden"  name="createId" value="$!{leave.createId}">
+    <input type="hidden"  name="deptId" value="$!{leave.deptId}">
+
+        <!--BPM -->
+    <input type="hidden" name="_bpm_param" value="$!{_bpm_param}"/>
+    <input type="hidden" name="_bpm_ts_id" value=""/>
+	<input type="hidden" name="bpm_ts_id" value=""/>
+    <input type="hidden" name="_bpm_enabled" value="true"/>
+    <div style="width:100%;height:94%;overflow-y:scroll">
+	    <div class="actions">
+			#if($!leave.id)
+        	<div class="lf-btns" style="float:left;">
+                <a href="javascript:showFlowChart('$!leave.processInstanceId',1000,600);" class="lf-btn lf-btn-chart" title="查看流程图"></a>
+            </div>
+			#end
+           #if(!$!viewOnly)
+                <button class="k-primary hc_btn" id="form_save_id"  type="submit"><i class="fa fa-save"></i>保存</button>
+                #if($!leave.id)
+					<button class="k-primary hc_btn" id="form_delete_id"  type="submit"><i class="fa fa-close"></i>删除</button>
+                #end
+				#foreach($ts in $!_bpm_transitions)
+                  <button type="submit" class="k-primary hc_btn" id="$!ts.id" onclick="doSubmit('$!ts.id')"><i class="fa fa-database"></i>$!ts.name</button>
+                #end
+           #else
+           #end
+	    </div> 	
+    <table width="100%" style="padding-right:36px;">
+        <tr>
+            <td class="label"   ><label>姓名：</label></td>
+            <td ><input type="text" class="k-textbox" name="creator"  readonly  value="$!{leave.creator}"></td>
+            <td class="label"><label>部门：</label></td>
+            <td >
+                     <input type="text" class="k-textbox" name="deptName"  readonly  value="$!{leave.deptName}">
+			</td>
+        </tr>
+        <tr>
+          <td class="label">请假类别：</td>
+            <td>
+				#if($!{leave.id})
+				<input type="hidden" class="k-textbox" name="leaveType" value="$!{leave.leaveType}">
+				#end	
+				<select #if($!{leave.id}) disabled #else name="leaveType" #end id="leaveType_id"  class="k-textbox">
+						#foreach($!lType in $!listLeaveType)
+							<option value="$!{lType.enumValue}" #if($!{lType.enumValue}==$!{leave.leaveType}) selected #end>$!{lType.enumText}</option>
+						#end
+				</select>
+			</td>
+			<td class="label">申请时间：</td>
+			<td>
+                <input  id="createDate"  class="k-textbox"  name="createDate"   readonly  value="#date_format($!{leave.createDate},'yyyy-MM-dd HH:mm:ss')"  />
+            </td>
+		</tr>
+		     <tr id ="sj">
+	        	<td  class="label"><span class="ui-form-required">*</span>开始时间：</td>
+	            <td>
+	                <input  id="startDate" class="k-textbox"  name="startDate" value="#date_format($!{leave.startDate},'yyyy-MM-dd HH:mm:ss')"  />
+	            </td>
+				
+				<td class="label"><span class="ui-form-required">*</span>结束时间：</td>
+	            <td>
+					<input id="endDate"  class="k-textbox"  name="endDate" value="#date_format($!{leave.endDate},'yyyy-MM-dd HH:mm:ss')"/>
+	            </td>
+	          </tr>
+              <tr id="brj">
+		        	<td  class="label"><span class="ui-form-required">*</span>开始日期：</td>
+		            <td>
+		                <input id="startTime"  class="k-textbox"  name="startTime" value="#date_format($!{leave.startDate},'yyyy-MM-dd')"  />
+		            </td>
+					<td class="label"><span class="ui-form-required">*</span>结束日期：</td>
+		            <td>
+						<input id="endTime"  class="k-textbox"  name="endTime" value="#date_format($!{leave.endDate},'yyyy-MM-dd')"/>
+		            </td>
+		          </tr>
+		      <tr id="brj1">
+		        	<td  class="label"><span class="ui-form-required">*</span>开始时间：</td>
+		            <td>
+		                <input  id="startTime1"  class="k-textbox"  name="startTime1" value="#date_format($!{leave.startDate},'HH:mm:ss')"  />
+		            </td>
+					<td class="label"><span class="ui-form-required">*</span>结束时间：</td>
+		            <td>
+						<input id="endTime1"  class="k-textbox"  name="endTime1" value="#date_format($!{leave.endDate},'HH:mm:ss')"/>
+		            </td>
+		          </tr>
+        <tr>
+            <td class="label"><label><span class="ui-form-required">*</span>请假天数：</label></td>
+            <td  colspan="3">
+				<input    type="text"  class="k-textbox"  name="leaveDays"  value="$!{leave.leaveDays}" style="width:35px;" onkeyup="isDigits(this,1);"> 
+				天 
+				<input  type="text"  class="k-textbox"  name="leaveHours"  value="$!{leave.leaveHours}"  style="width:35px;" onkeyup="isDigits(this,0);">
+				小时 ([天|小时] 不能同时为空! 最小单位为1小时,其中年休假为4小时)
+		</td>
+        </tr>
+		<tr>
+            <td class="label"><span class="ui-form-required">*</span>请假事由：</td>
+            <td colspan="3"><textarea   id="reason" name="reason" class="k-textbox k-textarea" style="height:60px">$!{leave.reason}</textarea></td>
+        </tr>
+         <tr id="zds">
+        			<td valign="top" class="label">诊断书：</td>
+			        <td colspan="3" >
+				        <table  class="ui-table"  width="100%" cellpadding="0" cellspacing="0" border="1" id="images_table_id">
+					        <div id="filehidden"></div>
+							  <thead>
+						        <tr>
+						          <th align="left" width="40%">附件名称</th>
+						          <th align="left" width="20%" >附件类型</th>
+						          <th align="left" width="20%" >附件大小</th>
+						          <th align="left" width="20%" >操作</th>
+						        </tr>
+							  </thead>
+							   <tbody>
+					        #set($index=1)
+					        #foreach($!{attach} in $!{listAttachments}) 
+					        <tr id='alreadyfile$!{index}'>
+					          <td ><a id="showImageId_$velocityCount" 	href="${rc.contextPath}/device/attachment/download?fileName=$!{attach.fileName}&path=$!{attach.storePath}"> $!{attach.fileName}</a></td>
+					          <td > $!{attach.fileType}&nbsp; </td>
+					          <td >$!{attach.fileSize}KB</td>
+					          <td  name="tdControl"><a href="#" onclick="removealreadyfile('$!{index}','$!{attach.id}')">移除</a></td>
+					        </tr>
+					        #set($index=$index+1)
+							  #end
+							   </tbody>
+				      </table>
+                </td>
+    </tr>
+    <tr>
+       <td></td>
+       <td  colspan="3" >#if(!$!viewOnly)<input type="file" name="file"  id="file_upload" style="height:30px;width:150px;"/> #end病假、产假、计划生育假、工伤假、疗养假需要提供诊断书。</td>
+      </tr>
+      #if($!leave.id)
+		  <tr>	  	
+		      <td  colspan="4">
+		      	<div style="padding-left: 36px">
+		  			#parse("bpm/bpm_audit.vm")
+		  	  	</div>
+		      </td>	  	
+	      </tr>			
+      #end
+      
+    </table>
+</div>     
+</form>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+		      defaults: {
+		        resizable: true,
+		        closable: false,
+		        spacing_open: 5
+		      }
+	    });
+		 
+		 #if($!{leave.leaveType}==9)
+			$("#brj").show();
+	        $("#brj1").show();
+			$("#sj").hide();
+		#end
+		
+		#if($!{leave.leaveType}!=9)
+			$("#brj").hide();
+	        $("#brj1").hide();
+		    $("#sj").show();
+		#end
+		
+		$("#form_save_id").click(function () {
+	        $("input[name='_bpm_enabled']", $("#task_edit_form_id")).val(true);
+	        $("#task_edit_form_id").attr("action", "$!rc.contextPath/employee/leave/save");
+	        currentBt = "form_save_id";
+	    });
+
+		$("#form_delete_id").click(function () {
+	        $("input[name='_bpm_enabled']", $("#task_edit_form_id")).val(true);
+	        $("#task_edit_form_id").attr("action", "$!rc.contextPath/employee/leave/deleteProcessInstance");
+	        currentBt = "form_delete_id";
+	    });
+	});
+    
+	$("#leaveType_id").change(function() {
+		  var ltype=$("#leaveType_id").val();
+		  var key='LEAVE_APPLY_SJ_PROCESS';
+		  if(ltype=='1'){
+			key = 'LEAVE_APPLY_SJ_PROCESS';
+		  }
+		  if(ltype=='2'){
+			key = 'LEAVE_APPLY_BJ_PROCESS';
+		  }
+		  if(ltype=='3'){
+			key = 'LEAVE_APPLY_SQJ_PROCESS';
+		  }
+		  if(ltype=='4'){
+			key = 'LEAVE_APPLY_NXJ_PROCESS';		  
+		  }
+		  if(ltype=='5'){
+			key = 'LEAVE_APPLY_HJ_PROCESS';
+		  }
+		  if(ltype=='6'){
+		  	key = 'LEAVE_APPLY_TQJ_PROCESS';
+		  }
+		  if(ltype=='7'){
+		  	key = 'LEAVE_APPLY_CQJ_PROCESS';
+		  }
+		  if(ltype=='8'){
+		  	key = 'LEAVE_APPLY_CJ_PROCESS';
+		  }
+		  if(ltype=='9'){
+		  	key = 'LEAVE_APPLY_BRJ_PROCESS';
+			$("#brj").show();
+	        $("#brj1").show();
+			$("#sj").hide();
+			$("#startDate").val('');
+			$("#endDate").val('');
+		  }else{
+		  	$("#brj").hide();
+	        $("#brj1").hide();
+		    $("#sj").show();
+			$("#startTime").val('');
+			$("#endTime").val('');
+			$("#startTime1").val('');
+			$("#endTime1").val('');
+		  }
+		  if(ltype=='10'){
+		  	key = 'LEAVE_APPLY_PCJ_PROCESS';
+		  }
+		  if(ltype=='11'){
+		  	key = 'LEAVE_APPLY_JHSYJ_PROCESS';
+		  }
+		  if(ltype=='12'){
+		  	key = 'LEAVE_APPLY_GSJ_PROCESS';
+		  }
+		  if(ltype=='13'){
+		  	key = 'LEAVE_APPLY_LYJ_PROCESS';
+		  }
+		  $.ajax({
+	    	    'url': "$!{rc.contextPath}/platform/bpm/start?_bpm_process_key="+key, 
+	    	    'dataType': 'html',
+	    	    'type': 'get',
+	    	    'error': function (data) {
+	    	        return false;
+	    	    },
+	    	    'success': function (data) {
+					var str = $(data).find("input[name='_bpm_param']").val();
+					$("input[name='_bpm_param']").val(str);
+	    	    }
+	    	});
+	});	
+	
+    //
+    $(document).ready(function () {
+        $("#task_edit_form_id").validator({
+	            fields: {
+	                leaveDays: "请假天数; length[~3]; digits",
+	                leaveHours: "请假小时; digits",
+	                reason: "请假事由:required; length[~200]"
+	            },
+            valid: function (form) {
+            	form_btn_submit($("#"+currentBt),form,function(res){
+            		 validateCallback(res, "grid", "process_deal_dlg");
+                });
+            }
+        });
+    });
+    commonDateWithout("startTime","endTime","yyyy-MM-dd","zh-CN");
+	commonDateHms("startTime1","endTime1","HH:mm:ss","zh-CN");
+	commonDate("startDate","endDate","yyyy-MM-dd HH:mm:ss","zh-CN");
+
+		
+    #if($!viewOnly)
+    setAllReadonly();
+    #end
+	
+	var currentBt = "form_save_id";
+    function doSubmit(bpmId) {
+        currentBt = bpmId;
+        $("input[name='_bpm_ts_id']").val(bpmId);
+        $("input[name='bpm_ts_id']").val(bpmId);
+        $("input[name='_bpm_enabled']", $("#task_edit_form_id")).val(true);
+        $("#task_edit_form_id").attr("action", "$!rc.contextPath/employee/leave/submit");
+        return true;
+    }
+    
+</script>
+<script type="text/javascript">
+//文件上传
+var index = 1000;
+$(function(){
+	
+	$('#file_upload').uploadify({
+	    'buttonText' : '浏览',                
+		'buttonClass' : 'k-primary fileUploadBtn',
+		'queueID': 'context',
+		'multi' : true,                        
+		'fileSizeLimit':'$!{fileLength}MB',               
+		'fileObjName' : 'file', 
+		'cancelImg' : '$!{main_static_custom_url}/js/uploadify/cancel.png',
+        'swf'       : '$!{main_static_custom_url}/js/uploadify/uploadify.swf',
+        'uploader' : '${rc.contextPath}/fileupload/fileup',
+        'removeCompleted': true,
+        'removeTimeout':'1',
+       
+		 onUploadSuccess:function(file,data,response){
+              if(response){  
+            	  	var obj = eval('(' + data + ')');
+            	  	var temSize=""
+            	  	if(obj.filesize>1024){
+						temSize=formatNumber2(obj.filesize/1024)+"MB"
+					}else{
+						temSize=obj.filesize+"KB"
+					}
+            	  	
+	  				var filedisplay ="<tr id='alreadyfile"+index+"'><td>"+obj.orignalname+"</td><td>"+obj.postfix+"</td><td>"+temSize+"</td><td><a href='#'  onclick=removefile('"+index+"')>移除</a></td></tr>";
+	  				var filehidden ="<input type='hidden' name='fileorignal' value='"+obj.orignalname+"' id='fileorignal"+index+"'/><input type='hidden' name='filename' value='"+obj.filename+"' id='filename"+index+"'/>";
+	  				$("#images_table_id").append(filedisplay);
+	  				$("#filehidden").append(filehidden);
+	  				index++;
+					//将需要提交的以hidden的方式写入表单并提交
+					  //alert(obj.filePath)
+				
+              }else{
+    		  	 alert("文件上传失败！");
+              }
+  		},
+  		onUploadComplete:function(file){
+			
+		} 
+	});
+})
+
+function removefile(ind){
+	$("#attachment"+ind).remove();
+	$("#fileorignal"+ind).remove();
+	$("#filename"+ind).remove();
+	$("#alreadyfile"+ind).remove();
+}
+
+function removealreadyfile(index,fileid){
+		$("#alreadyfile"+index).remove();
+		var delfile ="<input type='hidden' name='delfiles' value='"+fileid+"'/>";
+	    $("#filehidden").append(delfile);
+}
+
+function isDigits(e,defaults){
+   var v = $(e).val();
+   if(!v)return;
+   if(!v.match(/^\d+(\d+)?$/)){
+       $(e).val(defaults);
+       return false;
+   }
+}
+
+//查看模式
+#if($!{viewOnly})
+	setAllReadonly("dialog");
+	$("#file_upload").hide();
+	$("td[name='tdControl']").html("移除");
+#end
+</script>
+</body>
+</html>

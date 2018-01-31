@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 学习可参看：http://www.mybatis.org/core/zh/index.html -->
+
+<mapper namespace="com.supconit.montrol.entity.MHistoryAlarm">
+
+	<resultMap type="com.supconit.montrol.entity.MHistoryAlarm" id="DataResultMap">
+		<id property="id" column="ID" />
+        <result property="deviceName" column="DEVICENAME" />
+        <result property="deviceId" column="DEVICEID" />
+        <result property="deviceCode" column="DEVICECODE" />
+		<result property="tagId" column="TAGID" />
+		<result property="alarmTime" column="ALARMTIME" />
+		<result property="alarmLevel" column="ALARMLEVEL" />
+		<result property="alarmData" column="ALARMDATA" />
+		<result property="ackTime" column="ACKTIME" />
+		<result property="ignoreTime" column="IGNORETIME" />
+		<result property="processTime" column="PROCESSTIME" />
+        <result property="processPerson" column="PROCESSPERSON" />
+        <result property="processType" column="PROCESSTYPE" />
+        <result property="processState" column="PROCESSSTATE" />
+		<result property="disappearTime" column="DISAPPEARTIME" />
+		<result property="alarmRemark" column="REMARK" />
+		<result property="alarmRank" column="ALARMRANK" />
+		<result property="areaId" column="AREAID" />
+        <result property="areaStr" column="AREASTR" />
+	</resultMap>
+    <sql id="TABLE_NAME" lang="velocity">A_HISTORYALARM</sql>
+	<!-- SELECT -->
+    <sql id="COUNT_PRE" lang="velocity">SELECT COUNT(1) FROM <include refid="TABLE_NAME"/></sql>
+    <sql id="SELECT_PRE" lang="velocity">SELECT * FROM  <include refid="TABLE_NAME"/> </sql>
+
+
+    <sql id="SEARCH_CONDITION_SQL" lang="velocity">
+        <![CDATA[
+		#where()
+			 #set($_p = $_parameter.condition)
+			 #if($_databaseId == 'oracle')
+                 #if($_p.startTime && $_p.startTime != '')
+                   AND ALARMTIME>= @{_p.startTime,jdbcType=TIMESTAMP}
+                 #end
+                 #if($_p.endTime && $_p.endTime != '')
+                   AND ALARMTIME<= @{_p.endTime,jdbcType=TIMESTAMP}
+                 #end
+             #else
+                  #if($_p.startTime && $_p.startTime != '')
+                    AND ALARMTIME >=@{_p.startTime,jdbcType=TIMESTAMP}
+                 #end
+                 #if($_p.endTime && $_p.endTime != '')
+                    AND ALARMTIME <= @{_p.endTime,jdbcType=TIMESTAMP}
+                 #end
+			 #end
+			  #if($_p.deviceId && $_p.deviceId != 0)
+                 AND DEVICEID = @{ $_p.deviceId,jdbcType=NUMERIC}
+             #end
+             #if($_p.deviceCode && $_p.deviceCode != 0)
+                 #set($_name = '%' + $_p.deviceCode + '%')
+                 AND DEVICECODE LIKE @{_name,jdbcType=VARCHAR}
+             #end
+              #if($_p.handleState && $_p.handleState != 0)
+                 AND PROCESSSTATE =$_p.handleState
+             #end
+              #if($_p.alarmLevel && $_p.alarmLevel != 0)
+                 AND ALARMLEVEL =$_p.alarmLevel
+             #end
+             #if($_p.alarmState && $_p.alarmState != 0)
+                 AND ALARMSTATE =$_p.alarmState
+             #end
+		#end
+		]]>
+    </sql>
+
+    <select id="selectPager" lang="velocity" resultMap="DataResultMap" parameterType="com.supconit.montrol.entity.MHistoryAlarm">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+        <include refid="SELECT_PRE"/>
+        <include refid="SEARCH_CONDITION_SQL"/>
+        #order($_parameter.condition,"ALARMSTATE ASC,ALARMRANK ASC ,ALARMTIME DESC ")
+        <include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="selectPager" lang="velocity" resultMap="DataResultMap" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+        SELECT *
+        <include refid="_PUBLIC_V.ROW_NUMBER_OVER" />
+        #order($_parameter.condition,"ALARMSTATE ASC,ALARMRANK ASC ,ALARMTIME DESC")
+        <include refid="_PUBLIC_V.AS_ROW_NUM" />
+        FROM <include refid="TABLE_NAME"/>
+        <include refid="SEARCH_CONDITION_SQL"/>
+        <include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countPager" lang="velocity" resultType="long">
+        <include refid="COUNT_PRE"/><include refid="SEARCH_CONDITION_SQL"/>
+    </select>
+    <select id="getById" parameterType="long" resultMap="DataResultMap" lang="velocity">
+        <include refid="SELECT_PRE"/>
+        WHERE ID = @{_parameter, jdbcType=NUMERIC}
+    </select>
+    <update id="update" parameterType="com.supconit.montrol.entity.MHistoryAlarm"
+            lang="velocity">
+        UPDATE
+        <include refid="TABLE_NAME" />
+        #mset()
+        <![CDATA[
+				#if($_parameter.processPerson)PROCESSPERSON = @{_parameter.processPerson,jdbcType=VARCHAR},#end
+				#if($_parameter.processType)PROCESSTYPE = @{_parameter.processType,jdbcType=VARCHAR},#end
+				#if($_parameter.processState)PROCESSSTATE = @{_parameter.processState,jdbcType=NUMERIC},#end
+				#if($_parameter.processTime)PROCESSTIME = @{_parameter.processTime,jdbcType=TIMESTAMP},#end
+			]]>
+        #end
+        WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+    </update>
+
+    <update id="displayAlarm" lang="velocity">
+        UPDATE  <include refid="TABLE_NAME" /> SET  ALARMSTATE = 3  WHERE  ALARMSTATE = 2 and PROCESSSTATE = 3
+    </update>
+    
+    <select id="getByDeviceId" parameterType="long" resultMap="DataResultMap" lang="velocity">
+    	<include refid="SELECT_PRE"/> a
+    	WHERE 
+    		a.DEVICEID = @{_parameter.deviceId, jdbcType=BIGINT}
+    	and
+    		a.ALARMTIME = (
+	    		SELECT MIN(b.ALARMTIME) FROM <include refid="TABLE_NAME" /> b
+	    		WHERE b.DEVICEID = @{_parameter.deviceId, jdbcType=BIGINT}
+        	)
+    </select>
+</mapper>

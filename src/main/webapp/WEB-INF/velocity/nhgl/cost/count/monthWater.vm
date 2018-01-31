@@ -1,0 +1,164 @@
+<style>
+.ui-table tbody tr {
+  background: #000;
+}
+.ui-table td {
+	background: #000;
+}
+.ui-table td {
+  border-bottom: 1px solid #0C4A25;
+  border-right: 1px solid #0C4A25;
+  color:white;
+}
+.ui-table {
+  border-top: 1px solid #24E648;
+  border-left: 1px solid #24E648;
+}
+.ui-module-name{
+ border-bottom: 1px solid #25e949; 
+}
+a.ui-input-remove, a.ui-input-icon{ right:3px; }
+	.panel li.current a{ background: #06251d; }
+</style>
+<link href="$!{nhgl_static_custom_url}/js/treeTable/vsStyle/jquery.treeTable.css" rel="stylesheet">
+<script src="$!{nhgl_static_custom_url}/js/treeTable/jquery.treeTable.js"></script>
+<div class="ui-layout-north">
+	<div class="ui-module-name">
+    	<label id="menuName">#crumbs("$!menu.code",1)</label>
+    </div>
+		<form class="ui-form ui-form-search fn-clear" id='queryForm1' action="$!rc.contextPath/nhgl/cost/zkCostCount/exportWater" method="post" >
+            <div class="ui-form-search-left">
+                <div class="ui-form-item-larger">
+                    <label class="ui-label">时间：</label>
+                    <input class="ui-input ui-input-small  Wdate " type="text" id="startDate" name="start"
+                           onclick="WdatePicker({dateFmt:'yyyy-MM-dd',maxDate:'#F{$dp.$D(\'endDate\')}'})"
+                           readonly
+                           value="$!condition.start">
+                    <span class="ui-form-text">至</span> 
+                    <input class="Wdate ui-input ui-input-small " type="text" id="endDate" name="end"
+                           onclick="WdatePicker({dateFmt:'yyyy-MM-dd',minDate:'#F{$dp.$D(\'startDate\')}'})"
+                           readonly
+                           value="$!condition.end">
+                </div>
+                <div class="ui-form-item">
+                    <input id="hidden_dept_id" type="hidden" value="$!condition.deptId"/>
+                    <label class="ui-label">部门：</label>
+					<input style="position: relative;" class="ui-input ui-input-choose" id="deptName" name="deptName" emptyFunc="clearItemCode" readonly="readonly" onclick="chooseDept('select_dept_id','deptName')"/>
+                	<input type="hidden" id="select_dept_id" name="deptId"/>
+                </div>
+            </div>
+                <div class="ui-form-search-right">
+                    <button type="button" class="btn btn-primary" onclick="serch()" id="searchButton" ><i class="iconfont icon-search"></i>查询</button>
+                    <button type="submit" onclick="check();" class="btn btn-primary" id="resetBtn"><i class="iconfont icon-upload-alt" style="padding-right:2px"></i>导出</button>
+                </div>
+        </form>
+</div>
+<div class="ui-layout-center" id="subMainWater">
+	<div class="ui-layout-north">
+		<table class="ui-table" >
+		<thead>
+			<tr>
+                <td  align="center" style="color:white;width:202px">科室</td>
+                <td  align="center" style="color:white;width:115px">水表编码</td>
+				<td  align="center" style="color:white;width:202px">设备名称</td>
+				<td  align="center" style="color:white;width:115px">水表</td>
+				<td  align="center" style="color:white;width:115px">用途</td>
+                <td  align="center" style="color:white;width:115px">上次读数(t)</td>
+                <td  align="center" style="color:white;width:115px">本次读数(t)</td>
+                <td  align="center" style="color:white;width:115px">水表用水(t)</td>
+                <td  align="center" style="color:white;width:115px">部门用水(t)</td>
+                <td  align="center" style="color:white;width:115px">水费(元)</td>
+             </tr>
+        </thead>
+        <tbody  id="treeTable">
+        
+        </tbody>
+		</table>
+	</div>
+</div>
+<script type="text/javascript">
+    
+	var option = {
+        theme:'vsStyle',
+        expandLevel : 2,
+        onSelect : function($treeTable, id) {
+        	return true;
+        }
+    };
+	var menuCode='$!menu.code';
+    $(document).ready(function(){
+    	$("#searchButton").click();
+    	//加载treeTable
+    	$('#treeTable').treeTable(option);
+    	$(".ui-layout-west").attr("style","width:3%;float:left");
+		$("#chart_content_id").attr("style","width:96.9%;float:left");
+    });
+	
+    function check(){
+        var startDate = $("#startDate").val();
+        var endDate = $("#endDate").val();
+        if(startDate == "" || endDate == "" || startDate == undefined || endDate == undefined){
+            alert("时间不能为空");
+            $("#startDate").focus();
+            return false;
+        }
+        return true;
+    }
+  //点击事件
+	function serch(){
+		toAjaxFrom({start:$("#startDate").val(),end:$("#endDate").val(),deptId:$("#select_dept_id").val(),menuCode:menuCode},'$!rc.contextPath/nhgl/cost/zkCostCount/costlistWater');
+	    $('#treeTable').treeTable(option);	
+	}
+
+   //动态加载数据
+   function writeHtml(costlistWater){
+		var deptId = 0;
+		var num = 0;
+		$.each(costlistWater, function(i, cost){
+			if(cost.water){
+				var html="<tr id='"+cost.id+""+num+"' pId='"+cost.ppId+"'>";
+				if(cost.id != deptId){
+					html = html + "<td width='120' id='"+cost.id+"name'>"+cost.deptName+"</td>";
+				}
+				html = html + "<td width='120' id='"+cost.bitNo+"'>"+cost.bitNo+"</td><td width='120'>"+(cost.deviceName==null? '':cost.deviceName)
+					+"</td><td width='100'>"+(cost.deviceSpec==null? '':cost.deviceSpec)
+					+"</td><td width='100'>"+(cost.extended2==null? '':cost.extended2)
+					+"</td><td width='65' align='right' class='fNum2'>"+cost.lastData
+					+"</td><td width='65' align='right' class='fNum2'>"+cost.currentData
+					+"</td><td width='65' align='right' class='fNum2'>"+cost.incremental
+					+"</td>";
+				if(cost.id != deptId){
+					html= html+"<td width='65' id='water"+cost.id+"' align='right' class='fInt'>"+cost.water+"</td>"
+					+"<td width='65' id='cost"+cost.id+"' align='right' class='fNum2'>"+cost.waterCost+"</td></tr>";
+					deptId = cost.id;
+					num = 1;
+				}else{
+					num++;
+					$("#"+cost.id+"name").attr("rowspan",num);
+					$("#water"+cost.id).attr("rowspan",num);
+					$("#cost"+cost.id).attr("rowspan",num);
+				}
+				$("#treeTable").append(html);
+			}
+	   });
+	   fNumPage();
+   }
+   function toAjaxFrom(data,url){
+		//清除div表中的所有的数据
+		$('#treeTable').empty();
+ 	 	//ajax请求后台加载数据，并刷新数据表
+ 	 	$.post(url,data,function(costlistWater){
+			//动态加载数据
+			writeHtml(costlistWater);
+			$('#treeTable').treeTable(option);
+			$.each(costlistWater,function(i,cost){	
+				$("#"+cost.bitNo).html("");
+				$("#"+cost.bitNo).html(cost.bitNo);
+			})
+  		}) 
+    }
+   function clearItemCode(){
+		$("#deptName").attr("value","");
+		$("#select_dept_id").attr("value","");
+	}
+</script>

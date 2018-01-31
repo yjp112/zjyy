@@ -1,0 +1,172 @@
+<div data-page="visitor_view" class="page page-visitor-add">
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="navbar-inner">
+                <div class="navbar-left">
+                    <a href="#" class="link back">
+                        <i class="icon icon-c-back only-icon"></i>
+                    </a>
+                </div>
+                <div class="navbar-center">访客登记-信息</div>
+                <div class="navbar-right"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-content show-content">
+        <div class="list-block">
+            <ul class="visitor">
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title">接待人员</div>
+                            <div class="item-input">
+                                <input type="text"  value="$!{receptor.name}" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title">部门</div>
+                            <div class="item-input">
+                                <input type="text"  value="$!{receptor.deptName}" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title">联系方式</div>
+                            <div class="item-input">
+                                <input type="text"  value="$!{receptor.personTelephone}" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title">来访客人</div>
+                            <div class="item-input">
+                                <input type="text"  value="$!{visitorReservation.visitor.visitorName}" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title">访客单位</div>
+                            <div class="item-input">
+                                <div class="textarea">#html_escape($!{visitorReservation.visitor.visitorUnit})</div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title">访客电话</div>
+                            <div class="item-input">
+                                <input type="text"  value="$!{visitorReservation.visitor.visitorPhone}" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title">来访人数</div>
+                            <div class="item-input">
+                                <input type="text"  value="$!{visitorReservation.expectVisitors}" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title">车辆数</div>
+                            <div class="item-input">
+                                <input type="text"  value="$!{visitorReservation.visitCars}" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title">车牌号</div>
+                            <div class="item-input">
+                                <div class="textarea">#html_escape($!{visitorReservation.visitCarNos})</div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title">来访时间</div>
+                            <div class="item-input">
+                                <input type="text"  value="#date_format($!{visitorReservation.visitTime},'yyyy-MM-dd')" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title">来访天数</div>
+                            <div class="item-input">
+                                <input type="text"  value="$!{visitorReservation.visitDays}" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title">预计离开时间</div>
+                            <div class="item-input">
+                                <input type="text"  value="#date_format($!{visitorReservation.expectLeaveTime},'yyyy-MM-dd')" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title">来访事由</div>
+                            <div class="item-input">
+                                <input type="text"  value="$!{visitorReservation.visitReasonName}" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title">备注</div>
+                            <div class="item-input">
+                                <div class="textarea">#html_escape($!{visitorReservation.remark})</div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title">登记时间</div>
+                            <div class="item-input">
+                                <input type="text"  value="#date_format($!{visitorReservation.createDate})" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

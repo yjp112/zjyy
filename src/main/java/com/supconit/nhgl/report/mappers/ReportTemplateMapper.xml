@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.report.entities.ReportTemplate">
+        <resultMap id="ReportTemplateResultMap" type="com.supconit.nhgl.report.entities.ReportTemplate">
+                <result column="code" property="code"/>
+                <result column="content" property="content"/>
+                <result column="type" property="type"/>
+                <result column="seq" property="order"/>
+                <result column="name" property="name"/>
+        </resultMap>
+
+        <insert id="batchInsert" >
+                insert into NH_REPORT_TEMPLATE(code,name,content,type,seq)values
+                <foreach collection="templates"  item="template" separator=",">
+                        (
+                        #{template.code,jdbcType=VARCHAR},
+                        #{template.name,jdbcType=VARCHAR},
+                        #{template.content,jdbcType=VARCHAR},
+                        #{template.type,jdbcType=NUMERIC},
+                        #{template.order,jdbcType=NUMERIC}
+                        )
+                </foreach>
+
+        </insert>
+
+        <delete id="deleteByCodeAndType" parameterType="com.supconit.nhgl.report.entities.ReportTemplate">
+                delete from NH_REPORT_TEMPLATE where code = #{code} and type=#{type}
+        </delete>
+
+        <update id="updateByCodeAndType" parameterType="com.supconit.nhgl.report.entities.ReportTemplate">
+                update NH_REPORT_TEMPLATE set content = #{content}  where type=#{type} and code=#{code} and seq=#{order}
+        </update>
+
+        <select id="queryByCodeAndType" parameterType="com.supconit.nhgl.report.entities.ReportTemplate" resultMap="ReportTemplateResultMap">
+                select * from NH_REPORT_TEMPLATE where code = #{code} and type= #{type} order by seq
+        </select>
+
+
+
+</mapper>

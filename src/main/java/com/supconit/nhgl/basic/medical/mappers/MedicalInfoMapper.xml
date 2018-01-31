@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.basic.medical.entities.MedicalInfo">
+
+	<resultMap type="com.supconit.nhgl.basic.medical.entities.MedicalInfo" id="MedicalInfoResultMap">      
+       <result property="id" column="ID" jdbcType="NUMERIC"/>
+        <result property="monthKey" column="MONTH_KEY" jdbcType="VARCHAR" />
+        <result property="typeId" column="TYPE_ID" jdbcType="NUMERIC"/>
+        <result property="outpatient" column="OUTPATIENT" jdbcType="NUMERIC"/>
+        <result property="inpatient" column="INPATIENT" jdbcType="NUMERIC" />
+        <result property="operation" column="OPERATION" jdbcType="NUMERIC" />
+        <result property="avgTemperataure" column="AVG_TEMPERATAURE" jdbcType="NUMERIC" />
+        <result property="runDevice" column="RUN_DEVICE" jdbcType="NUMERIC" />
+	</resultMap>
+	<sql id="TABLE_NAME" lang="velocity">NH_MEDICAL_INFO</sql>
+	
+	<sql id="SEQUENCE" lang="velocity">
+		SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL
+		</sql>
+	
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+   <sql id="select_pre" lang="velocity">
+		select
+        ID,
+        TYPE_ID,
+        MONTH_KEY,
+        OUTPATIENT,
+        INPATIENT,
+        OPERATION,
+        AVG_TEMPERATAURE,
+        RUN_DEVICE
+        FROM <include refid="TABLE_NAME" />
+	</sql>
+	<sql id="condition" lang="velocity">
+		
+		<![CDATA[
+		#where()
+				1=1
+				#if($_parameter.condition.monthKey && $_parameter.condition.monthKey != '')
+					AND MONTH_KEY = @{_parameter.condition.monthKey,jdbcType=VARCHAR}
+				#end
+		#end
+		]]>
+	</sql>
+	<sql id="count_pre" lang="velocity">
+		SELECT
+		COUNT(*)
+		FROM
+		<include refid="TABLE_NAME" />
+	</sql>
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+		#where()
+				1=1
+				#if($_parameter.condition.id && $_parameter.condition.id != '')
+					AND ID = @{_parameter.condition.id,jdbcType=VARCHAR}
+				#end
+				#if($_parameter.condition.monthKey && $_parameter.condition.monthKey != '')
+					AND MONTH_KEY = @{_parameter.condition.monthKey,jdbcType=VARCHAR}
+				#end
+		#end
+		]]>
+	</sql>
+	<!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.nhgl.basic.medical.entities.MedicalInfo" resultMap="MedicalInfoResultMap" lang="velocity" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre" />
+		<include refid="condition_sql" />
+		 #order($_parameter.condition,"MONTH_KEY ASC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="findByCondition" parameterType="com.supconit.nhgl.basic.medical.entities.MedicalInfo" resultMap="MedicalInfoResultMap" lang="velocity">
+		select
+        ID,
+        TYPE_ID,
+        MONTH_KEY,
+        OUTPATIENT,
+        INPATIENT,
+        OPERATION,
+        AVG_TEMPERATAURE,
+        RUN_DEVICE
+        <include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+        #order($_parameter.condition,"MONTH_KEY ASC")
+        <include refid="_PUBLIC_V.AS_ROW_NUM" />
+         FROM <include refid="TABLE_NAME" />
+		<include refid="condition_sql" />
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="countByCondition" parameterType="com.supconit.nhgl.basic.medical.entities.MedicalInfo" resultType="long" lang="velocity">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+	<select id="findByMonthKey" parameterType="com.supconit.nhgl.basic.medical.entities.MedicalInfo" resultMap="MedicalInfoResultMap" lang="velocity">
+		SELECT * FROM <include refid="TABLE_NAME" />
+		<![CDATA[
+			#where()
+				#if($_parameter.condition.start && $_parameter.condition.start != '')
+					 MONTH_KEY>=@{_parameter.condition.start,jdbcType=VARCHAR} AND
+				#end
+				#if($_parameter.condition.end && $_parameter.condition.end != '')
+					 MONTH_KEY<=@{_parameter.condition.end,jdbcType=VARCHAR} 
+				#end
+			#end
+		]]>	
+	</select>
+	<select id="getById" parameterType="long" resultMap="MedicalInfoResultMap" lang="velocity">
+      <include refid="select_pre" /> 
+        where ID = @{_parameter,jdbcType=NUMERIC}
+    </select>
+    
+    
+    
+    <!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.nhgl.basic.medical.entities.MedicalInfo" lang="velocity">
+		UPDATE
+		<include refid="TABLE_NAME" />
+		#mset()
+		<![CDATA[
+			#if($_parameter.monthKey)MONTH_KEY = @{_parameter.monthKey,jdbcType=VARCHAR},#end
+			#if($_parameter.typeId)TYPE_ID = @{_parameter.typeId,jdbcType=NUMERIC},#end
+			#if($_parameter.outpatient)OUTPATIENT = @{_parameter.outpatient,jdbcType=NUMERIC},#end
+			#if($_parameter.inpatient)INPATIENT = @{_parameter.inpatient,jdbcType=NUMERIC},#end
+			#if($_parameter.operation)OPERATION = @{_parameter.operation,jdbcType=NUMERIC},#end
+			#if($_parameter.avgTemperataure)AVG_TEMPERATAURE = @{_parameter.avgTemperataure,jdbcType=NUMERIC},#end
+			#if($_parameter.runDevice)RUN_DEVICE = @{_parameter.runDevice,jdbcType=NUMERIC},#end
+		]]>
+		#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+    
+    <insert id="insert" parameterType="com.supconit.nhgl.basic.medical.entities.MedicalInfo" 
+		keyProperty="id"  keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>       
+		<include refid="insert_sql" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.nhgl.basic.medical.entities.MedicalInfo" 
+		keyProperty="id" keyColumn="ID" 	databaseId="sqlserver"	 lang="velocity">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER">
+        	<include refid="_PUBLIC_V.SELECT_KEY"/> 
+        </selectKey>    
+     </insert>
+    <!-- 插入记录-->
+	<sql id="insert_sql" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>(
+		#if($_databaseId == 'oracle') ID,#end       
+        TYPE_ID,
+        MONTH_KEY,
+        OUTPATIENT,
+        INPATIENT,
+        OPERATION,
+        AVG_TEMPERATAURE,
+        RUN_DEVICE
+		) VALUES (  
+		#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end
+		 @{_parameter.typeId,jdbcType=NUMERIC}
+		,@{_parameter.monthKey,jdbcType=VARCHAR}
+		, @{_parameter.outpatient,jdbcType=NUMERIC}
+		, @{_parameter.inpatient,jdbcType=NUMERIC}
+		, @{_parameter.operation,jdbcType=NUMERIC}
+		, @{_parameter.avgTemperataure,jdbcType=NUMERIC}
+		, @{_parameter.runDevice,jdbcType=NUMERIC}
+		)
+	</sql>
+	<delete id="deleteById" parameterType="Long" lang="velocity">
+		DELETE FROM <include refid="TABLE_NAME" /> WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</delete>
+	<!-- 删除多条记录-->
+	<delete id="deleteByIds">
+        DELETE FROM <include refid="TABLE_NAME" /> WHERE ID in 
+		<foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+			#{id,jdbcType=NUMERIC}
+		</foreach>
+	</delete>
+	
+</mapper>

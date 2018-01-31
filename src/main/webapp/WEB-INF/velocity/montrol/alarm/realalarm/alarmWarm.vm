@@ -1,0 +1,98 @@
+<link href="${projectName}/alarmjs/iconfont/1.0.0/iconfont.css" rel="stylesheet" media="screen">
+<!--[if lt IE 7]>
+<link href="${projectName}/alarmjs/iconfont/1.0.0/iconfont-ie7.css" rel="stylesheet" media="screen">
+<![endif]-->
+<link rel="stylesheet" href="${projectName}/alarmjs/css/alarm.css"/>
+<script>
+currRealAlarmID = "$!{maxId}";
+</script>
+<div class="ui-tiptext-container ui-tiptext-container-warning ui-tiptext-noborder">
+  <p class="ui-tiptext ui-tiptext-warning" id="ptitle">
+      <i class="iconfont icon-warning-sign"></i> 您有$!{alarms.total}条报警信息<span class="ui-tiptext-explain">(点击报警记录查看详情)</span>
+  </p>
+</div>
+<table id="interval" class="ui-table ui-table-warn">
+
+    <tbody id="alarmlst">
+        <tr class="warn-tit">
+            <td>设备名称</td>
+            <td>报警描述</td>
+        </tr>
+    #foreach($alarm in $alarms)
+        <tr>
+            <td title="$!{alarm.deviceName}"><a  style="overflow: hidden;white-space: nowrap;text-overflow: ellipsis;" href="javascript:viewAlarm('$!{alarm.id}')">$!{alarm.deviceName}</a></td>
+            <td id="td_objId_$!{alarm.objectId}" objectId="$!{alarm.deviceId}" title="$!{alarm.alarmRemark}">$!{alarm.alarmRemark}</td>
+        </tr>
+	#end
+    </tbody>
+</table>
+<div id="alarmfoot">
+#if($alarmSize > 5)
+  <div class="fn-left">建议您尽快处理报警信息！</div>
+  <div class="fn-right"><a class="btn btn-small" href="javascript:processAlarm(0)">查看更多</a></div>
+#end
+</div>
+<script>
+function stopFechAlarm(){
+    var timer=$('#interval').attr('timer');
+	if(timer != null){
+        window.clearInterval(timer);//new前清空原先timer
+	}
+}
+
+function startFechAlarm(){
+	var timer=setInterval("showalarm()",$!{alarmTime});
+	$('#interval').attr('timer',timer);
+	
+}
+
+
+function processAlarm(id){
+	if(id==0){//查看更多实时报警管理
+		var url = '${rc.contextPath}/montrol/alarm/realalarm/list';
+		quick_dialog("list","实时报警记录" , url, 1000,600);
+	}else{
+		//实时报警页面报警处理
+		//var url = '${rc.contextPath}/platform/bpm/start?_bpm_extra_params={alarmId:'+id+'}&_bpm_process_key=DEVICE_NEW_REPAIR_PROCESS&menuCode=NBGL_HJZX_SQD';
+		var url = '${rc.contextPath}/montrol/alarm/realalarm/viewHandle?id='+id;
+		quick_dialog("viewhandle","查看" , url, 770,260);
+	}
+}
+
+$(document).ready(function(){
+	startFechAlarm();
+	#if($alarmSize > 5)
+	$("#alarmfoot").addClass('warn-foot')
+	#end
+})
+function showalarm(){
+		$.ajax({
+		type:'post',
+		url:"$!{rc.contextPath}/hl/montrol/alarm/realalarm/showWarm",
+		dataType:'json',
+		success:function(data){
+			var total='';
+			var maxId='';
+			$("#alarmlst").empty().append('<tr class="warn-tit"><td>设备名称</td><td>报警描述</td></tr>')
+
+            total=data.total;
+            maxId=data.maxId;
+			$.each(data.data,function(index,alarm){
+				var tmpalarm ="";
+				if(alarm.alarmRemark){
+                    tmpalarm=alarm.alarmRemark;
+				}
+				$("#alarmlst").append('<tr><td><a style="overflow: hidden;white-space: nowrap;text-overflow: ellipsis;" href="javascript:processAlarm('+alarm.id+')">'+alarm.deviceName+'</a></td><td  objectId="'+alarm.deviceId+'" title="'+alarm.alarmRemark+'">'+tmpalarm+'</td></tr>');
+	   		});
+	   		$("#ptitle").empty().append('<i class="iconfont icon-warning-sign"></i>您有'+total+'条报警信息<span class="ui-tiptext-explain">(点击报警记录查看详情)</span>');
+	   		if(total>5){
+	   			$("#alarmfoot").addClass('warn-foot')
+	   			$("#alarmfoot").empty().append('<div class="warn-foot"><div class="fn-left">建议您尽快处理报警信息！</div><div class="fn-right"><a class="btn btn-small" href="javascript:processAlarm(0)">查看更多</a></div></div>')
+	   		}
+	   		currRealAlarmID=maxId;
+		}
+    });
+}
+
+</script>
+

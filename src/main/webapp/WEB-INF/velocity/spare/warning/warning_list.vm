@@ -1,0 +1,346 @@
+
+#parse("index/_header.vm")
+<style>
+.ztree-cont,.grid-cont{position:absolute;}
+.ztree-cont{width:250px;top:0;left:0;}
+.ztree{overflow:auto;}
+.grid-cont{top:0;left:250px;}
+.k-tabstrip .k-content{
+  overflow:hidden;
+}
+</style>
+</head>
+<body>
+<div id="tabstrip" class="aaa">
+	    <ul>
+	        <li class="k-state-active">备件预警</li>
+	        <li>仓库预警</li>
+	    </ul>
+	<div id="div1">
+      <div class="ztree-cont">
+				<div class="k-header k-grid-toolbar" style="padding-left:10px;">
+					<div style="padding-top:3px">
+						备件类别
+                    </div>
+				</div>
+  		  <ul id="categoryTree" class="ztree"></ul>
+      </div>
+
+      <div class="grid-cont">
+        <form class="ui-form" id='queryForm'>
+      		<div class="ui-form-group" style="display:none" id='selectBlock2'>
+      			<div class="ui-form-item ui-form-item-block">
+      			  <label class="ui-label">您已选择：</label>
+      				  <span class="ui-form-pick">
+      					  <input id="spareCategoryId" type="hidden" name="spareCategoryId" value="$!{spareCategoryId}">
+      					  <strong>备件类别：</strong><em id='treeNodeText'></em><i class="iconfont icon-remove-sign"></i>
+      				  </span>
+      			</div>
+      		</div>	
+          <table width="100%">
+                <button type="submit" style="display:none" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+          </table>
+      	</form>
+      	<div class="grid-wrap">
+      	  <div id="grid"></div> 
+        </div>
+    </div>
+	<div id="" style="position: absolute; padding: 0px; margin: 0px; font-size: 1px; text-align: left; overflow: hidden; z-index: 2; left: 250px; cursor: default; height: 650px; width: 5px; top: 0px;" class="ui-layout-resizer ui-layout-resizer-west ui-layout-resizer-open ui-layout-resizer-west-open"></div>
+   </div>
+	    
+	    
+   <div>
+  	<div class="grid-wrap">
+  	  <div id="grid2"></div> 
+    </div>
+
+ </div>
+	</div>
+
+
+
+ #parse("index/_footer.vm")   
+
+<script type="text/javascript">
+  var _iframe_layout, _left_layout, _inner_layout;
+	$(document).ready(function(){
+   /* _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      },
+      west: {
+        size: 0.25
+      }
+    });
+
+    _left_layout = $("#leftTreeWrap").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      }
+    });
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+*/
+    $('#resetBtn').click(function(){
+      $("#queryForm :text").val('');  
+    });
+
+		$('.iconfont','.ui-form-pick').each(function(){
+      $(this).click(function(){
+      	$('#spareCategoryId').val('');
+      	$('#selectBlock').hide();
+        //$(this).parent().remove();
+      })
+    })
+	
+  //列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/spare/waring/stockWarning", [{
+              field: "id",
+              hidden: true
+          }, {
+              field: "spareCode",
+              title: "备件编码",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              #*attributes: {"class": "k-grid-text"},*#
+          	  attributes: {     
+  		  		title:"#: data.spareCode==null? '':data.spareCode #",
+  				"class": "k-grid-text k-grid-nowrap"
+		  	  },
+              width: 100
+          }, {
+              field: "spareName",
+              title: "备件名称",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+		  	  #*attributes: {"class": "k-grid-text"},*#
+          	  attributes: {     
+  		  		title:"#: data.spareName==null? '':data.spareName #",
+  				"class": "k-grid-text k-grid-nowrap"
+		  	  },
+              width: 120
+          }, {
+              field: "safeQty",
+              title: "安全库存",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-num"},
+              attributes: {"class": "k-grid-num"},
+              template:function(dataItem){
+        	  if(dataItem.safeQty != null)
+        		  return fInt(dataItem.safeQty);
+        	  else return '';
+          },
+              width: 110
+          }, {
+              field: "lowerQty",
+              sortable: false,
+              title: "最低库存",
+              headerAttributes: {"class": "k-grid-num"},
+              attributes: {"class": "k-grid-num"},
+              template:function(dataItem){
+        	  if(dataItem.lowerQty != null)
+        		  return fInt(dataItem.lowerQty);
+        	  else return '';
+          },
+              width: 110
+          }, {
+              field: "upperQty",
+              sortable: false,
+              title: "最高库存",
+              headerAttributes: {"class": "k-grid-num"},
+              attributes: {"class": "k-grid-num"},
+              template:function(dataItem){
+        	  if(dataItem.upperQty != null)
+        		  return fInt(dataItem.upperQty);
+        	  else return '';
+          },
+              width: 110
+          }, {
+              field: "qty",
+              sortable: false,
+              title: "现存量",
+              headerAttributes: {"class": "k-grid-num"},
+              attributes: {"class": "k-grid-num"},
+              template:function(dataItem){
+        	  if(dataItem.qty != null)
+        		  return fInt(dataItem.qty);
+        	  else return '';
+          },
+              width: 110
+          }, {
+              field: "safeQtyDiff",
+              sortable: false,
+              title: "安全差量",
+              headerAttributes: {"class": "k-grid-num"},
+              attributes: {"class": "k-grid-num"},
+              template:function(dataItem){
+        	  if(dataItem.safeQtyDiff != null)
+        		  return fInt(dataItem.safeQtyDiff);
+        	  else return '';
+          },
+              width: 110
+          }, {
+              field: "upperQtyDiff",
+              sortable: false,
+              title: "超存量",
+              headerAttributes: {"class": "k-grid-num"},
+              attributes: {"class": "k-grid-num"},
+              template:function(dataItem){
+        	  if(dataItem.upperQtyDiff != null)
+        		  return fInt(dataItem.upperQtyDiff);
+        	  else return '';
+          },
+              width: 110
+          }, {
+              field: "lowerQtyDiff",
+              sortable: false,
+              title: "短缺量",
+              headerAttributes: {"class": "k-grid-num"},
+              attributes: {"class": "k-grid-num"},
+              template:function(dataItem){
+        	  if(dataItem.lowerQtyDiff != null)
+        		  return fInt(dataItem.lowerQtyDiff);
+        	  else return '';
+          },
+              width: 110
+          }], 
+      {
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          },resizable:true
+      }, {
+          serverSorting: true
+      }, [            
+      ]);
+		
+    });
+	
+   var tabstrip = $("#tabstrip").hcTabStrip({
+        animation: {
+            // fade-out current tab over 1000 milliseconds
+            close: {
+                duration: 1000,
+                effects: "fadeOut"
+            },
+           // fade-in new tab over 500 milliseconds
+           open: {
+               duration: 500,
+               effects: "fadeIn"
+           }
+       }
+    }).data("kendoTabStrip");
+
+  tabsTreeLayout(tabstrip,"body","","","",function(){
+    var grid = get_grid("#grid");
+    var grid2 = get_grid("#grid2");
+    grid.resize();
+    grid2.resize();
+  });
+    /* zTree */
+    var setting = {
+    	data: {
+    		simpleData: {enable: true}
+          },
+          callback: {
+    			onClick: function(event, treeId, treeNode) {
+    				 $('#spareCategoryId').val(treeNode.id);
+    			 	 $('#treeNodeText').text(treeNode.name);
+    			 	 $('#selectBlock').show();
+    				 $('#queryBtn').click();
+    			}
+    		}
+    };
+  	var zNodes = [];  
+	zNodes.push({id:"0", pId:"-1", name:"备件类别簇",open:true});   
+  	#foreach($!{treeNode} in $!{treeDatas})
+      	zNodes.push({id:$!{treeNode.id}, pId:$!{treeNode.parentId}, name:"$!{treeNode.categoryName}"});     
+  	#end
+
+  	$(document).ready(function(){
+  		$.fn.zTree.init($("#categoryTree"), setting,zNodes);
+  	});
+</script>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+  //列表
+    quick_datagrid("#grid2", "#queryForm", "$!{rc.contextPath}/spare/waring/warehouseWaring", [{
+              field: "id",
+              hidden: true
+          }, {
+              field: "warehouseCode",
+              title: "仓库编码",
+              sortable: false,
+              width: 100
+          }, {
+              field: "warehouseName",
+              title: "仓库名称",
+              sortable: false,
+              width: 120
+          }, {
+              field: "safeQty",
+              title: "安全库存",
+              sortable: false,
+              width: 120
+          }, {
+              field: "lowerQty",
+              sortable: false,
+              title: "最低库存",
+              width: 120
+          }, {
+              field: "upperQty",
+              sortable: false,
+              title: "最高库存",
+              width: 120
+          }, {
+              field: "qty",
+              sortable: false,
+              title: "现存量",
+              width: 120
+          }, {
+              field: "safeQtyDiff",
+              sortable: false,
+              title: "安全差量",
+              width: 120
+          }, {
+              field: "upperQtyDiff",
+              sortable: false,
+              title: "超存量",
+              width: 120
+          }, {
+              field: "lowerQtyDiff",
+              sortable: false,
+              title: "短缺量",
+              width: 120
+          }], 
+      {
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          }
+      }, {
+          serverSorting: true
+      }, [            
+      ]);
+    });
+</script>
+
+</body>
+</html>

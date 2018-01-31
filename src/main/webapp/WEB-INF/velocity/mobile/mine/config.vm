@@ -1,0 +1,90 @@
+<div data-page="config" class="page page-about">
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="navbar-inner">
+                <div class="navbar-left">
+                    <a href="#" class="link back" data-force="true">
+                        <i class="icon icon-c-back only-icon"></i>
+                    </a>
+                </div>
+                <div class="navbar-center">设置</div>
+                <div class="navbar-right"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-content">
+        <div class="list-block block-setting">
+            <ul>
+                <li class="block-inner">
+                    <a href="" onclick="changeHeadPic()" class="item-link item-content">
+                        <div class="item-inner">
+                            <div class="item-title">
+                                <span>头像</span>
+                            </div>
+                            <div class="item-after">
+                                <img class="photo" src="/jcds/mobile/images/default.jpg" id="photo" alt=""/>
+                            </div>
+                        </div>
+
+                    </a>
+                </li>
+                <li class="block-inner">
+                    <a href="/jcds/mobile/mine/change" class="item-link item-content">
+                        <div class="item-inner">
+                            <div class="item-title">
+                                <span>更改密码</span>
+                            </div>
+                        </div>
+                    </a>
+                </li>
+##                <li class="block-inner">
+##                    <div class="item-content">
+##                        <div class="item-inner">
+##                            <div class="item-title label">
+##                                <span>新消息通知</span>
+##                            </div>
+##                            <div class="item-input">
+##                                <label class="label-switch">
+##                                    <input type="checkbox">
+##                                    <div class="checkbox"></div>
+##                                </label>
+##                            </div>
+##                        </div>
+##                    </div>
+##                </li>
+                <li class="block-inner">
+                    <a href="/jcds/mobile/about/view" class="item-link item-content">
+                        <div class="item-inner">
+                            <div class="item-title">
+                                <span>测试</span>
+                            </div>
+                        </div>
+                    </a>
+                </li>
+                <li class="block-area">
+                    <a href="" class="item-link item-content" onclick="clearWebViewCache()">
+                        <div class="item-inner">
+                            <div class="item-title">
+                                <span>清除缓存</span>
+                            </div>
+                        </div>
+                    </a>
+                </li>
+
+                <li class="block-area block-only">
+                    <a href="/jcds/mobile/mine/news" class="item-link item-content">
+                        <div class="item-inner">
+                            <div class="item-title">
+                                <span>新功能介绍</span>
+                            </div>
+                        </div>
+                    </a>
+                </li>
+                <li class="block-area block-only logout">
+                    <a href="#" onclick="mobileLogout()" class="item-link item-content list-button">退出登录</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

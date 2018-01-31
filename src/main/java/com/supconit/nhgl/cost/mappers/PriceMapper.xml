@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.cost.entities.Price">
+
+	<resultMap type="com.supconit.nhgl.cost.entities.Price" id="PriceResultMap">
+		<result property="id" column="ID" />
+		<result property="year" column="YEAR" />
+		<result property="month" column="MONTH" />
+		<result property="yearMonth" column="YEAR_MONTH" />
+		<result property="water" column="WATER" />
+		<result property="electric" column="ELECTRIC" />
+		<result property="gas" column="GAS" />
+		<result property="energy" column="ENERGY" />
+		
+	</resultMap>
+	<sql id="CURRENT_DATE_TIME">
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+	<sql id="TABLE_NAME" lang="velocity">NH_PRICE</sql>
+	<sql id="SEQUENCE" lang="velocity">
+		SELECT SEQ_<include refid="TABLE_NAME" />.NEXTVAL FROM DUAL
+	</sql>
+	<!-- 获取记录列表 -->
+	<sql id="select_pre" lang="velocity">
+		select
+		*	
+		FROM
+		<include refid="TABLE_NAME"/>
+	</sql>
+	<sql id="count_pre" lang="velocity">
+		SELECT
+		COUNT(*)
+		FROM
+		<include refid="TABLE_NAME"/>
+	</sql>
+
+	<sql id="condition_sql" lang="velocity">
+		
+		<![CDATA[
+		#where()
+			    1=1
+				#if($_parameter.condition.year && $_parameter.condition.year != '')
+					AND YEAR = @{_parameter.condition.year,jdbcType=NUMERIC}
+				#end
+		#end
+		]]>
+	</sql>
+
+	<!-- 按条件查询记录 -->
+	<select id="findByCondition" parameterType="com.supconit.nhgl.cost.entities.Price"
+		resultMap="PriceResultMap">
+		select
+		*	
+		FROM
+		<include refid="TABLE_NAME" /> 
+		<include refid="condition_sql" />
+		ORDER BY YEAR,MONTH
+	</select>
+
+	<select id="countByCondition" parameterType="com.supconit.nhgl.cost.entities.Price"	resultType="long">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+	
+	<select id="findByYearMonth" parameterType="com.supconit.nhgl.cost.entities.Price" resultMap="PriceResultMap" lang="velocity">
+		select
+		*	
+		FROM
+		<include refid="TABLE_NAME" />  
+		<![CDATA[
+		#where()
+			    1=1
+				#if($_parameter.year && $_parameter.year != '')
+					AND YEAR = @{_parameter.year,jdbcType=VARCHAR}
+				#end
+				#if($_parameter.month && $_parameter.month != '')
+					AND MONTH = @{_parameter.month,jdbcType=VARCHAR}
+				#end
+				#if($_parameter.startYear && $_parameter.startYear != '')
+					AND YEAR >= @{_parameter.startYear,jdbcType=VARCHAR}
+				#end
+				#if($_parameter.endYear && $_parameter.endYear != '')
+					AND YEAR <= @{_parameter.endYear,jdbcType=VARCHAR}
+				#end
+		#end
+		]]>
+		
+		ORDER BY YEAR,MONTH
+	</select>
+
+    <select id="findByMonth" parameterType="com.supconit.nhgl.cost.entities.Price" resultMap="PriceResultMap" lang = "velocity">
+        select * from <include refid="TABLE_NAME" /> where YEAR_MONTH = @{_parameter.month,jdbcType=VARCHAR}
+    </select>
+    <select id="findByYear" parameterType="com.supconit.nhgl.cost.entities.Price" resultMap="PriceResultMap" lang = "velocity">
+        select * from <include refid="TABLE_NAME" /> where YEAR = @{_parameter.year,jdbcType=VARCHAR}
+    </select>
+    <update id="update" parameterType="com.supconit.nhgl.cost.entities.Price" lang = "velocity">
+		UPDATE <include refid="TABLE_NAME" /> 
+		#mset()
+		<![CDATA[
+			#if($_parameter.year)YEAR = @{_parameter.year,jdbcType=NUMERIC},#end
+			#if($_parameter.month)MONTH = @{_parameter.month,jdbcType=NUMERIC},#end
+			#if($_parameter.electric)electric = @{_parameter.electric,jdbcType=NUMERIC},#end
+			#if($_parameter.water)WATER = @{_parameter.water,jdbcType=NUMERIC},#end
+			#if($_parameter.gas)GAS = @{_parameter.gas,jdbcType=NUMERIC},#end
+			#if($_parameter.energy)ENERGY = @{_parameter.energy,jdbcType=NUMERIC},#end
+				]]>
+		#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+	
+	<insert id="insert" parameterType="com.supconit.nhgl.cost.entities.Price"
+		keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>
+		<include refid="insert_sql" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.nhgl.cost.entities.Price"
+		keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+		<include refid="insert_sql" />
+		<selectKey keyProperty="id" resultType="long" order="AFTER">
+			<include refid="_PUBLIC_V.SELECT_KEY" />
+		</selectKey>
+	</insert>
+	
+    
+    <!-- 插入记录-->
+	<sql id="insert_sql" lang="velocity">
+	INSERT INTO <include refid="TABLE_NAME" />( 
+	   #if($_databaseId == 'oracle') ID,#end       
+        YEAR,
+		YEAR_MONTH,
+        MONTH,
+        electric,
+        WATER,
+        GAS,
+        ENERGY   
+		) VALUES (
+		#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end   
+		 @{_parameter.year,jdbcType=VARCHAR}
+		,@{_parameter.yearMonth,jdbcType=VARCHAR}
+		,@{_parameter.month,jdbcType=VARCHAR}
+		,@{_parameter.electric,jdbcType=VARCHAR}
+		,@{_parameter.water,jdbcType=VARCHAR}
+		,@{_parameter.gas,jdbcType=VARCHAR}
+		,@{_parameter.energy,jdbcType=VARCHAR}     
+		)
+	</sql>
+	<insert id="insertNextYear" parameterType="string" keyProperty="id" keyColumn="ID" databaseId="oracle" lang="velocity">
+	    <selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>
+		<![CDATA[
+			insert into nh_price(year,month,year_month,electric,water,gas,energy)
+			SELECT to_char(add_months(to_date(substr(@{_parameter.nextYear,jdbcType=VARCHAR},1,4)||'-01-01','yyyy-mm-dd'),12),'yyyy') YEAR, MONTH,
+			REPLACE(YEAR_MONTH, SUBSTR(@{_parameter.nextYear,jdbcType=VARCHAR},1,4), SUBSTR(@{_parameter.nextYear,jdbcType=VARCHAR},5,8)) YEAR_MONTH,electric,water,gas,energy
+			FROM nh_price
+			WHERE YEAR= SUBSTR(@{_parameter.nextYear,jdbcType=VARCHAR},1,4)
+		]]>
+		
+	</insert>
+	<insert id="insertNextYear" parameterType="string" keyProperty="id" keyColumn="ID" databaseId="sqlserver" lang="velocity">
+	<![CDATA[
+		insert into nh_price(year,month,year_month,electric,water,gas,energy)
+		select datepart (year,DATEADD(year,1, subString(@{_parameter.nextYear,jdbcType=VARCHAR},1,4))) year,month,
+		replace(year_month,subString(@{_parameter.nextYear,jdbcType=VARCHAR},1,4),subString(@{_parameter.nextYear,jdbcType=VARCHAR},5,8)) year_month,
+		power,water,gas,energy from nh_price where year=subString(@{_parameter.nextYear,jdbcType=VARCHAR},1,4)
+	]]>
+		<selectKey keyProperty="id" resultType="long" order="AFTER">
+			<include refid="_PUBLIC_V.SELECT_KEY" />
+		</selectKey>
+	</insert>
+</mapper>

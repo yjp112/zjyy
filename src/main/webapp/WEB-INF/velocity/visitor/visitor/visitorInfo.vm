@@ -1,0 +1,213 @@
+<div id="stock" style="margin-left:-5px;margin-right:5px">
+	  <!--参数type用来控制页面元素的修改权限:1代表来访登记tab页的请求；2代表是离开登记tab页的请求；3代表的是预约登记页面中新建和修改的页面请求-->
+      <table id='tableId' style="width:100%;" class="ui-table ui-table-addRow">
+        <thead>
+        <tr>
+            <th class="input-equilong">序号</th>
+            <th class="input-text">姓名</th>
+			<th class="input-text">单位</th>
+            <th class="input-text">证件类型</th>
+			<th class="input-text">证件号码</th>
+			<th class="input-text">联系方式</th>
+			#if(($!type)==1)
+			<th class="input-text">访客证号</th>
+			#end
+			#if(($!type)==2)
+			<th class="input-text">访客证号</th>
+			<th class="input-text">归还访客证</th>
+			#end
+			#if(($!type)==3 && !$!viewOnly)
+            <th class="input-equilong"><a href="javascript:void(0)" id="addRow" title="添加行"><i class="fa fa-plus-circle"></i></a></th>
+			#end
+        </tr>
+        </thead>
+        <tbody class="input-equilong">
+			#set($index=0)
+			#set($sy = 1)
+	#if($!reservationVisitor.visitorList.size() > 0)
+		    #foreach($list in $!reservationVisitor.visitorList)
+				#set($index = $velocityCount)
+				#set($sy = $velocityCount)
+			 <tr>
+                <td class="input-equilong">$velocityCount</td>
+                <td>
+                    <input #if(($!type)==2) readonly #end type="text" name="visitorList[$index].visitorName"value="$!{list.visitorName}"  class="k-textbox" onblur="validVisitorName(this)"/>
+				</td>
+				<td>
+                    <input #if(($!type)==2) readonly #end type="text" name="visitorList[$index].visitorUnit"value="$!{list.visitorUnit}"  class="k-textbox" onblur="validVisitorUnit(this)"/>
+				</td>
+				<td>
+					#if(($!type)==2)
+						<select disabled class="k-textbox" name="visitorList[$index].visitorCardType">
+						#foreach($enumDetail in $!visitorZJLXList)
+                        <option  value="$!enumDetail.enumValue" #if($!enumDetail.enumValue ==$!{list.visitorCardType}) selected="selected" #end>$!enumDetail.enumText</option>
+						#end
+		                </select>	
+						<input type="hidden" value="$!{list.visitorCardType}" name="visitorList[$index].visitorCardType"/>
+					#elseif(($!type)==3 or ($!type)==1)
+						<select readyonly class="k-textbox" name="visitorList[$index].visitorCardType">
+						#foreach($enumDetail in $!visitorZJLXList)
+                        <option readyonly value="$!enumDetail.enumValue" #if($!enumDetail.enumValue ==$!{list.visitorCardType}) selected="selected" #end>$!enumDetail.enumText</option>
+                        #end
+		                </select>	
+					#end	
+				</td>
+				<td>
+                    <input #if(($!type)==2) readonly #end  type="text" name="visitorList[$index].visitorCardNum"value="$!{list.visitorCardNum}"  class="k-textbox input-num" onblur="vaild_visitorCardNum();"/>
+                </td>
+				
+                <td><input #if(($!type)==2) readonly #end  type="text" name="visitorList[$index].visitorPhone" value="$!{list.visitorPhone}" class="k-textbox input-num" onblur="vaild_visitorPhone();"/>
+				</td>
+				#if(($!type)==1)
+				<td><input type="text" name="visitorList[$index].visitorCardNo" value="$!{list.visitorCardNo}" class="k-textbox input-num" onblur="vaild_number();"/>
+				</td>
+				<td style="display:none;">
+					<select class="k-textbox" name="visitorList[$index].visitorReturnCard">
+						<option value=''>--请选择--</option>
+						#foreach($enumDetail in $!visitorRETURNENList)
+                        <option readyonly value="$!enumDetail.enumValue" #if($!enumDetail.enumValue ==$!{list.visitorReturnCard}) selected="selected" #end>$!enumDetail.enumText</option>
+                        #end
+		             </select>
+                </td>
+				#end
+				#if(($!type)==2)
+				<td><input #if(($!view)) readonly #end type="text" name="visitorList[$index].visitorCardNo" value="$!{list.visitorCardNo}" class="k-textbox input-num" onblur="vaild_number();"/>
+				</td>
+				<td>
+						<select #if($!view) disabled #end class="k-textbox" name="visitorList[$index].visitorReturnCard">
+						<option value=''>--请选择--</option>
+						#foreach($enumDetail in $!visitorRETURNENList)
+                        <option  value="$!enumDetail.enumValue" #if($!enumDetail.enumValue ==$!{list.visitorReturnCard}) selected="selected" #end>$!enumDetail.enumText</option>
+                        #end
+		                </select>	
+
+				 </td>
+				#end
+				#if(($!type)==3 && !$!viewOnly)
+                <td><a onclick="delRow(this);"  class="del"  href="javascript:void(0);" title="删除"><i class="fa fa-remove spare_delRow"></i></a></td>
+			    #end
+			 </tr>
+		 #end 	
+	#else	 
+			#foreach($j in [$sy..1])
+			  <tr>
+                <td class="input-equilong">$j</td>
+                <td>
+                    <input #if(($!type)==2) readonly #end  type="text" name="visitorList[$j].visitorName"  class="k-textbox" onblur="validVisitorName(this)" value="$!{list.visitorName}"/>
+                </td>
+				<td><input #if(($!type)==2) readonly #end  type="text" name="visitorList[$j].visitorUnit" class="k-textbox" onblur="validVisitorUnit(this)"  value="$!{list.visitorUnit}"/>
+				</td>
+                <td>
+					#if(($!type)==2)
+						<select disabled class="k-textbox" name="visitorList[$j].visitorCardType">
+						#foreach($enumDetail in $!visitorZJLXList)
+                        <option  value="$!enumDetail.enumValue" #if($!enumDetail.enumValue ==$!{list.visitorCardType}) selected="selected" #end>$!enumDetail.enumText</option>
+						#end
+		                </select>	
+						<input type="hidden" value="$!{list.visitorCardType}" name="visitorList[$j].visitorCardType"/>
+					#elseif(($!type)==3 or ($!type)==1)
+						<select readyonly class="k-textbox" name="visitorList[$j].visitorCardType">
+						#foreach($enumDetail in $!visitorZJLXList)
+                        <option readyonly value="$!enumDetail.enumValue" #if($!enumDetail.enumValue ==$!{list.visitorCardType}) selected="selected" #end>$!enumDetail.enumText</option>
+                        #end
+		                </select>	
+					#end	
+				</td>
+				<td><input #if(($!type)==2) readonly #end  type="text" name="visitorList[$j].visitorCardNum" class="k-textbox input-num" value="$!{list.visitorCardNum}" onblur="vaild_visitorCardNum();"/>
+				</td>
+				<td><input #if(($!type)==2) readonly #end  type="text" name="visitorList[$j].visitorPhone" class="k-textbox input-num" value="$!{list.visitorPhone}" onblur="vaild_visitorPhone();"/>
+				</td>
+				#if(($!type)==1)
+				<td><input  type="text" name="visitorList[$j].visitorCardNo" onblur="writes(this)" class="k-textbox input-num" value="$!{list.visitorCardNo}" onblur="vaild_number();" />
+				</td>
+				#end
+				#if(($!type)==2)
+				<td><input #if(($!view)) readonly #end type="text" name="visitorList[$j].visitorCardNo" onblur="writes(this)" class="k-textbox input-num" value="$!{list.visitorCardNo}" onblur="vaild_number();"/>
+				</td>
+				<td>
+						<select  class="k-textbox" name="visitorList[$j].visitorReturnCard">
+						<option value='3'>--请选择--</option>
+						#foreach($enumDetail in $!visitorRETURNENList)
+                        <option  value="$!enumDetail.enumValue" #if($!enumDetail.enumValue ==$!{list.visitorReturnCard}) selected="selected" #end>$!enumDetail.enumText</option>
+						#end
+		                </select>	
+						<input type="hidden" value="$!{list.visitorCardType}" name="visitorList[$j].visitorCardType"/>
+				 </td>
+				 #end
+                #if(($!type)==3 && !$!viewOnly)
+                <td><a onclick="delRow(this);"  class="del"  href="javascript:void(0);" title="删除"><i class="fa fa-remove spare_delRow"></i></a></td>
+			    #end
+            </tr>
+			#end
+			#end
+        </tbody>
+        </table>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	
+
+	/*function readCardCode(){
+	    	 $.ajax({
+	            url :"$!{rc.contextPath}/visitor/reception/readCardNo",
+	            type:"get",
+	            async:false,
+	            success : function(data) {
+	            	if(data != ""){
+	            		 var iscard=0;
+	            		 $("input[name$='.visitorCardNo']").each(function(){
+            			     if($(this).val()==data){
+            			    	 iscard=1;
+            			    	 return false;
+            			     }
+            			 });
+	            		 if(iscard==0){
+	            			 $("input[name$='.visitorCardNo']").each(function(){
+	            			     if($(this).val()==""){
+	            			    	 $(this).val(data);
+	            			    	 return false;
+	            			     }
+	            			 });
+	            		 }
+	            		
+	            	}        
+	            }
+	        }); 
+	   }
+	   
+	
+	    #if(($!type)==1)
+		setInterval(readCardCode,2000);
+	   #end
+	   
+	   #if(($!type)==2 && !$!view)
+		 function backCardCode(){
+	    	 $.ajax({
+	            url :"$!{rc.contextPath}/visitor/reception/readCardNo",
+	            type:"get",
+	            async:false,
+	            success : function(data) {
+	            	if(data != ""){
+	            		 var iscard=0;
+	            		 $("input[name$='.visitorCardNo']").each(function(){
+	          			     if($(this).val()==data){
+	          			    	// alert( $(this).parents("tr").find("select[name$='.visitorReturnCard']").html());
+	          			    	$(this).parent("td").parent("tr").find("select[name$='.visitorReturnCard']").find("option[value='1']").attr("selected",true);
+	          			    	// $("select[name$='.visitorReturnCard']",$(this).parents("tr")).find("option[value='1']").attr("selected",true);
+	          			    	 iscard=1;
+	          			    	 return false;
+	          			     }
+          			     });
+	            		 if(iscard==0){
+	            			alert("当前页面没有对应卡号为："+data+"的访客!");
+	            		 }
+	            	}        
+	            }
+	        }); 
+	    }
+	     setInterval(backCardCode,2000);
+	   #end */
+	
+});   
+</script>

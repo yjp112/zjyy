@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.basic.discipine.discipine.entities.NhItem">
+
+	<resultMap type="com.supconit.nhgl.basic.discipine.discipine.entities.NhItem" id="NhItemResultMap">      
+       <result property="id" column="ID" />
+        <result property="code" column="CODE" />
+        <result property="parentCode" column="PARENT_CODE"/>
+        <result property="name" column="NAME" />
+        <result property="remark" column="REMARK" />
+        <result property="standardCode" column="STANDARD_CODE" />
+        <result property="nhType" column="NH_TYPE" />
+	</resultMap>
+	<sql id="TABLE_NAME" lang="velocity">NH_ITEM</sql>
+	<sql id="SEQUENCE" lang="velocity">
+		SELECT SEQ_<include refid="TABLE_NAME" />.NEXTVAL FROM DUAL
+	</sql>
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+   <sql id="select_pre">
+		select
+        ID,
+        CODE,
+        PARENT_CODE,
+        NAME,
+        REMARK,
+        STANDARD_CODE,
+        NH_TYPE
+        FROM NH_ITEM
+	</sql>
+   <sql id="select_pre_v" lang="velocity">
+		select
+        ID,
+        CODE,
+        PARENT_CODE,
+        NAME,
+        REMARK,
+        STANDARD_CODE
+        FROM NH_ITEM
+	</sql>
+	<sql id="select_pre_ele" lang="velocity">
+		SELECT DISTINCT
+			sub.ID,
+			sub.CODE,
+			sub.PARENT_CODE,
+			sub.NAME,
+			sub.REMARK,
+			sub.STANDARD_CODE
+		FROM
+			NH_ITEM sub
+		LEFT JOIN DEVICE d ON d.DISCIPINES_CODE = sub.CODE
+	</sql>
+	<sql id="condition" lang="velocity">
+		<![CDATA[
+		#where()
+				#set($_p = $_parameter)
+				1=1
+				#if($_p.code && $_p.code != '')
+					#set($_code=$_p.code)
+					AND CODE= @{_code,jdbcType=VARCHAR}
+				#end
+				#if($_p.parentCode && $_p.parentCode != '')
+					#set($_parentCode=$_p.parentCode)
+					AND PARENT_CODE= @{_parentCode,jdbcType=VARCHAR}
+				#end
+				#if($_p.nhType)
+					AND NH_TYPE = @{_p.nhType,jdbcType=NUMERIC}
+				#end
+		#end
+		]]>
+	</sql>
+	<sql id="count_pre" lang="velocity">
+		SELECT
+		COUNT(*)
+		FROM
+		<include refid="TABLE_NAME" />
+	</sql>
+	<sql id="condition_sql" lang="velocity">
+		
+		<![CDATA[
+		#where()
+				#set($_p = $_parameter.condition)
+				1=1
+				#if($_p.id && $_p.id != '')
+					#set($_id=$_p.id)
+					AND ID= @{_id,jdbcType=NUMERIC}
+				#end
+				#if($_p.parentCode && $_p.parentCode != '')
+					#set($_parentCode=$_p.parentCode)
+					AND PARENT_CODE= @{_parentCode,jdbcType=VARCHAR}
+				#end
+				#if($_p.standardCodes && $_p.standardCodes.size()>0)	
+					#set($_standardCodes =$_p.standardCodes)
+					and 
+					#repeat($_standardCodes $standardCode "," "  STANDARD_CODE IN  (" ")" )
+					    @{standardCode,jdbcType=VARCHAR}
+					#end	
+				#end
+				#if($_p.code && $_p.code != '')
+					#set($_code='%' +$_p.code+ '%')
+					AND CODE LIKE @{_code,jdbcType=VARCHAR}
+				#end
+				#if($_p.name && $_p.name != '')
+					#set($_name='%' +$_p.name+ '%')
+					AND NAME LIKE @{_name,jdbcType=VARCHAR}
+				#end		
+				#if($_p.standardCode && $_p.standardCode != '')
+					#set($_standardCode='%' +$_p.standardCode+ '%')
+					AND STANDARD_CODE LIKE @{_standardCode,jdbcType=VARCHAR}
+				#end
+				#if($_p.nhType)
+					AND NH_TYPE = @{_p.nhType,jdbcType=NUMERIC}
+				#end
+		#end
+		]]>	
+	</sql>
+	<select id="selectStandardCodesNh" parameterType="com.supconit.nhgl.basic.discipine.discipine.entities.NhItem" resultType="String">
+		with cte_root(ID,CODE,NAME,PARENT_CODE,REMARK,STANDARD_CODE)
+		as(
+		select ID,CODE,NAME,PARENT_CODE,REMARK,STANDARD_CODE from NH_ITEM<where><if test="standardCode != null "> STANDARD_CODE = #{standardCode}</if></where>
+		UNION all
+		select a.ID,a.CODE,a.NAME,a.PARENT_CODE,a.REMARK,a.STANDARD_CODE from NH_ITEM a
+		INNER JOIN cte_root b on a.PARENT_CODE=b.STANDARD_CODE
+		)
+		select STANDARD_CODE from cte_root 
+		<where>
+			<if test="code != null and code != ''">CODE like '%'+#{code}+'%' and</if>
+	        <if test="name != null and name !=''">NAME like '%'+#{name}+'%' and</if>
+	        <if test="remark != null and remark != ''">	REMARK like '%'+#{remark}+'%' and </if>
+	     1=1 
+		</where>	
+	</select>  
+	<sql id="standardCode_sql"  lang="velocity" >
+		
+		<![CDATA[
+		#where()
+				1=1
+				#if($_parameter.condition.standardCode && $_parameter.condition.standardCode != '')
+						AND STANDARD_CODE = @{_parameter.condition.standardCode,jdbcType=VARCHAR}
+				#end
+		#end
+		]]>	
+		
+	</sql>
+	<select id="findByCon" resultMap="NhItemResultMap" parameterType="com.supconit.nhgl.basic.discipine.discipine.entities.NhItem" lang="velocity">
+		<include refid="select_pre_v" />        
+       	<include refid="condition"/>
+	</select>
+	
+	<select id="findByConEle" resultMap="NhItemResultMap" parameterType="com.supconit.nhgl.basic.discipine.discipine.entities.NhItem" lang="velocity">
+		<include refid="select_pre_ele" />        
+       	<include refid="condition"/>
+	</select>
+	
+	<!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.nhgl.basic.discipine.discipine.entities.NhItem" resultMap="NhItemResultMap" lang="velocity" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		select
+        ID,
+        CODE,
+        PARENT_CODE,
+        NAME,
+        REMARK,
+        STANDARD_CODE,
+        NH_TYPE
+        <include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+        #order($_parameter.condition,"ID DESC")
+        <include refid="_PUBLIC_V.AS_ROW_NUM" />
+         FROM <include refid="TABLE_NAME" />
+		<include refid="condition_sql" />
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="findByCondition" parameterType="com.supconit.nhgl.basic.discipine.discipine.entities.NhItem" resultMap="NhItemResultMap" lang="velocity" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre_v" />
+		<include refid="condition_sql" />
+		 #order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="countByCondition" parameterType="com.supconit.nhgl.basic.discipine.discipine.entities.NhItem" resultType="long" lang="velocity">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+	<select id="countRecordByStandardCode" parameterType="com.supconit.nhgl.basic.discipine.discipine.entities.NhItem" resultType="long" lang="velocity">
+		<include refid="count_pre" />
+		<include refid="standardCode_sql" />
+	</select>
+	<select id="findById" parameterType="long" resultMap="NhItemResultMap" lang="velocity">
+      <include refid="select_pre" /> 
+        where ID = @{_parameter, jdbcType=NUMERIC}
+    </select>
+    <select id="findByStandardCode" parameterType="java.util.Map" resultMap="NhItemResultMap">
+    	<include refid="select_pre"/>
+    	<where>
+    		<if test="standardCode != null and standardCode != ''">STANDARD_CODE = #{standardCode}</if>
+    		<if test="nhType != null">and NH_TYPE = #{nhType}</if>
+    	</where>
+    </select>
+    <select id="findAll" resultMap="NhItemResultMap" parameterType="java.util.Map">
+    	<include refid="select_pre"/>
+    	<!-- where NH_TYPE = #{nhType} -->
+    	<where>
+    		<if test="nhType != null">NH_TYPE = #{nhType}</if>
+    	</where>
+    </select>
+    <select id="findAllById" resultMap="NhItemResultMap" parameterType="String" lang="velocity">
+		WITH a (id, CODE, name, parent_code ) AS (
+			SELECT p.id, p.CODE, p.name, p.parent_code FROM NH_ITEM p WHERE  p.parent_code= @{_parameter,jdbcType=VARCHAR}
+			UNION ALL SELECT c.id, c.CODE, c.name, c.parent_code FROM NH_ITEM c 
+			INNER JOIN a ON c.code = a.parent_code
+		)SELECT *FROM a
+    </select>
+       <select id="findChildrenByCode" resultMap="NhItemResultMap" parameterType="Map" lang="velocity">
+		WITH a ( id, STANDARD_CODE, name, parent_code ) AS (
+			SELECT p.id, p.STANDARD_CODE, p.name, p.parent_code
+				FROM NH_ITEM p WHERE p.NH_TYPE = @{nhType} AND STANDARD_CODE =  @{standardCode}
+			UNION ALL 
+			SELECT c.id, c.STANDARD_CODE, c.name,c.parent_code
+				FROM NH_ITEM c INNER JOIN a ON c.parent_code = a.STANDARD_CODE WHERE c.NH_TYPE =@{nhType} 
+		) SELECT *FROM a
+    </select>
+    <select id="findParents" resultMap="NhItemResultMap" lang="velocity">
+    	<include refid="select_pre"/>
+    	WHERE PARENT_CODE='0'
+    </select>
+    <select id="findChild" resultMap="NhItemResultMap" parameterType="String" lang="velocity">
+    	<include refid="select_pre"/>
+    	 WHERE STANDARD_CODE like @{_parameter, jdbcType=VARCHAR}
+    </select>
+    
+    
+    
+    <!-- 更新记录-->
+
+	<update id="update" parameterType="com.supconit.nhgl.basic.discipine.discipine.entities.NhItem"
+		lang="velocity">
+		UPDATE
+		<include refid="TABLE_NAME" />
+		#mset()
+		<![CDATA[
+			#if($_parameter.code)CODE = @{_parameter.code,jdbcType=VARCHAR},#end
+			#if($_parameter.parentCode)PARENT_CODE = @{_parameter.parentCode,jdbcType=VARCHAR},#end
+			#if($_parameter.name)NAME = @{_parameter.name,jdbcType=VARCHAR},#end
+			#if($_parameter.remark)REMARK = @{_parameter.remark,jdbcType=VARCHAR},#end
+			#if($_parameter.standardCode)STANDARD_CODE = @{_parameter.standardCode,jdbcType=VARCHAR},#end
+		]]>
+		#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+	
+    <insert id="insert" parameterType="com.supconit.nhgl.basic.discipine.discipine.entities.NhItem"
+		keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>
+		<include refid="INSERT_SQL" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.nhgl.basic.discipine.discipine.entities.NhItem"
+		keyProperty="id" keyColumn="ID" lang="velocity">
+		<include refid="INSERT_SQL" />
+		<selectKey keyProperty="id" resultType="long" order="AFTER">
+			<include refid="_PUBLIC_V.SELECT_KEY" />
+		</selectKey>
+	</insert>
+    <!-- 插入记录-->
+	
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO
+		<include refid="TABLE_NAME" />
+		(
+		#if($_databaseId == 'oracle') ID,#end
+		CODE,
+        PARENT_CODE,
+        NAME,
+        REMARK,
+        STANDARD_CODE,
+        NH_TYPE
+		) VALUES (
+		#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end
+		 @{_parameter.code,jdbcType=NUMERIC}
+		,@{_parameter.parentCode,jdbcType=VARCHAR}
+		,@{_parameter.name,jdbcType=VARCHAR}
+		,@{_parameter.remark,jdbcType=VARCHAR}
+		,@{_parameter.standardCode,jdbcType=VARCHAR}
+		,@{_parameter.nhType,jdbcType=NUMERIC}
+		)
+	</sql>
+	
+	
+	<delete id="deleteById" parameterType="Long" lang="velocity">
+		DELETE FROM <include refid="TABLE_NAME" /> WHERE ID = @{_parameter,jdbcType=NUMERIC}
+	</delete>
+	<!-- 删除多条记录-->
+	<delete id="deleteByIds">
+        DELETE FROM <include refid="TABLE_NAME" /> WHERE ID in 
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	<select id="getTreeByItemCode" parameterType="string" resultMap="NhItemResultMap" lang="velocity">
+		<![CDATA[
+			WITH TT (STANDARD_CODE) AS (
+					SELECT
+						STANDARD_CODE
+					FROM
+						NH_ITEM
+					#where()
+						#if($_parameter && $_parameter != '')
+							STANDARD_CODE=@{_parameter,jdbcType=VARCHAR}
+						#end
+					#end
+					UNION ALL
+						SELECT
+							A.STANDARD_CODE
+						FROM
+							NH_ITEM A,
+							TT B
+						WHERE
+							A.PARENT_CODE = B.STANDARD_CODE
+				)
+			select * from tt
+	]]>
+	</select>
+</mapper>

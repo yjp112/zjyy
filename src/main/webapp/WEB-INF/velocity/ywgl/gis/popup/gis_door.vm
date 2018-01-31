@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=8">
+    <script type="text/javascript" src="${static_url}/js/jquery-1.11.1.js"></script>
+    <!------------左侧样式--------------->
+
+    <script type="text/javascript" src="${projectName}/gis_server/gisjs/gisInfo.js"></script>
+
+    <link type="text/css" rel="stylesheet" media="screen" href="${projectName}/modules/hcstyle/hcstyle/1.0.0/hcstyle.css">
+    <!------------中间样式--------------->
+    <link type="text/css" rel="stylesheet" media="screen" href="${projectName}/gis_server/giscss/gisInfo.css?t=1">
+    <link type="text/css" rel="stylesheet" media="screen" href="${projectName}/modules/ywgl/css/hcstyle-ywgl.css">
+    
+    <style>
+    	.ui-table tbody td{
+    		font-size: 12px;
+    		padding: 5px 9px;
+    	}
+    </style>
+    <script>
+        var readBit = "$!{device.hpid}_ST";
+        var writeBit = "$!{device.hpid}_SET";
+        var itvRefresh;
+        var device_img_path = "$!{projectName}"+"/gis_server/imgDeviceState/";
+
+        //读点位
+        function readBlock() {
+            $.ajax({
+                'url': "$!{rc.contextPath}/hl/gis/readBit?code=$!{device.id}&bit=" + readBit + "&r=" + Math.random(),
+                'dataType': 'json',
+                'type': 'get',
+                'success': function (data) {
+                    if (data != null && data != "") {
+                        readBack(data);
+                    }
+                }
+            });
+        }
+        //
+        function readEvent() {
+            $.ajax({
+                'url': "$!{rc.contextPath}/hl/gis/readBit?code=$!{device.id}&bit=" + readBit + "&r=" + Math.random(),
+                'dataType': 'json',
+                'type': 'get',
+                'success': function (data) {
+                    if (data != null && data != "") {
+                        readBack(data);
+                    }
+                }
+            });
+        }
+        function readBack(data) {
+            var value = data.value;
+            var alarmState = data.alarmState;
+            if (value == "alarm") {
+                $("#spnStatus").text("报警");
+                $("#doorImage").attr("src", "$!{projectName}/gis_server/imgDeviceState/"+data.pic);
+                if (alarmState == "$!{alarmState1}") {
+                    $("#pHandleDo").show();
+                } else if (alarmState == "$!{alarmState4}") {
+                    $("#pHandleIng").show();
+                }
+            } else {
+                if (value == 0) {
+                    $("#spnStatus").text("关");
+                    $("#doorImage").attr("src","$!{projectName}/gis_server/imgDeviceState/"+data.pic);
+                } else if (value == 1) {
+                    $("#spnStatus").text("开");
+                    $("#doorImage").attr("src", "$!{projectName}/gis_server/imgDeviceState/"+data.pic);
+                }else{
+                    $("#spnStatus").text("关");
+                    $("#doorImage").attr("src","$!{projectName}/gis_server/imgDeviceState/"+data.pic);
+                }
+                $("#pHandleDo").hide();//报警处理按钮
+                $("#pHandleIng").hide();//报警处理中按钮
+            }
+            $("#spnStatus").show();//设备状态--文字
+            $("#doorImage").show();//设备状态--图片
+        }
+
+        //开关操作
+        function writeDoor(i) {
+       //     var val = $("#btnName").text() == "开" ? "1" : "0";
+            writeBlock(null, writeBit, i, "$!{rc.contextPath}");
+        }
+        $(document).ready(function () {
+            tab("gis_popupTab", "gis_popupTab_contents", "on");
+            readBlock();
+            itvRefresh = window.setInterval('readBlock()',$!{refreshOneTime});
+        });
+        //报警处理
+        function alarmHandle() {
+            $.ajax({
+                'url': "$!{rc.contextPath}/hl/gis/getRealAlarmId?hpid=$!{device.id}",
+                'data': '',
+                'dataType': 'json',
+                'type': 'get',
+                'error': function (data) {
+                    return false;
+                },
+                'success': function (data) {
+                    if (data.realAlarmId == null || data.realAlarmId == "") {
+                        alert(data.msg);
+                    } else {
+                        var hpid = '{"realAlarmId":' + data.realAlarmId + '}';
+                        var url = 'load:$!{rc.contextPath}/platform/bpm/start?_bpm_process_key=DEVICE_NEW_REPAIR_PROCESS&_bpm_extra_params=' + hpid;
+                        window.parent.parent.newDialog("handle", url, "报警处理", false, 800, 500);
+                    }
+                }
+            });
+        }
+		
+        //出入记录
+            $.ajax({
+                'url': "$!{rc.contextPath}/employee/timeCard/list?pageSize=5&deviceId=$!{device.id}",
+                'data': '',
+                'dataType': 'json',
+                'type': 'post',
+                'error': function (data) {
+                    return false;
+                },
+                'success': function (data) {
+                    $.each(data,function(name,obj){
+						if(name=='rows'){
+							$.each(obj,function(key,value){
+								$("#eventList").append("<tr><td>"+value.eventTimes+"</td><td>"+value.eventTypeName+"</td><td>"+value.personName+"</td></tr>");
+							});
+						}
+					});
+                }
+            });
+			
+        //写点位
+        function writeBlock(hpids, bits, val, projectName) {
+            var dataIn = {"hpids": hpids, "bits": bits, "val": val};
+            $.ajax({
+                'url': projectName + "/hl/gis/writeBit?r=" + Math.random(),
+                'data': dataIn,
+                'traditional': true,
+                'dataType': 'json',
+                'type': 'get',
+                'error': function (data) {
+                },
+                'success': function (data) {
+                }
+            });
+        }
+
+        function showAlarmGrid() {
+            quick_dialog("selectDiloag", "报警列表", "$!{rc.contextPath}/hl/montrol/alarm/realalarm/list?deviceId=$!{device.id}", 1200, 800);
+        }
+        function showDoorGrid() {
+            quick_dialog("selectDiloag", "门禁出入记录查询", "$!{rc.contextPath}/employee/timeCard/list?deviceId=$!{device.id}", 1294, 662);
+        }
+        function quick_dialog(id,title,url,width,height,reload){
+            if(window != top.window){
+                top.quick_dialog(id,title,url,width,height);
+                return;
+            }
+            var $el;
+            if(id){
+                $el = $("#" + id);
+            }else{
+                id = "dlg_" + new Date().getTime();
+            }
+            if(!$el || $el.length == 0){
+                $el = $('<div id="' + id + '"></div>').appendTo('body');
+            }
+
+            var win = $("#" + id).data("kendoWindow");
+            if(win){
+                win.open();
+                if(reload){
+                    win.refresh({
+                        iframe : true
+                    });
+                }
+                return;
+            }
+            var options = {
+                title : title,
+                content : url,
+                iframe : true,
+                modal : true,
+                pinned : true,
+                actions : ["Maximize","Refresh","Close"],
+                activate : function(){
+                    $("#" + id).addClass("k-window-iframecontent-loading");
+                    iframe_loaded($("iframe","#" + id)[0],function(){
+                        $("#" + id).removeClass("k-window-iframecontent-loading");
+                    });
+                },
+                open : function(){
+                    this.center();
+                },
+                close : function(){
+                    this.destroy();
+                }
+            };
+            if(width){
+                options.width = width;
+                options.orginalWidth = width;
+            }
+            if(height){
+                options.height = height;
+            }
+        }
+    </script>
+</head>
+<body>
+<div class="relative">
+    <div class="MoreR5" style="display:none"><a class="linkText" id="detailsBtn"> - 详情 &gt;&gt;</a></div>
+    <ul id="gis_popupTab" class="gis_popupTab">
+        <li><a>基本信息</a></li>
+        <li><a>预警信息</a></li>
+        <li><a>出入记录</a></li>
+    </ul>
+</div>
+<div id="gis_popupTab_contents" class="CL Mg_10" style="padding-top:10px;">
+    <div id="basicInfo">
+        <div class="gis_imgDiv fn-left Mg_10">
+            <img src='${imagePath}/${imgPath}' width="128px"
+                 height="94px" onerror="this.src='${projectName}/gis_server/img/default.jpg';"/></div>
+        <div class="base-info info-item">
+            <p><span class="hl">设备编号：</span>$!{device.deviceCode}</p>
+            <p><span class="hl">设备名称：</span>#substring("$!{device.deviceName}",12)</p>
+            <p><span class="hl">安装位置：</span>$!{device.locationName}</p>
+            <p><span class="hl">设备状态：</span>
+                <span id="spnStatus" style="display:none"></span>
+                <img id="doorImage" src='' width='24px' height='24px'
+                     style='vertical-align:middle; margin:0 6px;display:none;'></img>
+            </p>
+            <p style="margin-top: 10px;"> 
+                <a class="door-button" onclick="writeDoor(2);">开一次</a>
+                <a class="door-button" onclick="writeDoor(0);">常开</a>
+                <a class="door-button" onclick="writeDoor(1);">取消常开</a>
+				<a class="door-button" onclick="writeDoor(3);">常闭</a>
+                <a class="door-button" onclick="writeDoor(1);">取消常闭</a> 
+            </p>
+            <p id="pHandleDo" style="display:none"><span class="hl">报警处理：</span><a style="height:15px"
+                                                                                   class="btn btn-danger"
+                                                                                   href="javascript:void(0);"
+                                                                                   onclick="alarmHandle()">报警处理</a></p>
+
+            <p id="pHandleIng" style="display:none"><span class="hl">报警处理：</span>
+                <button class="btn" type="button" disabled="true">处理中..</button>
+        </div>
+        <div>
+            <a class="gis_toggle_rBtn FR" style="margin-top:55px;"></a>
+        </div>
+    </div>
+    <div id="warningInfo">
+        <table class="ui-table ui-table-warn">
+            <thead>
+            <tr>
+                <th>报警时间</th>
+                <th>报警描述</th>
+            </tr>
+            </thead>
+            <tbody>
+                #foreach($!{a} in $!{lstAlarm})
+                <tr>
+                    <td>#substring($!{a.alarmTime},19)</td>
+                    <td title="$!{a.alarmRemark}">#substring($!{a.alarmRemark},7)</td>
+                </tr>
+                #end
+            </tbody>
+        </table>
+
+         <div class="MoreR5"><a class="linkText" onclick="showAlarmGrid();">详情 &gt;&gt;</a></div>
+    </div>
+    <div id="eventInfo">
+        <table class="ui-table">
+            <thead>
+            <tr>
+                <th>刷卡时间</th>
+                <th>事件描述</th>
+                <th>人员</th>
+            </tr>
+            </thead>
+            <tbody id="eventList">
+            </tbody>
+        </table>
+        <div class="MoreR5"><a class="linkText" onclick="showDoorGrid();">更多 &gt;&gt;</a></div>
+    </div>
+</div>
+</body>
+</html>

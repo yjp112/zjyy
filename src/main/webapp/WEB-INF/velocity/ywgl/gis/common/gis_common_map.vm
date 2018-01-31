@@ -1,0 +1,85 @@
+<style>
+#G_Map {
+	position: relative;
+}
+#G_Map .tips{
+	position: absolute;
+	top: 20px;
+	left: 70px;
+	width: 120px;
+	height: 120px;
+	border: 1px solid #72bce4;
+	background: #d1eefe;
+	z-index: 999;
+	color: #fff;
+}
+</style>
+	   <!--地图-->
+	   <div class="map_main" style="width:100%; overflow:hidden;">
+          <div id="G_Map" class="claro">
+            <div class="ui-map-tools" style="text-align:right;right:30px;">
+    		  <!--当前在哪个楼层-->
+    		  <span id="geoAreaName_id" class="gis-trc-time" style="font-size:16px;line-height:25px"></span>    
+              <div class="geoAreaName_style" style="display:none">
+                 
+              </div>
+        	  <!--系统图 初始化默认不显示-->
+              <div class="ui-map-change" id="systemMap" style="display:none;z-index:1000;top:41px">
+                <a class="ui-btn-change ui-btn-lc" href="javascript:void(0);"></a>
+              </div>
+    		<span id="spnCurrentTime" class="gis-trc-time" style="font-size:24px;line-height:25px"></span>
+    		<img src="${projectName}/gis_server/img/pointer.png" width="74" height="74" style="margin-top:8px">
+            </div>
+            <div class="tips" id="tips" style="display:none;">
+                 #parse("ywgl/gis/common/gis_pms.vm")
+            </div>
+          </div>
+        </div>
+        
+<script type="text/javascript">
+window.onload=function ()
+{
+    var oDrag=document.getElementById('tips');
+    oDrag.onmousedown=function (ev)
+    {
+        var oEvent=ev||event;
+        var disX=oEvent.clientX-oDrag.offsetLeft;//x坐标
+        var disY=oEvent.clientY-oDrag.offsetTop;//y坐标
+         
+        document.onmousemove=function (ev)
+        {
+            var oEvent=ev||event;
+            var l=oEvent.clientX-disX;//移动x坐标位置
+            var t=oEvent.clientY-disY;//移动y坐标位置
+            //限制范围
+            if(l<0)
+            {
+                l=0;
+            }
+            else if(l>document.documentElement.clientWidth-oDrag.offsetWidth)
+            {
+                l=document.documentElement.clientWidth-oDrag.offsetWidth;
+            }
+             
+            if(t<0)
+            {
+                t=0;
+            }
+            else if(t>document.documentElement.clientHeight-oDrag.offsetHeight)
+            {
+                t=document.documentElement.clientHeight-oDrag.offsetHeight;
+            }
+             
+            oDrag.style.left=l+'px';
+            oDrag.style.top=t+'px';
+        };
+         
+        document.onmouseup=function ()
+        {
+            document.onmousemove=null;
+            document.onmouseup=null;
+        };
+    };
+};
+
+</script>

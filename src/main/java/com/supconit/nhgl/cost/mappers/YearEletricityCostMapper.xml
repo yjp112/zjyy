@@ -1,0 +1,586 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.cost.entities.YearEletricityCost">
+
+
+	<resultMap type="com.supconit.nhgl.cost.entities.YearEletricityCost"
+		id="YearEletricityCostResultMap">
+		<result property="deptId" column="deptId" />
+		<result property="ppId" column="PID" />
+		<result property="deptName" column="deptName" />
+		<result property="deptCode" column="deptCode"/>
+		<result property="start" column="start" />
+		<result property="end" column="end" />
+		<result property="lft" column="LFT" />
+		<result property="rgt" column="RGT" />
+		<result property="electric_01" column="electric_01" />
+		<result property="electric_02" column="electric_02" />
+		<result property="electric_03" column="electric_03" />
+		<result property="electric_04" column="electric_04" />
+		<result property="electric_05" column="electric_05" />
+		<result property="electric_06" column="electric_06" />
+		<result property="electric_07" column="electric_07" />
+		<result property="electric_08" column="electric_08" />
+		<result property="electric_09" column="electric_09" />
+		<result property="electric_10" column="electric_10" />
+		<result property="electric_11" column="electric_11" />
+		<result property="electric_12" column="electric_12" />
+		<result property="electricCost_01" column="electricCost_01" />
+		<result property="electricCost_02" column="electricCost_02" />
+		<result property="electricCost_03" column="electricCost_03" />
+		<result property="electricCost_04" column="electricCost_04" />
+		<result property="electricCost_05" column="electricCost_05" />
+		<result property="electricCost_06" column="electricCost_06" />
+		<result property="electricCost_07" column="electricCost_07" />
+		<result property="electricCost_08" column="electricCost_08" />
+		<result property="electricCost_09" column="electricCost_09" />
+		<result property="electricCost_10" column="electricCost_10" />
+		<result property="electricCost_11" column="electricCost_11" />
+		<result property="electricCost_12" column="electricCost_12" />
+		<result property="totalElectric_12" column="totalElectric_12" />
+		<result property="totalElectricCost_12" column="totalElectricCost_12" />
+	</resultMap>
+	
+	
+	
+	<select id="findYearEletricityCostByCondition" parameterType="com.supconit.nhgl.cost.entities.YearEletricityCost"
+		resultMap="YearEletricityCostResultMap" lang="velocity">
+		<![CDATA[
+			WITH --价格
+SC AS (
+	SELECT DISTINCT
+		HD.NAME deptName,
+		HD.PID,
+		HD.LFT,
+		HD.RGT,
+		HD.ID,
+		HD.CODE as deptCode,
+		isnull(
+			(
+				SELECT					
+						SUM (floor(
+							NH_D_DEPT_MONTH.TOTAL_MONTH_VALUE
+							)
+						)
+				FROM
+					NH_D_DEPT_MONTH
+				WHERE
+					NH_D_DEPT_MONTH.DEPT_ID = HD.ID
+					#if($_parameter.currentYear)
+						AND NH_D_DEPT_MONTH.MONTH_KEY =@{_parameter.currentYear,jdbcType=VARCHAR}+'-01'
+					#end
+			),
+			0
+		) AS electric_01,
+		isnull(
+			(
+				SELECT
+					round(
+						(
+								SUM (
+									floor(NH_D_DEPT_MONTH.TOTAL_MONTH_VALUE) * NH_PRICE.ELECTRIC
+								)
+						),
+						2
+					)
+				FROM
+					NH_D_DEPT_MONTH,
+					NH_PRICE
+				WHERE
+					NH_D_DEPT_MONTH.DEPT_ID = HD.ID
+				#if($_parameter.currentYear)
+				AND NH_PRICE.YEAR_MONTH = @{_parameter.currentYear,jdbcType=VARCHAR}+'01'
+				AND NH_D_DEPT_MONTH.MONTH_KEY = @{_parameter.currentYear,jdbcType=VARCHAR}+'-01'
+				#end
+			),
+			0
+		) AS electricCost_01,
+		isnull(
+			(
+				SELECT
+						SUM (floor(
+							NH_D_DEPT_MONTH.TOTAL_MONTH_VALUE
+							)
+					)
+				FROM
+					NH_D_DEPT_MONTH
+				WHERE
+					NH_D_DEPT_MONTH.DEPT_ID = HD.ID
+				#if($_parameter.currentYear)
+				AND NH_D_DEPT_MONTH.MONTH_KEY =@{_parameter.currentYear,jdbcType=VARCHAR}+'-02'
+				#end 
+			),
+			0
+		) AS electric_02,
+		isnull(
+			(
+				SELECT
+					round(
+						(
+								SUM (
+								floor(
+									NH_D_DEPT_MONTH.TOTAL_MONTH_VALUE) * NH_PRICE.ELECTRIC
+								)
+						),
+						2
+					)
+				FROM
+					NH_D_DEPT_MONTH,
+					NH_PRICE
+				WHERE
+					NH_D_DEPT_MONTH.DEPT_ID = HD.ID
+					#if($_parameter.currentYear)
+				AND NH_PRICE.YEAR_MONTH = @{_parameter.currentYear,jdbcType=VARCHAR}+'02'
+				AND NH_D_DEPT_MONTH.MONTH_KEY =@{_parameter.currentYear,jdbcType=VARCHAR}+'-02'
+				#end
+			),
+			0
+		) AS electricCost_02,
+		isnull(
+			(
+				SELECT
+						SUM (
+						floor(
+							NH_D_DEPT_MONTH.TOTAL_MONTH_VALUE
+							)
+						)
+				FROM
+					NH_D_DEPT_MONTH
+				WHERE
+					NH_D_DEPT_MONTH.DEPT_ID = HD.ID
+				#if($_parameter.currentYear)
+				AND NH_D_DEPT_MONTH.MONTH_KEY =@{_parameter.currentYear,jdbcType=VARCHAR}+'-03'
+				#end
+			),
+			0
+		) AS electric_03,
+		isnull(
+			(
+				SELECT
+					round(
+						(
+								SUM (
+									floor(
+									NH_D_DEPT_MONTH.TOTAL_MONTH_VALUE) * NH_PRICE.ELECTRIC
+								)
+						),
+						2
+					)
+				FROM
+					NH_D_DEPT_MONTH,
+					NH_PRICE
+				WHERE
+					NH_D_DEPT_MONTH.DEPT_ID = HD.ID
+				#if($_parameter.currentYear)
+				AND NH_PRICE.YEAR_MONTH =@{_parameter.currentYear,jdbcType=VARCHAR}+'03'
+				AND NH_D_DEPT_MONTH.MONTH_KEY = @{_parameter.currentYear,jdbcType=VARCHAR}+'-03'
+				#end
+			),
+			0
+		) AS electricCost_03,
+		isnull(
+			(
+				SELECT
+						SUM (
+						floor(
+							NH_D_DEPT_MONTH.TOTAL_MONTH_VALUE
+							)
+						)
+				FROM
+					NH_D_DEPT_MONTH
+				WHERE
+					NH_D_DEPT_MONTH.DEPT_ID = HD.ID
+				#if($_parameter.currentYear)
+				AND NH_D_DEPT_MONTH.MONTH_KEY =@{_parameter.currentYear,jdbcType=VARCHAR}+'-04'
+				#end
+			),
+			0
+		) AS electric_04,
+		isnull(
+			(
+				SELECT
+					round(
+								SUM (
+									floor(
+									NH_D_DEPT_MONTH.TOTAL_MONTH_VALUE )* NH_PRICE.ELECTRIC
+								)
+						,
+						2
+					)
+				FROM
+					NH_D_DEPT_MONTH,
+					NH_PRICE
+				WHERE
+					NH_D_DEPT_MONTH.DEPT_ID = HD.ID
+				#if($_parameter.currentYear)
+				AND NH_PRICE.YEAR_MONTH =@{_parameter.currentYear,jdbcType=VARCHAR}+'04'
+				AND NH_D_DEPT_MONTH.MONTH_KEY = @{_parameter.currentYear,jdbcType=VARCHAR}+'-04'
+				#end
+			),
+			0
+		) AS electricCost_04,
+		isnull(
+			(
+				SELECT
+						SUM (
+						floor(
+							NH_D_DEPT_MONTH.TOTAL_MONTH_VALUE
+							)
+						)
+				FROM
+					NH_D_DEPT_MONTH
+				WHERE
+					NH_D_DEPT_MONTH.DEPT_ID = HD.ID
+				#if($_parameter.currentYear)
+				AND NH_D_DEPT_MONTH.MONTH_KEY =@{_parameter.currentYear,jdbcType=VARCHAR}+'-05'
+				#end
+			),
+			0
+		) AS electric_05,
+		isnull(
+			(
+				SELECT
+					round(
+						(
+								SUM (
+									floor(
+									NH_D_DEPT_MONTH.TOTAL_MONTH_VALUE
+									) * NH_PRICE.ELECTRIC
+								)
+						),
+						2
+					)
+				FROM
+					NH_D_DEPT_MONTH,
+					NH_PRICE
+				WHERE
+					NH_D_DEPT_MONTH.DEPT_ID = HD.ID
+				#if($_parameter.currentYear)
+				AND NH_PRICE.YEAR_MONTH =@{_parameter.currentYear,jdbcType=VARCHAR}+'05'
+				AND NH_D_DEPT_MONTH.MONTH_KEY = @{_parameter.currentYear,jdbcType=VARCHAR}+'-05'
+				#end
+			),
+			0
+		) AS electricCost_05,
+		isnull(
+			(
+				SELECT
+						SUM (
+						floor(
+							NH_D_DEPT_MONTH.TOTAL_MONTH_VALUE
+							)
+					)
+				FROM
+					NH_D_DEPT_MONTH
+				WHERE
+					NH_D_DEPT_MONTH.DEPT_ID = HD.ID
+				#if($_parameter.currentYear)
+				AND NH_D_DEPT_MONTH.MONTH_KEY =@{_parameter.currentYear,jdbcType=VARCHAR}+'-06'
+				#end
+			),
+			0
+		) AS electric_06,
+		isnull(
+			(
+				SELECT
+					round(
+						(
+								SUM (
+								floor(
+									NH_D_DEPT_MONTH.TOTAL_MONTH_VALUE
+									) * NH_PRICE.ELECTRIC
+								)
+						),
+						2
+					)
+				FROM
+					NH_D_DEPT_MONTH,
+					NH_PRICE
+				WHERE
+					NH_D_DEPT_MONTH.DEPT_ID = HD.ID
+				#if($_parameter.currentYear)
+				AND NH_PRICE.YEAR_MONTH =@{_parameter.currentYear,jdbcType=VARCHAR}+'06'
+				AND NH_D_DEPT_MONTH.MONTH_KEY = @{_parameter.currentYear,jdbcType=VARCHAR}+'-06'
+				#end
+			),
+			0
+		) AS electricCost_06,
+		isnull(
+			(
+				SELECT
+						SUM (
+						floor(
+							NH_D_DEPT_MONTH.TOTAL_MONTH_VALUE
+							)
+					)
+				FROM
+					NH_D_DEPT_MONTH
+				WHERE
+					NH_D_DEPT_MONTH.DEPT_ID = HD.ID
+				#if($_parameter.currentYear)
+				AND NH_D_DEPT_MONTH.MONTH_KEY =@{_parameter.currentYear,jdbcType=VARCHAR}+'-07'
+				#end
+			),
+			0
+		) AS electric_07,
+		isnull(
+			(
+				SELECT
+					round(
+						(
+								SUM (
+									floor(
+									NH_D_DEPT_MONTH.TOTAL_MONTH_VALUE) * NH_PRICE.ELECTRIC
+								)
+						),
+						2
+					)
+				FROM
+					NH_D_DEPT_MONTH,
+					NH_PRICE
+				WHERE
+					NH_D_DEPT_MONTH.DEPT_ID = HD.ID
+				#if($_parameter.currentYear)
+				AND NH_PRICE.YEAR_MONTH =@{_parameter.currentYear,jdbcType=VARCHAR}+'07'
+				AND NH_D_DEPT_MONTH.MONTH_KEY = @{_parameter.currentYear,jdbcType=VARCHAR}+'-07'
+				#end
+			),
+			0
+		) AS electricCost_07,
+		isnull(
+			(
+				SELECT
+						SUM (
+						floor(
+							NH_D_DEPT_MONTH.TOTAL_MONTH_VALUE
+							)
+					)
+				FROM
+					NH_D_DEPT_MONTH
+				WHERE
+					NH_D_DEPT_MONTH.DEPT_ID = HD.ID
+				#if($_parameter.currentYear)
+				AND NH_D_DEPT_MONTH.MONTH_KEY =@{_parameter.currentYear,jdbcType=VARCHAR}+'-08'
+				#end
+			),
+			0
+		) AS electric_08,
+		isnull(
+			(
+				SELECT
+					round(
+						(
+								SUM (
+								floor(
+									NH_D_DEPT_MONTH.TOTAL_MONTH_VALUE )* NH_PRICE.ELECTRIC
+								)
+						),
+						2
+					)
+				FROM
+					NH_D_DEPT_MONTH,
+					NH_PRICE
+				WHERE
+					NH_D_DEPT_MONTH.DEPT_ID = HD.ID
+				#if($_parameter.currentYear)
+				AND NH_PRICE.YEAR_MONTH =@{_parameter.currentYear,jdbcType=VARCHAR}+'08'
+				AND NH_D_DEPT_MONTH.MONTH_KEY = @{_parameter.currentYear,jdbcType=VARCHAR}+'-08'
+				#end
+			),
+			0
+		) AS electricCost_08,
+		isnull(
+			(
+				SELECT
+						SUM (
+						floor(
+							NH_D_DEPT_MONTH.TOTAL_MONTH_VALUE
+							)
+					)
+				FROM
+					NH_D_DEPT_MONTH
+				WHERE
+					NH_D_DEPT_MONTH.DEPT_ID = HD.ID
+				#if($_parameter.currentYear)
+				AND NH_D_DEPT_MONTH.MONTH_KEY =@{_parameter.currentYear,jdbcType=VARCHAR}+'-09'
+				#end
+			),
+			0
+		) AS electric_09,
+		isnull(
+			(
+				SELECT
+					round(
+						(
+								SUM (
+								floor(
+									NH_D_DEPT_MONTH.TOTAL_MONTH_VALUE )* NH_PRICE.ELECTRIC
+								)
+						),
+						2
+					)
+				FROM
+					NH_D_DEPT_MONTH,
+					NH_PRICE
+				WHERE
+					NH_D_DEPT_MONTH.DEPT_ID = HD.ID
+				#if($_parameter.currentYear)
+				AND NH_PRICE.YEAR_MONTH =@{_parameter.currentYear,jdbcType=VARCHAR}+'09'
+				AND NH_D_DEPT_MONTH.MONTH_KEY = @{_parameter.currentYear,jdbcType=VARCHAR}+'-09'
+				#end
+			),
+			0
+		) AS electricCost_09,
+		isnull(
+			(
+				SELECT
+						SUM (
+						floor(
+							NH_D_DEPT_MONTH.TOTAL_MONTH_VALUE
+							)
+					)
+				FROM
+					NH_D_DEPT_MONTH
+				WHERE
+					NH_D_DEPT_MONTH.DEPT_ID = HD.ID
+				#if($_parameter.currentYear)
+				AND NH_D_DEPT_MONTH.MONTH_KEY =@{_parameter.currentYear,jdbcType=VARCHAR}+'-10'
+				#end
+			),
+			0
+		) AS electric_10,
+		isnull(
+			(
+				SELECT
+					round(
+						(
+								SUM (
+								floor(
+									NH_D_DEPT_MONTH.TOTAL_MONTH_VALUE
+									) * NH_PRICE.ELECTRIC
+								)
+						),
+						2
+					)
+				FROM
+					NH_D_DEPT_MONTH,
+					NH_PRICE
+				WHERE
+					NH_D_DEPT_MONTH.DEPT_ID = HD.ID
+				#if($_parameter.currentYear)
+				AND NH_PRICE.YEAR_MONTH =@{_parameter.currentYear,jdbcType=VARCHAR}+'10'
+				AND NH_D_DEPT_MONTH.MONTH_KEY = @{_parameter.currentYear,jdbcType=VARCHAR}+'-10'
+				#end
+			),
+			0
+		) AS electricCost_10,
+		isnull(
+			(
+				SELECT
+						SUM (
+						floor(
+							NH_D_DEPT_MONTH.TOTAL_MONTH_VALUE
+							)
+					)
+				FROM
+					NH_D_DEPT_MONTH
+				WHERE
+					NH_D_DEPT_MONTH.DEPT_ID = HD.ID
+				#if($_parameter.currentYear)
+				AND NH_D_DEPT_MONTH.MONTH_KEY =@{_parameter.currentYear,jdbcType=VARCHAR}+'-11'
+				#end
+			),
+			0
+		) AS electric_11,
+		isnull(
+			(
+				SELECT
+					round(
+						(
+								SUM (
+								floor(
+									NH_D_DEPT_MONTH.TOTAL_MONTH_VALUE )* NH_PRICE.ELECTRIC
+								)
+						),
+						2
+					)
+				FROM
+					NH_D_DEPT_MONTH,
+					NH_PRICE
+				WHERE
+					NH_D_DEPT_MONTH.DEPT_ID = HD.ID
+				#if($_parameter.currentYear)
+				AND NH_PRICE.YEAR_MONTH =@{_parameter.currentYear,jdbcType=VARCHAR}+'11'
+				AND NH_D_DEPT_MONTH.MONTH_KEY = @{_parameter.currentYear,jdbcType=VARCHAR}+'-11'
+				#end
+			),
+			0
+		) AS electricCost_11,
+		isnull(
+			(
+				SELECT
+						SUM (
+						floor(
+							NH_D_DEPT_MONTH.TOTAL_MONTH_VALUE
+							)
+					)
+				FROM
+					NH_D_DEPT_MONTH
+				WHERE
+					NH_D_DEPT_MONTH.DEPT_ID = HD.ID
+				#if($_parameter.currentYear)
+				AND NH_D_DEPT_MONTH.MONTH_KEY =@{_parameter.currentYear,jdbcType=VARCHAR}+'-12'
+				#end
+			),
+			0
+		) AS electric_12,
+		isnull(
+			(
+				SELECT
+					round(
+						(
+								SUM (
+								floor (
+									NH_D_DEPT_MONTH.TOTAL_MONTH_VALUE) * NH_PRICE.ELECTRIC
+								)
+						),
+						2
+					)
+				FROM
+					NH_D_DEPT_MONTH,
+					NH_PRICE
+				WHERE
+					NH_D_DEPT_MONTH.DEPT_ID = HD.ID
+				#if($_parameter.currentYear)
+				AND NH_PRICE.YEAR_MONTH =@{_parameter.currentYear,jdbcType=VARCHAR}+'12'
+				AND NH_D_DEPT_MONTH.MONTH_KEY = @{_parameter.currentYear,jdbcType=VARCHAR}+'-12'
+				#end
+			),
+			0
+		) AS electricCost_12
+	FROM
+		NH_DEPT HD --部门
+	    #where()
+				#if($_parameter.deptId)
+					HD.lft >=@{_parameter.lft,jdbcType=NUMERIC} and HD.rgt<=@{_parameter.rgt,jdbcType=NUMERIC}
+				#end
+			#end
+) SELECT
+	SC.*, (
+		SC.electric_01 + SC.electric_02 + SC.electric_03 + SC.electric_04 + SC.electric_05 + SC.electric_06 + SC.electric_07 + SC.electric_08 + SC.electric_09 + SC.electric_10 + SC.electric_11 + SC.electric_12
+	) AS totalElectric_12,
+	(
+		SC.electricCost_01 + SC.electricCost_02 + SC.electricCost_03 + SC.electricCost_04 + SC.electricCost_05 + SC.electricCost_06 + SC.electricCost_07 + SC.electricCost_08 + SC.electricCost_09 + SC.electricCost_10 + SC.electricCost_11 + SC.electricCost_12
+	) AS totalElectricCost_12
+FROM
+	SC
+ORDER BY
+	SC.LFT,
+	SC.id
+		]]>
+	</select>
+
+</mapper>

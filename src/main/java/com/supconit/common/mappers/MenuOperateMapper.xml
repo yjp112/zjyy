@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.common.domains.MenuOperate">
+	<resultMap type="com.supconit.common.domains.MenuOperate" id="ResultMap">
+		<result property="mid" column="M_ID" />
+		<result property="mname" column="M_NAME" />
+		<result property="mcode" column="M_CODE" />
+		<result property="mparentcode" column="m_parentcode" />
+		<result property="mdescription" column="M_DESCRIPTION" />
+		<result property="mpid" column="M_PID" />
+		<result property="mlft" column="M_LFT" />
+		<result property="mrgt" column="M_RGT" />
+		<result property="mshowIcon" column="M_SHOW_ICON" />
+		<result property="mlinkUrl" column="M_LINK_URL" />
+		<result property="mresources" column="M_RESOURCES" />
+		<result property="msortValue" column="M_SORT_VALUE" />
+		<result property="mdisplay" column="M_DISPLAY" />
+		
+		<result property="oname" column="O_NAME" />
+		<result property="ocode" column="O_CODE" />
+		<result property="odescription" column="O_DESCRIPTION" />
+        <result property="omenuId" column="O_MENU_ID"/>
+        <result property="oresources" column="O_RESOURCES"/>
+        <result property="oonclick" column="O_ONCLICK"/>
+        <result property="oicon" column="O_ICON"/>
+        <result property="olistButton" column="O_LIST_BUTTON"/>
+        <result property="ocolumnButton" column="O_COLUMN_BUTTON"/>
+        <result property="osortValue" column="O_SORT_VALUE"/>
+	</resultMap>
+    
+	<select id="selectAllMenuOperate"  resultMap="ResultMap" lang="velocity">
+		select t.code m_code,
+		       p.code m_parentcode,
+		       t.name m_name,
+		       t.link_url m_link_url,
+		       t.show_icon m_show_icon,
+		       t.sort_value m_sort_value,
+		       t.display m_display,
+		       t.description m_description,
+		       t.resources m_resources,
+		       t2.code o_code,
+		       t2.name o_name,
+		       t2.icon o_icon,
+		       t2.onclick o_onclick,
+		       t2.sort_value o_sort_value,
+		       t2.description o_description,
+		       t2.list_button o_list_button,
+		       t2.resources o_resources
+		  from ho_menu t
+		  left join ho_operate t2
+		    on t.id = t2.menu_id
+		  left join ho_menu p
+		    on t.pid = p.id
+		 order by t.lft asc, t.sort_value desc
+	</select>
+	<select id="selectTreePath" parameterType="com.supconit.common.domains.MenuOperate" resultMap="ResultMap" lang="velocity">
+		#set($_p = $_parameter)
+		<![CDATA[
+		SELECT t.id M_ID,t.code M_CODE,t.name M_NAME FROM HO_MENU T
+		INNER JOIN (
+				SELECT c.code,COUNT (P .code) lvl	FROM HO_MENU c INNER JOIN HO_MENU P ON c.LFT >= P .LFT AND c.LFT <= P .RGT
+				GROUP BY c.code,c.LFT,c.RGT) t2
+			ON T .code = T2.code WHERE	T2.LVL > @{_p.mlvl} AND T .LFT <= @{_p.mlft} AND T .RGT >= @{_p.mrgt} ORDER BY	T .lft ASC
+		]]>	
+	</select>
+	
+	
+</mapper>

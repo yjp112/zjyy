@@ -1,0 +1,288 @@
+<!-- hcjs更新时此处也需更新，主要用到dialog方法 -->
+
+<link rel="stylesheet" href="$!{nhgl_static_custom_url}/devappwithfullcanlendar/css/mainstructure.css"> 
+<link rel="stylesheet" href="$!{nhgl_static_custom_url}/devappwithfullcanlendar/css/maincontent.css"> 
+<!-- Jquery and Jquery UI -->
+
+<link rel="stylesheet" href="$!{nhgl_static_custom_url}/devappwithfullcanlendar/css/redmond/jquery-ui-1.8.1.custom.css"> 
+<link rel="stylesheet" href="$!{nhgl_static_custom_url}/devappwithfullcanlendar/js/formValidator/css/validationEngine.jquery.css" type="text/css" media="screen" charset="utf-8" />
+
+<!-- FullCalender -->
+
+<link rel='stylesheet' type='text/css' href='$!{nhgl_static_custom_url}/devappwithfullcanlendar/js/fullcal/css/fullcalendar.css' />
+<!-- Jquery and Jquery UI -->
+
+<script type="text/javascript" src="$!{nhgl_static_custom_url}/devappwithfullcanlendar/js/jquery-1.4.2.min.js"></script>
+
+<script type="text/javascript" src="$!{nhgl_static_custom_url}/devappwithfullcanlendar/js/jquery-ui-1.8.6.custom.min.js"></script>
+
+<script type="text/javascript" src="$!{nhgl_static_custom_url}/devappwithfullcanlendar/js/jquery-ui-timepicker-addon.js"></script>
+<script src="$!{nhgl_static_custom_url}/devappwithfullcanlendar/js/formValidator/js/jquery.validationEngine.js" type="text/javascript"></script>
+
+<script src="$!{nhgl_static_custom_url}/devappwithfullcanlendar/js/formValidator/js/jquery.validationEngine-en.js" type="text/javascript"></script>
+
+<script type='text/javascript' src='$!{nhgl_static_custom_url}/devappwithfullcanlendar/js/fullcal/fullcalendar.js'></script>
+
+<STYLE type=text/css>
+#loading {
+	TOP: 0px; RIGHT: 0px
+}
+.tooltip {
+	PADDING-BOTTOM: 25px; PADDING-LEFT: 25px; WIDTH: 160px; PADDING-RIGHT: 25px; DISPLAY: none; BACKGROUND: url(images/black_arrow.png); HEIGHT: 70px; COLOR: #fff; FONT-SIZE: 12px; PADDING-TOP: 25px; z-order: 100
+}
+
+#calendar {
+     width: 800px; 
+     margin: 0 auto;
+  }
+  
+</STYLE>
+<DIV id="wrap" style="background-color:#0B0E15;">
+<input type="hidden" value="" id="time" name="time" >
+	<!-- 日历背景 -->
+	<DIV id="calendar" style="float:left;background-color:#0B0E15;"></DIV>
+</DIV>
+<SCRIPT type=text/javascript>
+function RefreshCalendar() {
+   	$("#calendar").fullCalendar('refetchEvents');
+}
+$(document).ready(function() {
+    var month = $!month;
+    var year = $!year;
+    var day = $!day;
+    var time= '$!time';
+    var deDate='$!defaultDate';
+	$("#reserveformID").validationEngine({
+		validationEventTriggers:"keyup blur", // 键盘按键触发验证
+		openDebug: true
+	}) ;
+	var height;
+	var heightFlag = 0;
+	
+	var calendar =$('#calendar').fullCalendar({
+	  header:{
+			right: 'prev,next today'
+	  },
+	  y:year,
+	  m:month-1,
+	  d:day,
+	  defaultDate:deDate,
+      monthNames: ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"],
+      monthNamesShort: ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"],
+	  dayNames: ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"],
+	  dayNamesShort: ["周日", "周一", "周二", "周三", "周四", "周五", "周六"],
+	  dayNamesMin: ["日","一","二","三","四","五","六"],
+	  yearSuffix: '年',
+	  today: ['今天'],
+	  //	$('#calendar').fullCalendar( 'gotoDate', selectdate.getFullYear(), selectdate.getMonth(), selectdate.getDate());,
+	  firstDay: 1,				
+   	  buttonText: {
+  			today: '今天',
+  			prev: '上一月',
+  			next: '下一月'
+	   },
+	  //contentHeight: 350,
+	  //aspectRatio:0.7, 
+	  selectable:true,
+	  theme: true,
+	  editable: false,//日历项拖拽
+	  allDaySlot : false,
+	  titleFormat:'yyyy年MM月',
+	  events:  function(start, end , callback){//生成日历
+		var events = [];
+		$.ajax({
+        	'url':"$!{rc.contextPath}/nhgl/schedule/controller/taskPlan/canlendarModel?time="+new Date().getTime()+"&&taskVesting="+encodeURIComponent('$!taskVesting'),
+			'data': {                
+				//timeStart:$.fullCalendar.formatDate(start,"yyyy-MM-dd HH:mm:ss"),
+                //timeEnd:$.fullCalendar.formatDate(end,"yyyy-MM-dd HH:mm:ss") 
+				timeStart:$.fullCalendar.formatDate($('#calendar').fullCalendar('getView').start,"yyyy-MM-dd HH:mm:ss"),
+                timeEnd:$.fullCalendar.formatDate($('#calendar').fullCalendar('getView').end,"yyyy-MM-dd HH:mm:ss")
+			},
+        	'dataType': 'json',
+        	'type': 'post',
+        	'error': function(data){
+        		alert("查看执行计划失败");
+         		return false;
+        	 },
+        	'success': function(doc) {
+        		$("#time").attr("value",$.fullCalendar.formatDate($('#calendar').fullCalendar('getView').start,"yyyy-MM-dd"));
+        		$(doc).each(function(i) {
+    				var startDate = doc[i].dateList;
+    				var name = doc[i].taskName;
+    				if(name.length>7)
+    					name = name.substring(0,7)+"..";
+    				$(startDate).each(function(j){
+    					events.push({
+        					sid: doc[i].id,
+        					uid: doc[i].id,
+        					title: '计划任务',
+        					taskCode: doc[i].taskCode,
+        					excuteType: doc[i].excuteType,
+        					hourStart: doc[i].monitorHourStart,// 此处改变，列表和明细都会改变
+        					hourEnd: doc[i].monitorHourEnd,
+        					groupPersons: doc[i].excuteParam,
+        					start: startDate[j],//类型必须是date
+        					confcolor: '#ff3f3f',
+        					confid: 'test1',
+        					allDay: false,
+        					//end : doc[i].endDate,
+        					monitorTaskId: doc[i].monitorTaskId,
+    						taskName:name,
+    						taskVesting:doc[i].taskVesting
+        				});	
+    				});
+        		});
+				callback(events);
+    			setTimeout(function(){
+                	height = $(document).height();
+					if(heightFlag == 0)
+						heightFlag = height;
+					else if(heightFlag != height-20)
+						heightFlag = height;
+                    //alert(parent.document.all("canlendar_frame").id);
+                    //$("#canlendar_frame",document.html).height(height);
+					if(heightFlag != height-20)
+                    	parent.document.all("canlendar_frame").style.height = height+20+"px";
+                },10);
+        	}
+        });	
+	  },
+	  dayClick: function(date, allDay, jsEvent, view) {// 单机日历内空白 新增事件
+				//var selectdate = $.fullCalendar.formatDate(date, "yyyy-MM-dd");	
+				//$("#selecteddate").attr("value",selectdate);
+				//window.parent.openDilog('新增','$!{rc.contextPath}/schedule/controller/taskPlan/edit?selectdate='+selectdate);
+				window.parent.openDilogAdd('选择任务归属','$!{rc.contextPath}/nhgl/schedule/controller/taskPlan/edit');
+			return false;
+	  },
+	  timeFormat: 'HH:mm{ - HH:mm}',
+	  eventClick: function(event) {// 单机日历内已有事件
+	  		//window.parent.openDilog('选择任务归属','$!{rc.contextPath}/nhgl/schedule/controller/taskPlan/edit');
+	  		window.parent.openDilogLook('查看',event.taskVesting,event.monitorTaskId);
+			return false;
+	  },
+	  loading: function(bool) {
+			if (bool) $('#loading').show();
+			else $('#loading').hide();
+	  },
+	  eventMouseover: function(calEvent, jsEvent, view) {
+	  		var tempStart = $.fullCalendar.formatDate(calEvent.start, "yyyy/MM/dd");
+			var tempEnd = $.fullCalendar.formatDate(calEvent.end, "yyyy/MM/dd");
+			if(tempStart==tempEnd){//若在同一天，结束日期省略
+				var fstart  = $.fullCalendar.formatDate(calEvent.start, "yyyy/MM/dd HH:mm");
+				var fend  = $.fullCalendar.formatDate(calEvent.end, "HH:mm");	
+			}else{
+				var fstart  = $.fullCalendar.formatDate(calEvent.start, "yyyy/MM/dd HH:mm");
+				var fend  = $.fullCalendar.formatDate(calEvent.end, "yyyy/MM/dd HH:mm");	
+			}
+	  
+			$(this).attr('title', fstart + " - " + fend + " " + calEvent.taskName);
+			$(this).css('font-weight', 'normal');				
+			$(this).tooltip({
+				effect:'toggle',
+				cancelDefault: true
+			});
+	  },
+	  eventMouseout: function(calEvent, jsEvent, view) {
+			$(this).css('font-weight', 'normal');
+	  },
+	  eventRender: function(event, element) {
+		var fstart  = $.fullCalendar.formatDate(event.start, "HH:mm");
+		var fend  = $.fullCalendar.formatDate(event.end, "HH:mm");	
+	  },
+	  eventAfterRender : function(event, element, view) {
+		var fstart  = $.fullCalendar.formatDate(event.start, "HH:mm");
+		var fend  = $.fullCalendar.formatDate(event.end, "HH:mm");
+		if(fend != "")
+			 fend = "-" + fend;
+		
+		if(view.name=="month"){
+			var evtcontent = '<div class="fc-event-vert"><a>';
+			evtcontent = evtcontent + '<span class="fc-event-titlebg">' +  event.taskName + '</span>';
+			evtcontent = evtcontent + '</a></div>';
+			element.html(evtcontent);
+		}else if(view.name=="agendaWeek"){
+			var evtcontent = '<a>';
+			evtcontent = evtcontent + '<span class="fc-event-time">' +  fstart +  fend + '</span>';
+			evtcontent = evtcontent + '<span> by ' + event.taskName + '</span>';
+			evtcontent = evtcontent + '</a>';
+			element.html(evtcontent);						
+		}else if(view.name=="agendaDay"){
+			var evtcontent = '<a>';
+			evtcontent = evtcontent + '<span class="fc-event-time">' +  fstart +  fend + '</span>';
+			evtcontent = evtcontent + '<span>任务名称: ' +  event.taskName + '</span>';
+			//evtcontent = evtcontent + '<span>开始时间: ' +  event.hourStart + ":00" + '</span>';
+			//evtcontent = evtcontent + '<span>结束时间: ' +  event.hourEnd + ":00" + '</span>';
+			evtcontent = evtcontent + '</a>';
+			element.html(evtcontent);								
+		}
+	  },
+	  eventDragStart: function( event, jsEvent, ui, view ) {
+		ui.helper.draggable("option", "revert", true);
+	  },
+	  eventDragStop: function( event, jsEvent, ui, view ) {
+	  },
+	  eventDrop: function( event, dayDelta, minuteDelta, allDay, revertFunc, jsEvent, ui, view ) { 
+		if(1==1||2==event.uid){
+			var schdata = {startdate:event.start, enddate:event.end, confid:event.confid, sid:event.sid};
+		}else{
+			revertFunc();
+		}
+		
+	  },
+	  
+	  eventResize: function(event,dayDelta,minuteDelta,revertFunc) {
+
+		if(1==1||2==event.uid){
+			var schdata = {startdate:event.start, enddate:event.end, confid:event.confid, sid:event.sid};
+
+		}else{
+			revertFunc();
+		}
+
+	  }
+	});
+	
+	// goto date function
+	//if($.browser.msie){// 转到某一日
+	//	$("#calendar .fc-header-right table td:eq(0)").before('<td><div class="ui-state-default ui-corner-left ui-corner-right" style="border-right:0px;padding:1px 3px 2px;" >'
+	//																+'<input type="text" id="selecteddate" size="10" style="padding:0px;"></div></td>'
+	//														 +'<td><div class="ui-state-default ui-corner-left ui-corner-right">'
+	//														 		+'<a><span id="selectdate" class="ui-icon ui-icon-search">goto</span></a></div></td>'
+	//														 +'<td><span class="fc-header-space"></span></td>');
+	//}else{
+	//	$("#calendar .fc-header-right table td:eq(0)").before('<td><div class="ui-state-default ui-corner-left ui-corner-right" style="border-right:0px;padding:3px 2px 4px;" >'
+	//																+'<input type="text" id="selecteddate" size="10" style="padding:0px;"></div></td>'
+	//														 +'<td><div class="ui-state-default ui-corner-left ui-corner-right">'
+	//														 		+'<a><span id="selectdate" class="ui-icon ui-icon-search">goto</span></a></div></td>'
+	//														 +'<td><span class="fc-header-space"></span></td>');
+	//}
+	
+	//$("#selecteddate").datepicker({
+	//	dateFormat:'yy-mm-dd',
+	//	beforeShow: function (input, instant) {  
+	//		setTimeout(
+	//			function () {
+	//				$('#ui-datepicker-div').css("z-index", 15);
+	//			}, 100
+	//		);
+	//	}
+	//});
+					
+
+	
+	//$("#selectdate").click(function() {
+	//	var selectdstr = 	$("#selecteddate").val();	
+	//	var selectdate = $.fullCalendar.parseDate(selectdstr, "yyyy-mm-dd");
+		//alert(selectdate.getFullYear()+"年"+selectdate.getMonth()+"月"+selectdate.getDate()+"日");
+	//	var now = new Date();
+	//	//alert(now.getFullYear()+"年"+now.getMonth()+"月"+now.getDate()+"日");//月份0开始
+	//	$('#calendar').fullCalendar( 'gotoDate', selectdate.getFullYear(), selectdate.getMonth(), selectdate.getDate());
+	//});
+		
+	//var view = $('#calendar').fullCalendar('getView');
+	//alert("The view's title is " + view.title);
+});
+
+
+</SCRIPT>
+

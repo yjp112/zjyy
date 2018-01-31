@@ -1,0 +1,431 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.basic.meterConfig.electic.entities.ElectricConfig">
+
+	<resultMap type="com.supconit.nhgl.basic.meterConfig.electic.entities.ElectricConfig" id="DeviceResultMap">      
+        <result property="id" column="ID" />
+        <result property="deviceCode" column="DEVICE_CODE" />
+        <result property="deviceName" column="DEVICE_NAME" />
+        <result property="deviceSpec" column="DEVICE_SPEC" />
+        <result property="categoryId" column="CATEGORY_ID" />
+        <result property="locationId" column="LOCATION_ID" />
+        <result property="locationName" column="LOCATION_NAME" />
+        <result property="useDepartmentId" column="USE_DEPARTMENT_ID" />
+        <result property="manageDepartmentId" column="MANAGE_DEPARTMENT_ID" />
+        <result property="managePersonIds" column="MANAGE_PERSON_IDS" />
+        <result property="managePersonName" column="MANAGE_PERSON_NAME" />
+        <result property="supplierId" column="SUPPLIER_ID" />
+        <result property="maitainCycle" column="MAITAIN_CYCLE" />
+        <result property="timeAfterMaintain" column="TIME_AFTER_MAINTAIN" />
+        <result property="totalRunningTime" column="TOTAL_RUNNING_TIME" />
+        <result property="specialStatus" column="SPECIAL_STATUS" />
+        <result property="barcode" column="BARCODE" />
+        <result property="prduceDate" column="PRDUCE_DATE" />
+        <result property="assetsCode" column="ASSETS_CODE" />
+        <result property="enableDate" column="ENABLE_DATE" />
+        <result property="status" column="STATUS" />
+        <result property="assetsCost" column="ASSETS_COST" />
+        <result property="assetsResidual" column="ASSETS_RESIDUAL" />
+        <result property="depreciationAlgorithm" column="DEPRECIATION_ALGORITHM" />
+        <result property="depreciationRate" column="DEPRECIATION_RATE" />
+        <result property="depreciationYears" column="DEPRECIATION_YEARS" />
+        <result property="mapDisplay" column="MAP_DISPLAY" />
+        <result property="smallType" column="SMALL_TYPE" />
+        <result property="createId" column="CREATE_ID" />
+        <result property="creator" column="CREATOR" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="updateId" column="UPDATE_ID" />
+        <result property="updator" column="UPDATOR" />
+        <result property="updateDate" column="UPDATE_DATE" />
+        <result property="hpid" column="HPID" />
+        <result property="discipinesCode" column="DISCIPINES_CODE"/>
+        <result property="extended1" column="EXTENDED1"/>
+        
+        <result property="subName" column="SUB_NAME"/>
+        <result property="subCode" column="SUB_CODE"/>
+        <result property="lastTotal" column="LAST_TOTAL" />
+        <result property="total" column="TOTAL" />
+        <result property="incremental" column="INCREMENTAL" />
+        <result property="collectTime" column="COLLECT_TIME" />
+        <result property="useDepartmentName" column="USE_DEPARTMENT_NAME" />
+        
+	</resultMap>
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+	<sql id="column_device">
+		A.ID,
+		A.DEVICE_CODE,
+		A.DEVICE_NAME,
+		A.DEVICE_SPEC,
+		A.CATEGORY_ID,
+		A.LOCATION_ID,
+		A.LOCATION_NAME,
+		A.USE_DEPARTMENT_ID,
+		A.MANAGE_DEPARTMENT_ID,
+		A.MANAGE_PERSON_IDS,
+		A.MANAGE_PERSON_NAME,
+		A.SUPPLIER_ID,
+		A.MAITAIN_CYCLE,
+		A.TIME_AFTER_MAINTAIN,
+		A.TOTAL_RUNNING_TIME,
+		A.SPECIAL_STATUS,
+		A.BARCODE,
+		A.PRDUCE_DATE,
+		A.ASSETS_CODE,
+		A.ENABLE_DATE,
+		A.STATUS,
+		A.ASSETS_COST,
+		A.ASSETS_RESIDUAL,
+		A.DEPRECIATION_ALGORITHM,
+		A.DEPRECIATION_RATE,
+		A.DEPRECIATION_YEARS,
+		A.MAP_DISPLAY,
+		A.SMALL_TYPE,
+		A.CREATE_ID,
+		A.CREATOR,
+		A.CREATE_DATE,
+		A.UPDATE_ID,
+		A.UPDATOR,
+		A.UPDATE_DATE,
+		A.HPID,
+		A.DISCIPINES_CODE,
+		A.EXTENDED1
+	</sql>
+	
+    <!-- 获取记录列表-->
+	<sql id="select_pre">
+	    select 
+		<include refid="column_device" />,
+		sub.NAME SUB_NAME,
+		sub.CODE SUB_CODE,
+		ISNULL(ele.TOTAL-ele.INCREMENTAL,0) LAST_TOTAL,
+	    ele.TOTAL,
+	    ele.INCREMENTAL,
+	    ele.COLLECT_TIME
+		FROM
+		NH_ELECTRIC_METER ele        
+        INNER JOIN DEVICE A
+        ON A.EXTENDED1 = ele.bit_no
+        INNER JOIN DEVICE_CATEGORY DC
+        ON A.CATEGORY_ID = DC.ID AND DC.CATEGORY_CODE = #{categoryCode}
+        LEFT JOIN NH_SUB_SYSTEM_INFO sub
+        ON A.DISCIPINES_CODE = sub.STANDARD_CODE
+	</sql>
+	<sql id="count_pre">
+		SELECT
+		COUNT(1)
+		FROM
+		NH_ELECTRIC_METER ele        
+        INNER JOIN DEVICE A
+        ON A.EXTENDED1 = ele.bit_no
+        INNER JOIN DEVICE_CATEGORY DC
+        ON A.CATEGORY_ID = DC.ID AND DC.CATEGORY_CODE = #{categoryCode}
+        LEFT JOIN NH_SUB_SYSTEM_INFO sub
+        ON A.DISCIPINES_CODE = sub.STANDARD_CODE
+	</sql>
+	<sql id="sequence">SELECT SEQ_HO_USER.NEXTVAL FROM DUAL</sql>
+
+    
+	<select id="findById" parameterType="long" resultMap="DeviceResultMap">
+        select
+        <include refid="column_device" />,
+        sub.NAME SUB_NAME,
+        sub.CODE SUB_CODE,
+		ISNULL(ele.TOTAL-ele.INCREMENTAL,0) LAST_TOTAL,
+	    ele.TOTAL,
+	    ele.INCREMENTAL,
+	    ele.COLLECT_TIME
+		FROM
+		DEVICE A
+        LEFT JOIN NH_SUB_SYSTEM_INFO sub
+        ON A.DISCIPINES_CODE = sub.STANDARD_CODE
+        LEFT JOIN NH_ELECTRIC_METER ele
+        ON A.EXTENDED1 = ele.bit_no
+        where a.ID = #{id}
+    </select>
+<!-- 	<sql id="condition_sql">
+		<where>   
+        <if test="id != null  "> A.ID = #{id} and </if>
+        <if test="deviceCode != null and deviceCode != ''">	A.DEVICE_CODE like '%'+#{deviceCode}+'%' and </if>
+        <if test="deviceName != null and deviceName != ''">	A.DEVICE_NAME like '%'+#{deviceName}+'%' and </if>
+        <if test="deviceSpec != null and deviceSpec != ''">	A.DEVICE_SPEC like '%'+#{deviceSpec}+'%' and </if>
+        if test="categoryId != null  "> A.CATEGORY_ID = #{categoryId} and </if>
+        <if test="locationId != null  "> A.LOCATION_ID = #{locationId} and </if
+        <if test="locationId != null and lstLocationId != null and lstLocationId.size()>0"> 
+        A.LOCATION_ID IN 
+        <foreach item="item" index="index" collection="lstLocationId" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and
+        </if>   
+        <if test="categoryId != null ">  A.CATEGORY_ID =#{categoryId} and </if>
+        <if test="useDepartmentId != null  "> A.USE_DEPARTMENT_ID = #{useDepartmentId} and </if>
+        <if test="manageDepartmentId != null  "> A.MANAGE_DEPARTMENT_ID = #{manageDepartmentId} and </if>
+        <if test="managePersonIds != null and managePersonIds != ''">	A.MANAGE_PERSON_IDS like '%'+#{managePersonIds}+'%' and </if>
+        <if test="managePersonName != null and managePersonName != ''">	A.MANAGE_PERSON_NAME like '%'+#{managePersonName}+'%' and </if>
+        <if test="supplierId != null  "> A.SUPPLIER_ID = #{supplierId} and </if>
+        <if test="maitainCycle != null  "> A.MAITAIN_CYCLE = #{maitainCycle} and </if>
+        <if test="timeAfterMaintain != null  "> A.TIME_AFTER_MAINTAIN = #{timeAfterMaintain} and </if>
+        <if test="totalRunningTime != null  "> A.TOTAL_RUNNING_TIME = #{totalRunningTime} and </if>
+        <if test="specialStatus != null  "> A.SPECIAL_STATUS = #{specialStatus} and </if>
+        <if test="barcode != null and barcode != ''">	A.BARCODE like '%'+#{barcode}+'%' and </if>
+        <if test="assetsCode != null and assetsCode != ''">	A.ASSETS_CODE like '%'+#{assetsCode}+'%' and </if>
+        <if test="prduceDate != null ">	A.PRDUCE_DATE = '#{prduceDate}' and  </if>
+        <if test="enableDate != null ">	A.ENABLE_DATE = '#{enableDate}' and  </if>
+        <if test="status != null  "> A.STATUS = #{status} and </if>
+        <if test="assetsCost != null  "> A.ASSETS_COST = #{assetsCost} and </if>
+        <if test="assetsResidual != null  "> A.ASSETS_RESIDUAL = #{assetsResidual} and </if>
+        <if test="depreciationAlgorithm != null  "> A.DEPRECIATION_ALGORITHM = #{depreciationAlgorithm} and </if>
+        <if test="depreciationRate != null  "> A.DEPRECIATION_RATE = #{depreciationRate} and </if>
+        <if test="depreciationYears != null  "> A.DEPRECIATION_YEARS = #{depreciationYears} and </if>
+        <if test="mapDisplay != null  "> A.MAP_DISPLAY = #{mapDisplay} and </if>
+        <if test="smallType != null and smallType != ''">	A.SMALL_TYPE like '%'+#{smallType}+'%' and </if>
+        <if test="createId != null  "> A.CREATE_ID = #{createId} and </if>
+        <if test="creator != null and creator != ''">	A.CREATOR like '%'+#{creator}+'%' and </if>
+        <if test="createDate != null ">	A.CREATE_DATE = #{createDate} and  </if>
+        <if test="updateId != null  "> A.UPDATE_ID = #{updateId} and </if>
+        <if test="updator != null and updator != ''">	A.UPDATOR like '%'+#{updator}+'%' and </if>
+        <if test="updateDate != null ">	A.UPDATE_DATE = #{updateDate} and  </if>
+        <if test="startTime!=null">ele.COLLECT_TIME >=#{startTime} and</if>
+        <if test="endTime !=null">ele.COLLECT_TIME &lt;dateadd(day,1,#{endTime}) and</if>
+        (<if test="subCode!=null and subCode!='' ">sub.STANDARD_CODE=#{subCode} or</if>
+        <if test="subCode!=null and subCode!='' ">sub.PARENT_ID=#{subCode} and</if>
+        1=1)
+		</where>
+	</sql> -->
+
+    <sql id="select_electric_pre">
+        select
+        <include refid="column_device" />,
+        sub.NAME SUB_NAME,
+        sub.CODE SUB_CODE,
+        ISNULL(ele.TOTAL-ele.INCREMENTAL,0) LAST_TOTAL,
+        ele.TOTAL,
+        ele.INCREMENTAL,
+        ele.COLLECT_TIME
+        FROM
+        NH_ELECTRIC_METER ele
+        INNER JOIN DEVICE A
+        ON A.EXTENDED1 = ele.bit_no
+        <if test="subCode!=null and subCode!='' ">
+            and A.DISCIPINES_CODE like #{subCode}+'%'
+        </if>
+        INNER JOIN DEVICE_CATEGORY DC
+        ON A.CATEGORY_ID = DC.ID AND DC.CATEGORY_CODE = #{categoryCode}
+        LEFT JOIN NH_SUB_SYSTEM_INFO sub
+        ON A.DISCIPINES_CODE = sub.STANDARD_CODE
+    </sql>
+
+    <sql id="condition_electric_sql">
+        <where>   
+        <if test="id != null  "> A.ID = #{id} and </if>
+        <if test="deviceCode != null and deviceCode != ''">	A.DEVICE_CODE like '%'+#{deviceCode}+'%' and </if>
+        <if test="deviceName != null and deviceName != ''">	A.DEVICE_NAME like '%'+#{deviceName}+'%' and </if>
+        <if test="deviceSpec != null and deviceSpec != ''">	A.DEVICE_SPEC like '%'+#{deviceSpec}+'%' and </if>
+        <!--if test="categoryId != null  "> A.CATEGORY_ID = #{categoryId} and </if>
+        <if test="locationId != null  "> A.LOCATION_ID = #{locationId} and </if-->
+        <if test="locationId != null and lstLocationId != null and lstLocationId.size()>0"> 
+        A.LOCATION_ID IN 
+        <foreach item="item" index="index" collection="lstLocationId" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and
+        </if>   
+        <if test="categoryId != null ">  A.CATEGORY_ID =#{categoryId} and </if>
+        <if test="useDepartmentId != null  "> A.USE_DEPARTMENT_ID = #{useDepartmentId} and </if>
+        <if test="manageDepartmentId != null  "> A.MANAGE_DEPARTMENT_ID = #{manageDepartmentId} and </if>
+        <if test="managePersonIds != null and managePersonIds != ''">	A.MANAGE_PERSON_IDS like '%'+#{managePersonIds}+'%' and </if>
+        <if test="managePersonName != null and managePersonName != ''">	A.MANAGE_PERSON_NAME like '%'+#{managePersonName}+'%' and </if>
+        <if test="supplierId != null  "> A.SUPPLIER_ID = #{supplierId} and </if>
+        <if test="maitainCycle != null  "> A.MAITAIN_CYCLE = #{maitainCycle} and </if>
+        <if test="timeAfterMaintain != null  "> A.TIME_AFTER_MAINTAIN = #{timeAfterMaintain} and </if>
+        <if test="totalRunningTime != null  "> A.TOTAL_RUNNING_TIME = #{totalRunningTime} and </if>
+        <if test="specialStatus != null  "> A.SPECIAL_STATUS = #{specialStatus} and </if>
+        <if test="barcode != null and barcode != ''">	A.BARCODE like '%'+#{barcode}+'%' and </if>
+        <if test="assetsCode != null and assetsCode != ''">	A.ASSETS_CODE like '%'+#{assetsCode}+'%' and </if>
+        <if test="prduceDate != null ">	A.PRDUCE_DATE = '#{prduceDate}' and  </if>
+        <if test="enableDate != null ">	A.ENABLE_DATE = '#{enableDate}' and  </if>
+        <if test="status != null  "> A.STATUS = #{status} and </if>
+        <if test="assetsCost != null  "> A.ASSETS_COST = #{assetsCost} and </if>
+        <if test="assetsResidual != null  "> A.ASSETS_RESIDUAL = #{assetsResidual} and </if>
+        <if test="depreciationAlgorithm != null  "> A.DEPRECIATION_ALGORITHM = #{depreciationAlgorithm} and </if>
+        <if test="depreciationRate != null  "> A.DEPRECIATION_RATE = #{depreciationRate} and </if>
+        <if test="depreciationYears != null  "> A.DEPRECIATION_YEARS = #{depreciationYears} and </if>
+        <if test="mapDisplay != null  "> A.MAP_DISPLAY = #{mapDisplay} and </if>
+        <if test="smallType != null and smallType != ''">	A.SMALL_TYPE like '%'+#{smallType}+'%' and </if>
+        <if test="createId != null  "> A.CREATE_ID = #{createId} and </if>
+        <if test="creator != null and creator != ''">	A.CREATOR like '%'+#{creator}+'%' and </if>
+        <if test="createDate != null ">	A.CREATE_DATE = #{createDate} and  </if>
+        <if test="updateId != null  "> A.UPDATE_ID = #{updateId} and </if>
+        <if test="updator != null and updator != ''">	A.UPDATOR like '%'+#{updator}+'%' and </if>
+        <if test="updateDate != null ">	A.UPDATE_DATE = #{updateDate} and  </if>
+        <if test="startTime!=null">ele.COLLECT_TIME >=#{startTime} and</if>
+        <if test="endTime !=null">ele.COLLECT_TIME &lt;dateadd(day,1,#{endTime}) and</if>
+        1=1
+		</where>
+    </sql>
+    
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.nhgl.basic.meterConfig.electic.entities.ElectricConfig" resultMap="DeviceResultMap">
+        <include refid="select_electric_pre" />
+        <include refid="condition_electric_sql"/>
+
+		ORDER BY  ELE.ID
+	</select>
+
+	<select id="findByBitNo" parameterType="java.lang.String" resultMap="DeviceResultMap">
+		select ID from DEVICE where EXTENDED1 = #{bitNo}
+	</select>   
+    <sql id="count_electric_pre">
+        select count(1)
+        FROM
+        NH_ELECTRIC_METER ele
+        INNER JOIN DEVICE A
+        ON A.EXTENDED1 = ele.bit_no
+        <if test="subCode!=null and subCode!='' ">
+            and A.DISCIPINES_CODE like #{subCode}+'%'
+        </if>
+        INNER JOIN DEVICE_CATEGORY DC
+        ON A.CATEGORY_ID = DC.ID AND DC.CATEGORY_CODE = #{categoryCode}
+        LEFT JOIN NH_SUB_SYSTEM_INFO sub
+        ON A.DISCIPINES_CODE = sub.STANDARD_CODE
+    </sql>
+    <select id="countByCondition" parameterType="com.supconit.nhgl.basic.meterConfig.electic.entities.ElectricConfig" resultType="long">
+		<include refid="count_electric_pre" />
+		<include refid="condition_electric_sql" />
+	</select>
+	<!-- 电表按条件查询记录 start-->
+	<select id="findByConditionPower" parameterType="com.supconit.nhgl.basic.meterConfig.electic.entities.ElectricConfig" resultMap="DeviceResultMap" lang="velocity" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		select
+        <include refid="column_device" />
+        ,dpu.NAME USE_DEPARTMENT_NAME,sub.NAME SUB_NAME
+        <include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+ 		#order($_parameter.condition,"a.id")
+ 		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+        from 
+        DEVICE A 
+        INNER JOIN DEVICE_CATEGORY DC
+        ON A.CATEGORY_ID = DC.ID AND DC.CATEGORY_CODE = @{_parameter.condition.barcode, jdbcType=VARCHAR}
+        LEFT JOIN HO_DEPARTMENT dpu
+        ON A.USE_DEPARTMENT_ID = dpu.ID 
+        LEFT JOIN NH_SUB_SYSTEM_INFO sub
+        ON A.DISCIPINES_CODE = sub.STANDARD_CODE
+		<include refid="condition_sql_power" />
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="findByConditionPower" parameterType="com.supconit.nhgl.basic.meterConfig.electic.entities.ElectricConfig" resultMap="DeviceResultMap" lang="velocity">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		select
+        <include refid="column_device" />
+        ,dpu.NAME USE_DEPARTMENT_NAME,sub.NAME SUB_NAME
+        from DEVICE A 
+        INNER JOIN DEVICE_CATEGORY DC
+        ON A.CATEGORY_ID = DC.ID AND DC.CATEGORY_CODE = @{_parameter.condition.barcode, jdbcType=VARCHAR}
+        LEFT JOIN HO_DEPARTMENT dpu
+        ON A.USE_DEPARTMENT_ID = dpu.ID 
+        LEFT JOIN NH_SUB_SYSTEM_INFO sub
+        ON A.DISCIPINES_CODE = sub.STANDARD_CODE
+		<include refid="condition_sql_power" />
+		#order($_parameter.condition,"a.id")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="countByConditionPower" parameterType="com.supconit.nhgl.basic.meterConfig.electic.entities.ElectricConfig" resultType="long" lang="velocity">
+		SELECT
+		COUNT(*)
+		FROM
+		DEVICE A
+		INNER JOIN DEVICE_CATEGORY DC
+        ON A.CATEGORY_ID = DC.ID AND DC.CATEGORY_CODE = @{_parameter.condition.barcode, jdbcType=VARCHAR}
+        LEFT JOIN HO_DEPARTMENT dpu
+        ON A.USE_DEPARTMENT_ID = dpu.ID 
+        LEFT JOIN NH_SUB_SYSTEM_INFO sub
+        ON A.DISCIPINES_CODE = sub.STANDARD_CODE
+		<include refid="condition_sql_power" />
+	</select>
+	<sql id="condition_sql_power" lang="velocity">
+    <![CDATA[
+    	#where()
+    		#set($_p = $_parameter.condition)
+			1=1
+			#if($_p.deviceCode && $_p.deviceCode!='')
+				#set($_deviceCode='%' +$_p.deviceCode+ '%')
+				and A.DEVICE_CODE like @{_deviceCode,jdbcType=VARCHAR}
+			#end
+			#if($_p.deviceName && $_p.deviceName!='')
+				#set($_deviceName='%' +$_p.deviceName+ '%')
+				and A.DEVICE_NAME like @{_deviceName,jdbcType=VARCHAR}
+			#end
+			#if($_p.extended1 && $_p.extended1!='')
+				#set($_extended1='%' +$_p.extended1+ '%')
+				and A.EXTENDED1 like @{_extended1,jdbcType=VARCHAR}
+			#end
+			#if($_p.discipinesCode && $_p.discipinesCode!='')
+				#set($_discipinesCode='%' +$_p.discipinesCode+ '%')
+				and A.DISCIPINES_CODE like @{_discipinesCode,jdbcType=VARCHAR}
+			#end
+			#if($_p.lstLocationId && $_p.lstLocationId.size()>0)	
+				#set($_lstLocationId =$_p.lstLocationId)
+				and 
+				#repeat( $_lstLocationId $ids "," " A.LOCATION_ID IN (" ")" )
+				    @{ids,jdbcType=BIGINT}
+				#end	
+			#end
+			#if($_p.lstDepartmentId && $_p.lstDepartmentId.size()>0)	
+				#set($_lstDepartmentId =$_p.lstDepartmentId)
+				and 
+				#repeat( $_lstDepartmentId $ids "," " dpu.ID IN (" ")" )
+				    @{ids,jdbcType=BIGINT}
+				#end	
+			#end
+    	#end
+		]]>	
+	</sql>
+	<!-- 电表按条件查询记录 end-->
+	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.nhgl.basic.meterConfig.electic.entities.ElectricConfig">
+		UPDATE DEVICE
+		<set>
+        <if test="deviceCode != null">DEVICE_CODE = #{deviceCode,jdbcType=VARCHAR},</if>
+        <if test="deviceName != null">DEVICE_NAME = #{deviceName,jdbcType=VARCHAR},</if>
+        <if test="deviceSpec != null">DEVICE_SPEC = #{deviceSpec,jdbcType=VARCHAR},</if>
+        <if test="categoryId != null">CATEGORY_ID = #{categoryId,jdbcType=NUMERIC},</if>
+        <if test="locationId != null">LOCATION_ID = #{locationId,jdbcType=NUMERIC},</if>
+        <if test="locationName != null">LOCATION_NAME = #{locationName,jdbcType=VARCHAR},</if>
+        <if test="useDepartmentId != null">USE_DEPARTMENT_ID = #{useDepartmentId,jdbcType=NUMERIC},</if>
+        <if test="manageDepartmentId != null">MANAGE_DEPARTMENT_ID = #{manageDepartmentId,jdbcType=NUMERIC},</if>
+        <if test="managePersonIds != null">MANAGE_PERSON_IDS = #{managePersonIds,jdbcType=VARCHAR},</if>
+        <if test="managePersonName != null">MANAGE_PERSON_NAME = #{managePersonName,jdbcType=VARCHAR},</if>
+        <if test="supplierId != null">SUPPLIER_ID = #{supplierId,jdbcType=NUMERIC},</if>
+        <if test="maitainCycle != null">MAITAIN_CYCLE = #{maitainCycle,jdbcType=NUMERIC},</if>
+        <if test="timeAfterMaintain != null">TIME_AFTER_MAINTAIN = #{timeAfterMaintain,jdbcType=NUMERIC},</if>
+        <if test="totalRunningTime != null">TOTAL_RUNNING_TIME = #{totalRunningTime,jdbcType=NUMERIC},</if>
+        <if test="specialStatus != null">SPECIAL_STATUS = #{specialStatus,jdbcType=NUMERIC},</if>
+        <if test="barcode != null">BARCODE = #{barcode,jdbcType=VARCHAR},</if>
+        <if test="prduceDate != null">PRDUCE_DATE = #{prduceDate,jdbcType=TIMESTAMP},</if>
+        <if test="assetsCode != null">ASSETS_CODE = #{assetsCode,jdbcType=VARCHAR},</if>
+        <if test="enableDate != null">ENABLE_DATE = #{enableDate,jdbcType=TIMESTAMP},</if>
+        <if test="status != null">STATUS = #{status,jdbcType=NUMERIC},</if>
+        <if test="assetsCost != null">ASSETS_COST = #{assetsCost,jdbcType=NUMERIC},</if>
+        <if test="assetsResidual != null">ASSETS_RESIDUAL = #{assetsResidual,jdbcType=NUMERIC},</if>
+        <if test="depreciationAlgorithm != null">DEPRECIATION_ALGORITHM = #{depreciationAlgorithm,jdbcType=NUMERIC},</if>
+        <if test="depreciationRate != null">DEPRECIATION_RATE = #{depreciationRate,jdbcType=NUMERIC},</if>
+        <if test="depreciationYears != null">DEPRECIATION_YEARS = #{depreciationYears,jdbcType=NUMERIC},</if>
+        <if test="mapDisplay != null">MAP_DISPLAY = #{mapDisplay,jdbcType=NUMERIC},</if>
+        <if test="smallType != null">SMALL_TYPE = #{smallType,jdbcType=VARCHAR},</if>
+        <if test="createId != null">CREATE_ID = #{createId,jdbcType=NUMERIC},</if>
+        <if test="creator != null">CREATOR = #{creator,jdbcType=VARCHAR},</if>
+        <if test="createDate != null">CREATE_DATE = #{createDate,jdbcType=TIMESTAMP},</if>
+        <if test="updateId != null">UPDATE_ID = #{updateId,jdbcType=NUMERIC},</if>
+        <if test="updator != null">UPDATOR = #{updator,jdbcType=VARCHAR},</if>
+        <if test="updateDate != null">UPDATE_DATE = #{updateDate,jdbcType=TIMESTAMP},</if>
+        <if test="discipinesCode != null">DISCIPINES_CODE = #{discipinesCode,jdbcType=VARCHAR},</if>
+        <if test="extended1 != null">EXTENDED1 = #{extended1,jdbcType=VARCHAR},</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+</mapper>

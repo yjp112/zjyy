@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.analyse.electric.entities.Temperataure">
+
+	<resultMap type="com.supconit.nhgl.analyse.electric.entities.Temperataure" id="TemperataureResultMap">      
+        <result property="id" column="ID" />
+        <result property="updateDate" column="UPDATE_DATE" />
+        <result property="maxTemp" column="MAX_TEMP" />
+        <result property="mintTemp" column="MIN_TEMP" />
+        <result property="description" column="DESCRIPTION" />
+        <result property="temperataureDate" column="TEMPERATAURE_DATE" />
+		<result property="avgTemp" column="AVG_TEMP" />
+	</resultMap>
+	
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+	 <sql id="select_pre">
+		SELECT MAX_TEMP,MIN_TEMP FROM TEMPERATAURE
+	</sql>
+	<sql id="condition" lang="velocity">
+		<![CDATA[
+		#where()
+			 #if($_parameter.start)
+					AND TEMPERATAURE_DATE >=@{_parameter.start,jdbcType=VARCHAR}
+			 #end
+			 #if($_parameter.end)
+					AND TEMPERATAURE_DATE <=@{_parameter.end,jdbcType=VARCHAR}
+			 #end
+		#end
+		order by TEMPERATAURE_DATE
+		]]>
+	</sql>
+	
+	<select id="findByCon" resultMap="TemperataureResultMap" parameterType="com.supconit.nhgl.analyse.electric.entities.Temperataure" lang="velocity">
+		<include refid="select_pre" />        
+       	<include refid="condition"/>
+	</select>
+</mapper>

@@ -1,0 +1,105 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<form id="testUpdate" method="post" action="$!{rc.contextPath}/hl/montrol/alarm/realalarm/testUpdateAlarms"
+      class="ui-dialog-form">
+    <table width="100%">
+        <tr>
+            <td width="100" class="label"><span class="ui-form-required">*</span><label>处理人：</label></td>
+            <td width="300">
+                <input id="alarmId" type="hidden" name="alarmId" value="$!{alarmId}">
+                <input class="ui-input k-textbox" type="text" value="$!{realAlarm.processPerson}" name="handlePerson" id="handlePerson"></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td width="100" class="label"><span class="ui-form-required">*</span><label>处理类型：</label></td>
+            <td width="300">
+               #* <input class="ui-input k-textbox" type="text" name="handleType" id="handleType">
+*#
+                <select name="handleType" id="handleType" class="ui-combobox">
+                    <option value="">--请选择--</option>
+                    <option value="1"  #if($realAlarm.processType == 1) selected #end>确认</option>
+                    <option value="2"  #if($realAlarm.processType == 2) selected #end>忽略</option>
+                    <option value="3"  #if($realAlarm.processType == 3) selected #end>维修处理</option>
+                </select>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td class="label"><span class="ui-form-required">*</span><label>处理状态：</label></td>
+            <td>
+                <select name="handleState" id="handleState" class="ui-combobox">
+                    <option value="">--请选择--</option>
+                    <option value="1" #if($realAlarm.processState == 1) selected #end>未处理</option>
+                    <option value="2" #if($realAlarm.processState == 2) selected #end>处理中</option>
+                    <option value="3" #if($realAlarm.processState == 3) selected #end>处理完成</option>
+
+                </select>
+            </td>
+            <td></td>
+        </tr>
+
+    </table>
+    <div class="actions">
+        <button class="k-primary hc_btn" id="tijiao" type="submit"><i class="fa fa-save"></i>保 存</button>
+        <button class="hc_btn cancel" onclick="close_dialog('alarm_handle_dlg')" type="button"><i
+                class="fa fa-close"></i>取 消
+        </button>
+    </div>
+</form>
+    #parse("index/_footer.vm")
+<script>
+
+    $("#testUpdate").validator({
+        fields: {
+            handlePerson: "处理人:required; ",
+            handleType: "处理类型:required; ",
+            handleState: "处理状态:required"
+        },
+        valid: function (form) {
+            form_btn_submit($("#tijiao"), form, function (res) {
+                // 关闭窗口
+                //close_dialog('alarm_handle_dlg');
+                validateCallbackSelf(res, "grid", "alarm_handle_dlg");
+            });
+        }
+    });
+
+
+function validateCallbackSelf(response, dataGridId,dialogId) {
+    if (response.status == "success") {
+        notify(response.data.message || "操作成功！", "success");
+
+        if (response.data.next) {
+            if (response.data.next == ".") {//刷新datagrid
+                //edited_callback(window.parent._main_frame.get_grid("#" + dataGridId));
+				edited_callback(window.parent.frames[0].frames[1].get_grid("#" + dataGridId));
+            } else if (response.data.next == "x") {//关闭dialog并刷新datagrid
+            	//edited_callback(window.parent._main_frame.get_grid("#" + dataGridId));
+            	edited_callback(window.parent.frames[0].frames[1].get_grid("#" + dataGridId));
+                close_dialog();//关闭dialog
+            }
+            else if (response.data.next == 'r') {
+
+            } else if (response.data.next == 'c') {
+                close_dialog(dialogId);//关闭dialog
+            } else {//关闭dialog并刷新页面
+
+                if (parent) {//dialog中有iframe
+                    if (parent.frames[0]) {
+                        parent.loadFrame(response.data.next);
+                    }
+                } else if ($("#_main_frame")) {
+                    loadFrame(response.data.next);
+                }
+                if(dialogId) {
+                    close_dialog(dialogId);//关闭dialog
+                }
+            }
+        }
+    }
+}
+</script>
+
+</body>
+</html>

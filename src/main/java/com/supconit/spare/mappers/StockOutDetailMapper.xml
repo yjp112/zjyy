@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.spare.entities.StockOutDetail">
+	<resultMap type="com.supconit.spare.entities.StockOutDetail" id="StockOutDetailResultMap">
+		 <result property="id" column="ID" />
+        <result property="stockOutId" column="STOCK_OUT_ID" />
+        <result property="spareId" column="SPARE_ID" />
+        <result property="qty" column="QTY" />
+        <result property="availableQty" column="AVAILABLE_QTY" />
+        <result property="backQty" column="BACK_QTY" />
+        <result property="prc" column="PRC" />
+        <result property="money" column="MONEY" />
+        <result property="remark" column="REMARK" />
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">STOCK_OUT_DETAIL</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	
+	
+	
+	
+	
+    <!-- 插入记录-->
+    <insert id="insert" parameterType="java.util.List"  databaseId="oracle">
+		 INSERT INTO <include refid="TABLE_NAME"/>(  
+            ID,     
+	        STOCK_OUT_ID,
+	        SPARE_ID,
+	        QTY,
+	        AVAILABLE_QTY,
+	        PRC,
+	        MONEY,
+	        REMARK
+		)  SELECT SEQ_STOCK_OUT_DETAIL.NEXTVAL,A.* from(
+		<foreach collection="list" item="item" index="index"
+			separator="UNION">
+				SELECT
+		        #{item.stockOutId,jdbcType=NUMERIC},
+		        #{item.spareId,jdbcType=NUMERIC},
+		        #{item.qty,jdbcType=NUMERIC},
+		        #{item.availableQty,jdbcType=NUMERIC},
+		        #{item.prc,jdbcType=NUMERIC},
+		        #{item.money,jdbcType=NUMERIC},
+		        #{item.remark,jdbcType=VARCHAR}	
+				FROM dual 
+             </foreach>
+		) A         
+        
+	</insert>
+	<insert id="insert" parameterType="java.util.List"  databaseId="sqlserver">
+        INSERT INTO <include refid="TABLE_NAME"/>(        
+	        STOCK_OUT_ID,
+	        SPARE_ID,
+	        QTY,
+	        AVAILABLE_QTY,
+	        PRC,
+	        MONEY,
+	        REMARK
+		) VALUES        
+        <foreach collection="list" item="item" separator="," >  
+		(
+        #{item.stockOutId,jdbcType=NUMERIC},
+        #{item.spareId,jdbcType=NUMERIC},
+        #{item.qty,jdbcType=NUMERIC},
+        #{item.availableQty,jdbcType=NUMERIC},
+        #{item.prc,jdbcType=NUMERIC},
+        #{item.money,jdbcType=NUMERIC},
+        #{item.remark,jdbcType=VARCHAR}		
+		)	
+     	</foreach>
+    </insert>
+   
+	
+	<delete id="deleteByStockOutId" parameterType="long" lang="velocity"> 
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE STOCK_OUT_ID = @{_parameter.stockOutId,jdbcType=NUMERIC}
+	</delete>
+	
+	<!-- 更新记录-->
+	<update id="updateBackQty"  parameterType="com.supconit.spare.entities.StockOutDetail" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+			#mset()
+				<![CDATA[
+			        #if($_parameter.availableQty)AVAILABLE_QTY = AVAILABLE_QTY+@{_parameter.availableQty,jdbcType=NUMERIC},#end
+			        #if($_parameter.backQty )BACK_QTY = @{_parameter.backQty,jdbcType=NUMERIC},#end
+			    ]]>
+			#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+	 
+</mapper>

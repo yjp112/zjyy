@@ -1,0 +1,142 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.base.entities.DeviceExtendProperty">
+
+	<resultMap type="com.supconit.base.entities.DeviceExtendProperty" id="DeviceExtendPropertyResultMap">      
+        <result property="id" column="ID" />
+        <result property="deviceId" column="DEVICE_ID" />
+        <result property="propertyId" column="PROPERTY_ID" />
+        <result property="propertyValue" column="PROPERTY_VALUE" />
+	</resultMap>
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+    <!-- 获取记录列表-->
+	<sql id="select_pre">
+    select 
+        ID,
+        DEVICE_ID,
+        PROPERTY_ID,
+        PROPERTY_VALUE		
+		FROM
+		DEVICE_EXTEND_PROPERTY
+	</sql>
+	<sql id="count_pre">
+		SELECT
+		COUNT(*)
+		FROM
+		DEVICE_EXTEND_PROPERTY
+	</sql>
+	<sql id="TABLE_NAME" lang="velocity">DEVICE_EXTEND_PROPERTY</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>		
+    <insert id="insert" parameterType="com.supconit.base.entities.DeviceExtendProperty" keyProperty="id" keyColumn="ID" databaseId="sqlserver">
+		<include refid="insert_sql" />
+        <!-- 获取记录主键 microsoft sql server -->
+		<selectKey keyProperty="id" resultType="Long" order="AFTER">
+			select @@identity
+		</selectKey>
+	</insert>
+    <insert id="insert" parameterType="com.supconit.base.entities.DeviceExtendProperty" 
+		keyProperty="id" keyColumn="ID" 		lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>        
+		<include refid="INSERT_SQL" />
+	</insert>    
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>
+		(#if($_databaseId=='oracle') ID,#end
+	        DEVICE_ID,
+	        PROPERTY_ID,
+	        PROPERTY_VALUE	
+		) VALUES (        
+		 #if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end	 
+	        #{deviceId,jdbcType=NUMERIC},
+	        #{propertyId,jdbcType=NUMERIC},
+	        #{propertyValue,jdbcType=VARCHAR}		
+		)
+	</sql>		     
+    <!-- 插入记录-->
+	<sql id="insert_sql">
+		INSERT INTO DEVICE_EXTEND_PROPERTY(        
+        DEVICE_ID,
+        PROPERTY_ID,
+        PROPERTY_VALUE
+		) VALUES (        
+        #{deviceId,jdbcType=NUMERIC},
+        #{propertyId,jdbcType=NUMERIC},
+        #{propertyValue,jdbcType=VARCHAR}		
+		)
+	</sql>
+   <insert id="insertLst" parameterType="java.util.List" databaseId="sqlserver">
+		INSERT INTO DEVICE_EXTEND_PROPERTY(
+		#if($_databaseId=='oracle') ID,#end        
+        DEVICE_ID,
+        PROPERTY_ID,
+        PROPERTY_VALUE
+		) VALUES        
+        <foreach collection="list" item="item" separator="," >  
+		(
+		 #if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end
+		#{item.deviceId,jdbcType=NUMERIC},
+        #{item.propertyId,jdbcType=NUMERIC},
+        #{item.propertyValue,jdbcType=VARCHAR}	
+		)	
+     	</foreach>
+	</insert>
+	<select id="getById" resultMap="DeviceExtendPropertyResultMap" parameterType="Long">
+		<include refid="select_pre" />        
+        WHERE ID = #{id}
+	</select>
+	
+	
+	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.base.entities.DeviceExtendProperty">
+		UPDATE	DEVICE_EXTEND_PROPERTY
+		<set>
+        <if test="deviceId != null">DEVICE_ID = #{deviceId,jdbcType=NUMERIC},</if>
+        <if test="propertyId != null">PROPERTY_ID = #{propertyId,jdbcType=NUMERIC},</if>
+        <if test="propertyValue != null">PROPERTY_VALUE = #{propertyValue,jdbcType=VARCHAR},</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+    <!-- 通过 ID 获取对象-->
+	<delete id="deleteById" parameterType="Long">
+		DELETE FROM DEVICE_EXTEND_PROPERTY WHERE ID = #{id}
+	</delete>
+	<sql id="condition_sql">
+		<where>
+        <if test="id != null "> ID = #{id} and </if>
+        <if test="deviceId != null "> DEVICE_ID = #{deviceId} and </if>
+        <if test="propertyId != null "> PROPERTY_ID = #{propertyId} and </if>
+        1=1 
+		</where>
+	</sql>
+    
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.base.entities.DeviceExtendProperty" resultMap="DeviceExtendPropertyResultMap">
+		<include refid="select_pre" />
+		<include refid="condition_sql" />
+		ORDER BY ID DESC
+	</select>	
+
+    <select id="countByCondition" parameterType="com.supconit.base.entities.DeviceExtendProperty" resultType="long">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+    
+    <!-- 删除多条记录-->
+	<delete id="deleteByIds">
+        DELETE FROM DEVICE_EXTEND_PROPERTY WHERE ID in 
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+
+	</delete>
+    <delete id="deleteByDeviceId" parameterType="long">
+        DELETE FROM DEVICE_EXTEND_PROPERTY WHERE Device_ID =#{deviceId}
+	</delete>
+</mapper>

@@ -1,0 +1,100 @@
+#parse("mobile/_header.vm")
+<!-- Path to your app js-->
+<body>
+<!-- Status bar overlay for fullscreen mode-->
+<div class="statusbar-overlay"></div>
+
+<!-- Views, and they are tabs-->
+<!-- We need to set "toolbar-through" class on it to keep space for our tab bar-->
+<div class="views">
+    <div id="view" class="view view-main">
+        <!-- Pages-->
+        <div class="pages navbar-fixed">
+            <div data-page="attendance" class="page">
+                <div class="navbar">
+                    <div class="navbar-inner">
+                        <div class="navbar-inner">
+                            <div class="navbar-left">
+##                                <a href="#" class="link">
+##                                    <i class="icon icon-c-user only-icon"></i>
+##                                </a>
+                            </div>
+                            <div class="navbar-center">考勤管理</div>
+                            <div class="navbar-right"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="page-content attendance" id="attendance-content">
+                    <div class="content-block-title">
+                        <div class="today-morning">
+                            <ul>
+                                <li><span class="time" id="todayComeTime">--：--</span></li>
+                                <li><span class="status" id="todayComeStatus">未知</span></li>
+                            </ul>
+                        </div>
+                        <div class="today-date">
+                            <ul>
+                                <li><span class="today">今&nbsp;日</span></li>
+                                <li><span class="date" id="todayDate"></span></li>
+                            </ul>
+                        </div>
+                        <div class="today-afternoon">
+                            <ul>
+                                <li><span class="time" id="todayOffTime">--：--</span></li>
+                                <li><span class="status" id="todayOffStatus">未知</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="content-block">
+                        <div class="content-block-inner">
+                            <div id="calendar-inline-container"></div>
+                        </div>
+                        <div class="msg-tip">
+                            <div class="select-time">
+                                <span class="select-date" id="showDate"></span>
+                                <span class="am">
+                                    <span class="text">上班时间</span>
+                                    <span class="time" id="comeTime">--：--</span>
+                                </span>
+                                <span>/</span>
+                                <span class="pm warn">
+                                    <span class="text">下班时间</span>
+                                    <span class="time" id="offTime">--：--</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="block-summed">
+                        <div class="summed-title" id="sumDate"></div>
+                        <div class="summed-content">
+                            <ul class="row">
+                                <li class="normal col-50">
+                                    <span class="text">正常</span>
+                                    <span class="days" id="normalDays"></span>
+                                    <span class="unit">天</span>
+                                </li>
+                                <li class="abnormal col-50" id="unusualDetail">
+                                    <span class="text">异常</span>
+                                    <span class="days" id="unusualDays"></span>
+                                    <span class="unit">天</span>
+                                    <span class="icon">&nbsp;</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="list-block" id="abnormal-list" style="display: none">
+                            <ul id="unusualDetails">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> <!-- view-1 end-->
+
+</div><!-- views end -->
+</body>
+</html>
+#parse("mobile/_footer.vm")
+<script type="text/javascript" src="$!{rc.contextPath}/mobile/js/attendance-app.js"></script>
+
+

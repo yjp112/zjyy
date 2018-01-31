@@ -1,0 +1,102 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north"><form id="search_form_id" class="ui-form">
+    </div>
+    <div class="ui-layout-center">
+        <div id="grid"></div>
+    </div>
+</div>
+  #parse("index/_footer.vm") 
+<script type="text/javascript">
+        var _iframe_layout, _left_layout, _inner_layout;
+        $(document).ready(function(){
+            _iframe_layout = $('body').layout({
+                defaults: {
+                    resizable: false,
+                    closable: false,
+                    spacing_open: 5
+                }
+            });
+
+            _inner_layout = $("#subMain").layout({
+                defaults: {
+                    resizable: false,
+                    closable: false,
+                    spacing_open: 0
+                },
+                center: {
+                    onresize_end: function () {
+                        var grid = $("#grid").data("kendoGrid");
+                        grid.resize();
+                    }
+                }
+            })
+            //列表
+            quick_datagrid(
+                    "#grid",
+                    "#search_form_id",
+                    "$!rc.contextPath/spare/todo/list",
+                    [
+                        {field: "id",hidden: true,sortable:false,width:100},
+                        {field: "processDefinitionName",title: "流程名称",sortable: false,width:100,headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"}},
+                        {field: "name",title: "当前节点",sortable: false,width:100,headerAttributes: {"class": "k-grid-equilong"},attributes: {"class": "k-grid-equilong"}},
+                        {field: "createTime",title: "创建时间",sortable: false,width:100,headerAttributes: {"class": "k-grid-equilong"},attributes: {"class": "k-grid-equilong"}},
+                        {field: "residence",title: "停留时间",sortable: false,width:100,headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"}},
+                        {field: "operate",title: "操作",sortable: false,width:100,headerAttributes: {"class": "k-grid-equilong"},attributes: {"class": "k-grid-equilong"},
+                        template:"<a href=\"$!{rc.contextPath}/platform/bpm/task?_tid=#: data.id #\">办理</a>"
+                        }
+
+
+                    ],
+                    {sortable: {mode: "multiple",allowUnsort: true}},
+                    {serverSorting: true}
+                    /*    ,
+                        [
+                 {
+                     name: "添加",
+                     icon: "fa fa-plus",
+                     onclick: function (obj) {
+                         quick_dialog("task_add_id", "故障登记", "$!{rc.contextPath}/platform/bpm/start?_bpm_process_key=EVENT_REPORT_PROCESS", 550, 400, obj);
+                            }
+                        },
+          		{
+              		name: "修改",
+              		icon: "fa fa-pencil",
+              		onclick: function (obj, grid) {
+                  		var row = grid.select();
+                  		if (null == row || row.length == 0) {
+                      		notify("你还没有选择要修改的报修登记！", "warn");
+                      		return;
+                  		}
+                  		var data = grid.dataItem(row);
+                  		quick_dialog("task_edit_id", "修改报修登记", "$!{rc.contextPath}/repair/task/edit?id=" + data.id, 550, 400, obj);
+              		}
+          		},
+          		{
+             		name: "删除",
+              		icon: "fa fa-remove",
+              		onclick: function (obj, grid) {
+                  		var row = grid.select();
+                  		if (null == row || row.length == 0) {
+                      		notify("你还没有选择要删除的报修登记！", "warn");
+                      		return;
+                  		}
+                  		singleDelete(grid,"$!{rc.contextPath}/repair/task/delete");
+              		}
+          		}
+                    ]*/
+            );
+
+
+        });
+
+
+        function processDone(e){
+            var tr = $(e.target).closest("tr");
+            var data = this.dataItem(tr);
+            console.log(data.id);
+            console.log(data);
+        }
+    </script>

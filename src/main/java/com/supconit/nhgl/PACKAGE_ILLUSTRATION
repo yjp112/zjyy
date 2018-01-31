@@ -1,0 +1,51 @@
+能耗管理子系统模块规划
+
+overview： 总体概况        /overview
+
+monitor: 能耗监测
+---   electric          monitor/electric/area | monitor/electric/dept | monitor/electric/discipine
+---   water
+---   gas
+
+analyse: 能耗分析
+---   electric          analyse/electric/area | analyse/electric/dept | analyse/electric/discipine
+---   water
+---   gas
+
+alarm： 能耗报警
+---  device 设备报警       alarm/device
+---  energy 用能异常报警    alarm/energy
+
+query:  查询相关
+---  complex 综合查询      query/complex
+---  collect 采集管理      query/collect
+
+publicity: 能耗公示        /publicity
+
+evaluate:分析评价         /evaluate
+
+basic:基础管理子系统
+--- sysConfig 系统配置项  basic/sysConfig
+
+--- meterConfig 表配置
+------ electric         basic/meterConfig/electric
+------ water
+------ gas
+
+--- discipine 分项维护   basic/discipine
+
+schedule -- 异常用能监测
+---  taskPlan     执行计划   schedule/taskPlan
+---  taskCategory 任务分类   schedule/taskCategory
+---  log          执行日志   schedule/log
+
+job -- 能耗中涉及到的job都存放到这里
+
+utils --- 能耗系统中使用到的工具类，如果感觉其他子系统也可能用到该工具类，就放到com.supconit.util包内
+
+
+
+页面放到与URL对应的目录下面
+    如，能耗监测 电 区域监测  URL为 monitor/electric/area，那么velocity页面位置为 monitor/electric/area目录
+
+如果包名使用汉语拼音的首字母，在该包下面配上说明文件，说明包名的含义

@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.hikvision.entities.AccessCount">
+	<resultMap type="com.supconit.hikvision.entities.AccessCount" id="accessCountResultMap">
+		<result property="id" column="ID"/>
+        <result property="personId" column="PERSON_ID"/>
+        <result property="personName" column="PERSON_NAME"/>
+        <result property="personNo" column="PERSON_NO"/>
+        <result property="comeDate" column="COME_TIME"/>
+        <result property="offDate" column="OFF_TIME"/>
+        <result property="cardNo" column="CARD_NO"/>
+        <result property="eventDate" column="EVENT_DATE"/>
+        <result property="comeStatus" column="COME_STATUS"/>
+        <result property="offStatus" column="OFF_STATUS"/>
+		<result property="totalAttendance" column="TOTAL_ATTENDANCE"/>
+		<result property="normalAttendance" column="NORMAL_ATTENDANCE"/>
+		<result property="unusualAttendance" column="UNUSUAL_ATTENDANCE"/>
+		<result property="showComeTime" column="SHOW_COME_TIME"/>
+		<result property="showOffTime" column="SHOW_OFF_TIME"/>
+		<result property="showWeekDay" column="SHOW_WEEK_DAY"/>
+		<result property="showEventDate" column="SHOW_EVENT_DATE"/>
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">ACCESS_COUNT</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	<sql id="select_pre" lang="velocity">
+		SELECT
+			a.ID,
+			a.PERSON_ID,
+			a.PERSON_NAME,
+	        a.PERSON_NO,
+	        a.CARD_NO,
+	        a.OFF_TIME,
+	        a.COME_TIME,
+	        a.EVENT_DATE,
+	        a.COME_STATUS,
+	        a.OFF_STATUS
+		FROM <include refid="TABLE_NAME"/> a
+		LEFT JOIN HO_PERSON hp on a.PERSON_ID=hp.ID
+	</sql>
+	
+	<sql id="count_pre" lang="velocity">SELECT COUNT(*) FROM <include refid="TABLE_NAME"/> a LEFT JOIN HO_PERSON hp on a.PERSON_ID=hp.ID</sql>
+
+	<sql id="condition_sql2" lang="velocity">
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter)
+			
+			#if($_p.personId  )
+				AND a.PERSON_ID = @{_p.personId,jdbcType=BIGINT}
+			#end
+			
+			#if($_p.personNo && $_p.personNo !='' )
+			#set($_personNo = '%' + $_p.personNo + '%')
+				AND a.PERSON_NO LIKE @{_personNo,jdbcType=VARCHAR}
+			#end
+			
+			#if($_p.personName && $_p.personName != '')
+			#set($_personName = '%' + $_p.personName + '%')
+				AND a.PERSON_NAME LIKE @{_personName,jdbcType=VARCHAR}
+			#end
+			
+			#if($_p.cardNo && $_p.cardNo !='')
+				AND a.CARD_NO = @{_p.cardNo,jdbcType=VARCHAR}
+			#end
+			
+			#if($_p.comeStatus)
+				AND a.COME_STATUS = @{_p.comeStatus,jdbcType=BIGINT}
+			#end
+			
+			#if($_p.offStatus)
+				AND a.OFF_STATUS = @{_p.offStatus,jdbcType=BIGINT}
+			#end
+			
+			#if($_p.startDate && $_p.startDate != '')
+				AND  to_date(a.EVENT_DATE,'yyyy-MM-dd') >=  to_date(@{_p.startDate,jdbcType=VARCHAR},'yyyy-MM-dd') 
+			#end
+			#if($_p.endDate && $_p.endDate !='')
+				AND  to_date(a.EVENT_DATE,'yyyy-MM-dd') <= to_date(@{_p.endDate,jdbcType=VARCHAR},'yyyy-MM-dd') 
+			#end
+						
+			#if($_p.deptId && $_p.deptChildIds && $_p.deptChildIds.size()>0)
+				#set($_deptChildIds =$_p.deptChildIds)
+				AND 
+				#repeat( $_deptChildIds $id "," " hp.DEPT_ID IN (" ")" )
+					@{id,jdbcType=BIGINT}
+				#end
+			#end		
+		#end
+		]]>	
+    </sql>
+	
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			
+			#if($_p.personId)
+				AND a.PERSON_ID = @{_p.personId,jdbcType=BIGINT}
+			#end
+			
+			#if($_p.personNo)
+			#set($_personNo = '%' + $_p.personNo + '%')
+				AND a.PERSON_NO LIKE @{_personNo,jdbcType=VARCHAR}
+			#end
+			
+			#if($_p.personName)
+			#set($_personName = '%' + $_p.personName + '%')
+				AND a.PERSON_NAME LIKE @{_personName,jdbcType=VARCHAR}
+			#end
+			
+			#if($_p.cardNo)
+				AND a.CARD_NO = @{_p.cardNo,jdbcType=VARCHAR}
+			#end
+			
+			#if($_p.comeStatus)
+				AND a.COME_STATUS = @{_p.comeStatus,jdbcType=BIGINT}
+			#end
+			
+			#if($_p.offStatus)
+				AND a.OFF_STATUS = @{_p.offStatus,jdbcType=BIGINT}
+			#end
+			
+			#if($_p.startDate)
+				AND  to_date(a.EVENT_DATE,'yyyy-MM-dd') >=  to_date(@{_p.startDate,jdbcType=VARCHAR},'yyyy-MM-dd') 
+			#end
+			#if($_p.endDate)
+				AND  to_date(a.EVENT_DATE,'yyyy-MM-dd') <= to_date(@{_p.endDate,jdbcType=VARCHAR},'yyyy-MM-dd') 
+			#end
+			#if($_p.deptId && $_p.deptChildIds && $_p.deptChildIds.size()>0)
+				#set($_deptChildIds =$_p.deptChildIds)
+				AND 
+				#repeat( $_deptChildIds $id "," " hp.DEPT_ID IN (" ")" )
+					@{id,jdbcType=BIGINT}
+				#end
+			#end			
+			
+		#end
+		]]>	
+    </sql>
+
+	<!-- 手机端搜索月考勤天数 -->
+	<sql id="COUNT_ATTENDANCE_SQL" lang="velocity">
+		<![CDATA[
+			#where()
+				#if($_parameter.eventDate && $_parameter.eventDate != '')
+					AND T.EVENT_DATE #set($_eventDate = '%' + $_parameter.eventDate + '%') LIKE @{_eventDate,jdbcType=VARCHAR}
+				#end
+				#if($_parameter.personId && $_parameter.personId != '')
+					AND T.PERSON_ID = @{_parameter.personId,jdbcType=VARCHAR}
+				#end
+			#end
+		]]>
+	</sql>
+
+	<sql id="SEARCH_UNUSUAL_ATTENDANCE_SQL" lang="velocity">
+		<![CDATA[
+			#if($_parameter.eventDate && $_parameter.eventDate != '')
+				AND T.EVENT_DATE #set($_eventDate = '%' + $_parameter.eventDate + '%') LIKE @{_eventDate,jdbcType=VARCHAR}
+			#end
+			#if($_parameter.personId && $_parameter.personId != '')
+				AND T.PERSON_ID = @{_parameter.personId,jdbcType=VARCHAR}
+			#end
+		]]>
+	</sql>
+
+	<sql id="SEARCH_ATTENDANCE_SQL" lang="velocity">
+		<![CDATA[
+			#where()
+				#if($_parameter.eventDate && $_parameter.eventDate != '')
+					AND T.EVENT_DATE = @{_parameter.eventDate,jdbcType=VARCHAR}
+				#end
+				#if($_parameter.personId && $_parameter.personId != '')
+					AND T.PERSON_ID = @{_parameter.personId,jdbcType=VARCHAR}
+				#end
+			#end
+		]]>
+	</sql>
+	
+	  <!-- 按条件查询所有的记录-->
+    <select id="findAllByConditions" parameterType="com.supconit.hikvision.entities.AccessCount" resultMap="accessCountResultMap" lang="velocity" databaseId="oracle">
+		<include refid="select_pre"/>
+		<include refid="condition_sql2"/>
+		#order($_parameter.condition,"PERSON_ID ASC ,COME_TIME  DESC")
+    </select>
+	
+    <!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.hikvision.entities.AccessCount" resultMap="accessCountResultMap" lang="velocity" databaseId="oracle">
+       <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre"/>
+		<include refid="condition_sql"/>
+		#order($_parameter.condition,"COME_TIME  DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countByConditions" resultType="long" lang="velocity">
+        <include refid="count_pre"/>
+     	<include refid="condition_sql"/>
+    </select>
+
+	<!-- 手机端使用 -->
+	<select id="searchMonthAttendances" parameterType="com.supconit.hikvision.entities.AccessCount" resultMap="accessCountResultMap" lang="velocity">
+		SELECT *
+		FROM ACCESS_COUNT T
+		<include refid="COUNT_ATTENDANCE_SQL"/>
+		order by T.EVENT_DATE DESC
+	</select>
+
+	<select id="searchUnusualMonthAttendances" parameterType="com.supconit.hikvision.entities.AccessCount" resultMap="accessCountResultMap" lang="velocity">
+		SELECT TO_CHAR(TO_DATE('1970-01-01 08:00:00', 'YYYY-MM-DD HH24:MI:SS') +
+			(TO_NUMBER(T.COME_TIME) / 86400000),
+			'HH24:MI') SHOW_COME_TIME,
+		TO_CHAR(TO_DATE('1970-01-01 08:00:00', 'YYYY-MM-DD HH24:MI:SS') +
+			(TO_NUMBER(T.OFF_TIME) / 86400000),
+			'HH24:MI') SHOW_OFF_TIME,
+		TO_CHAR(TO_DATE(T.EVENT_DATE, 'YYYY-MM-DD'), 'DY') SHOW_WEEK_DAY,
+		SUBSTR(T.EVENT_DATE,6,5) SHOW_EVENT_DATE,
+		T.COME_STATUS,
+		T.OFF_STATUS,
+		T.ID,
+		T.PERSON_ID
+		FROM ACCESS_COUNT T
+		WHERE (T.COME_STATUS = 1 OR T.OFF_STATUS = 1)
+		<include refid="SEARCH_UNUSUAL_ATTENDANCE_SQL"/>
+		order by T.EVENT_DATE
+	</select>
+
+	<select id="countMonthAttendances" parameterType="com.supconit.hikvision.entities.AccessCount" resultMap="accessCountResultMap" lang="velocity">
+		SELECT SUM(CASE
+		WHEN T.OFF_STATUS = 9 AND T.COME_STATUS = 0 THEN
+		0
+		ELSE
+		1
+		END) TOTAL_ATTENDANCE,
+		SUM(CASE
+		WHEN T.COME_STATUS = 0 AND T.OFF_STATUS = 0 THEN
+		1
+		ELSE
+		0
+		END) NORMAL_ATTENDANCE,
+		SUM(CASE
+		WHEN T.COME_STATUS = 1 OR T.OFF_STATUS = 1 THEN
+		1
+		ELSE
+		0
+		END) UNUSUAL_ATTENDANCE
+		FROM ACCESS_COUNT T
+		<include refid="COUNT_ATTENDANCE_SQL"/>
+	</select>
+
+	<select id="searchAttendance" parameterType="com.supconit.hikvision.entities.AccessCount" resultMap="accessCountResultMap" lang="velocity">
+		SELECT TO_CHAR(TO_DATE('1970-01-01 08:00:00', 'YYYY-MM-DD HH24:MI:SS') +
+		(TO_NUMBER(T.COME_TIME) / 86400000),
+		'HH24:MI') SHOW_COME_TIME,
+		TO_CHAR(TO_DATE('1970-01-01 08:00:00', 'YYYY-MM-DD HH24:MI:SS') +
+		(TO_NUMBER(T.OFF_TIME) / 86400000),
+		'HH24:MI') SHOW_OFF_TIME,
+		T.*
+		FROM ACCESS_COUNT T
+		<include refid="SEARCH_ATTENDANCE_SQL"/>
+	</select>
+</mapper>

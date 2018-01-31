@@ -1,0 +1,127 @@
+#parse("index/_header.vm")
+<link href="${projectName}/gis_server/devicejs/uploadify/uploadify.css" rel="stylesheet">
+<style>
+	.k-button .fa{margin-right: 2px;}
+</style>
+<script src="${projectName}/gis_server/devicejs/uploadify/jquery.uploadify-3.1.min.js"></script>
+</head>
+<body>
+    <div id="platform_loading" style="display: none;"></div>
+	<div class="ui-form row-fluid">
+ 		<form id ='myform_id' action="$!{rc.contextPath}/hl/gis/platform/systemRule/imp_exp/impSystemRule" method="post">	
+			<input type="hidden" name='filePaths' id="filepath" />
+		</form>
+		<div style="margin-top:20px"  align="center">请以EXCEL格式导入相关数据...</div>
+		<table align="center">
+	        <br>
+            <tr>
+                <td>
+	                <span id="uploadImg">       					
+						<input type="file" id="file_upload" name="file" size="1">				
+					</span>	 
+    			</td>
+                <td valign="top"><input type="text" id="file-url" ></td>
+            </tr>
+            
+            <tr >
+	            
+	            <td align="right" valign="top">
+	                <button style="width:94px" class="k-primary hc_btn" type="button" id="bt" onclick="imp()"><i class="fa fa-upload"></i>导入</button>
+	            </td>
+	            <td align="left" valign="top"><a href="$!{rc.contextPath}/download/SystemRuleExpTemplate.xls">模板下载</a></td>
+            </tr> 
+        </table>
+    </div>
+	
+<script>
+var filePaths=new Array();
+$(function(){
+	$('#file_upload').uploadify({
+	    'buttonText' : '选择文件',                
+		'buttonClass' : 'k-primary fileUploadBtn',
+		'queueID': 'context',
+		'multi' : true,                        
+		'fileSizeLimit':'100MB',               
+		'fileObjName' : 'file', 
+		'fileTypeExts' : '*.xls',
+		'cancelImg' : '${projectName}/gis_server/devicejs/uploadify/cancel.png',
+        'swf'       : '${projectName}/gis_server/devicejs/uploadify/uploadify.swf',
+        'uploader'  : '$!{rc.contextPath}/hl/gis/platform/systemRule/imp_exp/import',
+        'removeCompleted': true,
+        'removeTimeout':'1',
+       
+		 onUploadSuccess:function(file,data,response){
+              if(response){  
+					var obj = eval('(' + data + ')');
+					$("#file-url").val(obj.orignalname)
+					$("#filepath").val(obj.filePath);
+              }else{
+    		  	 alert("文件上传失败！");
+              }
+  		},
+	});
+})
+function imp(){ 
+        if($("#filepath").val() == ""){
+			notify("请选择导入文件！","error");
+			return;        
+        }
+        $("#platform_loading").show();
+    	$("#myform_id").ajaxSubmit({
+         	dataType:'html',
+            success: function(responseText, statusText, xhr, $form) {
+			
+				if(responseText.indexOf("error")!=-1){
+					$("#errmsg").html(responseText);
+					notify("导入失败！","error");
+					$("#platform_loading").hide();
+				}else{
+					var res={
+						status:statusText,
+						data:{
+							next:"x"
+						}
+					}
+					//notify("导入成功！");
+					validateCallback(res,"grid","systemRule_exp_add_dlg");
+				}
+			},
+            error: function(o) {
+               $("#platform_loading").hide();	
+			   notify("ajaxSubmit error","error");
+            },
+            complete: function() {
+                
+            }
+        }); 
+	}
+	
+	
+/**
+* 控制按钮的状态
+**/
+function btn_running_self(btn) {
+	if (!btn)
+		return;
+		var runningText = '<i class="fa fa-refresh fa-spin"></i> 运行中..';
+		//var runningText = '<i class="fa fa-refresh"></i> 运行中..';
+		btn = $(btn)[0];
+	if (btn.tagName.toUpperCase() == "A") {
+		$(btn).addClass("disabled").data("text", $(btn).html()).html(runningText);
+		var onclick = $(btn).attr("onclick");
+		if (onclick) {
+			$(btn).data("onclickevent", onclick);
+			$(btn).removeAttr("onclick");
+		}
+	} else if (btn.tagName.toUpperCase() == "BUTTON") {
+		var button = $(btn).data("kendoButton");
+		if (button) {
+			$(btn).data("text", $(btn).html()).html(runningText);
+			button.enable(false);
+		}
+	}
+
+}	
+</script>
+</body>
+</html>

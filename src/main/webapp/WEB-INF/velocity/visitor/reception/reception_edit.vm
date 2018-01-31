@@ -1,0 +1,253 @@
+#parse("index/_header.vm")
+<script src="$!{main_static_custom_url}/js/webcam/webcam.js"></script>
+<script src="$!{main_static_custom_url}/js/jquery.slideBox.js"></script>
+<link href="$!{main_static_custom_url}/css/jquery.slideBox.css" rel="stylesheet">
+<style>
+.ui-dialog-form{padding:0;bottom:0!improtant;margin-bottom:38px;}
+</style>
+</head>
+<body>
+<div class="ui-layout-north diglog-title">来访登记</div>
+<div class="ui-layout-center dialog-form ui-dialog-form">
+<form id="myform_id" method="post" action="$!{rc.contextPath}/visitor/reception/come">
+    <input type="hidden" name="id" value="$!{reservationVisitor.id}"/>
+    <input type="hidden" name="number" #if($!{reservationVisitor.actualVisitors}==0) value="1" #else value="$!{reservationVisitor.actualVisitors}" #end  id="number" />
+    <div class="ui-layout-center" style="padding:10px 0;">
+	    <table width="100%" style="margin-left:-10px;" >
+	        <tr>
+	            <td width="15%" class="label"><label>接待人员：</label></td>
+	            <td width="34%" > 
+				   <input readonly type="text" class="k-textbox" id="receptorName" name="receptorName" value="$!{receptor.name}" />		
+				</td>
+	            <td width="15%" class="label"><label>接待部门：</label></td>
+	            <td width="34%">
+					<input type="hidden" class="k-textbox" readonly id="deptNameId" value="$!{receptor.deptId}">
+					<input type="text" class="k-textbox" readonly id="deptName" value="$!{receptor.deptName}">
+				</td>
+	        </tr>
+	        <tr>
+	            <td class="label"><label>联系方式：</label></td>
+	            <td ><input readonly type="text" id="receptorContactPhone" value="$!{receptor.personTelephone}" class="k-textbox"/></td>
+				<td class="label">来访时间：</td>
+				<td class="label"><input readonly type="text" id="visitTime" class="k-textbox"  name="visitTime" value="#date_format($!{reservationVisitor.visitTime},'yyyy-MM-dd')" /></td>
+		    </tr>
+		    <tr>	
+				<td class="label">来访客人：</td>
+				<td ><input  type="text"  name="visitorName" class="k-textbox" value="$!{reservationVisitor.visitor.visitorName}"></td>
+	            <td class="label">访客单位：</td>
+	            <td><input   type="text"  name="visitorUnit" class="k-textbox" value="$!{reservationVisitor.visitor.visitorUnit}"/></td>
+	        </tr>
+	        <tr>
+				<td class="label">访客电话：</td>
+				<td><input  type="text"  name="visitorPhone" class="k-textbox" value="$!{reservationVisitor.visitor.visitorPhone}"/></td>
+	            <td class="label">来访人数：</td>
+	            <td><input  readonly type="text" name="expectVisitors" class="k-textbox" value="$!{reservationVisitor.expectVisitors}"/></td>     
+	        </tr>
+			
+			<tr>
+				<td class="label">来访天数：</td>
+	            <td><input readonly id="visitDays" type="text" name="visitDays" value="$!{reservationVisitor.visitDays}" class="k-textbox" onblur="addDays()"/></td>
+				<td class="label">预计离开时间：</td>
+	            <td><input readonly type="text" name="expectLeaveTime" class="k-textbox"   value="#date_format($!{reservationVisitor.expectLeaveTime},'yyyy-MM-dd')"/></td>
+	           
+				
+	       </tr>
+	      
+            <tr>
+			<td class="label">车辆数：</td>
+				<td><input  readonly type="text" name="visitCars" value="$!{reservationVisitor.visitCars}" class="k-textbox" /></td>
+			   <td class="label">车牌号：</td>
+				<td><input  readonly type="text" name="visitCarNos" value="$!{reservationVisitor.visitCarNos}" class="k-textbox" /></td>
+			
+			</tr>
+            <tr><td  class="label"><label>来访事由：</label></td>
+		        <td >
+					<select disabled id="visitorReason_id" name="visitReason" class="k-textbox">
+			                     #foreach($enumDetail in $!visitorTypeList)
+			                         <option value="$!enumDetail.enumValue" #if($!enumDetail.enumValue ==$!{reservationVisitor.visitReason}) selected="selected" #end>$!enumDetail.enumText</option>
+			                     #end
+					</select>
+		        </td>
+			</tr>
+			 <tr> 	
+				 <td  class="label"><label>登记人：</label></td>
+	            <td>  
+					 <input type="hidden" name="createId" value="$!{reservationVisitor.createId}"/>
+	                 <input readonly type="text" class="k-textbox" name="creator" value="$!{reservationVisitor.creator}">
+	            </td>
+	            	<td  class="label"><label>登记时间：</label></td>
+	            <td ><input readonly type="text" class="k-textbox" name="createDate" value="#date_format($!{reservationVisitor.createDate})"></td>
+				
+	        </tr>
+			<tr>
+	            <td class="label">备注：</td>
+	            <td colspan="5"><textarea readonly id="textAreaId" style="height:80px"class="k-textbox k-textarea"  name="remark">$!{reservationVisitor.remark}</textarea></td>
+			</tr>
+			<tr>
+				<td class="label">实际来访时间：</td>
+	            <td class="inputText">
+					 <!--<input type="text" name="actualVisitTime" class="k-textbox" id="actualVisitTime" value="#date_format($!reservationVisitor.actualVisitTime,'yyyy-MM-dd HH:mm:ss')"/>-->
+					 <input readonly type="text" class="k-textbox" name="actualVisitTime" value="#date_format($!{reservationVisitor.actualVisitTime})">
+				</td>
+				<td  class="label">发证人：</td>
+				<td class="inputText">
+						<span>
+						<input type="hidden" id="grantPersonID" name="grantPersonID" value="$!{grantPerson.id}" class="ui-input"/>
+						<input readonly type="text" id="grantPersonName" name="grantPersonName" value="$!{grantPerson.name}" class="k-textbox" />
+	                </span>
+				</td>
+	         </tr>
+	          
+			<tr>
+	            <td class="label">访客卡信息：</td>
+	            <td colspan="3" rowspan="5">            
+	    			<div class="ui-co-cont ui-co-nob">
+	    			    #parse("visitor/dc_card/active.vm")	    
+						#parse("visitor/visitor/cardInfo.vm")
+	    			</div>
+				</td>
+			</tr>
+			
+	    </table>
+    </div>
+    <div class="ui-layout-east">
+		<div class="camera">
+			<div id="cam">
+				<script type="text/javascript">
+					webcam.set_api_url('$!{rc.contextPath}/visitor/reception/webcam?id=$!{reservationVisitor.id}');
+					webcam.set_quality(100);
+					webcam.set_shutter_sound(true,'$!{main_static_custom_url}/js/webcam/shutter.mp3'); 
+					document.write(webcam.get_html(290, 216, 290, 216));
+					webcam.set_hook('onComplete', 'my_completion_handler');
+				</script>
+			</div>
+		</div>
+		<div class="mid">
+			<span class="picicon"></span>
+			<span>图片轮播区</span>
+			<div id="filehidden"></div>
+		</div>
+		<div class="pictures">
+			<div id="results" class="slideBox">
+				<ul id="items" class="items">
+					#if($!listImage.size() > 0)
+					    #foreach($image in $!listImage)
+					    <li><img src="${imagePath}/${image.fileName}"></li>
+						#end
+					#end
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div class="ui-layout-south">
+	    <div class="actions">
+	        <button type="button" class="k-primary hc_btn" onclick="webcam.configure();"><i class="fa fa-save"></i>配置摄像头</button>
+	        <button class="k-primary hc_btn" id="save_button_id" type="submit"><i class="fa fa-save"></i>保 存</button>
+	        <button class="hc_btn cancel" onclick="window.close();" type="button"><i class="fa fa-close"></i>取 消</button>
+	    </div>
+	</div>	
+	
+</form>
+</div>
+
+<script type="text/javascript">
+var index = 1000;
+function my_completion_handler(msg) {
+	webcam.reset();
+	$("#items").append('<li><img src="' +'${imageTempPath}/' + msg + '"></li>');
+	var filehidden = "<input type='hidden' name='fileorignal' value='" +msg+ "' id='fileorignal" + index + "'/><input type='hidden' name='filename' value='" +msg+ "' id='filename" + index + "'/>";
+	$("#filehidden").append(filehidden);
+	index++;
+	$("#results").slideBox();
+}
+</script>
+<script type="text/javascript">
+
+function validateCallback(response, dataGridId,dialogId) {
+
+    if (response.status == "success") {
+        notify(response.data.message || "操作成功！", "success");
+        if (response.data.next) {
+             if (parent) {//dialog中有iframe
+                 if (parent.$("#_main_frame")) {
+                	 $("#queryBtn_r",window.opener.document).click();
+                	 window.close();
+                 }
+             }
+        }
+    }
+}   
+	
+	//将val写入value
+	function writes(o){
+		$(o).attr("value",$(o).val());
+	}
+	var id;
+	function a(id){
+	   var id = id;
+	}
+	##验证是否为数字、字母、下划线并长度不能大于50
+    	function vaild_number()
+    	{    
+			var visitorCardNo = $("input[name$='.visitorCardNo']");
+			$.each(visitorCardNo,function(i,item){
+    			if("" == $(item).val() || !isLetters($(item).val())||$(item).val().length>50)
+    			{
+    				$(item).val("");
+    			}
+    		});
+    	}
+	$("#save_button_id").click(function () {
+        var vName=$("input[name='visitorName']").val();
+        var vPhone=$("input[name='visitorPhone']").val();
+        var vUnit=$("input[name='visitorUnit']").val();
+        $("input[name='visitorList[1].visitorName']").val(vName);
+        $("input[name='visitorList[1].visitorUnit']").val(vUnit);
+        $("input[name='visitorList[1].visitorPhone']").val(vPhone);
+       // $("#task_edit_form_id").attr("action", "$!rc.contextPath/employee/leave/save");
+    });
+	
+	$(document).ready(function(){
+	//	var obj =document.getElementById("TestOCX");
+	//	obj.D8eExit();
+	//	obj.LONGD8eInit();
+	    $("#results").slideBox();
+	    $('body').layout({
+            defaults: {
+              resizable: true,
+              closable: false,
+              spacing_open: 0
+            },
+            north: {
+          	    size: 34
+          	  }
+          });	
+		$('.ui-dialog-form').layout({
+           defaults: {
+             resizable: true,
+             closable: false,
+             spacing_open: 0
+           },
+           south: {
+         	    size: 38
+         	  },
+         	  east: {
+         		  size: 330
+         	  }
+         });	
+	
+        $("#myform_id").validator({
+            fields:{
+            	visitorName:"来访客人:required;length[~10]"
+            },
+            valid: function (form) {
+                form_btn_submit($("#save_button_id"), form, function (res) {
+                    validateCallback(res, "grid", "");
+                });
+            }
+        });
+   
+     });
+</script>
+</body>
+</html>

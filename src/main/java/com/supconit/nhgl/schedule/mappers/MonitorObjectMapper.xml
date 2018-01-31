@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.schedule.entites.MonitorObject">
+
+	<resultMap type="com.supconit.nhgl.schedule.entites.MonitorObject" id="JcdxResultMap">
+					<id property="id" column="ID" />
+							<result property="taskCode" column="TASK_CODE" />
+							<result property="deviceId" column="DEVICE_ID" />
+							<result property="deviceName" column="DEVICE_NAME" />
+				</resultMap>
+	
+	
+	<sql id="TABLE_NAME" lang="velocity">NH_MONITOR_OBJECT</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	<sql id="SELECT_PRE" lang="velocity">SELECT * FROM <include refid="TABLE_NAME"/></sql>
+	<sql id="COUNT_PRE" lang="velocity">SELECT COUNT(1) FROM <include refid="TABLE_NAME"/></sql>
+
+	<sql id="SEARCH_CONDITION_SQL" lang="velocity">
+		<![CDATA[
+		#where()
+		#end
+		]]>	
+	</sql>
+	
+	<select id="getById" resultMap="JcdxResultMap" parameterType="long" lang="velocity">
+		<include refid="SELECT_PRE" />
+				WHERE ID = @{_parameter, jdbcType=NUMERIC}
+			</select>
+	
+	<select id="selectPager" lang="velocity" resultMap="JcdxResultMap">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="SELECT_PRE"/>
+		<include refid="SEARCH_CONDITION_SQL"/>
+		#order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	
+	<select id="selectPager" lang="velocity" resultMap="JcdxResultMap" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT * 
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/>
+		<include refid="SEARCH_CONDITION_SQL"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+
+	<select id="countPager" lang="velocity" resultType="long">
+		<include refid="COUNT_PRE"/><include refid="SEARCH_CONDITION_SQL"/>
+	</select>
+	
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>(
+															#if($_databaseId == 'oracle') ID,#end
+																TASK_CODE
+																					,DEVICE_ID
+														) VALUES (
+															#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end
+																@{_parameter.taskCode,jdbcType=VARCHAR}
+																					,@{_parameter.deviceId,jdbcType=NUMERIC}
+														)
+	</sql>
+	
+	<insert id="insert" parameterType="com.supconit.nhgl.schedule.entites.MonitorObject" 
+		keyProperty="id" keyColumn="ID" 		lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>        <include refid="INSERT_SQL" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.nhgl.schedule.entites.MonitorObject" 
+		keyProperty="id" keyColumn="ID" 		 lang="velocity">
+        <include refid="INSERT_SQL"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>    </insert>
+    
+	<update id="update" parameterType="com.supconit.nhgl.schedule.entites.MonitorObject" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/> 
+		#mset()
+		<![CDATA[
+																							#if($_parameter.taskCode)TASK_CODE = @{_parameter.taskCode,jdbcType=VARCHAR},#end
+																#if($_parameter.deviceId)DEVICE_ID = @{_parameter.deviceId,jdbcType=NUMERIC},#end
+									]]>
+		#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+	
+	<delete id="deleteById" parameterType="long" lang="velocity">
+		DELETE FROM <include refid="TABLE_NAME" /> WHERE ID = @{_parameter,jdbcType=NUMERIC}
+	</delete>
+	<delete id="deleteByTaskCode" parameterType="string" lang="velocity">
+		DELETE FROM <include refid="TABLE_NAME" /> WHERE TASK_CODE=@{_parameter,jdbcType=VARCHAR}
+	</delete>	
+	<select id="selectByTaskCode" parameterType="string" lang="velocity" resultMap="JcdxResultMap" >
+		select * FROM <include refid="TABLE_NAME"/>
+		WHERE TASK_CODE=@{_parameter,jdbcType=VARCHAR}
+	</select>
+	
+	 <select id="findMonitorObjectFromAreaConfigAndDeptConfig" parameterType="com.supconit.nhgl.schedule.entites.MonitorObject" resultMap="JcdxResultMap">
+	 		SELECT
+				t1.id,
+				t1.DEVICE_CODE,
+				t1.DEVICE_NAME
+			FROM
+				DEVICE t1
+			<if test="catagoryCode!=null and catagoryCode!=''">
+				inner join DEVICE_CATEGORY t2 on t1.category_id=t2.id and t2.category_code=#{catagoryCode} 
+			</if>
+			left join NH_AREA_CONFIG t3 on t3.DEVICE_ID = t1.id
+			left join NH_DEPT_CONFIG t4 on t4.DEVICE_ID = t1.ID
+			left join NH_DEPT t5 on t5.ID = t4.DEPT_ID
+			left join NH_AREA t6 on t6.id = t3.AREA_ID
+			<where>
+				and t1.PARENT_ID!=0 
+				<if test="departmentId !=null and departmentId !=0">
+	              and  (t4.DEPT_ID = #{departmentId} or t5.PID=#{departmentId})
+	            </if>
+	            <if test="locationId!=null and locationId !=0">
+	              and (t1.location_id = #{locationId} or t6.PARENT_ID=#{locationId})
+	            </if>
+	            <if test="deviceCode !=null and deviceCode !=''">
+	              and  t1.device_Code like '%'+#{deviceCode}+'%'
+	            </if>
+	            <if test="deviceName !=null and deviceName !=''">
+	              and  t1.device_Name like '%'+#{deviceName}+'%'
+	            </if>
+			</where>
+			order by t1.id ASC		
+	 </select>
+	 
+	 
+    <select id="findMonitorObject" parameterType="com.supconit.nhgl.schedule.entites.MonitorObject" resultMap="JcdxResultMap">
+        select t.id device_Id,t.DEVICE_NAME from device t
+        <if test="catagoryCode!=null and catagoryCode!=''">
+         inner join DEVICE_CATEGORY t2 on t.category_id=t2.id and t2.category_code=#{catagoryCode} 
+        </if>
+        left join GEO_AREA g on t.location_id=g.id
+        left join HO_DEPARTMENT d on t.use_department_id=d.id
+        <where>
+          	<if test="departmentId !=null and departmentId !=0">
+              and  (t.USE_DEPARTMENT_ID = #{departmentId} or d.PID=#{departmentId})
+            </if>
+            <if test="locationId!=null and locationId !=0">
+              and (t.location_id = #{locationId} or g.PARENT_ID=#{locationId})
+            </if>
+            <if test="deviceCode !=null and deviceCode !=''">
+              and  t.device_Code like '%'+#{deviceCode}+'%'
+            </if>
+            <if test="deviceName !=null and deviceName !=''">
+              and  t.device_Name like '%'+#{deviceName}+'%'
+            </if>
+        </where>
+    </select>    		
+    <select id="findMonitorObjectByTaskCode" parameterType="string" resultMap="JcdxResultMap">
+        select t2.id device_Id,t2.DEVICE_NAME from <include refid="TABLE_NAME" /> t inner join
+        device t2 on t.device_id=t2.id
+        <where>
+            t.task_code=#{taskCode,jdbcType=VARCHAR}
+        </where>
+    </select>    		
+</mapper>

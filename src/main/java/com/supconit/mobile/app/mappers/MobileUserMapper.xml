@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.mobile.app.entities.MobileUser">
+
+	<resultMap type="com.supconit.mobile.app.entities.MobileUser" id="MobileUserResultMap">
+		<id property="id" column="ID" />
+		<result property="username" column="USERNAME" />
+		<result property="email" column="EMAIL" />
+		<result property="password" column="PASSWORD" />
+		<result property="personId" column="PERSON_ID" />
+		<result property="description" column="DESCRIPTION" />
+		<result property="avatar" column="AVATAR" />
+		<result property="expired" column="EXPIRED" />
+		<result property="disabled" column="DISABLED" />
+		<result property="locked" column="LOCKED" />
+		<result property="deleted" column="DELETED" />
+		<result property="creator" column="CREATOR" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="modifier" column="MODIFIER" />
+		<result property="modifiedTime" column="MODIFIED_TIME" />
+		<result property="signPassword" column="SIGN_PASSWORD" />
+		<result property="isOpenSignPassword" column="IS_OPEN_SIGN_PASSWORD" />
+	</resultMap>
+
+	<sql id="TABLE_NAME" lang="velocity">HO_USER</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	<sql id="SELECT_PRE" lang="velocity">SELECT * FROM <include refid="TABLE_NAME"/></sql>
+	<sql id="COUNT_PRE" lang="velocity">SELECT COUNT(1) FROM <include refid="TABLE_NAME"/></sql>
+
+	<sql id="GET_CONDITION_SQL" lang="velocity">
+		<![CDATA[
+		#where()
+			#if($_parameter.id)
+				ID = @{_parameter.id,jdbcType=NUMERIC}
+			#end
+			#if($_parameter.username && $_parameter.username != '')
+				AND USERNAME = @{_parameter.username,jdbcType=VARCHAR}
+			#end
+			#if($_parameter.email && $_parameter.email != '')
+				AND EMAIL = @{_parameter.email,jdbcType=VARCHAR}
+			#end
+			AND DELETED <> 1
+		#end
+		]]>
+	</sql>
+	
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>(
+			#if($_databaseId == 'oracle') ID, #end
+			USERNAME,
+			EMAIL,
+			PASSWORD,
+			SIGN_PASSWORD,
+			PERSON_ID,
+			DESCRIPTION,
+			AVATAR,
+			EXPIRED,
+			DISABLED,
+			LOCKED,
+			<include refid="_PUBLIC_V.INSERT_AUDIT_BEFORE" />
+		) VALUES (
+			#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end
+			@{_parameter.username,jdbcType=VARCHAR},
+			@{_parameter.email,jdbcType=VARCHAR},
+			@{_parameter.password,jdbcType=VARCHAR},
+			@{_parameter.signPassword,jdbcType=VARCHAR},
+			#if($_parameter.person.id)@{_parameter.person.id,jdbcType=NUMERIC}#{else}@{_parameter.personId,jdbcType=NUMERIC}#{end},
+			@{_parameter.description,jdbcType=VARCHAR},
+			@{_parameter.avatar,jdbcType=VARCHAR},
+			@{_parameter.expired,jdbcType=BOOLEAN},
+			@{_parameter.disabled,jdbcType=BOOLEAN},
+			@{_parameter.locked,jdbcType=BOOLEAN},
+			<include refid="_PUBLIC_V.INSERT_AUDIT_AFTER" />
+		)
+	</sql>
+	<insert id="insert" parameterType="com.supconit.mobile.app.entities.MobileUser" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="INSERT_SQL" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.mobile.app.entities.MobileUser" keyProperty="id" keyColumn="ID" lang="velocity">
+        <include refid="INSERT_SQL"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+	<update id="update" parameterType="com.supconit.mobile.app.entities.MobileUser" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/> 
+		#mset()
+		<![CDATA[
+			#if($_parameter.username)			USERNAME 			= @{_parameter.username,jdbcType=VARCHAR},		#end
+			#if($_parameter.email)				EMAIL 				= @{_parameter.email,jdbcType=VARCHAR},			#end
+			#if($_parameter.password) 			PASSWORD 			= @{_parameter.password,jdbcType=VARCHAR},		#end
+			#if($_parameter.signPassword) 		SIGN_PASSWORD 		= @{_parameter.signPassword,jdbcType=VARCHAR},		#end
+			#if($_parameter.isOpenSignPassword) IS_OPEN_SIGN_PASSWORD 	= @{_parameter.isOpenSignPassword,jdbcType=NUMERIC},		#end
+			#if($_parameter.person.id && $_parameter.person.id > 0)
+												PERSON_ID			= @{_parameter.person.id,jdbcType=NUMERIC},		
+			#elseif($_parameter.personId) 		PERSON_ID			= @{_parameter.personId,jdbcType=NUMERIC},		
+			#end
+			
+			#if($_parameter.description) 		DESCRIPTION 		= @{_parameter.description,jdbcType=VARCHAR},	#end
+			#if($_parameter.avatar) 			AVATAR 				= @{_parameter.avatar,jdbcType=VARCHAR},		#end
+					EXPIRED 			= @{_parameter.expired,jdbcType=BOOLEAN},		
+					DISABLED 			= @{_parameter.disabled,jdbcType=BOOLEAN},		
+					LOCKED 				= @{_parameter.locked,jdbcType=BOOLEAN},		
+		]]>
+			<include refid="_PUBLIC_V.UPDATE_AUDIT" />
+		#end
+		WHERE id = @{_parameter.id,jdbcType=NUMERIC}
+		
+	</update>
+	
+	<update id="disabledById" parameterType="long" lang="velocity"> 
+		<!-- DELETE FROM <include refid="TABLE_NAME"/> WHERE ID = @{_parameter,jdbcType=NUMERIC} -->
+		UPDATE <include refid="TABLE_NAME"/> SET DELETED = 1 WHERE ID = @{_parameter,jdbcType=NUMERIC}
+	</update>
+	
+	<select id="getByCondition" parameterType="com.supconit.mobile.app.entities.MobileUser" resultMap="MobileUserResultMap" lang="velocity">
+		<include refid="SELECT_PRE"/>
+		<include refid="GET_CONDITION_SQL"/>
+		#if($_databaseId == 'mysql') LIMIT 1 #end
+	</select>
+</mapper>

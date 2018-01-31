@@ -1,0 +1,32 @@
+<ul id="plat_org_position_select_tree" class="ztree"></ul>
+
+<script type="text/javascript">
+	var plat_org_position_select_tree;
+    var setting = {
+    		view : {
+				fontCss : function(treeId, treeNode){
+					if(treeNode.id.indexOf("_")>0){
+						treeNode.name="[岗位]"+treeNode.name;
+						return {color : "blue"};
+					}
+				}
+			},
+			data: {
+				simpleData: {enable: true}
+		    },
+		    callback: {
+					onClick: function(event, treeId, treeNode) {
+					}
+			}
+    };
+	var zNodes = [];  
+	#foreach($!{treeNode} in $!{postionTree})
+   	zNodes.push({id:"$!{treeNode.id}", pId:$!{treeNode.pid}, name:"$!{treeNode.name}"});      
+	#end
+ 	$(document).ready(function(){
+  		plat_org_position_select_tree =$.fn.zTree.init($("#plat_org_position_select_tree"), setting,zNodes);
+		plat_org_position_select_tree.expandAll(true);
+  	});
+
+	
+</script>

@@ -1,0 +1,355 @@
+#parse("index/_header.vm")
+<link href="$!{main_static_custom_url}/js/uploadify/uploadify.css" rel="stylesheet">
+<script src="$!{main_static_custom_url}/js/uploadify/jquery.uploadify-3.1.min.js"></script>
+<style >
+	.ui-co-seg{
+		width:822px;
+	}
+</style>
+</head>
+<body>
+<form method="POST"  name="myform" id="myform_id">
+<input type="hidden" name="id" value="$!{task.id}"/>
+
+<!--BPM -->
+<input type="hidden" name="_bpm_param" value="$!{_bpm_param}"/>
+<input type="hidden" name="_bpm_ts_id" value=""/>
+<input type="hidden" name="bpm_ts_id" value=""/>
+<input type="hidden" name="_bpm_enabled" value="true"/>
+
+<div class="lf-tool ui-layout-south">
+    <div class="lf-btns">
+        <a href="javascript:showFlowChart('$!task.processInstanceId',1000,600);" class="lf-btn lf-btn-chart" title="查看流程图"></a>
+		#if($!{show})
+		<a href="javascript:showReport('$!task.id','maintainTask');" class="lf-btn lf-btn-print" title="打印"></a>
+		#end
+    </div>
+    <div class="lf-operate">
+        #if(!$!{viewOnly})
+            <button class="k-primary hc_btn" type="submit" id="save_button_id" ><i class="fa fa-save"></i>保存</button>
+		#end
+            #foreach($ts in $!_bpm_transitions)
+				<input type="hidden" name="processButtonId" value="$!ts.id"/>
+                <button class="k-primary hc_btn" type="submit" id="$!ts.id" onclick="doSubmit('$!ts.id')">
+                    #if( $!ts.name =='提交')
+                        <i class="fa fa-database"></i>
+                    #else
+                        <i class="fa fa-retweet"></i>
+                    #end
+                    $!ts.name</button>
+			#end
+			#if($!{openStyle}=='dialog')
+				<a class="hc_btn cancel" onclick="close_dialog('maintain_dlg')" ><i class="fa fa-close"></i>取 消</a>
+			#else
+				<button class="k-primary hc_btn" type="button" id="$!ts.id" onclick="history.go(-1);"><i class="fa fa-reply"></i>返回</button>
+			#end
+		#set($readonlyview='')
+        #if($!{viewOnly} == true)
+            #set($readonlyview='readonly')
+        #end
+    </div>
+</div>
+
+<div class="ui-layout-center ui-largeform">
+    <div class="ui-composer">
+        <div class="ui-co-area">
+            <div class="co-area-list">
+                <ul>
+                    <li class="level-1"><a href="#index1"><span>1</span>保养任务基本信息</a></li>
+                    <li class="level-1"><a href="#index2">
+                        <span>2</span>保养项目</a>
+                        <ul>
+                            <li class="level-2"><a href="#index2-1"><span>2.1</span>保养内容</a>
+                            <li class="level-2"><a href="#index2-2"><span>2.2</span>消耗配件</a>
+                            <li class="level-2"><a href="#index2-3"><span>2.3</span>附件</a>
+                         </ul>
+                    </li>
+                    <li class="level-1"><a href="#index3"><span>3</span>流程处置节点信息</a></li>
+                </ul>
+            </div>
+            <a href="#index4" class="level-flow">流转意见</a>
+            <a href="javascript:;" class="backtop" title="回到顶部"></a>
+        </div>
+        <div class="ui-co-seg" data-role="anchor" id="index1" style="margin-bottom: 20px;">
+            <h2 class="ui-co-tit"><span class="seg-num">1</span>保养任务基本信息</h2>
+            <div class="ui-co-cont">
+                <table class="ui-co-table" width="100%">
+                    <tr>
+                        <td class="label"><label>流程编号：</label></td>
+                        <td class="inputText">
+                            <input type="text" class="k-textbox" name="maintainCode" readonly="readonly" value="$!{task.maintainCode}">
+                        </td>
+
+						<td class="label"><label>保养班组：</label></td>
+                        <td class="inputText">
+                            <input type="hidden" id="maintainGroupId_id" name="maintainGroupId" value="$!{task.maintainGroupId}">
+                            <input type="text" class="k-textbox"  id="maintainGroupName_id" name="maintainGroupName" value="$!{task.maintainGroupName}" readonly>
+                        </td>
+                    </tr>
+					<tr>
+                        <td class="label"><span class="ui-form-required">*</span>现场负责人：</td>
+                        <td class="inputText">
+            				#if(!$!viewOnly)<span class="k-textbox k-space-right" style="background: #F5F5F5;" onclick="choosePersons(1,'maintainPersonId','maintainPersonName','','','','','')">#end
+            				<input type="hidden" class="k-textbox" id="maintainPersonId" name="maintainPersonId" value="$!{task.maintainPersonId}"/>
+            				<input #if(!$!viewOnly) style="width:100%;background:#F5F5F5;" #else style="background:#F5F5F5;"  #end type="text" readonly class="k-textbox ui-input-choose" id="maintainPersonName" name="maintainPersonName" value="$!{task.maintainPersonName}"/>
+            				#if(!$!viewOnly)<a href="#" class="k-icon k-i-search">&nbsp;</a>
+            				</span>#end
+            			</td>
+                        <td class="label"><span class="ui-form-required">*</span>保养参与人：</td>
+                        <td class="inputText">
+            				#if(!$!viewOnly)<span class="k-textbox k-space-right" style="background: #F5F5F5;" onclick="choosePersons(3,'maintainWorkerIds','maintainWorkerNames','','','','','')">#end
+            				<input type="hidden" class="k-textbox" id="maintainWorkerIds" name="maintainWorkerIds" value="$!{task.maintainWorkerIds}"/>
+            				<input #if(!$!viewOnly) style="width:100%;background:#F5F5F5;" #else style="background:#F5F5F5;"  #end  type="text" readonly class="k-textbox ui-input-choose" id="maintainWorkerNames" name="maintainWorkerNames" value="$!{task.maintainWorkerNames}"/>
+            				#if(!$!viewOnly)<a href="#" class="k-icon k-i-search">&nbsp;</a>
+            				</span>#end
+            			</td>
+                    </tr>
+                    <tr>
+                        <td class="label"><label>实际开始时间：</label></td>
+                        <td class="inputText">
+                            <input #if($!viewOnly) readonly #end id="startTime" name="actualStartTime" type="text" style="width:84%;" class="k-textbox" value="#date_format($!{task.actualStartTime},'yyyy-MM-dd HH:mm:ss')">
+                        </td>
+                        <td class="label"><label>实际结束时间：</label></td>
+                        <td class="inputText">
+                            <input #if($!viewOnly) readonly #end id="endTime" name="actualEndTime" type="text" style="width:84%;" class="k-textbox" value="#date_format($!{task.actualEndTime},'yyyy-MM-dd HH:mm:ss')">
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="ui-co-seg" data-role="anchor" id="index2" style="margin-bottom: 20px;">
+            <h2 class="ui-co-tit"><span class="seg-num">2</span>保养项目</h2>
+            <div class="ui-co-cont">
+				<h3 class="ui-co-subtit" data-role="anchor" id="index2-1">2.1保养内容</h3>
+				#parse("maintain/task/maintainTaskContent.vm")
+                <h3 class="ui-co-subtit" data-role="anchor" id="index2-3">2.2消耗配件</h3>
+                #parse("maintain/task/maintainTaskSpare.vm")
+				<h3 class="ui-co-subtit" data-role="anchor" id="index2-3">2.3附件</h3>
+				<table  class="ui-table"  width="100%" cellpadding="0" cellspacing="0" border="1" id="images_table_id">
+        	        <div id="filehidden"></div>
+        			  <thead>
+        		        <tr>
+        		          <th align="left" width="40%">附件名称</th>
+        		          <th align="left" width="20%" >附件类型</th>
+        		          <th align="left" width="20%" >附件大小</th>
+						  #if(!$!{viewOnly})
+        		          <th align="left" width="20%" >操作</th>
+						  #end
+        		        </tr>
+        			  </thead>
+        			   <tbody>
+        		        #set($index=1)
+        		        #foreach($!{attach} in $!{listAttachments}) 
+        		        <tr id='alreadyfile$!{index}'>
+        		          <td ><a id="showImageId_$velocityCount" 	href="${rc.contextPath}/device/attachment/download?fileName=$!{attach.fileName}&path=$!{attach.storePath}"> $!{attach.fileName}</a></td>
+        		          <td > $!{attach.fileType}&nbsp; </td>
+        		          <td >$!{attach.fileSize}KB</td>
+						  #if(!$!{viewOnly})
+        		          <td  name="tdControl"><a href="#" onclick="removealreadyfile('$!{index}','$!{attach.id}')">移除</a></td>
+						  #end
+        		        </tr>
+        		        #set($index=$index+1)
+        				#end
+        			   </tbody>
+        		</table>
+				#if(!$!{viewOnly})
+                <div class="head">
+        			<input type="file" name="file"  id="file_upload"/>
+        			<div class="tip"><span>请不要上传超过$!{fileLength}MB的文件</span></div> 
+        		</div> 
+				#end
+            </div>
+        </div>
+
+        <div class="ui-co-seg" data-role="anchor" id="index3">
+            <h2 class="ui-co-tit"><span class="seg-num">3</span>流程处置节点信息<span class="ui-co-fold ui-co-foldup"></span></h2>
+            <div class="ui-co-cont ui-co-nob">
+                #parse("bpm/bpm_audit.vm")
+            </div>
+        </div>
+		#if($!{view})
+        <div class="ui-co-seg" data-role="anchor" id="index4">
+            <div class="ui-co-notice">
+                <p>注意！</p>
+                <p>请填写流转意见(流转意见提交时保存)!</p>
+            </div>
+        </div>
+        <div class="ui-co-seg">
+            <div class="ui-co-flow">
+                <div>
+                    <label>流转意见：</label>
+                    <textarea id="_bpm_comment" class="k-textbox"  name="_bpm_comment" />$!_bpm_comment</textarea>
+                </div>
+            </div>
+        </div>
+		#end
+    </div>
+    </div>
+</div>
+
+</form>
+<script type="text/javascript">
+commonDate("startTime","endTime","yyyy-MM-dd HH:mm:ss","zh-CN");
+    $(document).ready(function(){
+        $("body").layout({
+            defaults:{
+                spacing_open:0,
+                spacing_closed:0
+            },
+            south:{
+                size:35
+            },
+            onresize:function(){
+                areaPosition();
+            }
+        });
+        areaPosition();
+        var link = $(".co-area-list").find("li>a");
+        link.removeClass("current").eq(0).addClass("current");
+        $(".ui-co-fold").click(function(){
+            var that = $(this);
+            if(that.hasClass("ui-co-foldup")){
+                that.removeClass("ui-co-foldup").addClass("ui-co-folddown");
+                that.parent().addClass("ui-co-tit1").siblings(".ui-co-cont").hide();
+            }else{
+                that.removeClass("ui-co-folddown").addClass("ui-co-foldup");
+                that.parent().removeClass("ui-co-tit1").siblings(".ui-co-cont").show();
+            }
+        });
+        $(".level-1 a").click(function(){
+            var that = $(this);
+            if(!that.hasClass("current")){
+                $(".level-1 a").removeClass("current");
+                that.addClass("current");
+            }
+        });
+        $(".backtop").click(function(){
+            $(".ui-layout-center").scrollTop(0);
+            var link = $(".co-area-list").find("li>a");
+            link.removeClass("current").eq(0).addClass("current");
+        });
+
+        $("#dropdownlist").kendoDropDownList();
+        $(".ui-layout-center").scroll(function(){
+            var offsetTop = $(this).offset().top;
+            var link = $(".co-area-list").find("li>a");
+            $.each(link,function (item,i){
+               var cla =  $(item).attr("class");
+                if(cla && cla === "current"){
+                    link.removeClass("current").eq(i).addClass("current");
+                }
+            })
+
+        });
+    });
+
+</script>
+<script type="text/javascript">
+    var currentButton;
+
+    $(function () {
+        $("#myform_id").validator({
+            fields:{
+				maintainPersonName: "现场负责人:required;",
+				maintainWorkerNames: "保养负责人:required;",
+                _bpm_comment: "流转意见: length[~100]"
+            },
+            valid:function(form){
+                form_btn_submit($("#"+currentButton),form,function(res){
+                    // 关闭窗口
+                    validateCallback(res,"grid","");
+                });
+            }
+        });
+
+        $("#save_button_id").click(function () {
+            currentButton = "save_button_id";
+            //这里给出提示
+            var _bpm_comment = $("#_bpm_comment").val();
+            if(_bpm_comment){
+                notify("流转意见提交时才会被保存", "warn");
+            }
+            $("input[name='_bpm_enabled']", $("#myform_id")).val(false);
+            $("#myform_id").attr("action", "$!rc.contextPath/maintain/task/edit");
+        });
+
+        $("#item_tableId").on("click", "a[name ='repairPersonName']", function () {
+                $item_tr= $(this).parents("tr");
+            quick_dialog("selectPersonDiloag", "选择", "$!{rc.contextPath}/choose/personByGroup?dialogId=selectPersonDiloags&txtId=personId_id&txtName=personName_id&groupId=$!{repair.task.processDeptId}", 700, 500);
+
+        });
+
+
+    });
+
+    function doSubmit(tid) {
+        currentButton = tid;
+        var newStatus ;
+        $("input[name='_bpm_ts_id']", $("#myform_id")).val(tid);
+        $("input[name='bpm_ts_id']", $("#myform_id")).val(tid);
+        $("input[name='_bpm_enabled']", $("#myform_id")).val(true);
+        $("#myform_id").attr("action", "$!rc.contextPath/maintain/task/submit");
+        return true;
+    }
+
+</script>
+<script type="text/javascript"> 
+//文件上传
+var index = 1000;
+$(function(){
+	$('#file_upload').uploadify({
+	    'buttonText' : '浏览',                
+		'buttonClass' : 'k-primary fileUploadBtn',
+		'queueID': 'context',
+		'multi' : true,                        
+		'fileSizeLimit':'$!{fileLength}MB',               
+		'fileObjName' : 'file', 
+		'cancelImg' : '$!{main_static_custom_url}/js/uploadify/cancel.png',
+        'swf'       : '$!{main_static_custom_url}/js/uploadify/uploadify.swf',
+        'uploader'  : '${rc.contextPath}/fileupload/fileup',
+        'removeCompleted': true,
+        'removeTimeout':'1',
+       
+		 onUploadSuccess:function(file,data,response){
+              if(response){  
+            	  	var obj = eval('(' + data + ')');
+	  				var filedisplay ="<tr id='alreadyfile"+index+"'><td>"+obj.orignalname+"</td><td>"+obj.postfix+"</td><td>"+obj.filesize+"KB</td><td><a href='#'  onclick=removefile('"+index+"')>移除</a></td></tr>";
+	  				var filehidden ="<input type='hidden' name='fileorignal' value='"+obj.orignalname+"' id='fileorignal"+index+"'/><input type='hidden' name='filename' value='"+obj.filename+"' id='filename"+index+"'/>";
+	  				$("#images_table_id").append(filedisplay);
+	  				$("#filehidden").append(filehidden);
+	  				index++;
+					//将需要提交的以hidden的方式写入表单并提交
+					  //alert(obj.filePath)
+				
+              }else{
+    		  	 alert("文件上传失败！");
+              }
+  		},
+  		onUploadComplete:function(file){
+			
+		} 
+	});
+})
+
+function removefile(ind){
+	$("#attachment"+ind).remove();
+	$("#fileorignal"+ind).remove();
+	$("#filename"+ind).remove();
+	$("#alreadyfile"+ind).remove();
+}
+
+function removealreadyfile(index,fileid){
+		$("#alreadyfile"+index).remove();
+		var delfile ="<input type='hidden' name='delfiles' value='"+fileid+"'/>";
+	    $("#filehidden").append(delfile);
+	}
+	
+		//查看模式
+		#if($!{viewOnly})
+    		$("input").attr('readonly', true);
+		#end
+	
+</script>
+</body>
+</html>

@@ -1,0 +1,205 @@
+#parse("index/_header.vm")
+</head>
+<body>
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<form class="ui-form" id='queryForm'>
+
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+                <tr>
+                  <td class="ui-search-name first">仓库编码：</td>
+                  <td class="ui-search-c">
+                    <input name="warehouseCode" value="$!warehouse.warehouseCode" class="k-textbox" type="text">
+                  </td>
+                  <td class="ui-search-name">仓库名称：</td>
+                  <td class="ui-search-c">
+                    <input  name="warehouseName" value="$!warehouse.warehouseName" class="k-textbox" type="text">
+                  </td>
+                </tr>
+              </table>
+            </td>
+            <td width="150" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+            <td></td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+ #parse("index/_footer.vm")  
+
+<script type="text/javascript">
+  var _iframe_layout, _left_layout, _inner_layout;
+	$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      },
+      west: {
+        size: 0.25
+      }
+    });
+
+
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+
+    $('#resetBtn').click(function(){
+      $("#queryForm :text").val('');  
+    });
+
+		$('.iconfont','.ui-form-pick').each(function(){
+      $(this).click(function(){
+      	$('#treeId').val('');
+      	$('#selectBlock').hide();
+        //$(this).parent().remove();
+      })
+    })
+	
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/spare/warehouse/list", [{
+              field: "id",
+              hidden: true
+          }, {
+              field: "warehouseCode",
+              title: "仓库编码",
+			  headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              sortable: false,
+               template:"<a href=\"javascript:void(0)\" title=\"查看#: data.warehouseCode #的详细信息\" onclick=\"quick_dialog('warehouse_add_dlg','查看#:data.warehouseCode #的信息','$!{rc.contextPath}/spare/warehouse/edit?viewOnly=true&id=#: data.id #',468,370)\">#: data.warehouseCode #</a>",
+              
+          }, {
+              field: "warehouseName",
+              title: "仓库名称",
+              headerAttributes: {"class": "k-grid-text"},
+    		  #*attributes: {"class": "k-grid-text"},*#
+              attributes: {     
+      		  	 title:"#: data.warehouseName==null? '':data.warehouseName #",
+      			 "class": "k-grid-text k-grid-nowrap"
+    		  },
+              sortable: false,             
+             
+          }, {
+              field: "managerName",
+               sortable: false,
+              title: "管理员",
+              attributes: {     
+     				 style: "text-align: center"
+   			   },
+             
+          }, {
+              field: "upperQty",
+              sortable: false,
+              title: "最高库存",
+              headerAttributes: {"class": "k-grid-num"},
+              attributes: {"class": "k-grid-num"},
+              template:function(dataItem){
+        	  	  if(dataItem.upperQty != null)
+        	  		  return fInt(dataItem.upperQty);
+        	  	  else
+        	  		  return '';
+               },
+              
+          }, {
+              field: "safeQty",
+              sortable: false,
+              title: "安全库存",
+              headerAttributes: {"class": "k-grid-num"},
+              attributes: {"class": "k-grid-num"},
+              template:function(dataItem){
+        	  	  if(dataItem.safeQty != null)
+        	  		  return fInt(dataItem.safeQty);
+        	  	  else
+        	  		  return '';
+               },
+             
+          }, {
+              field: "lowerQty",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-num"},
+              attributes: {"class": "k-grid-num"},
+              template:function(dataItem){
+        	  	  if(dataItem.lowerQty != null)
+        	  		  return fInt(dataItem.lowerQty);
+        	  	  else
+        	  		  return '';
+               },
+              title: "最低库存",
+          }], 
+      {
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          },resizable:true
+      }, {
+          serverSorting: true
+      }, [{
+              name: "添加",
+              icon: "fa fa-plus",
+              onclick: function (obj) {
+                /*
+                  var geoAreaId = "";
+                  var nodes = tree.getSelectedNodes();
+                  if (null != nodes && nodes.length > 0) {
+                      geoAreaId = nodes[0].id;
+                  }
+                  */
+                  quick_dialog("warehouse_add_dlg", "添加仓库管理", "$!{rc.contextPath}/spare/warehouse/edit", 468, 370, obj);
+              }
+          },
+          {
+              name: "修改",
+              icon: "fa fa-pencil",
+              onclick: function (obj, grid) {
+                  var row = grid.select();
+                  if (null == row || row.length == 0) {
+                      notify("请选择要修改的项", "warn");
+                      return;
+                  }
+                  var data = grid.dataItem(row);
+                  quick_dialog("warehouse_add_dlg", "修改仓库管理", "$!{rc.contextPath}/spare/warehouse/edit?id=" + data.id, 468, 370, obj);
+              }
+          },
+          {
+              name: "删除",
+              icon: "fa fa-remove",
+              onclick: function (obj, grid) {
+			    var row = grid.select();
+	              if (null == row || row.length == 0) {
+	                  notify("请选择要删除的项", "warn");
+	                  return;
+	              }
+                  singleDelete(grid,"$!{rc.contextPath}/spare/warehouse/delete");
+                
+              }
+          }
+      ]);
+		
+    });
+
+   
+</script>
+</body>
+</html>

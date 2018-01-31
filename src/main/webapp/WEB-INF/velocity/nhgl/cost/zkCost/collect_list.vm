@@ -1,0 +1,40 @@
+<div class="ui-layout-center">
+	<div class="ui-module-name">
+    	<label id="menuName">#crumbs("$!menu.code",1)</label>
+    </div>
+    <form class="ui-form ui-form-search fn-clear" action="$!{rc.contextPath}/nhgl/cost/zkCostCount/zkExp" method="post">
+    	<div class="ui-form-item-larger">
+                <label class="ui-label">时间：</label>
+                <input class="ui-input ui-input-small  Wdate " type="text" id="startTime" name="startTime"
+                       onclick="WdatePicker({dateFmt:'yyyy-MM-dd',maxDate:'#F{$dp.$D(\'endTime\')}'})"
+                       readonly
+                       value="$!condition.startTime" />
+                <span class="ui-form-text">至</span> 
+                <input class="Wdate ui-input ui-input-small " type="text" id="endTime" name="endTime"
+                       onclick="WdatePicker({dateFmt:'yyyy-MM-dd',minDate:'#F{$dp.$D(\'startTime\')}'})"
+                       readonly
+                       value="$!condition.endTime" />
+        </div>	
+    	<div class="ui-form-search-right" style="padding: 0 10px;">
+    			<button id="expButton" class="btn btn-primary" ><i class="iconfont icon-upload-alt" ></i>导出</button>
+    	</div>
+    </form>
+</div>
+  <script type="text/javascript">
+  	var nhType=$!{nhType};
+  	$(document).ready(function(){
+		
+    });
+	
+		
+	$("#expButton").click(function(){
+        	var startTime=$('#startTime').val();
+			var endTime=$('#endTime').val();
+			if(startTime=='' || endTime==''){
+				$.message("开始时间和结束时间不能为空！", 1, 4, false, true);
+				return false;
+			}
+    });
+	
+	
+  </script>

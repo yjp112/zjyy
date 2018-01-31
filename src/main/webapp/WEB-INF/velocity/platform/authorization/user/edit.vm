@@ -1,0 +1,52 @@
+#if($_type)#else#set($_type="edit")#end
+<form class="ui-form" id="platform_auth_user_$!{_type}_form" action="$!{rc.contextPath}/platform/authorization/user/$!{_type}" method="post">
+	<input type="hidden" name="user.id" value="$!{user.id}"/>
+	<fieldset>
+		<div class="ui-form-item ">
+			<label class="ui-label" for=""><span class="ui-form-required">*</span>用户名：</label>
+			#if($_type=="edit")
+			<span class="ui-text" title="$!{user.username}">$!{user.username}</span>
+			#else
+			<input class="ui-input" type="text" name="user.username" value="$!{user.username}" data-rule="用户名:required;username;" />
+			#end
+		</div>
+		<div class="ui-form-item ">
+			<label class="ui-label" for=""><span class="ui-form-required">*</span>电子邮箱：</label>
+			<input class="ui-input" type="text" name="user.email" value="$!{user.email}" data-rule="电子邮箱:required;email;" />
+		</div>
+		<div class="ui-form-item ">
+			<label class="ui-label" for="">#if($_type == "add")<span class="ui-form-required">*</span>#{end}登录密码：</label>
+			<input class="ui-input" type="password" value="" name="user.password" data-rule="登录密码:#if($_type == "add")required;#{end}password;" />
+		</div>
+		<div class="ui-form-item ">
+			<label class="ui-label" for="">#if($_type == "add")<span class="ui-form-required">*</span>#{end}重复密码：</label>
+			<input class="ui-input" type="password" value="" name="repassword" data-rule="重复密码:#if($_type == "add")required;#{end}password;#*match[user.password];*#" />
+		</div>
+		<div class="ui-form-item">
+			<label class="ui-label"><span class="ui-form-required">*</span>关联人员：</label>
+			<input type="hidden" name="user.person.id" value="$!{user.person.id}" />
+			<input readonly="readonly" class="ui-input ui-readonly" type="text" name="user.person.name" value="$!{user.person.name}" data-rule="关联人员:required;" />
+			<a href="javascript:void(0)" class="ui-input-icon"
+				 onclick="$.selectPerson(this,{muilt:false,fill:{id:'#platform_auth_user_$!{_type}_form input[name=\'user.person.id\']',name:'#platform_auth_user_$!{_type}_form input[name=\'user.person.name\']'}})"><i class="iconfont icon-folder-open-alt"></i></a>
+		</div>
+		<div class="ui-form-item colspan2 ui-muilt-select">
+			<label class="ui-label">分配角色：</label>
+			<input type="hidden" name="selectedRoleIds" value="#foreach($role in $assignedRoles)#if($velocityCount > 1),#{end}$!{role.id}#{end}" />
+			<ul class="ui-input ui-readonly" type="text">
+				#foreach($role in $assignedRoles)
+				<li>$!{role.name} [$!{role.code}]</li>
+				#end
+			</ul>
+			<a href="javascript:void(0)" class="ui-input-icon" style="background:transparent;" onclick='$.selectRole(this,{muilt:true,muiltFill:{key:"name",val:"id"}})'><i class="iconfont icon-folder-open-alt"></i></a>
+		</div>
+		<div class="ui-form-item ui-form-item-textarea colspan2">
+      		<label class="ui-label" for="">备注:</label>
+      		<textarea class="ui-textarea" name="user.description" data-rule="备注:length[~500];">$!{user.description}</textarea>
+		</div>
+	</fieldset>
+</form>
+<script type="text/javascript">
+	$(function(){
+		$("#platform_auth_user_$!{_type}_form .ui-muilt-select").muiltSelect();
+	});
+</script>

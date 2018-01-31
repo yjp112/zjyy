@@ -1,0 +1,202 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.base.entities.DevicePionts">
+
+	<resultMap type="com.supconit.base.entities.DevicePionts" id="DevicePiontsResultMap">      
+        <result property="id" column="ID" />
+        <result property="deviceId" column="DEVICE_ID" />
+        <result property="pointCode" column="POINT_CODE" />
+        <result property="pointDesc" column="POINT_DESC" />
+        <result property="pointType" column="POINT_TYPE" />
+        <result property="status" column="STATUS" />
+        <result property="alarmH" column="ALARM_H" />
+        <result property="alarmHh" column="ALARM_HH" />
+        <result property="alarmL" column="ALARM_L" />
+        <result property="alarmLl" column="ALARM_LL" />
+	</resultMap>
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+	<sql id="TABLE_NAME" lang="velocity">DEVICE_PIONTS</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>		
+    <!-- 获取记录列表-->
+	<sql id="select_pre">
+    select 
+        ID,
+        DEVICE_ID,
+        POINT_CODE,
+        POINT_DESC,
+        POINT_TYPE,
+        STATUS,
+        ALARM_H,
+        ALARM_HH,
+        ALARM_L,
+        ALARM_LL		
+		FROM
+		DEVICE_PIONTS
+	</sql>
+	<sql id="count_pre">
+		SELECT
+		COUNT(*)
+		FROM
+		DEVICE_PIONTS
+	</sql>
+    <insert id="insert" parameterType="com.supconit.base.entities.DevicePionts" keyProperty="id" keyColumn="ID" databaseId="sqlserver">
+		<include refid="insert_sql" />
+        <!-- 获取记录主键 microsoft sql server -->
+		<selectKey keyProperty="id" resultType="Long" order="AFTER">
+			select @@identity
+		</selectKey>
+	</insert>
+    <insert id="insert" parameterType="com.supconit.base.entities.DevicePionts" 
+		keyProperty="id" keyColumn="ID" 		lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>        
+		<include refid="INSERT_SQL" />
+	</insert>    
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>
+		(#if($_databaseId=='oracle') ID,#end    
+	        DEVICE_ID,
+	        POINT_CODE,
+	        POINT_DESC,
+	        POINT_TYPE,
+	        STATUS,
+	        ALARM_H,
+	        ALARM_HH,
+	        ALARM_L,
+	        ALARM_LL	
+		) VALUES (        
+		 #if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end	
+	        #{deviceId,jdbcType=NUMERIC},
+	        #{pointCode,jdbcType=VARCHAR},
+	        #{pointDesc,jdbcType=VARCHAR},
+	        #{pointType,jdbcType=NUMERIC},
+	        #{status,jdbcType=NUMERIC},
+	        #{alarmH,jdbcType=NUMERIC},
+	        #{alarmHh,jdbcType=NUMERIC},
+	        #{alarmL,jdbcType=NUMERIC},
+	        #{alarmLl,jdbcType=NUMERIC}		
+		)
+	</sql>			        
+    <!-- 插入记录-->
+	<sql id="insert_sql">
+		INSERT INTO DEVICE_PIONTS(        
+        DEVICE_ID,
+        POINT_CODE,
+        POINT_DESC,
+        POINT_TYPE,
+        STATUS,
+        ALARM_H,
+        ALARM_HH,
+        ALARM_L,
+        ALARM_LL
+		) VALUES (        
+        #{deviceId,jdbcType=NUMERIC},
+        #{pointCode,jdbcType=VARCHAR},
+        #{pointDesc,jdbcType=VARCHAR},
+        #{pointType,jdbcType=NUMERIC},
+        #{status,jdbcType=NUMERIC},
+        #{alarmH,jdbcType=NUMERIC},
+        #{alarmHh,jdbcType=NUMERIC},
+        #{alarmL,jdbcType=NUMERIC},
+        #{alarmLl,jdbcType=NUMERIC}		
+		)
+	</sql>
+    <insert id="insertLst" parameterType="java.util.List" databaseId="sqlserver">
+		INSERT INTO DEVICE_PIONTS(        
+        DEVICE_ID,
+        POINT_CODE,
+        POINT_DESC,
+        POINT_TYPE,
+        STATUS,
+        ALARM_H,
+        ALARM_HH,
+        ALARM_L,
+        ALARM_LL
+		) VALUES        
+        <foreach collection="list" item="item" separator="," >  
+		(
+        #{item.deviceId,jdbcType=NUMERIC},
+        #{item.pointCode,jdbcType=VARCHAR},
+        #{item.pointDesc,jdbcType=VARCHAR},
+        #{item.pointType,jdbcType=NUMERIC},
+        #{item.status,jdbcType=NUMERIC},
+        #{item.alarmH,jdbcType=NUMERIC},
+        #{item.alarmHh,jdbcType=NUMERIC},
+        #{item.alarmL,jdbcType=NUMERIC},
+        #{item.alarmLl,jdbcType=NUMERIC}		
+		)	
+     	</foreach>
+	</insert>
+	<select id="getById" resultMap="DevicePiontsResultMap" parameterType="Long">
+		<include refid="select_pre" />        
+        WHERE ID = #{id}
+	</select>
+	
+	
+	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.base.entities.DevicePionts">
+		UPDATE	DEVICE_PIONTS
+		<set>
+        <if test="deviceId != null">DEVICE_ID = #{deviceId,jdbcType=NUMERIC},</if>
+        <if test="pointCode != null">POINT_CODE = #{pointCode,jdbcType=VARCHAR},</if>
+        <if test="pointDesc != null">POINT_DESC = #{pointDesc,jdbcType=VARCHAR},</if>
+        <if test="pointType != null">POINT_TYPE = #{pointType,jdbcType=NUMERIC},</if>
+        <if test="status != null">STATUS = #{status,jdbcType=NUMERIC},</if>
+        <if test="alarmH != null">ALARM_H = #{alarmH,jdbcType=NUMERIC},</if>
+        <if test="alarmHh != null">ALARM_HH = #{alarmHh,jdbcType=NUMERIC},</if>
+        <if test="alarmL != null">ALARM_L = #{alarmL,jdbcType=NUMERIC},</if>
+        <if test="alarmLl != null">ALARM_LL = #{alarmLl,jdbcType=NUMERIC},</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+    <!-- 通过 ID 获取对象-->
+	<delete id="deleteById" parameterType="Long">
+		DELETE FROM DEVICE_PIONTS WHERE ID = #{id}
+	</delete>
+	<sql id="condition_sql">
+		<where>
+        <if test="id != null "> ID = #{id} and </if>
+        <if test="deviceId != null "> DEVICE_ID = #{deviceId} and </if>
+        <if test="pointCode != null and pointCode != ''">	POINT_CODE like '%'+#{pointCode}+'%' and </if>
+        <if test="pointDesc != null and pointDesc != ''">	POINT_DESC like '%'+#{pointDesc}+'%' and </if>
+        <if test="pointType != null "> POINT_TYPE = #{pointType} and </if>
+        <if test="status != null "> STATUS = #{status} and </if>
+        <if test="alarmH != null "> ALARM_H = #{alarmH} and </if>
+        <if test="alarmHh != null "> ALARM_HH = #{alarmHh} and </if>
+        <if test="alarmL != null "> ALARM_L = #{alarmL} and </if>
+        1=1 
+		</where>
+	</sql>
+    
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.base.entities.DevicePionts" resultMap="DevicePiontsResultMap">
+		<include refid="select_pre" />
+		<include refid="condition_sql" />
+		ORDER BY ID DESC
+	</select>	
+
+    <select id="countByCondition" parameterType="com.supconit.base.entities.DevicePionts" resultType="long">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+    
+    <!-- 删除多条记录-->
+	<delete id="deleteByIds">
+        DELETE FROM DEVICE_PIONTS WHERE ID in 
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+
+	</delete>
+    <delete id="deleteByDeviceId" parameterType="long">
+        DELETE FROM DEVICE_PIONTS WHERE Device_ID =#{deviceId}
+	</delete>
+
+
+</mapper>

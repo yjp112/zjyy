@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=8">
+    <!--无gis的系统，直接显示单个flash-->
+</head>
+<body>
+<div style="width:100px;height:35px;z-index:-1;position:absolute;" class="ui-loading"></div>
+<div style="width:800px; height:400px;">
+  <object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="800" height="400" hspace="0" vspace="0" id="FlashID" title="">
+    <param name="movie" value="/jcds/flash/REM_PAU_1.swf?windmacheineID=C_20F_REM_PAU_001&windmacheineName=新风空调&serverIP=172.20.113.52" />
+    <param name="quality" value="high" />
+    <param name="wmode" value="opaque" /><!--不透，高质动画效果 -->
+    <param name="swfversion" value="6.0.65.0" />
+    <!-- 此 param 标签提示使用 Flash Player 6.0 r65 和更高版本的用户下载最新版本的 Flash Player。如果您不想让用户看到该提示，请将其删除。B_BA_6F_001 KX-6-1新风空调机组 -->
+    <param name="expressinstall" value="Scripts/expressInstall.swf" />
+    <!-- 下一个对象标签用于非 IE 浏览器。所以使用 IECC 将其从 IE 隐藏。 -->
+    <!--[if !IE]>-->
+    <object data="/jcds/flash/REM_PAU_1.swf?windmacheineID=C_20F_REM_PAU_001&windmacheineName=新风空调&serverIP=172.20.113.52" type="application/x-shockwave-flash" width="800" height="400" hspace="0" vspace="0">
+      <!--<![endif]-->
+      <param name="quality" value="high" />
+      <param name="wmode" value="opaque" />
+      <param name="swfversion" value="6.0.65.0" />
+      <param name="expressinstall" value="Scripts/expressInstall.swf" />
+      <!-- 浏览器将以下替代内容显示给使用 Flash Player 6.0 和更低版本的用户。 -->
+      <div>
+        <h4>此页面上的内容需要较新版本的 Adobe Flash Player。</h4>
+        <p><a href="http://www.adobe.com/go/getflashplayer"><img src="http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif" alt="获取 Adobe Flash Player" width="112" height="33" /></a></p>
+      </div>
+      <!--[if !IE]>-->
+    </object>
+    <!--<![endif]-->
+  </object>
+</div>
+<script type="text/javascript" src="/gis_server/flash/js/clickFlashFunction.js"></script>
+</body>
+</html>

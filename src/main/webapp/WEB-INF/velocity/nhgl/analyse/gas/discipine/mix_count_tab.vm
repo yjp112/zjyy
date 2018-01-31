@@ -1,0 +1,270 @@
+  <style>
+  body #centerMain {
+	overflow: hidden !important;
+	}
+  </style>
+  <script type="text/javascript" src="$!{nhgl_static_custom_url}/js/tabs.min.js"> </script>
+
+  <SCRIPT type="text/javascript">
+	$(document).ready(function(){
+		showProgress("span_dept");
+		showProgress("span_dept_list",38);
+		showProgress("span_area");
+		showProgress("span_area_list",38);
+		$('#qy_accordion_area').accordion({
+                "handle": ".handle",
+                "panel": ".panel"
+           	});
+		$('#qy_accordion_dept').accordion({
+                "handle": ".handle",
+                "panel": ".panel"
+           	});
+		var flag = '$!{flag}';
+		if(flag == 2)
+			$('#tab-containers').tabs({
+				defaultTab: 'li:nth-child(2)'
+			});
+		else
+			$('#tab-containers').tabs();
+		if('1'==flag)
+		{
+			$("#name1").text("所有部门 白天总用蒸汽量");
+			$("#name2").text("所有部门 夜间总用蒸汽量");
+		}else{
+			$("#name1").text("所有区域 白天总用蒸汽量");
+			$("#name2").text("所有区域 夜间总用蒸汽量");
+		}
+		var areaId='$!{areaId}';
+		var deptId='$!{deptId}';
+		if(areaId!=''){
+			if($("#"+areaId).parent().is("#qy_accordion_area")){
+				$("#qy_accordion_area #"+areaId+" .accordion-opener").click();
+			}else{
+				$("#qy_accordion_area #"+areaId).parent().parent("li").addClass("current");
+				$("#qy_accordion_area #"+areaId).parent().removeAttr("style");
+				$("#qy_accordion_area #"+areaId).parent().addClass("open");
+				$("#qy_accordion_area #"+areaId+" a").click();
+				$("#qy_accordion_area #"+areaId).addClass("current");
+			}
+		}
+		if(deptId!=''){
+			if($("#"+deptId).parent().is("#qy_accordion_dept")){
+				$("#qy_accordion_dept #"+deptId+" .accordion-opener").click();
+			}else{
+				$("#qy_accordion_dept #"+deptId).parent().parent("li").addClass("current");
+				$("#qy_accordion_dept #"+deptId).parent().removeAttr("style");
+				$("#qy_accordion_dept #"+deptId).parent().addClass("open");
+				$("#qy_accordion_dept #"+deptId+" a").click();
+				$("#qy_accordion_dept #"+deptId).addClass("current")
+			}
+		}
+		
+		$("ul.panel li").click(function(){
+			$(".panel li").removeClass("current");
+			$(this).addClass("current");
+		});		
+		if(areaId=='' && deptId==''){			
+			$("#tabBlock").load('$!{rc.contextPath}/nhgl/analyse/gas/discipine/allYear?start=$!{start}'+'&flag='+flag);
+		}
+	});
+  </SCRIPT>
+<div class="nh-header">
+	<span class="nh-tab-name">蒸汽</span>
+	<span class="nh-menu-name">#crumbs("$!menu.code",1)</span>
+	<div class="nh-count">
+    		<div class="count-item count-item-rise" id="rudD">
+			<div class="item-data">
+				<span class="data-num fInt" id="dayTimeTotal"></span>
+				<span>同比去年</span>
+					<span class="data-trend" id="percentD"></span>
+			</div>
+			<div class="item-ratio">
+				<div class="item-ratio-i"></div>
+			</div>
+			<div class="item-info">
+				<span class="info-date" id="sTime1"></span>
+				<span class="info-name" id="name1">所有部门 白天总用蒸汽量</span>
+			</div>
+		</div>
+    		<div class="count-item count-item-rise" id="rudN">
+			<div class="item-data">
+				<span class="data-num fInt" id="nightTotal"></span>
+				<span>同比去年</span>
+					<span class="data-trend" id="percentN"></span>
+			</div>
+			<div class="item-ratio">
+				<div class="item-ratio-i"></div>
+			</div>
+			<div class="item-info">
+				<span class="info-date" id="sTime2"></span>
+				<span class="info-name" id="name2">所有部门 夜间总用蒸汽量</span>
+			</div>
+		</div>
+	</div>	
+</div>	
+<div id="tab-containers" class="nh-box ui-tab ui-tab-h">
+	##切换时需要更新地址
+	<input id="areaId" type="hidden"/>
+	<input id="deptId" type="hidden"/>
+	<input id="allId" type="hidden"/>
+	<input id="isp" type="hidden"/>
+	<input id="name" type="hidden"/>
+	<input id="flag" type="hidden" value="$!{flag}"/>
+	<ul class='ui-tab-items ui-tab-items-h'>
+       <li class='ui-tab-item'><a href="#tabDept" onclick="changeTab('$!start','1','0','$!eleMonth.totalMonthValue','$!eleMonth.percent')"><span class="ui-tab-area"></span>部门</a></li>
+       <li class='ui-tab-item'><a href="#tabArea" onclick="changeTab('$!start','2','1','$!eleMonth.totalMonthValue','$!eleMonth.percent')"><span class="ui-tab-type"></span>区域</a></li>
+	</ul>
+  	<div  class="ui-tab-panels" style="overflow:auto">
+		<div id="tabDept" class="ui-tab-panel">
+			<ul id="qy_accordion_dept" class="accordion">
+			#foreach($me in $list)
+				#if($me.parentId == $rootDId)
+					<li id='$!me.deptId'>
+						#if($me.tb==1)
+							<h3 class="handle handle-rise" onclick="toTab('$!{start}','$!me.deptName','$!me.deptId','','1','$!me.total','$!me.percent')">
+						#elseif($me.tb==0)
+							<h3 class="handle handle-unchanged" onclick="toTab('$!{start}','$!me.deptName','$!me.deptId','','1','$!me.total','$!me.percent')">
+						#else
+							<h3 class="handle handle-decline" onclick="toTab('$!{start}','$!me.deptName','$!me.deptId','','1','$!me.total','$!me.percent')">
+						#end
+							    <span class="handle-name" name="nameCss" title="$!me.deptName">$!me.deptName</span>
+        						<span class="handle-num fInt">$!me.total</span>
+        						<span class="handle-bar" name="span_dept" num="$!me.total"></span>
+							</h3>
+							<ul class="panel">
+								#foreach($cm in $list)
+									#if($!me.deptId == $!cm.parentId)
+										#if($cm.tb==1)
+											<li id='$!cm.deptId' onclick="toTab('$!{start}','$!cm.deptName','$!cm.deptId','','1','$!cm.total','$!cm.percent')" class="pitem-rise">
+										#elseif($cm.tb==0)
+											<li id='$!cm.deptId' onclick="toTab('$!{start}','$!cm.deptName','$!cm.deptId','','1','$!cm.total','$!cm.percent')" class="pitem-unchanged">
+										#else
+											<li id='$!cm.deptId' onclick="toTab('$!{start}','$!cm.deptName','$!cm.deptId','','1','$!cm.total','$!cm.percent')" class="pitem-decline">
+										#end
+												<a class="pitem-link" href="javascript:;">
+        											<span class="pitem-name" name="nameCss" title="$!cm.deptName">$!cm.deptName</span>
+                            						<span class="pitem-num fInt">
+														$!cm.total
+													</span>
+                            						<span class="pitem-bar" name="span_dept_list" num="$!cm.total"></span>
+												</a>
+											</li>
+									#end
+								#end
+							</ul>
+						</li>
+					#end
+				#end
+			</ul>
+		</div>
+		<div id="tabArea" class="ui-tab-panel" >
+			<ul id="qy_accordion_area" class="accordion">
+			#foreach($me in $glist)
+				#if($me.parentId == $rootAId)
+					<li name="subli" id="$me.areaId" isp="1">
+						#if($me.tb==1)
+							<h3 class="handle handle-rise" onclick="toTab('$!{start}','$!me.areaName','$!me.areaId','1','2','$!me.total','$!me.percent')">
+						#elseif($me.tb==0)
+							<h3 class="handle handle-unchanged" onclick="toTab('$!{start}','$!me.areaName','$!me.areaId','1','2','$!me.total','$!me.percent')">
+						#else
+							<h3 class="handle handle-decline" onclick="toTab('$!{start}','$!me.areaName','$!me.areaId','1','2','$!me.total','$!me.percent')">
+						#end
+							    <span class="handle-name" name="nameCss" title="$!me.areaName">$!me.areaName</span>
+        						<span class="handle-num fInt">$!me.total</span>
+        						<span class="handle-bar" name="span_area" num="$!me.total"></span>
+							</h3>
+							<ul class="panel">
+								#foreach($cm in $glist)
+									#if($!me.areaId == $!cm.parentId)
+										#if($cm.tb==1)
+											<li name="subli" isp="" id="$cm.areaId" onclick="toTab('$!{start}','$!cm.areaName','$!cm.areaId','','2','$!cm.total','$!cm.percent')" class="pitem-rise">
+										#elseif($cm.tb==0)
+											<li name="subli" isp="" id="$cm.areaId" onclick="toTab('$!{start}','$!cm.areaName','$!cm.areaId','','2','$!cm.total','$!cm.percent')" class="pitem-unchanged">
+										#else
+											<li name="subli" isp="" id="$cm.areaId" onclick="toTab('$!{start}','$!cm.areaName','$!cm.areaId','','2','$!cm.total','$!cm.percent')" class="pitem-decline">
+										#end
+												<a class="pitem-link" href="javascript:;">
+        											<span class="pitem-name" name="nameCss"  title="$!cm.areaName">$!cm.areaName</span>
+                            						<span class="pitem-num fInt">
+														$!cm.total
+													</span>
+                            						<span class="pitem-bar" name="span_area_list" num="$!cm.total"></span>
+												</a>
+											</li>
+									#end
+								#end
+							</ul>
+						</li>
+					#end
+				#end
+			</ul>
+		</div>
+	</div>
+</div>
+<!-- 图表和表格区域 -->
+<div class="nh-content">
+	<div class="nh-nd">
+		<div id="dateTime" class="nh-nd-date">
+			<label>日期：</label>
+			<input class="ui-input Wdate" type="text" id="start" name="start" value="$!{start}" onclick="WdatePicker({el:this,dateFmt:'yyyy-MM',onpicked:linkTo,maxDate:'%y-%M-%d'})">
+		</div>
+	</div>
+	<div id="tabBlock" class="nh-ct">
+		
+	</div>
+</div>
+  
+  
+<script type="text/javascript">
+	var code='$!code';
+	if(code!='fzjc'){
+		T.nhInit();
+	}
+	//重新load右边的tab
+	function toTab(start,deptName,id,isp,flag,eleTotal,percent)
+	{	
+		if(flag=='1'){
+			$("#deptId").val(id);
+		}else{
+			$("#areaId").val(id);
+		}
+		var dname=deptName;
+		if(deptName.length>8)
+    		deptName = deptName.substring(0,8)+"...";
+    	$("#name1").text(deptName+" 白天总用蒸汽量");
+    	$("#name2").text(deptName+" 夜间总用蒸汽量");
+		$("#tabBlock").load('$!{rc.contextPath}/nhgl/analyse/gas/discipine/allYear?start='+start+'&deptName='+encodeURIComponent(dname)+'&id='+id+'&flag='+flag);
+	}
+	
+	//切换tab
+	function changeTab(start,flag,isp,total,percent)
+	{
+		$(".ui-tab-panels li").removeClass("current");
+		$(".ui-tab-panels li ul").removeClass("open");
+		$(".ui-tab-panels li ul").attr("style","display:none");
+		$("#flag").attr("value",flag);
+    	if('1'==flag)
+    	{
+    		$("#areaId").val('');
+			$("#name1").text("所有部门 白天总用蒸汽量");
+			$("#name2").text("所有部门 夜间总用蒸汽量");
+    		$("#tabBlock").load('$!{rc.contextPath}/nhgl/analyse/gas/discipine/allYear?start='+start+'&flag='+flag);
+    	}else{
+    		$("#deptId").val('');
+			$("#name1").text("所有区域 白天总用蒸汽量");
+			$("#name2").text("所有区域 夜间总用蒸汽量");
+    	    $("#tabBlock").load('$!{rc.contextPath}/nhgl/analyse/gas/discipine/allYear?start='+start+'&flag='+flag);
+    	  }
+	}
+	
+	function linkTo()
+	{	
+		var areaId=$("#areaId").val();
+		var deptId=$("#deptId").val();
+		var start = $("#start").val();
+		var flag = $("#flag").val();
+		var menuCode = '$!menu.code'
+		$("#chart_content_id").load('$!{rc.contextPath}/nhgl/analyse/gas/discipine/index?flag='+flag+'&start='+start+'&areaId='+areaId+'&deptId='+deptId+'&menuCode='+encodeURIComponent(menuCode)+'&code='+encodeURIComponent(code));
+	}
+
+</script>

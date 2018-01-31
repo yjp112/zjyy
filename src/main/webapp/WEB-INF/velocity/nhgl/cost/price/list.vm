@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=8"> 
+	
+<link href="$!{nhgl_static_custom_url}/price_1.9.2/pathLine.css" rel="stylesheet" media="screen"> 	
+##<link href="${static_url}/hcstyle/iconfont/1.0.0/iconfont.css" rel="stylesheet" media="screen">
+ 
+##<link rel="stylesheet" href="$!{rc.contextPath}/assets/price_1.9.2/themes/base/jquery.ui.all.css">
+<link rel="stylesheet" href="$!{nhgl_static_custom_url}/price_1.9.2/demos/demos.css">
+
+<script src="$!{nhgl_static_custom_url}/price_1.9.2/ui/jquery.ui.core.js"></script>
+<script src="$!{nhgl_static_custom_url}/price_1.9.2/ui/jquery.ui.widget.js"></script>
+<script src="$!{nhgl_static_custom_url}/price_1.9.2/ui/jquery.ui.mouse.js"></script>
+<script src="$!{nhgl_static_custom_url}/price_1.9.2/ui/jquery.ui.selectable.js"></script>
+<style>
+#feedback { font-size: 1.4em; }
+#selectable1 .ui-selecting { background: #FECA40; }
+#selectable1 .ui-selected { background: #F39814; color: white; }
+#selectable1 { list-style-type: none; margin: 0; padding: 0;}
+#selectable1 li { margin: 3px; padding: 1px; float: left; width: 156px; height: 150px; font-size: 2.5em; text-align: center; }
+.divO{width: 500px;float:left;margin:15px }
+.divN{text-align:center;font-size:16px;background-color:green;color:white;margin-left:2px;margin-right:5px} 
+
+.divList{font-size:14px;color:#2894ff;padding-top:6px;text-align:left;padding-left:10px;}
+.inpList{width:40px;display:none;}
+.ui-state-default{background-color:#DADADA;}
+
+.month {height:32px;margin-top:7px;}
+</style>
+<script>
+//document.onselectstart = new Function('event.returnValue=false;');
+function isChange($obj){
+	var bol =$obj.find("span.water").text() != $obj.find("input.water").val()
+    		|| $obj.find("span.electric").text() != $obj.find("input.electric").val()
+			|| $obj.find("span.energy").text() != $obj.find("input.energy").val()
+    		|| $obj.find("span.gas").text() != $obj.find("input.gas").val();
+	return bol;
+}
+function check(){	
+	var bol =true;	
+	$("li.ui-selected").each(function(i){
+    	if($(this).find("input.water").val()==null || $(this).find("input.water").val()==""){
+    		$(this).find("input.water").val(0);
+    	}
+    	if($(this).find("input.electric").val()==null || $(this).find("input.electric").val()==""){
+    		$(this).find("input.electric").val(0);
+    	}
+    	if($(this).find("input.energy").val()==null || $(this).find("input.energy").val()==""){
+    		$(this).find("input.energy").val(0);
+    	}	
+		if($(this).find("input.gas").val()==null || $(this).find("input.gas").val()==""){
+    		$(this).find("input.gas").val(0);
+    	}
+    	var reg0 = /^[0-9]+.?[0-9]+$|^[0-9]+$/;
+    	if(!reg0.test($(this).find("input.water").val())){
+           alert($(this).siblings("div.year").text()+$(this).find("div.month").text()+ "水价请输入数字!");
+    	   bol = false;
+		   return false;
+        }else if(!reg0.test($(this).find("input.electric").val())){
+           alert($(this).siblings("div.year").text()+$(this).find("div.month").text()+ "电价请输入数字!");
+    	   bol = false;
+		   return false;
+        }else if(!reg0.test($(this).find("input.energy").val())){
+           alert($(this).siblings("div.year").text()+$(this).find("div.month").text()+ "能量价请输入数字!");
+    	   bol = false;
+		   return false;
+        }else if(!reg0.test($(this).find("input.gas").val())){
+           alert($(this).siblings("div.year").text()+$(this).find("div.month").text()+ "蒸汽价请输入数字!");
+    	   bol = false;
+		   return false;
+        }
+
+	});
+
+	return bol;
+}
+function save(){
+	if($("li.ui-selected").length>0){
+		var ids = new Array();
+		var years = new Array();
+		var months = new Array();
+		var waters = new Array();
+		var electrics = new Array();
+		var energys = new Array();
+		var gass = new Array();		
+		if(check()){
+			$("li.ui-selected").each(function(i){
+    			if(isChange($(this))){	
+    				ids.push($(this).find("input.id").val());
+        			years.push($(this).siblings("div.year").text().replace("年",""));
+    				months.push($(this).find("div.month").text().replace("月",""));
+    				waters.push($(this).find("input.water").val());
+    				electrics.push($(this).find("input.electric").val());
+    				energys.push($(this).find("input.energy").val());
+    				gass.push($(this).find("input.gas").val());
+    			}
+    		});
+    		$.ajax({
+    		   'url':'$!{rc.contextPath}/nhgl/cost/price/save', 
+    		   'data':  {'ids':ids.join(),'years':years.join(),'months':months.join(),'waters':waters.join(),'electrics':electrics.join(),'gass':gass.join(),'energys':energys.join()} ,
+    		   'dataType': 'json',
+    		   'type': 'post',
+    		   'error': function(data){
+    				 return false;
+    		    },
+    		   'success': function(data) {
+    				window.location.reload();
+    		    },
+    			'complete': function(data){
+    				 return false;
+    			},
+    		});
+		}
+		
+	}
+}
+$(document).ready(function(){
+	$("#gisbar").html($("#bar",parent.document).html());
+	var rootEl=document.compatMode=="CSS1Compat"?document.documentElement:document.body;
+	var rootWt = parseInt(rootEl.clientWidth);
+	$("#selectable1").css("margin-left",(rootWt-500*2-30)/2);
+##	$("#divBtn").css("margin-left",(rootWt-500*2-30)/2+20);
+
+	$("li.ui-state-default").click(function(){
+		if(!$(this).hasClass("ui-selected")){
+			//$("li.ui-state-default").removeClass("ui-selected");
+			$(this).find("span.num").hide();
+			$(this).find("input").show();
+			$(this).addClass("ui-selected");
+		}
+	})
+	
+	if($!{startYear}<=2014){
+		$(".types_slide_left").hide();
+	}else if($!{startYear}>=($!{thisYear}+2)){
+		$(".types_slide_right").hide();
+	}
+	$(".types_slide_left").click(function(){
+		var y = $!{startYear};
+		y = y -2;
+		var menuCode='$!menu.code';
+		$("#centerMain").load('$!{rc.contextPath}/nhgl/cost/price/list?startYear='+y+'&menuCode='+menuCode);
+	});
+		
+	$(".types_slide_right").click(function(){
+		var y = $!{startYear};
+		y = y + 2;
+		var menuCode='$!menu.code';
+		$("#centerMain").load('$!{rc.contextPath}/nhgl/cost/price/list?startYear='+y+'&menuCode='+menuCode);
+##		window.location.href='$!{rc.contextPath}/nhgl/cost/price/list?startYear='+y;
+	});
+});
+</script>
+</head>
+<body style="margin:0px;">
+	<div class="toolbar"  style="margin-top:0px;">
+     <!-- 导航条 开始 -->
+     <div id="gisbar" class="row-fluid" ><div class="ui-module-name" style="margin-top20px;height:50px;border-left:0px">#crumbs("$!menu.code",1)</div>
+     </div>
+	 </div>
+     <!-- 导航条 结束 -->
+	 <div  id="divBtn" class="ui-form-item ui-form-item-small" style="margin-left:50px;width:155px">
+		<button type="button" class="btn ui-btn" onclick="save();"  id="btnSave" ><i class="iconfont icon-save" style="padding-right:5px"></i>保存</button>
+	</div>	
+	
+	<a href="javascript:void(0);" class="types_slide_left"></a>
+	<a href="javascript:void(0);" class="types_slide_right"></a>
+    <ol id="selectable1" style="margin-left:199px">
+    	#foreach($!price in $!list)
+    		
+    	#if($!{price.month}==1)<div class="divO">#end
+        	#if($!{price.month}==1)<div class="divN year" style="width:97.5%">$!{price.year}年</div>#end
+        	<li class="ui-state-default"><div class="month">$!{price.month}月</div>
+    		<input type="hidden" class="id" value="$!{price.id}"/>
+        	<div class="divList" style="padding-top:0px"><span style="color:green">水</span>:<span class="num water">$!{price.water}</span><input type="text" class="inpList water" value="$!{price.water}"/>元/吨</div>
+        	<div class="divList"><span style="color:green">电</span>:<span class="num electric">$!{price.electric}</span><input type="text" class="inpList electric" value="$!{price.electric}"/>元/度</div>
+        	<div class="divList"><span style="color:green">能量</span>:<span class="num energy"  >$!{price.energy}</span><input type="text" class="inpList energy" value="$!{price.energy}"/>元/焦耳</div>
+			<div class="divList"><span style="color:green">蒸汽</span>:<span class="num gas"  >$!{price.gas}</span><input type="text" class="inpList gas" value="$!{price.gas}"/>元/吨</div>
+        	</li>
+     	
+    	#if($!{price.month}==12)</div>#end
+    	#end
+    	 
+    </ol>
+
+
+</body>
+</html>

@@ -1,0 +1,367 @@
+<div class="evl">
+	<div class="evl-main">
+		<div class="evl-header">
+
+			<!--未开始评估(上次评估得分)-->
+			<div class="evl-score evl-score-init">
+				<div class="evl-logo"></div>
+				<div class="evl-details">
+					<p class="score">
+						上次用能评估得分 
+						<span class="score-num">100</span>
+						<i class="score-rise"></i>
+					</p>
+					<p>上次评估时间：2014-7-15 </p>
+					<p>建议定期评估，提升用能效率，降低能耗支出成本。</p>
+				</div>
+				<a class="btn-score-action" href="javascript:;">全面评估</a>
+			</div>
+
+			<!--正在评估-->
+			<div class="evl-score evl-score-current">
+				<div class="evl-logo logo-active"><span class="goal">80</span></div>
+				<div class="evl-details">
+					<p class="score">正在进行评估，请稍后。。。</p>
+					<div class="progress-warp">
+						<div class="progress">
+							<div class="progress-bar"></div>
+						</div>
+						<a class="btn-score-cancel" href="javascript:void(0);" title="取消"></a>
+					</div>
+					<p>正在评估：空调用电是否出现异常</p>
+				</div>				
+			</div>
+
+			<!--评估被取消-->
+			<div class="evl-score evl-score-cancel">
+				<div class="evl-logo logo-notice"></div>
+				<div class="evl-details">
+					<p class="score">本次评估被取消</p>
+					<p>已发现<span class="rpt-num color-warn">N</span>项能耗异常，请及时处理</p>
+					<p>还有N项未评估，建议您重新进行完整评估 
+						<a class="score-link score-afresh" href="javascript:void(0);">重新评估</a>
+						<a class="score-link score-back" href="javascript:void(0);">返回</a>
+					</p>
+				</div>
+			</div>
+
+			<!--评估被取消后返回-->
+			<div class="evl-score evl-score-breakoff">
+				<div class="evl-logo logo-notice"></div>
+				<div class="evl-details">
+					<p class="score">上次用能评估被取消</p>
+					<p>建议您重新进行用能评估</p>
+					<p>建议定期评估，提升用能效率，降低能耗支出成本。</p>
+				</div>
+				<a class="btn-score-action" href="javascript:;">全面评估</a>
+			</div>
+
+			<!--评估完成-->
+			<div class="evl-score evl-score-finsh">
+				<div class="evl-logo logo-warn"></div>
+				<div class="evl-details">
+					<p class="score">
+						上次用能评估得分 
+						<span class="score-num score-num-warn">47</span>
+						<i class="score-decline"></i>
+					</p>
+					<p>已发现<span class="rpt-num color-warn">N</span>项能耗异常，请及时处理</p>
+					<p>
+						<a class="score-link score-afresh" href="javascript:void(0);">重新评估</a>
+						<a class="score-link score-finsh-back" href="javascript:void(0);">返回</a>
+					</p>
+				</div>
+				<a class="btn-score-action" href="javascript:;">全面评估</a>
+			</div>
+
+			<!--未开始评估/评估被取消后返回建议-->
+			<div class="evl-report evl-report-tip">
+				<ul class="issue-list">
+					<li class="issue-exception">
+						<p><span class="issue-title">用能异常  </span><span class="issue-status">已全部开启  </span>按部门和建筑功能进行能耗使用异常评估</p>
+						<p>本次启动已评估能耗：128</p>
+					</li>
+					<li class="issue-warn">
+						<p><span class="issue-title">设备报警 </span><span class="issue-status">已全部开启  </span></p>
+						<p>本次启动已评估能耗：128</p>
+					</li>
+				</ul>
+			</div>
+
+			<!--正在评估/评估被取消/评估完成详情列表-->
+			<div class="evl-report evl-report-detail">
+				<div class="rpt-item rpt-item-excep">
+					<h3 class="rpt-item-title">用能异常<i class="icon-img icon-loading"></i></h3>
+					<ul class="rpt-list">
+						<li class="rpt-list-item">
+							<a class="rpt-list-link" href="javascript:void(0);">
+								<i class="icon-img icon-closed"></i>
+								<span class="rpt-state state-n">正常</span>
+								<span class="rpt-num">N</span>项没有发现问题
+								<ul class="rpt-list-detail">
+									<li>空调用电，占总比重的20%</li>
+									<li>空调用电，占总比重的20%</li>
+									<li>空调用电，占总比重的20%</li>
+								</ul>
+							</a>
+						</li>
+						<li class="rpt-list-item">
+							<a class="rpt-list-link" href="javascript:void(0);">
+								<i class="icon-img icon-closed"></i>
+								<span class="rpt-state state-e">异常</span>
+								发现<span class="rpt-num color-warn">N</span>项能耗问题
+								<ul class="rpt-list-detail">
+									<li>空调用电，占总比重的20%</li>
+									<li>空调用电，占总比重的20%</li>
+									<li>空调用电，占总比重的20%</li>
+								</ul>
+							</a>
+						</li>
+						<li class="rpt-list-item">
+							<a class="rpt-list-link" href="javascript:void(0);">
+								<i class="icon-img icon-closed"></i>
+								<span class="rpt-state state-t">提示</span>
+								提出<span class="rpt-num">N</span>项能耗建议
+								<ul class="rpt-list-detail">
+									<li>空调用电，占总比重的20%</li>
+									<li>空调用电，占总比重的20%</li>
+									<li>空调用电，占总比重的20%</li>
+								</ul>
+							</a>
+						</li>
+						<li class="rpt-list-item">
+							<a class="rpt-list-link" href="javascript:void(0);">
+								<i class="icon-img icon-closed"></i>
+								<span class="rpt-state state-i">忽略</span>
+								<span class="rpt-num">N</span>项已忽略
+								<ul class="rpt-list-detail">
+									<li>空调用电，占总比重的20%</li>
+									<li>空调用电，占总比重的20%</li>
+									<li>空调用电，占总比重的20%</li>
+								</ul>
+							</a>
+						</li>
+					</ul>
+				</div>
+				<div class="rpt-item rpt-item-warn">
+					<h3 class="rpt-item-title">设备报警<i class="icon-img icon-loading"></i></h3>
+					<ul class="rpt-list">
+						<li class="rpt-list-item">
+							<a class="rpt-list-link" href="javascript:void(0);">
+								<i class="icon-img icon-closed"></i>
+								<span class="rpt-state state-n">正常</span>
+								<span class="rpt-num">N</span>项没有发现问题
+								<ul class="rpt-list-detail">
+									<li>空调用电，占总比重的20%</li>
+									<li>空调用电，占总比重的20%</li>
+									<li>空调用电，占总比重的20%</li>
+								</ul>
+							</a>
+						</li>
+						<li class="rpt-list-item">
+							<a class="rpt-list-link" href="javascript:void(0);">
+								<i class="icon-img icon-closed"></i>
+								<span class="rpt-state state-e">异常</span>
+								发现<span class="rpt-num color-warn">N</span>项能耗问题
+								<ul class="rpt-list-detail">
+									<li>空调用电，占总比重的20%</li>
+									<li>空调用电，占总比重的20%</li>
+									<li>空调用电，占总比重的20%</li>
+								</ul>
+							</a>
+						</li>
+						<li class="rpt-list-item">
+							<a class="rpt-list-link" href="javascript:void(0);">
+								<i class="icon-img icon-closed"></i>
+								<span class="rpt-state state-t">提示</span>
+								提出<span class="rpt-num">N</span>项能耗建议
+								<ul class="rpt-list-detail">
+									<li>空调用电，占总比重的20%</li>
+									<li>空调用电，占总比重的20%</li>
+									<li>空调用电，占总比重的20%</li>
+								</ul>
+							</a>
+						</li>
+						<li class="rpt-list-item">
+							<a class="rpt-list-link" href="javascript:void(0);">
+								<i class="icon-img icon-closed"></i>
+								<span class="rpt-state state-i">忽略</span>
+								<span class="rpt-num">N</span>项已忽略
+								<ul class="rpt-list-detail">
+									<li>空调用电，占总比重的20%</li>
+									<li>空调用电，占总比重的20%</li>
+									<li>空调用电，占总比重的20%</li>
+								</ul>
+							</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+				
+		</div>
+
+		<!--能耗支出明细-->
+		<div class="evl-piece">
+			<h2 class="evl-c-title">全员能耗支出<span>2014/07/01 - 2014/07/18</span></h2>
+			<div class="evl-c-cont">
+				<div class="evl-c-caption">
+					<span class="evl-c-name">总成本支出</span>
+					<span class="evl-c-details">￥10,356.00</span>
+					<a class="evl-c-more" href="javascript:;">查看能耗支出明细>></a>
+				</div>
+				<div class="evl-c-cl">
+					<div class="evl-c-chart"></div>
+					<div class="evl-c-list">
+						<div class="c-list-header">
+							<span class="c-list-row-1">能耗占比</span>
+							<span class="c-list-row-2">同比上月</span>
+							<span class="c-list-row-3">能耗成本支出</span>
+							<span class="c-list-row-4">能耗量</span>
+							<span class="c-list-row-5">转换标准煤</span>
+						</div>
+						<ul class="c-list-ul">
+							<li class="c-list-li">
+								<i class="c-list-icon"></i>
+								<a href="javascript:;">									
+									<span class="c-list-row-1"><label class="c-list-tit">电</label>  94%</span>
+									<span class="c-list-row-2"><label class="c-list-row-rise">↑</label></span>
+									<span class="c-list-row-3">￥ 45,000.00</span>
+									<span class="c-list-row-4">75000 度</span>
+									<span class="c-list-row-5">9215 kg</span>
+									<span class="c-list-row-tri">&gt;</span>
+								</a>
+							</li>
+							<li class="c-list-li">
+								<i class="c-list-icon"></i>
+								<a href="javascript:;">									
+									<span class="c-list-row-1"><label class="c-list-tit">水</label>  3%</span>
+									<span class="c-list-row-2"><label class="c-list-row-unchanged">▬</label></span>
+									<span class="c-list-row-3">￥ 45,000.00</span>
+									<span class="c-list-row-4">75000 度</span>
+									<span class="c-list-row-5">9215 kg</span>
+									<span class="c-list-row-tri">&gt;</span>
+								</a>
+							</li>
+							<li class="c-list-li">
+								<i class="c-list-icon"></i>
+								<a href="javascript:;">									
+									<span class="c-list-row-1"><label class="c-list-tit">燃气</label>  3%</span>
+									<span class="c-list-row-2"><label class="c-list-row-decline">↓</label></span>
+									<span class="c-list-row-3">￥ 45,000.00</span>
+									<span class="c-list-row-4">75000 度</span>
+									<span class="c-list-row-5">9215 kg</span>
+									<span class="c-list-row-tri">&gt;</span>
+								</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="evl-piece">
+			<h2 class="evl-c-title">全员能耗支出<span>2014/07/01 - 2014/07/18</span></h2>
+			<div class="evl-c-cont">
+
+			</div>
+		</div>
+		<div class="evl-piece-half-l">
+			<h2 class="evl-c-title">全员能耗支出<span>2014/07/01 - 2014/07/18</span></h2>
+			<div class="evl-c-cont">
+
+			</div>
+		</div>
+		<div class="evl-piece-half-r">
+			<h2 class="evl-c-title">全员能耗支出<span>2014/07/01 - 2014/07/18</span></h2>
+			<div class="evl-c-cont">
+
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	$("li.c-list-li").die().live({
+	'mouseover':function(){
+		$(this).css("marginLeft","-10px");
+		},
+	'mouseleave':function(){
+		$(this).css("marginLeft",0);
+	}
+	});
+
+	//全面评估/重新评估按钮点击
+	$(".btn-score-action,.score-afresh").click(function(){
+		startAssess();
+	});
+	//取消评估按钮点击
+	$(".btn-score-cancel").click(function(){
+		cancelAssess();
+	});	
+	//取消评估后返回按钮点击	
+	$(".score-back").click(function(){
+		cancelBackAssess();
+	});
+	$(".score-finsh-back").click(function(){
+		initAssess();
+	});
+
+	$(".rpt-list-link").click(function(){
+		var $icon = $(this).find("i");
+		var $detail = $(this).find(".rpt-list-detail");
+		var state = $icon.hasClass("icon-open")?"open":"closed";
+		if(state=="open"){
+			$icon.removeClass("icon-open").addClass("icon-closed");
+			$detail.slideUp();
+		}else if(state=="closed"){
+			$icon.removeClass("icon-closed").addClass("icon-open");
+			$detail.slideDown();
+		}
+	});
+	//设置进度条的百分比，参数为百分号前的数值（如需设置为45%则传入45即可）
+	function setProgress(percent){
+		var width = percent/100*($(".progress").width());
+		$(".progress-bar").width(width);
+	}
+	//设置当前评估分数
+	function setGoal(num){
+		$(".goal").html(num);
+	}
+	//设置最终评估分数
+	function setScore(num){
+		$(".score-num").html(num);
+	}
+	var assessTimeout;
+	//开始评估
+	function startAssess(fn){
+		$(".evl-score,.evl-report").hide();
+		$(".evl-score-current,.evl-report-detail").show();
+		$(".icon-loading").css("display","inline-block");
+		setProgress(100);
+		setScore(45);
+		setGoal(21);
+		assessTimeout = setTimeout(function(){
+			finshAssess();
+		},2000);
+	}
+	//取消评估
+	function cancelAssess(){
+		$(".evl-score,.evl-report,.icon-loading").hide();
+		$(".evl-score-cancel,.evl-report-detail").show();
+		clearTimeout(assessTimeout);
+	}
+	//取消评估后返回
+	function cancelBackAssess(){
+		$(".evl-score,.evl-report").hide();
+		$(".evl-score-breakoff,.evl-report-tip").show();
+	}
+	//完成评估
+	function finshAssess(){
+		$(".evl-score,.evl-report,.icon-loading").hide();
+		$(".evl-score-finsh,.evl-report-detail").show();	
+	}
+	//完成评估后返回
+	function initAssess(){
+		$(".evl-score,.evl-report").hide();
+		$(".evl-score-init,.evl-report-tip").show();
+	}
+</script>

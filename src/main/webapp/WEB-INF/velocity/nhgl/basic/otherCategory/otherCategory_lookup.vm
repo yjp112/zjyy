@@ -1,0 +1,36 @@
+<script type="text/javascript">
+    var setting = {
+
+        data: {
+            simpleData: {
+                enable: true
+            }
+        },
+		callback: {
+				onClick: onClick
+			}
+
+    };
+
+    var zNodes = [];
+    #foreach($!{treeNode} in $!{treeList})
+     zNodes.push({id:"$!{treeNode.id}", pId:"$!{treeNode.parentId}", name: "$!{treeNode.name}"});
+    #end
+    function onClick(event, treeId, treeNode, clickFlag) {
+        $("#$!{txtId}").val(treeNode.id);
+    	$("#$!{txtName}").val(treeNode.name);
+    	closeDialog();
+    	
+    }	
+    $(document).ready(function(){
+        //ztree
+		//console.info("#$!{txtName}");
+        $.fn.zTree.init($("#ngAreaTree"), setting,zNodes).expandAll(true);
+    });
+
+</script>
+
+<div class="tree">
+    <ul id="ngAreaTree" class="ztree"></ul>
+</div>
+

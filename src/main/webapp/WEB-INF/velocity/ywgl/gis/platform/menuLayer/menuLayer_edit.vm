@@ -1,0 +1,394 @@
+#parse("index/_header.vm")
+</head>
+<body style="padding-bottom:40px;">
+<form id="myform_id" method="post" action="$!{rc.contextPath}/hl/gis/platform/menuLayer/save" class="ui-layout-center ui-dialog-form">
+	<input type="hidden" name="id" value="$!{menuLayer.id}">
+	<input type="hidden" id="hidden_model" value="$!{menuLayer.layerModel}">
+    <table width="100%">
+        <tr>
+            <td class="label" width="33%"><span class="ui-form-required">*</span><label>菜单编码：</label></td>
+            <td><input type="text" style="width:100px!important;" class="k-textbox" name="menuType" id="menuType" value="$!{menuLayer.menuType}">
+                <button id="copyButton" class="k-primary hc_btn" onclick="return copy();">复制地址</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="label" width="33%"><span class="ui-form-required">*</span><label>菜单名称：</label></td>
+            <td><input type="text" style="width:200px!important;" class="k-textbox" name="menuName" value="$!{menuLayer.menuName}"></td>
+        </tr>
+		
+         <tr id="layerModelType_id">
+        	<td class="label"><span class="ui-form-required">*</span><label>图层类型：</label></td>
+			<td>
+				<input type="radio" id="modelTypeId1" class="k-radiobox" name="modelType" value="1"/>
+				<span class="ui-form-text"> flash模式</span>
+				
+				<input type="radio" id="modelTypeId2" class="k-radiobox" name="modelType" value="2"/>
+				<span class="ui-form-text"> gis模式</span>
+			</td>
+	    </tr>
+	    
+	    <tr id="flash_system_code">
+			<td class="label"><span class="ui-form-required">*</span><label>系统编码：</label></td>
+			<td>
+			<select  class="k-textbox" id="flashId" name="flashId" style="width:200px!important;" value="$!{menuLayer.flashId}" >
+					<option value=''>--请选择--</option>
+				    #foreach($!{e} in $!{flashConfigs})
+	   					<option value="$!{e.fullCode}">#if($!{e.model}=="LAYOUT")  $!{e.fullCode}(左右模式)  #else $!{e.fullCode}(单一模式) )#end</option>
+	   				#end   
+			</select>
+			</td>
+		</tr>
+	    
+	    
+        <tr id="gislayer">
+            <td class="label"><span class="ui-form-required">*</span>GIS图层名：</td>
+            <td>
+	            <span id="gisLayerIds_id" $!{readonly} style="width:200px!important;"  class="k-textbox k-space-right">
+	            <input class="k-textbox"  type="hidden" id="gisLayerIds" name="gisLayerIds" value="$!{menuLayer.gisLayerIds}"/>
+	            <input class="k-textbox"  type="hidden" id="gisLayerDisplay" name="gisLayerDisplay" value="$!{menuLayer.gisLayerDisplay}"/>
+	        	<input readonly style="width:170px!important;"  class="k-textbox"  type="text" onmouseover="this.title=this.value" id="gisLayerNames" name="gisLayerNames" value="$!{menuLayer.gisLayerNames}"/>
+	        	<a href="#" class="k-icon k-i-search">&nbsp;</a>
+	        	</span>
+	        </td>
+            <td></td>
+        </tr>
+        
+        <tr id="layerModel_id">
+        	<td class="label"><span class="ui-form-required">*</span><label>图层模式：</label></td>
+			<td>
+			#foreach($!lsLayerModel in $!listLayerModel)
+				<input type="radio" id="modelId-$!{lsLayerModel.enumValue}" class="k-radiobox" name="layerModel" value="$!{lsLayerModel.enumValue}"/>
+				<span class="ui-form-text"> $!{lsLayerModel.enumText}</span>
+			#end
+			</td>
+	    </tr>
+	    <tr id="system_id">
+			<td class="label"><span class="ui-form-required">*</span>系统图层：</td>
+			<td>
+				<select style="width:200px!important;" class="k-textbox" id="systemId" name="systemId" value="$!{menuLayer.systemId}" >
+					<option value=''>--请选择--</option>
+				    #foreach($!{e} in $!{systemMapLevels})
+	   					<option value="$!{e.id}" #if("$!{menuLayer.systemId}" == "$!{e.id}") selected #end> $!{e.systemName}($!{e.systemCode})  </option>
+	   				#end   
+			    </select>
+			
+			</td>
+		</tr>
+	    <tr id="initLou">
+			<td class="label">初始化大楼：</td>
+			<td>
+			<select style="width:200px!important;" class="k-textbox" id="initBuild" name="initBuild"  onchange="changeFloor(this)">
+					<option value='-1'>--请选择--</option>
+				    #foreach($!{e} in $!{topArea})
+	   					<option value="$!{e.id}">$!{e.areaName}</option>
+	   				#end   
+			</select>
+			</td>
+		</tr>
+		<tr id="initCeng">
+			<td class="label">初始化层数：</td>
+			<td>
+			<select style="width:200px!important;" class="k-textbox"  id="initFloor"  name="initFloor"  >
+					<option value='-1'>--请选择--</option>
+			</select>
+			</td>
+		</tr>
+		
+	    <tr id="gislayout">
+	          <td class="label"><span class="ui-form-required">*</span><label>页面布局：</label></td>
+	          <td>
+	           <select style="width:200px!important;" id="layout" name="layout" value="$!{menuLayer.layout}" class="k-textbox">
+	          			<option value="0">--请选择--</option>
+						<option value="1">左右</option>
+						<option value="2">单一</option> 
+	            </select>
+	          </td>
+        </tr>      
+        <tr id="gisurltip">
+            <td class="label"><span class="ui-form-required">*</span><label>左url：</label></td>
+            <td>
+            	<input style="width:200px!important;" name="leftUrl" id="leftUrl" class="k-textbox" type="text" value="$!{menuLayer.leftUrl}">
+            </td>
+        
+        </tr>
+
+        <tr id="gisurl">
+            <td class="label"><label>默认配置URL：</label></td>
+            <td>
+                ywgl/gis/common/gis_common_left.vm
+            </td>
+
+        </tr>
+    </table>
+    <div class="actions">
+        <button class="k-primary hc_btn" id="save_button_id1"  type="submit"><i class="fa fa-save"></i>保 存</button>
+        <button class="hc_btn cancel" onclick="close_dialog('menuLayer_add_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+    </div>
+
+</form>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+	      defaults: {
+	        resizable: true,
+	        closable: false,
+	        spacing_open: 5
+	      }
+	    });
+	});
+	
+	$("#gisLayerIds_id").click(function() {
+            quick_dialog("selectDiloag","选择图层","$!{rc.contextPath}/hl/choose/layer?menulayerId=$!{menuLayer.id}&txtId=gisLayerIds&txtName=gisLayerNames&dialogId=menuLayer_add_dlg&ids=$!{menuLayer.gisLayerIds}",830,400 );
+	});
+	
+    //
+    $(document).ready(function () {
+		$("#myform_id").validator({
+            fields: {
+	        	menuType: "菜单编码:required; length[~32]",
+	        	menuName: "菜单名称:required; length[~100]",
+	        	flashId:"系统编码:required; length[~200]",
+	        	layout:"页面布局:required",
+	        	leftUrl:"左URL:required; length[~200]",
+	        	systemId:"系统图层:required; length[~40]"
+            },
+            valid: function (form) {
+                form_btn_submit($("#save_button_id"), form, function (res) {
+                    //console.log(res);
+                    validateCallback(res, "grid", "menuLayer_add_dlg");
+                });
+            },
+            beforeSubmit:function(form){
+            	return selfValids();
+            }
+            
+        });
+        
+		$("#modelTypeId1").click(function(){//flash模式
+			$("#gislayer").hide();
+			$("#layerModel_id").hide();
+			$("#gislayout").hide();
+			$("#system_id").hide();
+			$("#initLou").hide();
+			$("#initCeng").hide();
+			$("#flash_system_code").show();
+			$("#flashId").val("$!{menuLayer.flashId}");
+			$("#layout").val(0);
+			$("#leftUrl").val("");
+			if("$!{menuLayer.modelType}" == ""){//添加
+				$("#layout").val(0);
+				$("#leftUrl").val("");
+			}
+			$("#gisurl").hide();
+            $("#gisurltip").hide();
+			$("#modelId-1").attr("checked", "checked");
+		});
+		
+		$("#modelTypeId2").click(function(){//gis模式
+			$("#gislayer").show();
+			$("#layerModel_id").show();
+			$("#gislayout").show();
+			$("#gisurl").show();
+            $("#gisurltip").show();
+			//$("#leftUrl").val("");
+			$("#system_id").show();
+			$("#initLou").show();
+		    $("#initCeng").show();
+		    $("#flash_system_code").hide();
+		    
+			if($("#hidden_model").val()!=""){
+				if($("#hidden_model").val()=='1'){
+					$("#modelId-1").attr("checked", "checked");
+					$("#modelId-1").click();
+					$("#system_id").css("display","none");
+					$("#initBuild").val("$!{menuLayer.initBuild}");
+					$("#initBuild").change();
+					$("#initFloor").val("$!{menuLayer.initFloor}");
+				}else{
+					$("#modelId-2").attr("checked", "checked");
+					$("#modelId-2").click();
+					$("#system_id").css("display","");
+				}
+	    	}else{
+	    		$("#modelId-1").attr("checked", "checked");
+				$("#system_id").css("display","none");
+				$("#initBuild").val("$!{menuLayer.initBuild}");
+				$("#initBuild").change();
+				$("#initFloor").val("$!{menuLayer.initFloor}");
+	    	}
+		});
+		
+		$("#layout").change(function(){//左右
+			if(this.value == '1'){
+				$("#gisurl").show();
+                $("#gisurltip").show();
+			}
+			
+			if(this.value == '2'){//单一
+				$("#gisurl").hide();
+                $("#gisurltip").hide();
+			}
+		});
+		$("input[name='layerModel']").click(function(){
+			var id = $(this).val();
+			if(id=='1'){
+				$("#modelId-1").attr("checked", "checked");
+				$("#modelId-2").removeAttr("checked");
+				$("#system_id").css("display","none");
+				$("#initLou").show();
+			    $("#initCeng").show();
+			    $("#gislayout").show();
+			    if($("#layout").val() == "2"){
+			    	$("#gisurl").hide();
+                    $("#gisurltip").hide();
+			    }else{
+			    	$("#gisurl").show();
+                    $("#gisurltip").show();
+			    }
+				if("$!{menuLayer.layerModel}" == ""){//添加
+					$("#layout").val("0");
+			        $("#leftUrl").val("");
+		        }
+			}else{
+				$("#modelId-2").attr("checked", "checked");
+				$("#modelId-1").removeAttr("checked");
+				$("#system_id").css("display","");
+			    $("#initLou").hide();
+				$("#initCeng").hide();
+				$("#gislayout").hide();
+				$("#gisurl").hide();
+                $("#gisurltip").hide();
+			}
+		});
+		
+	    if("$!{menuLayer.layout}"== "1"){//左右
+		    $("#layout").val("1");
+			$("#gisurl").show();
+            $("#gisurltip").show();
+		}
+		
+		if("$!{menuLayer.layout}"== "2"){//单一
+		    $("#layout").val("2");
+			$("#gisurl").hide();
+            $("#gisurltip").hide();
+		}
+		
+		if("$!{menuLayer.modelType}"== "1"||"$!{menuLayer.modelType}"== ""){
+			$("#modelTypeId1").click();
+		}
+		
+		if("$!{menuLayer.modelType}"== "2"){
+			$("#modelTypeId2").click();
+		}
+		
+    });
+    
+    #if($!viewOnly)
+        $("#copyButton").disable();
+    	setAllReadonly();
+    #end
+        
+    function changeFloor(obj){
+        var initFloor = "$!{menuLayer.initFloor}";
+        var select = $("#initFloor");
+        var selectedBuild = $("#initBuild option:selected");
+	    $(select).empty();
+	    if(obj.value!=''){
+	    	$.ajax({
+	            'url': "$!{rc.contextPath}/hl/gis/platform/mapLevel/getFloor",
+	            'dataType': 'json',
+	            'type': 'post',
+	            'data': {'id':obj.value},
+	            'success': function (res) {
+                    $(select).append("<option value='"+selectedBuild.val()+"'>"+selectedBuild.text()+"</option>");
+	            	 for(var i=0;i<res.length;i++){
+	            	 	var tt = res[i];
+	            	 	var option ="";
+	            	 	if(initFloor == tt.id){
+	            	 		option = "<option value='"+tt.id+"' selected>"+tt.areaName+"</option>"; 
+	            	 	}else{
+	            	 	    option = "<option value='"+tt.id+"' >"+tt.areaName+"</option>";
+	            	 	}
+	            	 	$(select).append(option);
+	            	 }
+	            }
+        	});
+	    }else{
+	    	$("#initBuild").val('-1');
+ 			$("#initFloor").val('-1');
+	    }
+        
+   }         
+   
+   function selfValids(){
+	   	if($("#modelTypeId1")[0].checked){//图层类型为flash模式
+		   	//系统编码验证
+		   	//if($("#flashId").val() == ""){
+		   	//	notify("系统编码为空", "error");
+			//	return false;
+		   	//}
+		   	$("#layout").attr("novalidate","");
+		   	$("#leftUrl").attr("novalidate","");
+		   	$("#systemId").attr("novalidate","");
+	   		$("#flashId").removeAttr("novalidate");
+	   	}
+	   	if($("#modelTypeId2")[0].checked){//图层类型为gis模式
+	   		$("#flashId").attr("novalidate","");
+	   		$("#layout").removeAttr("novalidate");
+		   	$("#leftUrl").removeAttr("novalidate");
+		   	$("#systemId").removeAttr("novalidate");
+	   		
+	   		var tcms = $("#layerModel").val();//图层模式
+	   		if(tcms == ""){
+	   			notify("图层模式为空", "error");
+				return false;
+	   		}
+	   		
+	   		var gisLayerIds = $("#gisLayerIds").val();//GIS图层名
+	   		if(gisLayerIds == ""){
+	   			notify("GIS图层名为空", "error");
+				return false;
+	   		}
+	   		
+	   		if($("#modelId-1")[0].checked){//楼层图
+	   			var layout = $("#layout").val();
+	   			$("#systemId").attr("novalidate","");
+	   			 
+	   			if(layout == "2"){//单一
+	   			    $("#leftUrl").attr("novalidate","");
+	   			}
+	   			if(layout == "1"){//左右
+	   			    $("#leftUrl").removeAttr("novalidate");
+	   			}
+	   		}
+	   		if($("#modelId-2")[0].checked){//系统图
+	   			$("#systemId").removeAttr("novalidate");
+	   			$("#layout").attr("novalidate","");
+	   			$("#layout").val(0);
+	   			
+	   			$("#leftUrl").attr("novalidate","");
+	   			
+	   		}
+	   	}
+	   
+   }
+   
+  function copy(){
+      var code = $("#menuType").val();
+      var copycode="hl/gis/index/"+code;
+      $.ajax({
+          'url': "$!{rc.contextPath}/hl/gis/platform/menuLayer/copyCode",
+          'dataType': 'json',
+          'type': 'post',
+          'data': {'code':copycode},
+          'success': function (res) {
+              notify("复制成功", "success");
+          }
+      })
+
+      return false;
+  }
+</script>
+</body>
+</html>

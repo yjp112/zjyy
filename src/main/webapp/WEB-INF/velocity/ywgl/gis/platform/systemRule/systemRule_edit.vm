@@ -1,0 +1,212 @@
+#parse("index/_header.vm")
+</head>
+<body style="padding-bottom:40px;">
+<form id="myform_id" method="post" action="$!{rc.contextPath}/hl/gis/platform/systemRule/save" class="ui-layout-center ui-dialog-form">
+    <input type="hidden" name="id" id="systemRule_id" value="$!{systemRule.id}">
+    <input type="hidden" name="parentCode" id="parentCode_id"  value="$!{systemRule.parentCode}">
+    
+    <table width="100%">
+        <tr>
+            <td class="label"><span class="ui-form-required" >*</span><label>系统编码：</label></td>
+            <td width="66%"><input type="text" onblur="m_c()" class="k-textbox" id="code"  name="code" value="$!{systemRule.code}"></td>
+            <td width="8%"></td>
+        </tr>
+        <tr>
+            <td class="label"><span class="ui-form-required">*</span>系统名称：</td>
+            <td><input type="text" class="k-textbox" name="name" value="$!{systemRule.name}"></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td class="label"><span class="ui-form-required">*</span>父系统：</td>
+            <td>
+                <input class="k-textbox" type="hidden" name="parentId" id="parentId" value="$!{systemRule.parentId}"/>
+	            	<span id="parentName_choose" class="k-textbox k-space-right">
+                        <input readonly type="text" class="k-textbox" name="parentName" onblur="m_c()" id="parentName" value="$!{systemRule.parentName}"  />
+                    <a href="#" class="k-icon k-i-search">&nbsp;</a>
+                    </span>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td class="label">全名：</td>
+            <td><input type="text" readonly class="k-textbox" id="fullCode_id" name="fullCode" value="$!{systemRule.fullCode}"></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td class="label">程序用编码：</td>
+            <td><input type="text" class="k-textbox" id="softCode" name="softCode" value="$!{systemRule.softCode}"></td>
+            <td></td>
+        </tr>
+         <tr>
+            <td class="label">控制状态：</td>
+            <td><input type="text" class="k-textbox" id="iconNormal" name="iconNormal" value="$!{systemRule.iconNormal}"></td>
+            <td></td>
+        </tr>
+        <tr>
+	        <td class="label">开关状态：</td>
+	        <td  class="inputText">
+				<input type="radio"  class="k-radiobox" name="haveOpenStatus" value="0" #if($!{systemRule.haveOpenStatus} != 1) checked #end/>
+		        <span class="ui-form-text"> 无</span>
+		        <input type="radio"  class="k-radiobox" name="haveOpenStatus" value="1" #if($!{systemRule.haveOpenStatus} == 1) checked #end/>
+		        <span class="ui-form-text"> 有</span>
+			<input id="period_type_id1" type="text" style="width:120px;float:right;" class="k-textbox" id="iconStart" name="iconStart" value="$!{systemRule.iconStart}">
+			</td>
+	        <td></td>
+	    </tr>
+	    <tr>
+	        <td class="label">报警状态：</td>
+	        <td class="inputText">
+				<input type="radio"  class="k-radiobox" name="haveAlarmStatus" value="0" #if($!{systemRule.haveAlarmStatus} != 1) checked #end/>
+		        <span class="ui-form-text"> 无</span>
+		        <input type="radio"  class="k-radiobox" name="haveAlarmStatus" value="1" #if($!{systemRule.haveAlarmStatus} == 1) checked #end/>
+		        <span class="ui-form-text"> 有</span>
+		    <input id="period_type_id2"  type="text" style="width:120px;float:right;"  class="k-textbox" id="iconAlarm" name="iconAlarm" value="$!{systemRule.iconAlarm}">    
+			</td>
+	        <td></td>
+	    </tr>
+	    <tr>
+		    <td class="label">故障状态：</td>
+		    <td  class="inputText">
+				<input type="radio"  class="k-radiobox" name="haveFaultStatus" value="0" #if($!{systemRule.haveFaultStatus} != 1) checked #end/>
+		        <span class="ui-form-text"> 无</span>
+		        <input type="radio"  class="k-radiobox" name="haveFaultStatus" value="1" #if($!{systemRule.haveFaultStatus} == 1) checked #end/>
+		        <span class="ui-form-text"> 有</span>
+		   <input id="period_type_id3" type="text" style="width:120px;float:right;" class="k-textbox" id="iconFault" name="iconFault" value="$!{systemRule.iconFault}">     
+			</td>
+		    <td></td>
+		</tr>
+    </table>
+    <div class="actions">
+        <button class="k-primary hc_btn" id="save_button_id" type="submit"><i class="fa fa-save"></i>保 存</button>
+        <button class="hc_btn cancel" onclick="close_dialog('systemRule_add_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+    </div>
+
+</form>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+	      defaults: {
+	        resizable: true,
+	        closable: false,
+	        spacing_open: 5
+	      }
+	    });
+        $("#softCode").hcAutoComplete({
+        	height: 100,
+        	template: '<span class="k-state-default">#: data.enumValue #(#: data.enumText #)</span>',
+        	dataTextField: "enumValue",
+            dataSource: 
+            {
+                transport: {
+                    read: {
+                    	dataType: "json",
+                        url: "$!{rc.contextPath}/hl/gis/platform/systemRule/softCodeAuto"
+                    }
+                }
+            }
+        });
+        var menuTypeAutoComplete = $("#softCode").data("kendoAutoComplete");
+        // 再次focus 时显示所有匹配提示信息
+        $("#softCode").focus(function(){
+            menuTypeAutoComplete.search($("#softCode").val());
+        })	    
+	});
+
+    //
+    $(document).ready(function () {
+    	
+        $("#parentName_choose").click(function () {
+            var systemRule_id = $("#systemRule_id").val();
+            quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/hl/gis/platform/systemRule/lookup?txtId=parentId&txtName=parentName&dialogId=systemRule_add_dlg&id="+systemRule_id, 300, 300);
+        });
+
+        $("#myform_id").validator({
+            fields: {
+                code: "系统编码:required;length[~20]",
+                name: "系统名称:required;length[~30]",
+                softCode: "程序用编码:length[~20]",
+                parentName: "父系统:required"
+            },
+            valid: function (form) {
+                form_btn_submit($("#save_button_id5"), form, function (res) {
+                    //console.log(res);
+                    validateCallback(res, "grid", "systemRule_add_dlg");
+                });
+            }
+        });
+        
+        $("input[name='haveOpenStatus']").click(function(){
+        	var radios0 =  $("input[name='haveOpenStatus']");
+        	if(radios0[0].checked){
+        		$("#period_type_id1").hide();
+        	}
+        	if(radios0[1].checked){
+        		$("#period_type_id1").show();
+        	}
+        
+        });
+        
+        $("input[name='haveAlarmStatus']").click(function(){
+        	var radios1 =  $("input[name='haveAlarmStatus']");
+        	if(radios1[0].checked){
+        		$("#period_type_id2").hide();
+        	}
+        	if(radios1[1].checked){
+        		$("#period_type_id2").show();
+        	}
+        
+        });
+        
+         $("input[name='haveFaultStatus']").click(function(){
+        	var radios2 =  $("input[name='haveFaultStatus']");
+        	if(radios2[0].checked){
+        		$("#period_type_id3").hide();
+        	}
+        	if(radios2[1].checked){
+        		$("#period_type_id3").show();
+        	}
+        
+        });
+        
+        
+        if("$!{systemRule.haveOpenStatus}" == '1'){
+        	$("input[name='haveFaultStatus']")[1].click();
+        	$("#period_type_id1").show();
+        }else{
+        	$("input[name='haveFaultStatus']")[0].click();
+        	$("#period_type_id1").hide();
+        }
+        if("$!{systemRule.haveAlarmStatus}" == '1'){
+        	$("input[name='haveAlarmStatus']")[1].click();
+        	$("#period_type_id2").show();
+        }else{
+        	$("input[name='haveAlarmStatus']")[0].click();
+        	$("#period_type_id2").hide();
+        }
+        if("$!{systemRule.haveFaultStatus}" == '1'){
+        	$("input[name='haveFaultStatus']")[1].click();
+        	$("#period_type_id3").show();
+        }else{
+        	$("input[name='haveFaultStatus']")[0].click();
+        	$("#period_type_id3").hide();
+        }
+    });
+   
+    function m_c(){
+		var str1 = $("#code").val();
+		var str2 = $("#parentCode_id").val();
+		if(str2!='')
+			str2 = str2+'_';
+		$("#fullCode_id").val(str2+str1);
+	}
+	
+    
+    
+	
+        #if($!viewOnly)
+        setAllReadonly();
+        #end
+</script>
+</body>
+</html>

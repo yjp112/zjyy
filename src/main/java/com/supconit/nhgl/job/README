@@ -1,0 +1,3 @@
+数据归档相关类：
+  1.从NH_ELECTRIC_METER_REALTIME 至 NH_ELECTRIC_METER  (RealTimeDataArchivedJob.java)
+  2.从NH_ELECTRIC_METER_DAY 至 NH_ELECTRIC_METER_MONTH (DayDataArchiveToMonthDataJob.java)

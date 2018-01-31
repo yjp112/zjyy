@@ -1,0 +1,169 @@
+<style>
+	a.ui-input-remove, a.ui-input-icon{ right:3px; }
+	.panel li.current a{ background: #06251d; }
+</style>
+<div class="ui-layout-center" id="subMain">
+	<div class="ui-layout-center">
+		<table id="collect_datalist" class="fn-hide"></table>
+	</div>
+	<div class="ui-layout-north">
+		<div class="ui-module-name"><label id="menuName">#crumbs("$!menu.code",1)</label></div>
+		<form id="collect_list_search" class="ui-form ui-form-search fn-clear">
+			<input id="locationId" type="hidden" name="locationId" value=""/>
+			<div class="ui-form-search-left">
+				<div class="ui-form-item">
+		            <label class="ui-label">能耗编码：</label>
+		            <input class="ui-input" type="text" name="energyCode"/>
+				</div>
+				<div class="ui-form-item">
+		    		<label class="ui-label">电表名称：</label>
+		    		<input class="ui-input" type="text" name="deviceName"/>
+				</div>
+				<div class="ui-form-item">
+			  		<label class="ui-label">分项名称：</label>
+			  		<input class="ui-input ui-input-choose"readonly type="text" emptyFunc="clearItemCode" name="subCodeName" value="$!subCodeName" id="subCodeName" onclick="chooseSubSystem('subCode','subCodeName','collect_list',$!{nhType})"/>
+					<input type="hidden" name="subCode" id="subCode" value="$!subCode"/>
+
+				</div>
+				<div class="ui-form-item-larger">
+			  		<label class="ui-label">时间：</label>
+	          		<input id="startTime" type="text" name="startTime"  class="ui-input ui-input-small  Wdate"  onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',maxDate:'#F{$dp.$D(\'endTime\')}'});" value="$!device.startTime"/>
+		      		<span class="ui-form-text">至</span> 
+					<input id="endTime" type="text" name="endTime"  class="ui-input ui-input-small  Wdate"  onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'#F{$dp.$D(\'startTime\')}'})" value="$!device.endTime"/>
+				</div>
+			</div>	
+			<div class="ui-form-search-right">
+					<button type="submit" id="subButton" class="btn btn-primary"><i class="iconfont icon-search"></i> 查&nbsp;询</button>
+			</div>
+		</form>
+	</div>
+</div>
+<!--<div class="ui-layout-north">
+	#bread_crumbs("NHGL_CJGL")
+</div>
+-->
+<div class="ui-layout-west ztree-box">
+	<div class="ztree-header">
+		<div class="ztree-title">服务区域树</div>
+	</div>
+    <div id="collectlist_box" class="ui-box">
+      <div class="ui-box-container">
+          <ul id="geoArea_tree" class="ztree"></ul>
+      </div>
+    </div>
+</div>
+  <script type="text/javascript">
+  ##debugger;
+  	var nhType=$!{nhType};
+  	$(document).ready(function(){
+##		if(T.innerLayout&&!T.innerLayout.destroyed){
+##			T.innerLayout.destroy();
+##		}
+		$('#subButton').click(function(){
+			var startTime=$('#startTime').val();
+			var endTime=$('#endTime').val();
+			if(startTime=='' || endTime==''){
+				$.message("开始时间和结束时间不能为空！", 1, 4, false, true);
+				return false;
+			}
+		});
+		T.nhInit();
+		T.tabLayout = $("#chart_content_id").layout({
+        defaults : {
+            resizable : false,
+            closable : false,
+            spacing_open : 5
+        },
+        west : {
+            size : 250,
+            resizable : true,
+            resizerTip : "移动改变大小",
+            closable : true,
+            togglerTip_open : "隐藏",
+            togglerTip_closed : "打开"
+        },
+        onresize_end : function(){
+            $("#collectlist_box").box("resize");
+        }
+    });
+    	_content_layouts.push(T.innerLayout);
+		_inner_layout=$("#subMain").layout({
+			defaults:{
+				resizabel:false,
+				closable: false,
+				spacing_open:5
+			},
+			onresize_end:function(){
+				$("#collect_datalist").datagridResize({width:_inner_layout.state.center.innerWidth,height:_inner_layout.state.center.innerHeight});
+			}
+		});
+		$("#collectlist_box").box({
+        	width : function(){return 'auto';},
+        	height : function(){return T.tabLayout.state.west.innerHeight-26;}
+    	});
+		var collect_datagrid=$("#collect_datalist").datagrid({
+			url:'$!{rc.contextPath}/nhgl/query/complex/page',
+			dataType: "json",
+			method: "POST",
+			singleSelected : true,
+			striped : false,
+			height:  _inner_layout.center.state.innerHeight,
+			width :  _inner_layout.center.state.innerWidth,
+			showOrderNumber : true,
+			useRp : true,
+			usepager: true, 
+    		rpOptions: [10, 20, 40, 50],
+    		pageSize: 20,
+    		searchFormId:"collect_list_search",
+    		searchCallback:function(datagrid){},
+    		onSuccess:function(table,grid){
+    			if(!grid)return ;
+    		},
+    		colModel:[
+    			{"display":"序号"},
+    			{display: "能耗编码", name: "energyCode",width:130},
+    			{display: "电表名称", name: "deviceName",width:150},
+	            {display: "服务区域", name: "serviceArea",width:150},
+	            {display: "分项名称", name: "subName"},
+	            {display: "上次计数", name: "lastTotal",format:function(lastTotal){ return fInt(lastTotal)},align:"right"},
+	            {display: "本次计数", name: "total",format:function(total){ return fInt(total)},align:"right"},
+	            {display: "用电量", name: "incremental",format:function(incremental){ return fInt(incremental)},align:"right"},
+	            {display: "最近采集时间", name: "collectTime",width:"200",align:"center"}
+    		],
+    		buttons : [
+##	            #data_grid_buttons('NHGL_CJGL')#end
+	        ]
+		});
+	});
+##	function changeTime(){
+##		$('#endTime').val('');
+##	} 
+	function clearItemCode(){
+		$("#subCodeName").attr("value","");
+		$("#subCode").attr("value","");
+	}
+  </script>
+  <script type="text/javascript">
+    var setting = {
+	data: {
+		simpleData: {enable: true}
+      },
+      callback: {
+			onClick: function(event, treeId, treeNode) {
+##				if(treeNode.id==0){
+##					$('#locationId').val(1)
+##				}else{
+					 $('#locationId').val(treeNode.id);
+##				}
+				 $('#subButton').click();
+			}
+		}
+    };
+	var zNodes = [];
+	#foreach($!{treeNode} in $!{treeList})
+		zNodes.push({id:"$!{treeNode.id}", pId:"$!{treeNode.parentId}", name:"$!{treeNode.areaName}"});     
+	#end 
+	$(document).ready(function(){
+	        $.fn.zTree.init($("#geoArea_tree"), setting,zNodes).expandAll(true);
+	});
+  </script>

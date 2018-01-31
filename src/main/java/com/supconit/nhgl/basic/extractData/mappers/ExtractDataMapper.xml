@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.basic.extractData.entities.ExtractData">
+
+	<resultMap type="com.supconit.nhgl.basic.extractData.entities.ExtractData"
+		id="ExtractDataResultMap">
+		<id property="id" column="ID" />
+		<result property="scheduleId" column="SCHEDULE_ID" />
+		<result property="startTime" column="START_TIME" />
+		<result property="endTime" column="END_TIME" />
+		<result property="excuteTime" column="EXCUTE_TIME" />
+		<result property="success" column="SUCCESS" />
+		<result property="errorMsg" column="ERROR_MSG" />
+
+		<result property="jobSubject" column="JOB_SUBJECT" />
+		<result property="jobName" column="JOB_NAME" />
+		<result property="groupName" column="GROUP_NAME" />
+		<result property="beanOrClass" column="BEAN_OR_CLASS" />
+		<result property="targetObject" column="TARGET_OBJECT" />
+		<result property="targetMethod" column="TARGET_METHOD" />
+		<result property="targetArguments" column="TARGET_ARGUMENTS" />
+		<result property="cronExpression" column="CRON_EXPRESSION" />
+		<result property="startDate" column="START_DATE" />
+		<result property="nextDate" column="NEXT_DATE" />
+		<result property="endDate" column="END_DATE" />
+		<result property="ignoreError" column="IGNORE_ERROR" />
+		<result property="concurrent" column="CONCURRENT" />
+		<result property="description" column="DESCRIPTION" />
+		<result property="status" column="STATUS" />
+		<result property="enumText" column="ENUM_TEXT" />
+	</resultMap>
+
+
+	<sql id="TABLE_NAME" lang="velocity">SCHEDULE_LOG</sql>
+	<sql id="SEQUENCE" lang="velocity">
+		SELECT SEQ_<include refid="TABLE_NAME" />.NEXTVAL FROM DUAL
+	</sql>
+	<sql id="SELECT_PRE" lang="velocity">
+		select t1.*,t2.JOB_SUBJECT,t2.JOB_NAME,t2.GROUP_NAME,t2.BEAN_OR_CLASS,t2.TARGET_OBJECT,t2.TARGET_METHOD,t2.CRON_EXPRESSION,t2.START_DATE,t2.NEXT_DATE,t2.END_DATE,t2.IGNORE_ERROR,t2.CONCURRENT,t2.DESCRIPTION,t2.STATUS,e.ENUM_TEXT
+		FROM schedule_log t1 
+		LEFT JOIN schedule_job t2 on t1.schedule_id=t2.id
+		INNER JOIN ENUM_DETAIL e on t1.SCHEDULE_ID=e.INT1
+	</sql>
+	<sql id="COUNT_PRE" lang="velocity">
+		SELECT COUNT(1) FROM
+		<include refid="TABLE_NAME" />
+	</sql>
+
+	<sql id="SEARCH_CONDITION_SQL" lang="velocity">
+		<![CDATA[
+		#where()
+				#if($_parameter.condition.jobName && $_parameter.condition.jobName != '')
+					AND t2.JOB_NAME 
+										#set($_jobName = '%' + $_parameter.condition.jobName + '%')
+						LIKE @{_jobName,jdbcType=VARCHAR}				
+				
+				#end
+				#if($_parameter.condition.enumText && $_parameter.condition.enumText != '')
+					#set($_enumText = '%' + $_parameter.condition.enumText + '%')
+					AND e.ENUM_VALUE LIKE @{_enumText,jdbcType=VARCHAR}				
+				#end
+				#if($_parameter.condition.startTime && $_parameter.condition.startTime != '')
+					AND t1.START_TIME>=@{_parameter.condition.startTime,jdbcType=TIMESTAMP}
+				#end
+				#if($_parameter.condition.endTime && $_parameter.condition.endTime != '')
+					AND t1.END_TIME<=@{_parameter.condition.endTime,jdbcType=TIMESTAMP} 
+				#end
+				#if($_parameter.condition.success && $_parameter.condition.success != '')
+					AND t1.SUCCESS= @{_parameter.condition.success,jdbcType=VARCHAR}
+				#end
+		#end
+		]]>
+	</sql>
+
+	<select id="getById" resultMap="ExtractDataResultMap" parameterType="long" lang="velocity">
+		select t1.*,t2.JOB_SUBJECT,t2.JOB_NAME,t2.GROUP_NAME,t2.BEAN_OR_CLASS,t2.TARGET_OBJECT,t2.TARGET_METHOD,t2.CRON_EXPRESSION,t2.START_DATE,t2.NEXT_DATE,t2.END_DATE,t2.IGNORE_ERROR,t2.CONCURRENT,t2.DESCRIPTION,t2.STATUS 
+		from schedule_log t1 LEFT JOIN schedule_job t2 on t1.schedule_id=t2.id
+		WHERE t1.ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+
+	<select id="selectPager" lang="velocity" resultMap="ExtractDataResultMap"  databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE" />
+		<include refid="SELECT_PRE" />
+		<include refid="SEARCH_CONDITION_SQL" />
+		#order($_parameter.condition,"t1.ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER" />
+	</select>
+
+	<select id="selectPager" lang="velocity" resultMap="ExtractDataResultMap"
+		databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE" />
+		select t1.*,t2.JOB_SUBJECT,t2.JOB_NAME,t2.GROUP_NAME,t2.BEAN_OR_CLASS,t2.TARGET_OBJECT,t2.TARGET_METHOD,t2.CRON_EXPRESSION,t2.START_DATE,t2.NEXT_DATE,t2.END_DATE,t2.IGNORE_ERROR,t2.CONCURRENT,t2.DESCRIPTION,t2.STATUS,e.ENUM_TEXT 
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" />
+		#order($_parameter.condition,"t1.START_TIME DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM schedule_log t1 
+		LEFT JOIN schedule_job t2 on t1.schedule_id=t2.id
+		INNER JOIN ENUM_DETAIL e on t1.SCHEDULE_ID=e.INT1
+		<include refid="SEARCH_CONDITION_SQL" />
+		<include refid="_PUBLIC_V.PAGER_AFTER" />
+	</select>
+
+	<select id="countPager" lang="velocity" resultType="long">
+		select count(*) from schedule_log t1 LEFT JOIN schedule_job t2 on t1.schedule_id=t2.id
+		<include refid="SEARCH_CONDITION_SQL" />
+	</select>
+
+
+
+
+</mapper>

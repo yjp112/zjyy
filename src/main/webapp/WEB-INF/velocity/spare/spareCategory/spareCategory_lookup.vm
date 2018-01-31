@@ -1,0 +1,94 @@
+#parse("index/_header.vm")
+</head>
+<body style="padding-bottom:40px;">
+<script type="text/javascript">
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+	      defaults: {
+	        resizable: true,
+	        closable: false,
+	        spacing_open: 5
+	      }
+	    });
+	});
+
+    var setting = {
+	data: {
+		simpleData: {enable: true}
+      },
+      callback: {
+			onClick: function(event, treeId, treeNode) {
+			//console.info(treeNode);
+			    var id = get_el_in_dialog("$!{dialogName}","#"+"$!{txtId}").val();
+				if(id!=''&&treeNode.id==id){
+				  alert('请不要选择自身作为父节点。');
+				  return false;
+				}
+				//if(treeNode.id==0)
+				//{
+					//notify("请不要选择备件类别做为父节点", "warn");
+					//return false;
+				//}	
+				get_el_in_dialog("$!{dialogName}","#"+"$!{txtName}").val(treeNode.name);
+				get_el_in_dialog("$!{dialogName}","#"+"$!{txtId}").val(treeNode.id);
+				resetfocus(get_el_in_dialog("$!{dialogName}","#"+"$!{txtName}").val(treeNode.name));
+				
+    			close_dialog('selectDiloag')
+			}
+		}
+    };
+var zNodes = [];  
+#foreach($!{treeNode} in $!{treeDatas})
+	zNodes.push({id:$!{treeNode.id}, pId:$!{treeNode.parentId}, name:"$!{treeNode.categoryName}"});     
+#end
+
+	function okClick(){
+    	var zTree = $.fn.zTree.getZTreeObj("spareCategoryTree");
+    	var nodes=zTree.getCheckedNodes(true);
+    	if (nodes.length == 0) {
+    	   alert("未选择");
+		   return false;
+    	}else{
+    		if (parent){
+    			$("#"+"$!{txtId}").val(nodes[0].id);
+    			$("#"+"$!{txtName}").val(nodes[0].name); 
+    		}
+    		
+    	}
+		return true;
+	}
+   $(document).ready(function(){
+		//ztree
+		$.fn.zTree.init($("#spareCategoryTree"), setting,zNodes).expandAll(true);
+    });
+    
+    function clearChoose(){
+    	if("$!{dialogName}"!=""){
+    		get_el_in_dialog("$!{dialogName}","#$!{txtId}").val("");
+    		get_el_in_dialog("$!{dialogName}","#$!{txtName}").val("");  
+    		//resetfocus(get_el_in_dialog("$!{dialogName}","#"+"$!{txtName}").val(treeNode.name));
+    	}else{
+			var id_v = $("#"+"$!{txtId}",window.parent["_main_frame"].document);
+			id_v.val("");
+			var id_t = $("#"+"$!{txtName}",window.parent["_main_frame"].document);
+			id_t.val("");
+			//resetfocus($("#"+"$!{txtName}",window.parent["_main_frame"].document));
+		}
+		//关闭iframe
+		close_dialog('selectDiloag');
+		return true;
+    }
+</script>
+
+  <div class="ui-layout-center ui-dialog-form">
+	  <div class="tree">
+	 	<ul id="spareCategoryTree" class="ztree"></ul>   
+	   </div>
+   
+	<div class="actions">
+	<button class="hc_btn cancel" onclick="clearChoose()" type="button"><i class="fa fa-close"></i>清空</button>
+	</div>
+</div>
+</body>
+</html>
+ 

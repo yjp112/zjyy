@@ -1,0 +1,209 @@
+#parse("index/_header.vm")
+</head>
+<body>
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<form class="ui-form" id='queryForm'>
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+				<tr>
+					<td class="ui-search-name first">诉求单号：</td>
+					<td class="ui-search-c">
+						<input name="taskCode" class="k-textbox" type="text">
+					</td>
+					
+					
+					<td class="ui-search-name">诉求详情：</td>
+					<td class="ui-search-c">
+						<input name="descripton" class="k-textbox" type="text">
+					</td>
+					
+					
+					<td class="ui-search-name">紧急程度：</td>
+                    <td class="ui-search-c">
+						<select  class="k-textbox" name="urgency">
+							<option value=''>--请选择--</option>
+							#foreach($!{item} in $!{urgencyList})
+		       			    <option value="$!{item.enumValue}">$!{item.enumText}</option>
+							#end
+						</select>
+	                </td>
+					
+                </tr>
+				
+				<tr>
+					<td class="ui-search-name">报修部门：</td>
+				    <td>
+						<span class="k-textbox k-space-right" onclick="chooseDept('repairDeptId','repairDeptName','','')">
+    						<input readonly class="k-textbox #if(!$!{viewOnly}) ui-input-choose #end" type="text" id="repairDeptName" name="repairDeptName" />
+    						<a href="#" class="k-icon k-i-search">&nbsp;</a>
+						</span>
+						<input type="hidden" id="repairDeptId" name="repairDeptId" />
+				    </td>
+				    <td class="ui-search-name">报修时间：</td>
+					<td class="ui-search-c" colspan="3">
+						<input  id="startTime"  class="k-textbox"  name="startTimes" />
+						至
+						<input id="endTime"  class="k-textbox"  name="endTimes" />
+					</td>
+	        	</tr>
+				
+				
+              </table>
+            </td>
+            <td width="180" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn" onclick="cancelLeftTreeSelected();"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+            <td></td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+  #parse("index/_footer.vm") 
+<script type="text/javascript">
+    $("#groupNames").click(function() {
+		if("$!viewOnly" != "true")
+		quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/base/dutyGroup/lookup?txtId=groupId&txtName=groupName&dialogId=dutyGroupPerson_add_dlg", 300, 300);
+    });
+    var _iframe_layout, _left_layout, _inner_layout,containerHeight;
+	$(document).ready(function(){
+	    _iframe_layout = $('body').layout({
+	      defaults: {
+	        resizable: false,
+	        closable: false,
+	        spacing_open: 5
+	      },
+	      west: {
+	        size: 0.18
+	      }
+        });
+
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+	
+ $('#resetBtn').click(function(){
+		clearDate("startTime", "endTime");
+		$("#queryForm :text").val('');  
+    });
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/repair/newTask/list?r=" + new Date(), [
+		  {
+		  	field: "id",
+			hidden: true,
+			sortable:false
+		  }, {
+		  	field: "taskCode",
+			title: "诉求单号",
+			sortable: false,
+			headerAttributes: {"class": "k-grid-equilong"},
+		  	attributes: {"class": "k-grid-equilong"},
+			width:150,
+            template:"<a href=\"javascript:view('#:data.id #')\" title=\"查看#: data.taskCode #的详细信息\" >#: data.taskCode #</a>"
+		  }, {
+              field: "categoryName",
+              title: "事件分类",
+			  sortable: false,
+			  width:180,
+              headerAttributes: {"class": "k-grid-text"},
+		  	  attributes: {"class": "k-grid-text"}
+          }, {
+              field: "urgencyName",
+              title: "紧急程度",
+			  sortable: false,
+			  width:80,
+              headerAttributes: {"class": "k-grid-equilong"},
+		  	  attributes: {"class": "k-grid-equilong"}
+          }, {
+              field: "areaName",
+              title: "事发区域",
+			  sortable: false,
+			  width:180,
+              headerAttributes: {"class": "k-grid-text"},
+		  	  attributes: {"class": "k-grid-text"}
+          }, {
+              field: "descripton",
+              title: "诉求详情",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+          	  attributes: {     
+  		  		title:"#: data.descripton==null? '':data.descripton #",
+  				"class": "k-grid-text k-grid-nowrap"          
+		  	  },
+			  width: 250
+          }, {
+              field: "repairDeptName",
+              title: "报修部门",
+			  sortable: false,
+			  width:150,
+              headerAttributes: {"class": "k-grid-text"},
+		  	  attributes: {
+		  		title:"#: data.repairDeptName==null? '':data.repairDeptName #",
+                "class": "k-grid-text k-grid-nowrap"}
+          }, {
+              field: "contact",
+              title: "报修人",
+			  sortable: false,
+			  width:80,
+              headerAttributes: {"class": "k-grid-text"},
+		  	  attributes: {"class": "k-grid-text"}
+          }, {
+              field: "contactTel",
+              title: "报修人电话",
+			  sortable: false,
+			  width:100,
+              headerAttributes: {"class": "k-grid-text"},
+		  	  attributes: {"class": "k-grid-text"}
+          }, {
+		  	field: "repairDate",
+			title: "报修时间",
+			sortable: false,
+			width:180,
+			headerAttributes: {"class": "k-grid-equilong"},
+		  	attributes: {"class": "k-grid-equilong"}
+		  }
+          
+          ], 
+      {
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          },resizable:true
+      }, {
+          serverSorting: true
+      }, [
+          #kendo_datagrid_btns("NBGL_HJZX_SQD")#end
+      ]);
+	
+    }); 
+	
+	commonDate("startTime","endTime","yyyy-MM-dd HH:mm:ss","zh-CN");
+	
+	function view(id){
+    	window.location.href="$!{rc.contextPath}/repair/newTask/edit?viewOnly=true&menuCode=$!{menu.code}&id="+id;
+    }
+	
+	function cancelLeftTreeSelected(){
+		$("input").val("");
+		$("hidden").val("");
+	}
+	
+</script>

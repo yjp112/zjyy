@@ -1,0 +1,142 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<form id="myform_id" method="post" action="$!{rc.contextPath}/meeting/roomInfo/edit" class="ui-layout-center ui-dialog-form">
+    <input type="hidden" name="id" value="$!{meeting.id}">
+    <table width="100%" style="margin-right:20px;">
+        <tr>
+            <td width="15%" class="label"><span class="ui-form-required">*</span><label>会议室名称：</label></td>
+            <td width="35%" ><input type="text" class="k-textbox" name="roomName" value="$!{meeting.roomName}"></td>
+				
+            <td width="15%" class="label">会议室类别：</td>
+            <td width="35%" >
+				<select id="ownerType_id" name="roomType" class="k-textbox" onchange="typeChange(this.value);">
+						#foreach($!mType in $!listMeetingType)
+							<option value="$!{mType.enumValue}" #if($!{mType.enumValue}==$!{meeting.roomType}) selected #end>$!{mType.enumText}</option>
+						#end
+				</select>
+			</td>
+        </tr>
+        <tr>
+            <td class="label" style="height:31px;" ><span class="ui-form-required">*</span>可容纳人数：</td>
+            <td style="height:31px;" ><input type="text" class="k-textbox" name="capacityPerson" value="$!{meeting.capacityPerson}"></td>
+				
+            <td id="deptTd1" class="label">所属部门：</td>
+            <td id="deptTd2" >
+				<select id="useDeptId" name="useDeptId" class="k-textbox">
+						#foreach($!dept in $!firstLevelDept)
+							<option value="$!{dept.id}" #if($!{dept.id}==$!{meeting.useDeptId}) selected #end>$!{dept.Name}</option>
+						#end
+				</select>
+			</td>
+        </tr>
+        <tr>
+            <td class="label"><span class="ui-form-required">*</span>地理位置：</td>
+            <td><input type="text" class="k-textbox" name="location" value="$!{meeting.location}"></td>
+				
+            <td class="label">网络情况：</td>
+            <td>
+				<select id="ownerType_id" name="network" class="k-textbox">
+						#foreach($!mNet in $!listMeetingNetWork)
+							<option value="$!{mNet.enumValue}" #if($!{mNet.enumValue}==$!{meeting.network}) selected #end>$!{mNet.enumText}</option>
+						#end
+				</select>
+			</td>
+        </tr>
+        <tr>
+            <td class="label">是否有投影：</td>
+            <td>
+				<input type="radio" readonly class="ui-radio" name="projector" #if("$!{meeting.projector}"==1) checked #end value="1"><span class="ui-form-text">是</span>
+				<input type="radio" readonly class="ui-radio" name="projector" #if("$!{meeting.projector}"!=1) checked #end value="0"><span class="ui-form-text">否</span>
+			</td>
+				
+            <td class="label">多功能会议室：</td>
+            <td>
+				<input type="radio" readonly class="ui-radio" name="multiFunctional" #if("$!{meeting.multiFunctional}"==1) checked #end value="1"><span class="ui-form-text">是</span>
+				<input type="radio" readonly class="ui-radio" name="multiFunctional" #if("$!{meeting.multiFunctional}"!=1) checked #end value="0"><span class="ui-form-text">否</span>
+			</td>
+        </tr>
+        <tr>
+            <td class="label">是否有签到：</td>
+            <td>
+				<input type="radio" readonly class="ui-radio" name="isSign" #if("$!{meeting.isSign}"==1) checked #end value="1"><span class="ui-form-text">是</span>
+				<input type="radio" readonly class="ui-radio" name="isSign" #if("$!{meeting.isSign}"!=1) checked #end value="0"><span class="ui-form-text">否</span>
+			</td>
+				
+            <td class="label">读卡器HPID：</td>
+            <td>
+				<input type="text" class="k-textbox" name="hpid" value="$!{meeting.hpid}">
+			</td>
+        </tr>
+		
+		<tr>
+            <td class="label">备注：</td>
+            <td colspan="3"><textarea name="remark" class="k-textbox k-textarea" style="height:60px">$!{meeting.remark}</textarea></td>
+        </tr>
+    </table>
+    <div class="actions">
+        <button class="k-primary hc_btn" id="save_button_id" type="submit"><i class="fa fa-save"></i>保 存</button>
+        <button class="hc_btn cancel" onclick="close_dialog('meeting_add_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+    </div>
+
+</form>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+	      defaults: {
+	        resizable: true,
+	        closable: false,
+	        spacing_open: 5
+	      }
+	    });
+	});
+
+    //
+    $(document).ready(function () {
+        $("#parentName_choose").click(function () {
+            quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/base/geoArea/lookup?txtId=parentId&txtName=parentName&dialogId=meeting_add_dlg", 300, 300);
+        });
+
+
+        $("#myform_id").validator({
+            fields: {
+               roomName: "名称:required; length[~20]",
+                capacityPerson: "人数:required; length[~5]; digits",
+				location: "位置:required; length[~20]"
+            },
+            valid: function (form) {
+                form_btn_submit($("#save_button_id"), form, function (res) {
+                    //console.log(res);
+                    validateCallback(res, "grid", "meeting_add_dlg");
+                });
+            }
+        });
+    });
+	
+	function typeChange(type){
+		if(type=='1'){
+			$("#deptTd1").show();
+			$("#deptTd2").show();
+		}else if(type=='2'){
+			$("#deptTd1").hide();
+			$("#deptTd2").hide();
+			$("#useDeptId").val('');
+		}else{
+			alert('请重新选择');
+		}
+	}
+	
+		#if($!{meeting.roomType}==2)
+			$("#deptTd1").hide();
+			$("#deptTd2").hide();
+			$("#useDeptId").val('');
+        #end
+
+		
+        #if($!viewOnly)
+        setAllReadonly();
+        #end
+</script>
+</body>
+</html>

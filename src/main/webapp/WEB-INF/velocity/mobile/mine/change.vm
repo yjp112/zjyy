@@ -1,0 +1,55 @@
+<div data-page="change" class="page page-change">
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="navbar-inner">
+                <div class="navbar-left">
+                    <a href="#" class="link back">
+                        <i class="icon icon-c-back only-icon"></i>
+                    </a>
+                </div>
+                <div class="navbar-center">更改密码</div>
+                <div class="navbar-right"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-content">
+        <form class="list-block" id="change_password">
+            <ul>
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title">旧密码</div>
+                            <div class="item-input">
+                                <input type="password" placeholder="请输入旧密码" id="oldPass" name="oldPass" maxlength="20">
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title">新密码</div>
+                            <div class="item-input">
+                                <input type="password" placeholder="请输入新密码" id="newPass" name="newPass" maxlength="20">
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li class="block-area">
+                    <div class="item-content">
+                        <div class="item-inner">
+                            <div class="item-title">确认密码</div>
+                            <div class="item-input">
+                                <input type="password" placeholder="请确认新密码" id="repeatPass" maxlength="20">
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li class="submit">
+                    <a href="#" class="item-link item-content list-button" id="change_submit" onclick="changePassword()">确&nbsp;&nbsp;认</a>
+                </li>
+            </ul>
+        </form>
+    </div>
+</div>

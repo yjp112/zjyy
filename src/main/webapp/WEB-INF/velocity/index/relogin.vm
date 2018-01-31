@@ -1,0 +1,348 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>$!{index_title}</title>
+    <link type="text/css" rel="stylesheet" href="$!{main_static_custom_url}/css/common.css"/>
+    <link type="text/css"rel="stylesheet" href="$!{main_static_custom_url}/css/login.css" />
+    <script type="text/javascript" src="$!{main_static_custom_url}/js/jquery.js"></script>
+    <script type="text/javascript" src="$!{main_static_custom_url}/js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="$!{main_static_custom_url}/js/jquery.validate.js"></script>
+    <script type="text/javascript" src="$!{main_static_custom_url}/js/jquery.validate.messages.js"></script>
+    <script type="text/javascript" src="$!{main_static_custom_url}/js/jquery.metadata.js"></script>
+    <script type="text/javascript" src="$!{main_static_custom_url}/js/jquery.validate.messages_cn.js"></script>
+    <script type="text/javascript" src="$!{main_static_custom_url}/js/jquery.validate.rules.js"></script>
+
+    <script language=javascript>
+        $(document).ready(function(){
+            $(".inputBox input").each(function(){
+                //初始化
+                if($(this).val()){//当输入框不为空，隐藏提示信息
+                    $(this).siblings(".placeholder").css("display","none");
+                }
+                else{
+                    $(this).siblings(".placeholder").css("display","block");
+                }
+
+                this.onkeyup=function(){
+                }
+                this.onfocus = function(){
+                    $(".inputBox").removeClass("focus");
+                    $(this).parent(".inputBox").addClass("focus");
+                    $(this).siblings(".placeholder").css("display","none");
+                    $("#loginBtn").attr("disabled",false);
+                    $("#loginBtn").removeClass("disabledBtn").addClass("normal");
+
+                    //激活登录按钮
+                    $("#loginBtn").attr("disabled",false);
+                    $("#loginBtn").removeClass("disabledBtn").addClass("normal");
+                }
+                this.onblur = function(){
+                    $(this).parent(".inputBox").removeClass("focus");
+                    if(!$(this).val()){//当输入框为空，显示提示信息
+                        $(this).siblings(".placeholder").css("display","block");
+                    }
+                }
+            });
+        });
+
+        $("#loginform").validate({
+           meta:"validate",
+            errorElement:"em",
+            success:function(label){
+                label.text(" ").addClass("success");
+            }
+        });
+
+        function loginHandler(){
+            if(saveCookie()){
+                //点击登录按钮，call后台时，禁止登录按钮操作，直到后台返回结果
+                $("#loginBtn").attr("disabled",true);
+                $("#loginBtn").removeClass("normal").addClass("disabledBtn");
+               ## loginform.submit();
+               ## return;
+
+                $.ajax({
+                    url:"$!rc.contextPath/login/login",
+                    cache:false,
+                    type:"POST",
+                    data:'username='+$("#username").val()+'&&password='+$("#freepassword").val()+'&&rtype=json'
+                        #if($!platform.login.open_verify_code)
+                            +'code='+$("#checkcode").val()
+                        #end
+                        ,
+                    success:function(msg){
+                        if(msg.status=='success'){
+                           var url='$!{rc.contextPath}'+msg.data;
+                         //  if(url==''){
+                         //  	 url="$!{rc.contextPath}/index";
+                         //  }
+                           window.location.href=url;
+                        }else{
+                            alert(msg.message);
+                            if(msg.message == "密码错误"){
+                                $("#freepassword").focus();
+                                $("em").css("display","none");
+                                $("#username").next("em").removeClass().addClass("error success").show();
+                                $("#freepassword").next("em").removeClass().addClass("error").show();
+                            }else if(msg.exception == "用户不存在"){
+                                $("#username").focus();
+                                $("em").css("display","none");
+                                $("#username").next("em").removeClass().addClass("error").show();
+                            }
+                        }
+                    }
+                });
+                return false;
+            }
+            /*
+                var strTxtName = encodeURI($("#freename").val());
+                var strTxtPass = encodeURI($("#freepassword").val());
+                var strTxtCheckcode = encodeURI($("#checkcode").val());
+
+                $.ajax({
+                    url: "login.aspx",
+                    dataType: "html",
+                    data: {txtName:strTxtName, txtPass:strTxtPass, txtCheckcode:strTxtCheckcode},
+                    success:function(strValue){
+                        //根据返回值进行状态显示
+                        alert(strValue);
+                        //用户不存在，则用户输入框显示错误；其余验证图标都不显示；
+                        if(strValue==1){
+                            alert(1);
+                            $("em").css("display","none");
+                            $("#freename").next("em").removeClass().addClass("error").show();
+                        }
+                        //当用户存在的情况下 密码错误，用户验证显示正确，密码验证显示错误，其余验证显示不显示；
+                        else if(strValue==2){
+                            $("em").css("display","none");
+                            $("#freename").next("em").removeClass().addClass("error success").show();
+                            $("#freepassword").next("em").removeClass().addClass("error").show();
+                        }
+                        //用户名、密码正确，验证码错误，其余验证显示正确，验证码验证显示错误。
+                        else if(strValue==3){
+                            $("#checkcode").next("em").removeClass().addClass("error").show();
+                        }
+                        else{
+                            $.ajax({
+                                url: "index.html",
+                                dataType: "html"
+                            });
+                        }
+                    }
+                });
+                */
+            /*
+            var strTxtName = $("#freename").val();
+            var strTxtPass = $("#freepassword").val();
+            var strTxtCheckcode = $("#checkcode").val();
+            //用户不存在
+            if(strTxtName != "admin"){
+                //alert(1);
+                $("em").css("display","none");
+                $("#freename").next("em").removeClass().addClass("error").show();
+            }
+            //当用户存在的情况下 密码错误
+            else if(strTxtName == "admin" && strTxtPass != "123456"){
+                //alert(2);
+                $("em").css("display","none");
+                $("#freename").next("em").removeClass().addClass("error success").show();
+                $("#freepassword").next("em").removeClass().addClass("error").show();
+            }
+            //用户名、密码正确，验证码错误
+            else if(strTxtName == "admin" && strTxtPass == "123456" && strTxtCheckcode != "hv5s"){
+                //alert(3);
+                $("#checkcode").next("em").removeClass().addClass("error").show();
+            }
+            //全部正确
+            else{
+                //alert(0);
+                window.location.href="about:blank";
+            }
+            */
+        }
+
+    </script>
+
+</head>
+<body class="ui-body" onload="document.getElementById('username').focus()">
+##<form id="loginform" method="post" >
+##    <input type="hidden" name="callback" value="$!{rc.contextPath}/index" />
+##    <table width="100%" height="100%" cellpadding="0" cellspacing="0">
+##        <tr>
+##            <td align="center" valign="middle">
+##                <table width="100%" cellpadding="0" cellspacing="0" border="0">
+##                    <tr>
+##                        <td id="header" height="100px" valign="bottom">
+##                            <div class="lg_mainCenter" style="padding:0px 10px; height:100px; line-height:100px; color:#808080;">
+##                                <div class="login_logo">
+##                                    <!------ 附加功能，一般不使用 ------>
+##                                    <!--ul id="additionalFns" class="FR">
+##                                        <li><a href="#">附加功能1</a></li>
+##                                        <li>&nbsp;|&nbsp;</li>
+##                                        <li><a href="#">附加功能2</a></li>
+##                                    </ul-->
+##                                    <!------ 附加功能结束 ------>
+##                                </div>
+##                            </div>
+##                        </td>
+##                    </tr>
+##                    <tr class="login_picbg">
+##                        <td height="480px" class="login_img">
+##                            <div class="lg_mainCenter">
+##                                <div class="login_form">
+##                          
+##                                        <table id="form_tab" border="0" cellpadding="0" cellspacing="0">
+##                                            <tr>
+##                                                <td colspan="2"><h4>欢迎进入</h4></td>
+##                                            </tr>
+##                                            <tr>
+##                                                <td colspan="2">
+##                                                    <div id="usernameBox" class="inputBox focus">
+##                                                        <span class="userIcon"></span>
+##                                                       <input tabindex="1" id="username" name="username" type="text" class="login_input username {validate:{required:true,maxlength:20,messages:{required:' ',maxlength:' '}}}" value=""/>
+##                                                        <!--a href="#" class="clearname"></a-->
+##                                                        <label for="username" class="placeholder">请输入用户名/邮箱</label>
+##                                                    </div>
+##                                                </td>
+##                                            </tr>
+##                                            <tr>
+##                                                <td colspan="2">
+##                                                    <div id="passwordBox" class="inputBox">
+##                                                        <span class="psdIcon"></span>
+##                                                        <input tabindex="2" id="freepassword" name="password" type="password" class="login_input password {validate:{required:true,messages:{required:' '}}} " value="" />
+##                                                        <label for="freepassword" class="placeholder">请输入密码</label>
+##                                                    </div>
+##                                                </td>
+##                                            </tr>
+##                                            <tr>
+##                                                <td>
+##                                                    <input tabindex="3" id="store" type="checkbox" />
+##                                                    <label for="store" class="gray">下次自动登录</label>
+##                                                    <!--a class="help" title="什么是自动登录">&nbsp;</a-->
+##                                                </td>
+##                                                <!--td align="right" style="padding-right:45px"><a>忘记密码？</a></td-->
+##                                            </tr>
+##                                           #if($!platform.login.open_verify_code)
+##                                                <tr>
+##                                                    <td align="left" valign="top" width="170px">
+##                                                        <div id="checkcodeBox" class="inputBox">
+##                                                            <input tabindex="4" id="checkcode" name="checkcode" type="text" class="login_input {validate:{required:true, messages:{required:' '}}}" value="" />
+##                                                            <label for="checkcode" class="placeholder">验证码</label>
+##                                                            <!--em class="success"></em-->
+##                                                        </div>
+##                                                    </td>
+##                                                    <td align="right" valign="top" style="padding-right:45px">
+##                                                        <div id="checkcodeImg"><img src="images/checkcode.gif" /></div>
+##                                                        <a class="CL block" style="padding-top:6px">看不清，换一张</a>
+##                                                    </td>
+##                                                </tr>
+##                                            #end
+##                                            <tr>
+##                                                <th colspan="3" ><input type="submit"  tabindex="5" id="loginBtn" class="normal" onclick="javascript:return loginHandler();" value=""/></th>
+##                                            </tr>
+##                                        </table>
+##                                     
+##                                    <!--<div class="loginFormIcon"></div>-->
+##                                </div>
+##                            </div>
+##                        </td>
+##                    </tr>
+##                    <tr>
+##                        <td valign="top">
+##                            <div class="lg_mainCenter t_c">
+##                                <!-- t_l:设置Copyright居左; t_c:设置Copyright居中; t_r:设置Copyright居右 -->
+##                                <span id="login_footer">Copyright © 2003-$date.yyyy 浙江浙大中控信息技术有限公司</span>
+##                            </div>
+##                        </td>
+##                    </tr>
+##                </table>
+##            </td>
+##        </tr>
+##    </table>
+##</form>
+<div class="ui-login">
+    <div class="ui-login-title"></div>
+    <div class="ui-login-form">
+        <form id="loginform" method="post" >
+            <input type="hidden" name="callback" value="$!{rc.contextPath}/index" />
+            <div class="username"><span class="login-font">用户名</span><input type="text" id="username" name="username"></div>
+            <div class="password"><span class="login-font">密&nbsp;&nbsp;&nbsp;码</span><input type="password" id="freepassword" name="password"></div>
+            <div class="login-btn">
+                <input type="submit" class="submit-btn login-btn-pointer" onclick="javascript:return loginHandler();" value="登录">
+                <input type="reset" class="reset-btn login-btn-pointer" value="取消">
+            </div>
+        </form>
+    </div>
+</div>
+<div class="ui-login-footer"><span class="foot-text">Copyright © 2003-$date.yyyy 浙江浙大中控信息技术有限公司</span></div>
+
+</body>
+</html>
+<script>
+    $(document).ready(function(){
+
+        readCookie();
+
+    })
+    function readCookie() {
+        //从cookie中取得保存的用户信息
+        if ($.cookie("store") == "true") {
+            $("#username").val($.cookie("username"));
+            $("#freepassword").val($.cookie("password"));
+            $("#freepassword").siblings(".placeholder").css("display","none");
+            $("#store").attr("checked","true");
+        }
+
+    }
+    function saveCookie() {
+        $("#error").hide();//error消息隐藏
+        var username = $("#username").val();
+        var password = $("#freepassword").val();
+
+        if (username == "") {
+            alert("用户名不能为空！");
+            //$("em").css("display","none");
+            //$("#username").next("em").removeClass().addClass("error").show();
+            $("#username").focus();
+            return false;
+        }
+        if (password == "") {
+            alert("密码不能为空！");
+            //$("em").css("display","none");
+            //$("#username").next("em").removeClass().addClass("error success").show();
+            //$("#freepassword").next("em").removeClass().addClass("error").show();
+            $("#freepassword").focus();
+            return false;
+        }
+
+        //保存用户信息至cookie
+        if ($("#store").attr("checked")) {
+            $.cookie("store", "true", {
+                expires :30
+            }); // 存储一个带30天期限的 cookie
+
+            $.cookie("username", username, {
+                expires :30
+            });
+            $.cookie("password", password, {
+                expires :30
+            });
+
+            return true;
+        } else {//清除用户信息
+            $.cookie("store", "false", {
+                expires :-1
+            });
+            $.cookie("username", '', {
+                expires :-1
+            });
+            $.cookie("password", '', {
+                expires :-1
+            });
+            return true;
+        }
+
+        return true;
+    }
+</script>

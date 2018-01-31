@@ -1,0 +1,347 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.dev.gis.entities.MapLevel">
+
+	<resultMap type="com.supconit.dev.gis.entities.MapLevel" id="MapLevelResultMap">
+        <result property="id" column="ID" />
+        <result property="scales" column="SCALES" />
+        <result property="minlon" column="MINLON" />
+        <result property="maxlon" column="MAXLON" />
+        <result property="minlat" column="MINLAT" />
+        <result property="maxlat" column="MAXLAT" />
+        <result property="centerx" column="CENTERX" />
+        <result property="centery" column="CENTERY" />
+        <result property="initlevel" column="INITLEVEL" />
+        <result property="initBuild" column="INIT_BUILD" />
+        <result property="initFloor" column="INIT_FLOOR" />
+        <result property="baseLayer" column="BASE_LAYER" />
+        <result property="buildName" column="BUILD_NAME" />
+        <result property="floorName" column="FLOOR_NAME" />
+        <result property="fullLevelName" column="FULL_LEVEL_NAME" />
+        <result property="systemName" column="SYSTEM_NAME" />
+        <result property="systemCode" column="SYSTEM_CODE" />
+        <result property="type" column="TYPE" />
+	</resultMap>
+	
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+	
+	<sql id="TABLE_NAME" lang="velocity">G_MAP_LEVEL</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+    <!-- 获取记录列表-->
+	<sql id="select_pre" lang="velocity">
+    SELECT  ID
+      , INIT_BUILD
+      , INIT_FLOOR
+      , SCALES
+      , MINLON
+      , MAXLON
+      , MINLAT
+      , MAXLAT
+      , CENTERX
+      , CENTERY
+      , INITLEVEL
+      , BASE_LAYER
+      , (SELECT A.AREA_NAME FROM GEO_AREA A WHERE A.ID=INIT_BUILD) BUILD_NAME
+      , (SELECT B.AREA_NAME FROM GEO_AREA B WHERE B.ID=INIT_FLOOR) FLOOR_NAME
+      , (SELECT C.FULL_LEVEL_NAME FROM GEO_AREA C WHERE C.ID=INIT_FLOOR) FULL_LEVEL_NAME
+      , TYPE
+      , SYSTEM_NAME
+      , SYSTEM_CODE
+  FROM <include refid="TABLE_NAME"/>  
+	</sql>
+
+	<sql id="count_pre" lang="velocity">
+		SELECT COUNT(*) FROM <include refid="TABLE_NAME"/>
+	</sql>
+	
+    <insert id="insert" parameterType="com.supconit.dev.gis.entities.MapLevel" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+		<include refid="insert_sql" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.dev.gis.entities.MapLevel" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+		<include refid="insert_sql" />
+        <!-- 获取记录主键 microsoft sql server -->
+		<selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+	</insert>
+ 
+
+    <!-- 插入记录-->
+	<sql id="insert_sql" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>(
+		 
+        #if($_databaseId == 'oracle') ID, #end       
+			 INIT_BUILD
+      		,INIT_FLOOR
+		    ,SCALES
+		    ,MINLON
+		    ,MAXLON
+		    ,MINLAT
+		    ,MAXLAT
+		    ,CENTERX
+		    ,CENTERY
+		    ,INITLEVEL
+		    ,BASE_LAYER
+		    ,SYSTEM_NAME
+		    ,SYSTEM_CODE
+		    ,TYPE
+		) VALUES (    
+			#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end     
+	         @{_parameter.initBuild,jdbcType=NUMERIC},
+	         @{_parameter.initFloor,jdbcType=NUMERIC},
+	         @{_parameter.scales,jdbcType=NVARCHAR},
+	         @{_parameter.minlon,jdbcType=NUMERIC},
+	         @{_parameter.maxlon,jdbcType=NUMERIC},
+	         @{_parameter.minlat,jdbcType=NUMERIC},
+	         @{_parameter.maxlat,jdbcType=NUMERIC},
+	         @{_parameter.centerx,jdbcType=NUMERIC},
+	         @{_parameter.centery,jdbcType=NUMERIC},
+	         @{_parameter.initlevel,jdbcType=NUMERIC},
+	         @{_parameter.baseLayer,jdbcType=NVARCHAR},
+	         @{_parameter.systemName,jdbcType=NVARCHAR},
+	         @{_parameter.systemCode,jdbcType=NVARCHAR},
+	         @{_parameter.type,jdbcType=NUMERIC}
+		)
+	</sql>
+	
+	<select id="getById" resultMap="MapLevelResultMap" parameterType="Long" lang="velocity">
+		<include refid="select_pre" />        
+         WHERE ID = @{_parameter.id, jdbcType=NUMERIC}
+	</select>
+	
+	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.dev.gis.entities.MapLevel" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+		#mset()
+		<![CDATA[
+	        #if($_parameter.initBuild && $_parameter.initBuild !='') INIT_BUILD = @{_parameter.initBuild,jdbcType=NUMERIC},#end
+	        #if($_parameter.initFloor && $_parameter.initFloor !='') INIT_FLOOR = @{_parameter.initFloor,jdbcType=NUMERIC},#end
+	        #if($_parameter.scales && $_parameter.scales !='') SCALES = @{_parameter.scales,jdbcType=NVARCHAR},#end
+	        #if($_parameter.minlon && $_parameter.minlon !='') MINLON = @{_parameter.minlon,jdbcType=NUMERIC},#end
+	        #if($_parameter.maxlon && $_parameter.maxlon !='') MAXLON = @{_parameter.maxlon,jdbcType=NUMERIC},#end
+	        #if($_parameter.minlat && $_parameter.minlat !='') MINLAT = @{_parameter.minlat,jdbcType=NUMERIC},#end
+	        #if($_parameter.maxlat && $_parameter.maxlat !='') MAXLAT = @{_parameter.maxlat,jdbcType=NUMERIC},#end
+	        #if($_parameter.centerx && $_parameter.centerx !='') CENTERX = @{_parameter.centerx,jdbcType=NUMERIC},#end
+	        #if($_parameter.centery && $_parameter.centery !='') CENTERY = @{_parameter.centery,jdbcType=NUMERIC},#end
+	        #if($_parameter.initlevel && $_parameter.initlevel !='') INITLEVEL = @{_parameter.initlevel,jdbcType=NUMERIC},#end
+			#if($_parameter.baseLayer && $_parameter.baseLayer !='') BASE_LAYER = @{_parameter.baseLayer,jdbcType=NVARCHAR},#end
+			#if($_parameter.systemName && $_parameter.systemName !='') SYSTEM_NAME = @{_parameter.systemName,jdbcType=NVARCHAR},#end
+			#if($_parameter.systemCode && $_parameter.systemCode !='') SYSTEM_CODE = @{_parameter.systemCode,jdbcType=NVARCHAR},#end
+			#if($_parameter.type && $_parameter.type !='') TYPE = @{_parameter.type,jdbcType=NUMERIC},#end
+		]]>
+		#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+	
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[		
+		#where()
+			#set($_p = $_parameter.condition)
+			1=1 
+			
+			#if($_p.initBuild && $_p.initBuild != ''&& $_p.initBuild != 0)
+				AND INIT_BUILD = $_p.initBuild
+			#end
+			#if($_p.initFloor && $_p.initFloor != ''&& $_p.initFloor != 0)
+				AND INIT_FLOOR = $_p.initFloor
+			#end
+			#if($_p.type && $_p.type != ''&& $_p.type != 0)
+				AND TYPE = $_p.type
+			#end
+			#if($_p.scales && $_p.scales != '')
+				#set($_scales = '%' + $_p.scales + '%')
+				AND SCALES LIKE @{_scales}
+			#end
+			#if($_p.minlon && $_p.minlon != '' && $_p.minlon !=0.0)
+				#set($_minlon = '%' + $_p.minlon + '%')
+				AND MINLON LIKE @{_minlon}
+			#end
+			#if($_p.maxlon && $_p.maxlon != '' && $_p.minlon !=0.0)
+				#set($_maxlon = '%' + $_p.maxlon + '%')
+				AND MAXLON LIKE @{_maxlon}
+			#end
+			#if($_p.minlat && $_p.minlat != '' && $_p.minlon !=0.0)
+				#set($_minlat = '%' + $_p.minlat + '%')
+				AND MINLAT LIKE @{_minlat}
+			#end
+			#if($_p.maxlat && $_p.maxlat != '' && $_p.minlon !=0.0)
+				#set($_maxlat = '%' + $_p.maxlat + '%')
+				AND MAXLAT LIKE @{_maxlat}
+			#end
+			#if($_p.centerx && $_p.centerx != '' && $_p.minlon !=0.0)
+				#set($_centerx = '%' + $_p.centerx + '%')
+				AND CENTERX LIKE @{_centerx}
+			#end
+			#if($_p.centery && $_p.centery != '' && $_p.minlon !=0.0)
+				#set($_centery = '%' + $_p.centery + '%')
+				AND CENTERY LIKE @{_centery}
+			#end
+			#if($_p.initlevel && $_p.initlevel != '')
+				#set($_initlevel = '%' + $_p.initlevel + '%')
+				AND INITLEVEL LIKE @{_initlevel}
+			#end
+			#if($_p.baseLayer && $_p.baseLayer != '')
+				#set($_baseLayer = '%' + $_p.baseLayer + '%')
+				AND BASE_LAYER LIKE @{_baseLayer}
+			#end
+			#if($_p.systemName && $_p.systemName != '')
+				#set($_systemName = '%' + $_p.systemName + '%')
+				AND SYSTEM_NAME LIKE @{_systemName}
+			#end
+			#if($_p.systemCode && $_p.systemCode != '')
+				#set($_systemCode = '%' + $_p.systemCode + '%')
+				AND SYSTEM_CODE LIKE @{_systemCode}
+			#end
+		#end
+		]]>	
+	</sql>
+    
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.dev.gis.entities.MapLevel" resultMap="MapLevelResultMap" lang="velocity" databaseId="oracle">
+		 <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre" />
+		<include refid="condition_sql" />
+		#order($_parameter.condition,"ID DESC")
+ 		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+	<select id="findByCondition" parameterType="com.supconit.dev.gis.entities.MapLevel" resultMap="MapLevelResultMap" lang="velocity" databaseId="sqlserver">
+	 <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		 SELECT   ID
+      , INIT_BUILD,
+      , INIT_FLOOR,
+      , SCALES
+      , MINLON
+      , MAXLON
+      , MINLAT
+      , MAXLAT
+      , CENTERX
+      , CENTERY
+      , INITLEVEL
+      , BASE_LAYER
+      , SYSTEM_NAME
+      , SYSTEM_CODE
+      , TYPE
+  		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/> 
+		<include refid="condition_sql" />
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+
+    <select id="countByCondition" parameterType="com.supconit.dev.gis.entities.MapLevel" resultType="long" lang="velocity">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+	
+	<select id="findByFloor" resultMap="MapLevelResultMap" lang="velocity" parameterType="Long">
+		<include refid="select_pre" /> where INIT_FLOOR = @{_parameter.initFloor,jdbcType=NUMERIC}
+	</select>
+	
+	<select id="findByBuild" resultMap="MapLevelResultMap" lang="velocity" parameterType="Long">
+		<include refid="select_pre" /> where INIT_BUILD = @{_parameter.initBuild,jdbcType=NUMERIC}
+	</select>
+	
+	<select id="findAll" resultMap="MapLevelResultMap" lang="velocity">
+		<include refid="select_pre" />where 1=1
+	</select>
+	
+	<select id="findAllBuild" resultMap="MapLevelResultMap" lang="velocity">
+		<include refid="select_pre" />where TYPE = 1
+	</select>
+	
+	<select id="findAllSystemMapLevel" resultMap="MapLevelResultMap" lang="velocity">
+		<include refid="select_pre" />where type = 2
+	</select>
+	
+	<select id="findAllSystemCode" resultMap="MapLevelResultMap" parameterType="string" lang="velocity">
+		<include refid="select_pre" />where SYSTEM_CODE =  @{_parameter.systemCode,jdbcType=NVARCHAR}
+	</select>
+
+
+	<!-- DElETE -->
+	<delete id="deleteById" parameterType="long" lang="velocity">
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</delete>
+	<update id="batchMerge" databaseId="oracle">
+		MERGE into G_MAP_LEVEL  Target USING (
+		      SELECT t.id         init_floor,
+		       t.parent_id  init_build,
+		       g.scales,
+		       g.minlon,
+		       g.maxlon,
+		       g.minlat,
+		       g.maxlat,
+		       g.centerx,
+		       g.centery,
+		       g.initlevel,
+		       substr(t.area_code,0,1)||'_'||substr(t.area_code,2)||'F'  base_layer,
+		       g.system_name,
+		       g.system_code,
+		       g.type
+		  FROM geo_area t
+		  FULL JOIN g_map_level g
+		    ON 1 = 1
+		 WHERE t.parent_id != 0
+		   AND g.id = 0) 
+		    Source ON (
+		      Target.INIT_BUILD = Source.INIT_BUILD
+		      AND Target.INIT_FLOOR = Source.INIT_FLOOR
+		    )
+		    WHEN MATCHED THEN
+		      UPDATE
+		    SET Target.SCALES=Source.SCALES
+		        ,Target.MINLON=Source.MINLON
+		        ,Target.MAXLON=Source.MAXLON
+		        ,Target.MINLAT=Source.MINLAT
+		        ,Target.MAXLAT=Source.MAXLAT
+		        ,Target.CENTERX=Source.CENTERX
+		        ,Target.CENTERY=Source.CENTERY
+		        ,Target.INITLEVEL=Source.INITLEVEL
+		        ,Target.BASE_LAYER=Source.BASE_LAYER
+		        ,Target.SYSTEM_NAME=Source.SYSTEM_NAME
+		        ,Target.SYSTEM_CODE=Source.SYSTEM_CODE
+		        ,Target.TYPE=Source.TYPE
+		    WHEN NOT MATCHED  THEN
+		      INSERT (
+		        ID
+		        ,INIT_BUILD
+		            ,INIT_FLOOR
+		          ,SCALES
+		          ,MINLON
+		          ,MAXLON
+		          ,MINLAT
+		          ,MAXLAT
+		          ,CENTERX
+		          ,CENTERY
+		          ,INITLEVEL
+		          ,BASE_LAYER
+		          ,SYSTEM_NAME
+		          ,SYSTEM_CODE
+		          ,TYPE
+		      )
+		    VALUES
+		      (
+		      seq_g_map_level.nextval
+		      ,Source.INIT_BUILD
+		          ,Source.INIT_FLOOR
+		        ,Source.SCALES
+		        ,Source.MINLON
+		        ,Source.MAXLON
+		        ,Source.MINLAT
+		        ,Source.MAXLAT
+		        ,Source.CENTERX
+		        ,Source.CENTERY
+		        ,Source.INITLEVEL
+		        ,Source.BASE_LAYER
+		        ,Source.SYSTEM_NAME
+		        ,Source.SYSTEM_CODE
+		        ,Source.TYPE
+		      )
+	</update>	
+</mapper>

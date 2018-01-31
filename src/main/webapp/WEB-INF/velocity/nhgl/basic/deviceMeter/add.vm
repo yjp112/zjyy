@@ -1,0 +1,250 @@
+<style>
+#device_meter_add_form a.ui-input-remove,
+a.ui-input-icon {
+	right:13px;
+}
+#electricForm a.ui-input-remove,
+a.ui-input-icon {
+	right:13px;
+}
+ .ui-tab ul{
+	overflow:visible;
+}
+.chooseBox{
+	width:250px;
+	height:500px;
+	border:#cccccc 1px solid;
+	overflow-y:auto;
+	overflow-x:scroll;
+}
+.chooseUl li{
+	height:22px;
+	line-height:22px;
+	cursor:pointer;
+	padding-left:6px;
+	margin-bottom:1px;
+	width:280px;
+}
+.choosePick{
+	background:#6ebffe;
+	color:#FFF;
+}
+.t_c{
+	text-align:center;
+} 
+.mt_10{ margin-top:10px;}
+ul{ margin:0; padding:0;} 
+</style>
+<form id="electricForm" class="ui-form">
+	<fieldset>
+		<div class="ui-form-item">
+            <label class="ui-label"><span class="ui-form-required">*</span>电表编码：</label>
+            <input class="ui-input ui-input-choose" #if($!flag == 0) readonly #end type="text" id="electricCode"  emptyFunc="clearManageElectric" name="electricCode" value="$!condition.electricCode" onclick="getDevice('deviceMeterId','electricCode','0','electricName','locationNameCondition','useDepartMentCondition','manageDepartMent')">
+		</div>
+		<div class="ui-form-item" >
+			<label class="ui-label" >电表名称：</label>
+			<input class="ui-input" type="text" readOnly id="electricName" name="electricName" value="$!condition.electricName">
+		</div>
+		<div class="ui-form-item" >
+			<label class="ui-label" >安装位置：</label>
+			<input class="ui-input" type="text" readOnly id="locationNameCondition" name="locationNameCondition" value="$!condition.locationName">
+		</div>
+		<div class="ui-form-item" >
+			<label class="ui-label" >使用部门：</label>
+			<input class="ui-input" type="text" readOnly id="useDepartMentCondition" name="useDepartMentCondition" value="$!condition.useDepartMent">
+		</div>
+		<div class="ui-form-item" >
+			<label class="ui-label" >管理部门：</label>
+			<input class="ui-input" type="text" readOnly id="manageDepartMent" name="manageDepartMent" value="$!condition.manageDepartMent">
+		</div>
+	</fieldset>
+</form>
+<form class="ui-form" id="device_meter_add_form" action="$!{rc.contextPath}/nhgl/basic/deviceMeter/save" method="post">
+	<input type="hidden" id="id" name="id" value="$!condition.id"/>
+	<input type="hidden" id="deviceIds" name="deviceIds"/>
+	<input class="ui-input" type="hidden" id="deviceMeterId" name="deviceMeterId" value="$!condition.deviceMeterId">
+	<fieldset>
+		<div class="ui-form-item">
+            <label class="ui-label">设备编码：</label>
+            <input id="deviceCode" type="text" name="deviceCode" class="ui-input" />
+		</div>
+		<div class="ui-form-item" >
+			<label class="ui-label" >安装位置：</label>
+			<input id="locationName" type="text" name="locationName" emptyFunc="clearArea" class="ui-input ui-input-choose" onclick="chooseGeoarea('locationId','locationName')"/>
+			<input class="ui-input" type="hidden" id="locationId" name="locationId" value="$!condition.locationId">
+		</div>
+		<div style="width:80px;float:left" >
+			<button type="button" class="btn ui-btn" id="searchBtn" onclick="search();"><i class="iconfont icon-search"></i>搜索</button>
+		</div>
+		<div class="ui-form-item" >
+			<label class="ui-label" >使用部门：</label>
+			<input class="ui-input" type="hidden" id="useDepartmentId" name="useDepartmentId" value="$!condition.useDepartmentId">
+			<input class="ui-input ui-input-choose" type="text" emptyFunc="clearDept" id="useDepartMent" name="useDepartMent" onclick="chooseDept('useDepartmentId','useDepartMent')">
+		</div>
+		<div class="ui-form-item" >
+			<label class="ui-label" >特种设备：</label>
+			<select class="ui-select" id="specialStatus" name="specialStatus">
+				<option value="">---请选择---</option>
+				<option value="1">是</option>
+				<option value="0">否</option>
+			</select>
+		</div>
+		<div style="width:80px;float:left" >
+			<button type="reset" class="btn ui-btn" id="restBtn"><i class="iconfont icon-reset"></i>重置</button>
+		</div>
+		<div id="choosebox" style="width:680px;overflow:hidden;padding-top:20px;padding-left:50px">
+			<table  cellpadding="0" cellspacing="0" width="auto" >
+    		      <tr>
+                    <td width="228">
+                        <label class="ui-title-center"><strong style="color: #fff;">可选择设备</strong></label>
+                		<div class="chooseBox subclass">
+                    	 <ul class="chooseUl" id="device_selecting" >
+                         </ul>
+                        </div>
+                    </td>
+                    <td width="100" class="t_c" style="vertical-align:middle;">
+                        <input class="btn btn-success" type="button" value=">>" onclick="selectBotn('subclass','subclassPick');"/>
+                        <input class="btn btn-success" type="button" value="<<" onclick="selectBotn('subclassPick','subclass');"/> 
+                    </td>
+                    <td width="228">
+                        <label class="ui-title-center"><strong style="color: #fff;">已选择设备</strong></label>
+                		<div class="chooseBox subclassPick" style="overflow-x:auto;">
+                    	 <ul class="chooseUl" id="device_selected">
+    					 </ul>
+    					</div>
+                    </td>
+    			  </tr>
+    		</table>
+    	</div>
+	</fieldset>
+</form>
+<script>
+function addSelectClass($obj){
+	if($obj.hasClass("choosePick")){
+		$obj.removeClass("choosePick");
+	}else{
+		$obj.addClass("choosePick");
+	}	
+}
+$(function(){
+	//var deviceMeterId = $("#deviceMeterId").val();
+	if($!flag == 1)
+		search();
+		//$.post('$!{rc.contextPath}/basic/deviceMeter/findDmByCondition?deviceMeterId='+deviceMeterId,function(datas){
+    	//		 generateDeviceList('subclassPick',datas);
+    	//	 });
+});
+function search(){
+	var form = document.getElementById('device_meter_add_form');
+	var deviceMeterId = $("#deviceMeterId").val();
+	$.post('$!{rc.contextPath}/nhgl/basic/deviceMeter/findDmByCondition?deviceMeterId='+deviceMeterId,function(datas){
+    			var str='';
+             	for(var i=0;i<datas.length;i++){
+              	  str+='<li subId="'+datas[i].deviceId+"_"+datas[i].isValid+'" onclick="addSelectClass($(this));" >'+'<font style="color:#fff">'+datas[i].deviceCode+
+            	    '</font></li>';
+            	 }
+             	$('.subclassPick ul').html(str);
+    		 });
+	//ajax提交方法
+	 var options = { 
+		       beforeSubmit:  showRequest,  
+		       success:       showResponse, 
+		       url:       "$!{rc.contextPath}/nhgl/basic/deviceMeter/findListByCondition",       
+		       type:      "GET" ,    
+		       dataType:  "html"  
+	 };
+	 $(form).ajaxStart(function(){
+	 
+			    }).ajaxError(function(){
+			    
+				
+				    }).ajaxSubmit(options);
+	 function showRequest(formData, jqForm, options) { 
+		    return true; 
+		} 
+
+	 function showResponse(responseText, statusText){
+	 	var data = '';
+		if(responseText != ''){
+			data = eval("(" + responseText + ")");
+			generateDeviceList('subclass',data);
+		}
+		
+		$("#device_meter_add_form").attr("action","$!{rc.contextPath}/nhgl/basic/deviceMeter/save");
+	 } 
+	
+}
+//数据写到可选择设备或已选择设备
+function generateDeviceList(target,data){
+ var str='';
+ for(var i=0;i<data.length;i++){
+    str+='<li subId="'+data[i].id+"_1"+'" onclick="addSelectClass($(this));" >'+'<font style="color:#fff">'+data[i].deviceCode+
+    '</font></li>';
+ }
+ $('.'+target+' ul').html(str);
+}
+
+//获取选择的id
+function getSelectedDevice(){
+  var ids=[];
+  $('#device_selected li').each(function(idx,item){
+     ids.push($(this).attr('subId'));
+  });
+  return ids.join(';');
+}
+
+function selectBotn(from,to){
+	var html = "";
+	$("."+from+" li").each(function(){
+		if($(this).hasClass("choosePick")){//已选中
+			var subId = $(this).attr("subId");
+			if(subId.split("_")[1]=='0'){
+				$.message($(this).text()+"该设备在当前电表中是失效设备，不能移动！", $.message.TYPE_ERROR, 4, false, true); return false; 
+			}
+			$(this).removeClass("choosePick");
+			if($("."+to+" li[subId="+subId+"]").size()>0){
+    			$(this).remove();
+    			 return;
+			}else{
+				var toSubId = "";
+				var li = $(this)[0].outerHTML;
+    			if(to == 'subclass'){
+					$("."+to+" li").each(function(){
+						toSubId = $(this).attr("subId");
+						if(toSubId > subId){
+							$(this).before(li);
+							li="";
+							return;
+						}
+					})
+					if(toSubId < subId || toSubId == '')
+						$("."+to+" ul").append($(this)[0].outerHTML);
+    			}else{
+					$("."+to+" ul").append($(this)[0].outerHTML);
+    			}
+				$(this).remove();
+			}
+		}
+	})
+}
+
+function clearManageElectric(){
+    $("#electricCode").val("");	
+   	$("#deviceMeterId").val("");
+	$("#electricName").val("");
+	$("#locationNameCondition").val("");
+	$("#useDepartMentCondition").val("");
+	$("#manageDepartMent").val("");
+	
+}
+	   
+function clearArea(){
+  	$("#locationName").val("");	
+	$("locationId").val("");
+}
+function clearDept(){
+  	$("#useDepartMent").val("");
+	$("#useDepartmentId").val("");
+	
+}
+</script>

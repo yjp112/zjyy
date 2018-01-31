@@ -1,0 +1,264 @@
+#parse("index/_header.vm")
+
+</head>
+
+<body style="padding-bottom:40px;">
+<form id="queryForm" method="post" action="$!{rc.contextPath}/hl/device/device/save?flag=$!{flage}"
+      class="ui-layout-center ui-dialog-form">
+<input type="hidden" name="id" value="$!{device.id}"/>
+
+<div class="actions">
+    <button class="k-primary hc_btn" id="device_bt" type="submit"><i class="fa fa-save"></i>保 存</button>
+    #if("$!{from}"!="gis")
+        <a class="k-primary hc_btn" href="#" onclick="backbtn('$!{flage}')"><i class="fa fa-reply"></i></i>返回</a>
+    #end
+</div>
+<table class="ui-co-table" width="100%">
+<tr>
+    <td class="label"><label><span class="ui-form-required">*</span>设备编码：</label></td>
+    <td class="inputText">
+        <input class="k-textbox ui-disabled" type="text" name="deviceCode"
+               value="$!{device.deviceCode}"/>
+    </td>
+    <td class="label"><label><span class="ui-form-required">*</span>设备名称：</label></td>
+    <td class="inputText"><input class="k-textbox" type="text" name="deviceName"
+                                 value="$!{device.deviceName}"></td>
+
+    <td class="label">规格型号：</td>
+    <td class="inputText">
+        <input class="k-textbox" type="text" name="deviceSpec" value="$!{device.deviceSpec}">
+    </td>
+</tr>
+<tr>
+    <td class="label"><span class="ui-form-required">*</span>设备类别：</td>
+    <td class="inputText">
+                                                <span class="k-textbox k-space-right"
+                                                      onclick="chooseDeviceCategory('categoryId','categoryName','',1)">
+                                                   <input readonly
+                                                          class="k-textbox #if(!$!{viewOnly}) ui-input-choose #end"
+                                                          type="text" id="categoryName" name="categoryName"
+                                                          value="$!{device.categoryName}"/>
+                                                   <a href="#" class="k-icon k-i-search">&nbsp;</a>
+                                                 </span>
+
+        <input class="k-textbox" type="hidden" id="categoryId" name="categoryId"
+               value="$!{device.categoryId}"/>
+
+    </td>
+    <td class="label"><label><span class="ui-form-required">*</span>安装位置：</label></td>
+    <td class="inputText">
+               <span class="k-textbox k-space-right"
+                     onclick="chooseGeoarea('locationId','locationName')">
+                <input readonly type="text"
+                       class="k-textbox #if(!$!{viewOnly}) ui-input-choose #end" id="locationName" name="locationName"
+                       value="$!{device.locationName}"/>
+                <a href="#" class="k-icon k-i-search">&nbsp;</a>
+               </span>
+
+        <input class="k-textbox" type="hidden" id="locationId" name="locationId"
+               value="$!{device.locationId}"/>
+
+    </td>
+    <td class="label"><label><span class="ui-form-required">*</span>使用部门：</label></td>
+    <td class="inputText">
+                  <span class="k-textbox k-space-right"
+                        onclick="chooseDept('useDepartmentId','useDepartmentName')">
+                       <input readonly class="k-textbox #if(!$!{viewOnly}) ui-input-choose #end" type="text"
+                              id="useDepartmentName" name="useDepartmentName" value="$!{device.useDepartmentName}"/>
+                       <a href="#" class="k-icon k-i-search">&nbsp;</a>
+                   </span>
+
+        <input class="k-textbox" type="hidden" id="useDepartmentId" name="useDepartmentId"
+               value="$!{device.useDepartmentId}"/>
+    </td>
+</tr>
+
+<tr>
+    <td class="label"><label><span class="ui-form-required">*</span>管理负责人：</td>
+    <td class="inputText">
+                <span class="k-textbox k-space-right"
+                      onclick="choosePersons(1,'managePersonIds','managePersonName','','-1','manageDepartmentId','manageDepartmentName')">
+                   <input class="k-textbox #if(!$!{viewOnly}) ui-input-choose #end" onmouseover="this.title=this.value"
+                          readonly type="text" id="managePersonName" name="managePersonName"
+                          value="$!{device.managePersonName}"/>
+                   <a href="#" class="k-icon k-i-search">&nbsp;</a>
+                 </span>
+
+        <input class="k-textbox" type="hidden" id="managePersonIds" name="managePersonIds"
+               value="$!{device.managePersonIds}"/>
+    </td>
+    <td class="label"><span class="ui-form-required">*</span>管理部门：</td>
+    <td class="inputText">
+        <input class="k-textbox" type="hidden" id="manageDepartmentId" name="manageDepartmentId"
+               value="$!{device.manageDepartmentId}"/>
+        <input type="text" class="k-textbox" id="manageDepartmentName" name="manageDepartmentName"
+               value="$!{device.manageDepartmentName}"/>
+    </td>
+    <td class="label"><label>生产厂商：</label></td>
+    <td class="inputText">
+               <span class="k-textbox k-space-right"
+                     onclick="chooseSupplier('supplierId','supplierName');">
+                <input class="k-textbox #if(!$!{viewOnly}) ui-input-choose #end" readonly type="text" id="supplierName"
+                       name="supplierName" value="$!{device.supplierName}"/>
+               <a href="#" class="k-icon k-i-search">&nbsp;</a>
+               </span>
+        <input class="k-textbox" type="hidden" id="supplierId" name="supplierId"
+               value="$!{device.supplierId}"/>
+
+    </td>
+</tr>
+<tr>
+    <td class="label"><label>检修周期：</label></td>
+    <td class="inputText">
+        <input type="text" class="k-textbox fInt" name="maitainCycle" value="$!{device.maitainCycle}"/>
+        <span>天</span>
+    </td>
+
+    <td class="label"><label>检修后运行：</td>
+    <td class="inputText">
+        <input class="k-textbox fNum2" type="text" name="timeAfterMaintain" readonly="true"
+               value="$!{device.timeAfterMaintain}"/>
+        <span class="ui-form-unit">小时</span>
+    </td>
+    <td class="label">累计运行：</td>
+    <td class="inputText">
+        <input class="k-textbox fNum2" type="text" name="totalRunningTime" readonly="true"
+               value="$!{device.totalRunningTime}"/>
+        <span class="ui-form-unit">小时</span>
+    </td>
+</tr>
+
+<tr>
+    <td class="label"><label>特种设备：</label></td>
+    <td class="inputText">
+        <input type="radio" readonly class="ui-radio"
+               name="specialStatus" #if("$!{device.specialStatus}"==1) checked #end value="1"><span
+            class="ui-form-text">是</span>
+        <input type="radio" readonly class="ui-radio"
+               name="specialStatus" #if("$!{device.specialStatus}"!=1) checked #end value="0"><span
+            class="ui-form-text">否</span>
+
+    </td>
+    <td class="label"><label>设备条码：</label></td>
+    <td class="inputText">
+        <input class="k-textbox" type="text" name="barcode" value="$!{device.barcode}"/>
+    </td>
+
+    <td class="label"><label>出厂日期：</td>
+    <td>
+        <input id="startTime" class="k-textbox" name="prduceDate"
+               value="#date_format($!{device.prduceDate},'yyyy-MM-dd')"/>
+    </td>
+
+</tr>
+<tr>
+    <td class="label"><label>资产编码：</label></td>
+    <td class="inputText">
+        <input class="k-textbox" type="text" name="assetsCode" value="$!{device.assetsCode}"/>
+    </td>
+    <td class="label"><label>启用日期：</label></td>
+    <td>
+        <input id="endTime" class="k-textbox" name="enableDate"
+               value="#date_format( $!{device.enableDate},'yyyy-MM-dd')"/>
+    </td>
+
+    <td class="label"><label>使用状态：</td>
+    <td class="ui-search-c inputText">
+        <select name="status" class="k-textbox" #if($!{showFlag})disabled="true"#end >
+            #foreach($!{e} in $!{lstStatus})
+                <option value="$!{e.enumValue}" #if($!{device.status}==$!{e.enumValue})
+                        selected="selected" #end>$!{e.enumText}</option>
+            #end
+        </select>
+    </td>
+
+</tr>
+<tr>
+    <td class="label">资产原值：</td>
+    <td class="inputText">
+        <input class="k-textbox fNum2" type="text" name="assetsCost" value="$!{device.assetsCost}"/>
+        <span class="ui-form-unit">元</span>
+    </td>
+    <td class="label"><label>资产残值：</label></td>
+    <td class="inputText">
+        <input class="k-textbox fNum2" type="text" readonly="true" name="assetsResidual"
+               value="$!{device.assetsResidual}"/>
+        <span>元</span>
+    </td>
+    <td class="label"><label>折旧方法：</label></td>
+    <td class="inputText">
+        <select #if($!{showFlag})disabled="true"#end name="depreciationAlgorithm" class="k-textbox">
+            #foreach($!{e} in $!{lstZhejiu})
+                <option value="$!{e.enumValue}" #if($!{device.depreciationAlgorithm}==$!{e.enumValue})
+                        selected="selected" #end>$!{e.enumText}</option>
+            #end
+        </select>
+    </td>
+</tr>
+<tr>
+    <td class="label">折旧率(%)：</td>
+    <td class="inputText">
+        <input class="k-textbox" type="text" name="depreciationRate"
+               value="$!{device.depreciationRate}"/>
+    </td>
+
+    <td class="label">折旧年限：</td>
+    <td class="inputText">
+        <input class="k-textbox fInt" type="text" name="depreciationYears"
+               value="$!{device.depreciationYears}"/>
+    </td>
+
+    <td class="label">所属设备：</td>
+    <td class="inputText">
+    <span class="k-textbox k-space-right"
+          onclick="chooseDevice('parentId','parentName',1,1,'')">
+       <input readonly
+              class="k-textbox #if(!$!{viewOnly}) ui-input-choose #end"
+              type="text" id="parentName" name="parentName"
+              value="$!{device.parentName}"/>
+       <a href="#" class="k-icon k-i-search">&nbsp;</a>
+     </span>
+
+        <input class="k-textbox" type="hidden" id="parentId" name="parentId"
+               value="$!{device.parentId}"/>
+
+    </td>
+
+</tr>
+
+</table>
+</form>
+
+
+    #parse("index/_footer.vm")
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#queryForm").validator({
+            fields: {
+                deviceCode: "required; length[~32]",
+                deviceName: "required; length[~50]",
+                deviceSpec: "length[~50]",
+                categoryName: "required",
+                locationName: "required",
+                useDepartmentName: "required",
+                manageDepartmentName: "required",
+                managePersonName: "required",
+                maitainCycle: "'digits';length[~5]",
+                barcode: "length[~60]",
+                assetsCode: "length[~32]",
+                assetsCost: "'xiaoshu';length[~13]",
+                depreciationRate: "'xiaoshu';length[~6]",
+                depreciationYears: "'digits';length[~5]"
+            },
+            valid: function (form) {
+                form_btn_submit($("#device_bt"), form, function (res) {
+                    //console.log(res);
+                    validateCallback(res, "grid", "");
+                });
+            }
+        });
+    });
+</script>
+</body>
+</html>

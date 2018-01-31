@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.repair.entities.RepairReportByCategory">
+    <resultMap id="repairReportByCategoryResultMap" type="com.supconit.repair.entities.RepairReportByCategory">
+        <result column="category_id" property="categoryId"/>
+        <result column="category_name" property="categoryName"/>
+        <result column="device_num" property="deviceNum"/>
+        <result column="repair_times" property="repairTimes"/>
+        <result column="money" property="money"/>
+        <result column="workHours" property="work_hours"/>
+        <result column="repairMode" property="REPAIR_MODE"/>
+    </resultMap>
+    <select id="queryRepairByCategory" resultMap="repairReportByCategoryResultMap" parameterType="com.supconit.repair.entities.RepairReportByCategory">
+	  select d.category_id,
+	  max(dc.category_name) as category_name,
+	  count(r.device_id)as repair_times,
+	  sum(w.work_hours) as work_hours
+	  from repair_worker w 
+	  left join repair r on r.repair_code=w.repair_code
+	  left join device d on r.device_id = d.id
+	  left join device_category dc on dc.id = d.category_id
+	  where r.device_id is not null AND d.CATEGORY_ID IS NOT NULL AND
+	  dc.CATEGORY_NAME IS NOT NULL
+        <if test="null != repairMode and ''!=repairMode">
+            and r.REPAIR_MODE > #{repairMode}
+        </if>
+        <if test="null != beginDate and ''!=beginDate">
+            and r.create_date > #{beginDate}
+        </if>
+        <if test="null != endDate and ''!=endDate">
+            <![CDATA[ and r.create_date <= #{endDate} ]]>
+        </if>
+        group by d.category_id
+    </select>
+</mapper>

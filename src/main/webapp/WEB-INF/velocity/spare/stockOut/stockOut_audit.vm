@@ -1,0 +1,298 @@
+<script type="text/javascript">
+    function doSubmit(type,flowId,bpmEnabled) {
+        if(flowId){
+	        $("input[name='_bpm_ts_id']").val(flowId);
+        }
+        if(bpmEnabled){
+	        $("input[name='_bpm_enabled']").val(bpmEnabled);
+        }
+        var ctn = "$!rc.contextPath/spare/stockOut/"+type;
+        $("#stockOut_form_id").attr("action", ctn);
+        //$("#stockOut_form_id").submit();
+        return true;
+    }
+</script>
+	<form id="stockOut_form_id"  method="post" action="$!{rc.contextPath}/spare/stockOut/save" class="ui-form">
+		<input type="hidden" name="id" value="$!{stockOut.id}">
+        <div class="ui-box ui-box-close">
+          <div class="ui-box-container">
+              <div class="ui-box-content">
+                	<input type="hidden" name="_bpm_param" value="$!{_bpm_param}"/>
+	                <input type="hidden" name="_bpm_ts_id" value=""/>
+	                <input type="hidden" name="_bpm_enabled" value="false"/>
+	                #foreach($ts in $!_bpm_transitions)
+	                    <button type="submit" class="btn btn-small" onclick="doSubmit('processDone','$!ts.id',true)">
+	                   	#if($!ts.id.contains("reject"))
+	                   	<i class="iconfont icon-reply"></i>
+						#else
+	                    <i class="iconfont icon-submit"></i>
+						#end 
+	                    $!ts.name</button>
+	                #end
+                <button class="btn btn-small" type="submit" onclick="doSubmit('processSave');"><i class="iconfont icon-save"></i>保存</button>
+                <a class="btn btn-small" onclick="loadMain('$!{rc.contextPath}/spare/stockOut/go');"><i class="iconfont icon-reply"></i>返回</a>
+              </div>
+          </div>
+        </div>
+
+    <div class="ui-box">
+      <div class="ui-box-head">
+        <div class="ui-box-head-center">
+          <span class="ui-box-head-title">领用基本信息</span>
+          <a class="btn btn-small ui-box-toggle" href="#" data-trigger="collapse" data-target="#collapse1">
+          <i class="iconfont icon-caret-up"></i></a>
+        </div>
+      </div>
+      <div class="ui-box-container" id="collapse1">
+        <div class="ui-box-content">          
+	      <div class="ui-form-item">
+	        <label class="ui-label" for="" ><span class="ui-form-required">*</span>领用单号</label>
+	         <input class="ui-input" type="text"  name="stockOutCode" value="$!{stockOut.stockOutCode}"  />
+	      </div>
+	      <div class="ui-form-item">
+	        <label class="ui-label" for="" ><span class="ui-form-required">*</span>领用人</label>
+			<input type="hidden" id="outPersonId" name="outPersonId" value="$!{stockOut.outPersonId}"  />
+		  	<input readonly type="text" class="ui-input" id="outPersonName" name="outPersonName" value="$!{stockOut.outPersonName}"  onclick="choosePerson('outPersonId','outPersonName')" />
+	        <span class="ui-form-icon"><i class="iconfont icon-file-alt"></i></span>
+		 </div>
+	      <div class="ui-form-item">
+	        <label class="ui-label" for="" ><span class="ui-form-required">*</span>出库用途</label>
+		    <select class="ui-select" name="outType">
+		    	${outTypeSelectOptions}
+		    </select>
+		 </div>
+	      <div class="ui-form-item">
+	        <label class="ui-label" for="" ><span class="ui-form-required">*</span>领用日期</label>
+			<input type="text" name="outTime"  class="ui-input Wdate"  onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" value="#date_format($!{stockOut.outTime},'yyyy-MM-dd HH:mm:ss')"  size=22 />
+		 </div>
+	      <div class="ui-form-item">
+	  		<label class="ui-label" for="" ><span class="ui-form-required">*</span>领用仓库</label>
+		    <select class="ui-select" name="warehouseId" id="warehouseId">
+		    	${warehouseOptions}
+		    </select>
+	      </div>
+	      <div class="ui-form-item">
+	  		<label class="ui-label" for="" ><span class="ui-form-required">*</span>仓管人</label>
+			<input readonly type="text" class="ui-input"  name="managerName" value="$!{stockOut.managerName}" id="managerName" />
+	      </div>
+	      <div class="ui-form-item colspan2 block">
+	        <label class="ui-label" for="" >领用摘要</label>
+			<textarea  id="textAreaId" class="k-textbox k-textarea" type="text" name="descripton">$!{stockOut.descripton}</textarea>
+	      </div>
+            </div>
+          </div>
+        </div>
+
+
+
+    <div class="ui-box">
+      <div class="ui-box-head">
+        <div class="ui-box-head-center">
+          <span class="ui-box-head-title">领用明细信息</span>
+          <a class="btn btn-small ui-box-toggle" href="#" data-trigger="collapse" data-target="#collapse2">
+          <i class="iconfont icon-caret-up"></i></a>
+        </div>
+      </div>
+      <div class="ui-box-container" id="collapse2">
+        <div class="ui-box-content">          
+			    <table id='tableId' class="ui-table">
+			        <thead>
+						<tr>
+							<th width="30">序号</th>
+							<th>备件名称</th>
+							<th>备件编码</th>
+							<th>备件规格</th>
+							<th>备件型号</th>
+							<th>可用库存</th>
+							<th>领用数量</th>
+							<th width="30"><a href="#" class="btn addRow"><i class="iconfont icon-plus"></i></a></th>
+						</tr>
+			        </thead>
+		<tbody>
+			#set($index=0)
+			#foreach($list in $!stockOut.stockOutDetailList)
+				<tr>   
+					<td><span class="rowNumber">$index+1</span></td>
+			        <td>
+			        	<input type="hidden" name="stockOutDetailList[$index].spareId" value="$!{list.spareId}" />
+			        	<input type="text" name="stockOutDetailList[$index].spareName" value="$!{list.spareName}" class="ui-input ui-input-small"/>
+			        </td>                   
+			        <td><input readonly type="text" name="stockOutDetailList[$index].spareCode" value="$!{list.spareCode}" class="ui-input ui-input-small"/></td>                   
+			        <td><input readonly type="text" name="stockOutDetailList[$index].spec" value="$!{list.spec}" class="ui-input ui-input-small"/></td>                   
+			        <td><input readonly type="text" name="stockOutDetailList[$index].model" value="$!{list.model}" class="ui-input ui-input-small"/></td>                   
+			        <td><input readonly type="text" name="stockOutDetailList[$index].availableQty" value="$!{list.availableQty}" class="ui-input ui-input-small"/></td>                   
+			        <td><input type="text" name="stockOutDetailList[$index].qty" value="$!{list.qty}" class='ui-input ui-input-small number2'/></td>                   
+                    <td  class="fn-text-center"><i class="iconfont icon-remove-sign delRow"></i></td>
+				</tr>
+				#set($index=$index+1)
+			#end
+			#if($index==0)
+				<tr>   
+					<td><span class="rowNumber">1</span></td>
+			        <td>
+			        	<input type="hidden" name="stockOutDetailList[$index].spareId" value="$!{list.spareId}" />
+			        	<input readonly type="text" name="stockOutDetailList[$index].spareName" value="$!{list.spareName}" class="ui-input ui-input-small"/>
+			        </td>                   
+			        <td><input readonly type="text" name="stockOutDetailList[$index].spareCode" value="$!{list.spareCode}" class="ui-input ui-input-small"/></td>                   
+			        <td><input readonly type="text" name="stockOutDetailList[$index].spec" value="$!{list.spec}" class="ui-input ui-input-small"/></td>                   
+			        <td><input readonly type="text" name="stockOutDetailList[$index].model" value="$!{list.model}" class="ui-input ui-input-small"/></td>                   
+			        <td><input readonly type="text" name="stockOutDetailList[$index].availableQty" value="$!{list.availableQty}" class="ui-input ui-input-small"/></td>                   
+			        <td><input type="text" name="stockOutDetailList[$index].qty" value="$!{list.qty}" class="ui-input ui-input-small"/></td>                   
+                    <td  class="fn-text-center"><i class="iconfont icon-remove-sign delRow"></i></td>
+				</tr>
+			#end
+	            <tr>
+					<td>合计</td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td><input readonly id='sumQty' type="text" name="sumQty" size="12" class="ui-input ui-input-small"/></td>
+					<td></td>
+	            </tr>
+		</tbody>
+	</table>
+            </div>
+          </div>
+        </div>
+	</form>
+	<script type="text/javascript" src="$!{rc.contextPath}/js/ywgl.js"></script>
+	<script type="text/javascript">
+	$tr='';
+	 function rebuildTable(tableId,dataRows){
+	    var notMatchedRows=dataRows.notMatched;
+	    var matchedRows=dataRows.matched;
+	    $(notMatchedRows).each(function(i,v){
+	    	$('#'+tableId).find('input[value='+v.spareId+']').parents('tr').remove();
+	    });
+	    $(matchedRows).each(function(i,v){
+	    	var tr=$('#'+tableId).find('input[value='+v.spareId+']').parents('tr');
+			$("input,textarea",$(t)).each(function(i,v){
+				if($(v).attr("name")!=""){
+					var shortName=newName.split('\.')[1];
+					if(v[shortName]){
+						$(v).val(v[shortName]);
+					}
+				}
+			});
+	    });
+	 }
+	 $(document).ready(function(){
+ 	    $('#warehouseId').change(function(){
+ 	        if($(this).val()==''){
+ 	           return false;
+ 	        }
+ 	        var params={};
+ 	        params.warehouseId=$(this).val();
+ 	        params.spareIds=[];
+ 	        $("input[name$='.spareId']",$('#tableId')).each(function(i,v){
+ 	          if($(v).val()!=''){
+	 	          params.spareIds.push($(v).val());
+ 	          }
+ 	        });
+ 	        /*if(params.spareIds.length<=0){
+ 	          return false;
+ 	        }*/
+            $.ajax({
+                type: "post",
+                cache:false,
+                url: '$!{rc.contextPath}/spare/stockOut/loadSpare',
+                data: params,
+                success: function (response) {
+                        $('#managerName').val(response.managerName);
+						rebuildTable('tableId',response);
+						caculate();
+            		}
+            	});     
+	    });
+	 	$("input[name='isShelfLife'][value=$!spare.isShelfLife]").attr("checked",true);  
+        caculate();
+	    $(".addRow").btnAddRow({rowNumColumn:"rowNumber"},function(){
+	    	caculate();
+	    });
+	    $(".delRow").btnDelRow(function(){
+	    	caculate();
+	    });	        
+        $('#stockOut_form_id').valid({
+          rules: {
+			stockOutCode: ['not_empty',{max_length: 20}],
+			outTime: ['not_empty'],
+			warehouseId: ['not_empty'],
+			outPersonName: ['not_empty'],
+			outType: ['not_empty'],
+			descripton: [{max_length: 20}]
+          },onSuccess: function(response, validator, $form) {
+		  	validateCallback(response);
+		  	return false;
+		  }
+        });		
+	
+		 
+	 });
+	 
+    function spareCheckedCallback(dataRows){
+      var dataRow=dataRows[0];
+      $("input[name$='.spareId']",$tr).val(dataRow.spareId);  
+      $("input[name$='.spareName']",$tr).val(dataRow.spareName);  
+      $("input[name$='.spareCode']",$tr).val(dataRow.spareCode);  
+      $("input[name$='.model']",$tr).val(dataRow.model);  
+      $("input[name$='.spec']",$tr).val(dataRow.spec);  
+      $("input[name$='.availableQty']",$tr).val(dataRow.availableQty);  
+    }
+    
+    function caculate(){
+	$("input[name$='.spareName']").click(function(){
+	    $tr=$(this).parents("tr");
+	    var warehouseId=$('#warehouseId').val();
+	    dialog({
+	        id:'selectStock',
+	        content: "load:$!{rc.contextPath}/spare/stock/lookup?warehouseId="+warehouseId+"&t="+new Date().getTime(),
+	        title: '选择备件',
+	        lock: true,
+	        width: 1200,
+	        height: 600/*,
+			ok : function(){
+			  return okClick($tr)
+			},
+			okVal :'确定'*/
+	    });
+	}); 
+     var $table=$('#tableId');
+     var $sumQty=$('#sumQty');
+     
+     var $allQty=$("input[name$='.qty']",$table);
+     $('tr:gt(0):not(:last)',$table).each(function(i,tr){
+         var $qty=$("input[name$='.qty']",this);
+         var $availableQty=$("input[name$='.availableQty']",this);
+         $($qty).change(function(){
+            var v1=sum($allQty);
+            $sumQty.val(v1);
+         });                
+     });
+            var v1=sum($allQty);
+            $sumQty.val(v1);
+    }
+    
+    function sum(arr){
+      var s=0;
+      $(arr).each(function(i,item){
+           var val=$.trim($(item).val());
+	       s=s+val*1.0
+      })
+      return formatMoney(s);   
+    }
+    
+    function compare($a,$b){
+     var a=$.trim($a.val());
+     var b=$.trim($b.val());
+     try{
+      a=a.parseDouble();
+	  b=b.parseDouble();    
+     }catch(err){
+      alert(err)
+     }
+     return a-b;
+    }
+	</script>
+	</form>	

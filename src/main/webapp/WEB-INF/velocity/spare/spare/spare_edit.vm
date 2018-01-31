@@ -1,0 +1,262 @@
+#parse("index/_header.vm")
+ <style>
+	.ui-dialog-form .k-textbox{
+		width:85%;
+	}
+	.ui-co-table .ui-input-choose{
+		width:100%;
+	}
+	textarea#textAreaId.k-textbox{
+		width:100%;
+	}
+ </style>
+</head>
+<body>
+	<form id="myform_id" method="post" action="$!{rc.contextPath}/spare/spare/save"  class="ui-dialog-form">
+		<input class="ui-input" type="hidden" name="id" value="$!spare.id">
+		<input type="hidden" name="isShelfLife" value="0">
+	#if($!{viewOnly})
+		<table width="100%" class="ui-co-table" style="padding-right: 22px;">
+	#else
+		<table width="100%" class="ui-co-table" style="padding-right: 15px;">
+	#end
+        <tr>
+            <td  class="label">#if(!$!{viewOnly})<span class="ui-form-required">*</span>#end<label>备件编码：</label></td>
+            <td >
+				 #set($readonly='')
+    	         #if($!{viewOnly})
+    	         #set($readonly='readonly')
+    	         #end
+	            <input $!{readonly} class="k-textbox ui-disabled" type="text"  name="spareCode" id="spareCode_id" value="$!spare.spareCode"  />
+            <td class="label">#if(!$!{viewOnly})<span class="ui-form-required">*</span>#end<label>备件名称：</label></td>
+            <td><input class="k-textbox" type="text" $!{readonly} name="spareName" id="spareName_id" value="$!spare.spareName"></td>
+        </tr>
+        <tr>
+            <td  class="label" width="100">#if(!$!{viewOnly})<span class="ui-form-required">*</span>#end<label>备件类别：</label></td>
+            <td width="200">
+            	#if(!$!{viewOnly})<span class="k-textbox k-space-right" id="spareCategoryNames">#end
+					 <input class="k-textbox" id="spareCategoryId" type="hidden" name="spareCategoryId" value="$!spare.spareCategoryId">
+					 <input class="k-textbox #if(!$!{viewOnly}) ui-input-choose #end" id="spareCategoryName" type="text" name="spareCategoryName" value="$!spare.spareCategoryName" readonly>
+					 #if(!$!{viewOnly})<a href="#" class="k-icon k-i-search">&nbsp;</a>
+                </span>#end
+			</td>
+            <td class="label" width="100"><label>供应商：</label></td>
+			<td width="200">
+				#if(!$!{viewOnly})<span class="k-textbox k-space-right" id="supplierNames">#end
+					 <input class="k-textbox" id="supplierId" type="hidden" name="supplierId" value="$!spare.supplierId">
+					 <input readonly emptyFunc="emptySupplier" class="k-textbox #if(!$!{viewOnly}) ui-input-choose #end" id="supplierName" type="text" name="supplierName" value="$!spare.supplierName" >
+					 #if(!$!{viewOnly})<a href="#" class="k-icon k-i-search">&nbsp;</a>
+                </span>#end
+			</td>
+        </tr>
+        <tr>
+            <td class="label">备件型号：</td>
+			<td>
+				<input class="k-textbox" type="text" $!{readonly} name="model" value="$!spare.model">
+			</td>
+            <td class="label">备件规格：</td>
+			<td>
+				<input class="k-textbox" type="text" $!{readonly} name="spec" value="$!spare.spec">
+			</td>
+        </tr>
+		 <tr>
+            <td class="label">标准单价：</td>
+			<td>
+				<input class="k-textbox fNum2" $!{readonly}  type="text" name="price" id="price_id" value="$!spare.price" onblur="vaild1();">
+				<span class="ui-form-unit">元</span>
+			</td>
+			 <td class="label"><label>计量单位：</label></td>
+            <td>
+               <input class="k-textbox" type="text" $!{readonly} name="unit" value="$!spare.unit">
+            </td>
+        </tr>
+		 <tr>
+            <td class="label">材质：</td>
+			<td>
+				<input class="k-textbox" type="text" $!{readonly} name="meterial" value="$!spare.meterial">
+			</td>
+			  <td class="label"><label>安全库存：</label></td>
+            <td>
+              <input class="k-textbox fInt" type="text" $!{readonly} name="safeQty" id="safeQty_id" value="$!spare.safeQty">
+            </td>
+        </tr>
+		 <tr>
+            <td class="label">最低库存：</td>
+			<td>
+				<input class="k-textbox fInt" type="text" $!{readonly} name="lowerQty" id="lowerQty_id" value="$!spare.lowerQty">
+			</td>
+			<td class="label">最高库存：</td>
+			<td>
+				<input class="k-textbox fInt" type="text" $!{readonly} name="upperQty" id="upperQty_id" value="$!spare.upperQty">
+			</td>
+        </tr>
+        <tr>
+            <td class="label">备注：</td>
+            <td colspan="3" rowspan="1">
+				<textarea  id="textAreaId" class="k-textbox k-textarea" style="width:94.1%;height:60px"  $!{readonly} name="spareDesc">$!{spare.spareDesc}</textarea>
+			</td>
+        </tr>
+    </table>
+    <div class="actions">
+		#if( $!{readonly} != 'readonly')
+        <button class="k-primary hc_btn" type="submit" id="save"><i class="fa fa-save"></i>保 存</button>
+		<button class="hc_btn cancel" onclick="close_dialog('spare_add_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+		#end
+        
+    </div>
+
+	</form>
+
+	<script type="text/javascript">
+	function emptySupplier(){
+	 $('#supplierId').val('');
+	 $('#supplierName').val('');
+	}
+	$(document).ready(function(){
+		#if($!{viewOnly})
+			fNumPage();
+			$("#price_id").attr('onblur','');
+		#end
+	//加载页面后定位光标
+	//$("#spareCode_id").focus();
+		
+		$("#spareCategoryNames").click(function() {
+			if(!$!{viewOnly})
+				quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/spare/spare/spareCategoryLookup?txtId=spareCategoryId&txtName=spareCategoryName&dialogName=spare_add_dlg", 300, 300);
+        });
+		
+		$("#supplierNames").click(function() {
+           if(!$!{viewOnly})
+			quick_dialog("selectDiloag", "厂商选择", "$!{rc.contextPath}/base/supplier/lookup/supplierId/supplierName", 950, 400);
+        });
+
+        $("#myform_id").validator({
+    		rules: {
+    			xiaoshus:[/^([1-9]?\d{0,8}(\.\d{1,2})?)$/,"请输入9位数以内[1~2]位小数或整数"]
+    		},
+            fields:{
+				spareCode: "备件编码:required; length[~50]",
+    		    spareName: "备件名称:required; length[~50]",
+    		    spareCategoryName: "备件类别:required;",
+    		    spec: "设备规格: length[~20]",
+    		    model: "设备型号: length[~20]",
+    			price: "标准单价:xiaoshus",
+    		    unit: "计量单位: length[~10]",
+    		    meterial: "材质: length[~20]",
+    		    supplierName: "供应商: length[~20]",
+    			upperQty: "最高库存:length[~10];digits",
+    			safeQty:  "安全库存:length[~10];digits",
+    			lowerQty: "最低库存:length[~10];digits",
+    		    spareDesc: "备注: length[~200]"
+            },
+            valid:function(form){
+                form_btn_submit($("#save"),form,function(res){
+                    validateCallback(res,"grid","spare_add_dlg");
+                });
+            }
+        });
+
+  });
+	$("#save").click(function(){
+		var spareCode = $("#spareCode_id").val();
+		var spareName = $("#spareName_id").val();
+		var spareCategoryName = $("#spareCategoryName").val();
+		if(spareCode == ""){
+			$("#spareCode_id").blur();
+			if(spareName == ""){
+    			$("#spareName_id").blur();
+			}
+			if(spareCategoryName == ""){
+    			$("#spareCategoryName").blur();
+			}
+			return false;
+		}
+		if(spareName == ""){
+			$("#spareName_id").blur();
+			if(spareCode == ""){
+				$("#spareCode_id").blur();
+			}
+			if(spareCategoryName == ""){
+    			$("#spareCategoryName").blur();
+			}			
+			return false;
+		}
+		if(spareCategoryName == ""){
+			$("#spareCategoryName").blur();
+			if(spareCode == ""){
+				$("#spareCode_id").blur();
+			}
+			if(spareName == ""){
+    			$("#spareName_id").blur();
+			}
+			return false;
+		}
+		var safeQty = $("#safeQty_id").val();
+		var reg = /^[0-9]*[1-9][0-9]*$/;
+		if("" != safeQty && !reg.test(safeQty)){
+			notify("安全库存必须为正整数，请重新输入!", "error");
+			$("#save").attr("type","button");
+			return false;
+		}else{
+			var lowerQty = $("#lowerQty_id").val();
+			var reg = /^[0-9]*[1-9][0-9]*$/;
+			if("" != lowerQty && !reg.test(lowerQty)){
+				notify("最低库存必须为正整数，请重新输入!", "error");
+				$("#save").attr("type","button");
+				return false;
+			}else{
+				var upperQty = $("#upperQty_id").val();
+				var reg = /^[0-9]*[1-9][0-9]*$/;
+				if("" != upperQty && !reg.test(upperQty)){
+					notify("最高库存必须为正整数，请重新输入!", "error");
+					$("#save").attr("type","button");
+					return false;
+				}else{
+					$("#save").attr("type","submit");
+				}
+			}
+		}
+	})
+	
+	##验证库存量是否为数字--单价
+	function vaild1()
+	{
+		var price = $("#price_id");
+			if("" == price.val() || !isDigtal(price.val()))
+			{
+				price.val("");
+			}
+	}
+	/*
+	##验证库存量是否为数字--安全库存
+	function vaild2()
+	{
+		var safeQty = $("#safeQty_id");
+			if("" == safeQty.val() || !isZzs(safeQty.val()))
+			{
+				safeQty.val("");
+			}
+	}
+	##验证库存量是否为数字--最低库存
+	function vaild3()
+	{
+		var lowerQty = $("#lowerQty_id");
+			if("" == lowerQty.val() || !isZzs(lowerQty.val()))
+			{
+				lowerQty.val("");
+			}
+	}
+
+	##验证库存量是否为数字--最高库存
+	function vaild4()
+	{
+		var upperQty = $("#upperQty_id");
+			if("" == upperQty.val() || !isZzs(upperQty.val()))
+			{
+				upperQty.val("");
+			}
+	}
+	*/
+	</script>
+</body>
+</html>

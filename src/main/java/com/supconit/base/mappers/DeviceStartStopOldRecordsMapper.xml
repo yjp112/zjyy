@@ -1,0 +1,165 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.base.entities.DeviceStartStopOldRecords">
+
+	<resultMap type="com.supconit.base.entities.DeviceStartStopOldRecords" id="DeviceStartStopOldRecordsResultMap">      
+        <result property="id" column="ID" />
+        <result property="tagName" column="TAG_NAME" />
+        <result property="tagValue" column="TAG_VALUE" />
+        <result property="tagInfo" column="TAG_INFO" />
+        <result property="tagType" column="TAG_TYPE" />
+        <result property="changeTime" column="CHANGE_TIME" />
+        <result property="deviceId" column="DEVICE_ID" />
+	</resultMap>
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+    <!-- 获取记录列表-->
+	<sql id="select_pre">
+    select 
+        ID,
+        TAG_NAME,
+        TAG_VALUE,
+        TAG_INFO,
+        TAG_TYPE,
+        CHANGE_TIME		
+		FROM
+		DEVICE_START_STOP_OLD_RECORDS
+	</sql>
+	<sql id="count_pre">
+		SELECT
+		COUNT(*)
+		FROM
+		DEVICE_START_STOP_OLD_RECORDS
+	</sql>
+	<sql id="TABLE_NAME" lang="velocity">DEVICE_START_STOP_OLD_RECORDS</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>		
+    <insert id="insert" parameterType="com.supconit.base.entities.DeviceStartStopOldRecords" keyProperty="id" keyColumn="ID" databaseId="sqlserver">
+		<include refid="insert_sql" />
+        <!-- 获取记录主键 microsoft sql server -->
+		<selectKey keyProperty="id" resultType="Long" order="AFTER">
+			select @@identity
+		</selectKey>
+	</insert>
+    <insert id="insert" parameterType="com.supconit.base.entities.DeviceStartStopOldRecords" 
+		keyProperty="id" keyColumn="ID" 		lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>        
+		<include refid="INSERT_SQL" />
+	</insert>    
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>
+		(#if($_databaseId=='oracle') ID,#end    
+	        TAG_NAME,
+	        TAG_VALUE,
+	        TAG_INFO,
+	        TAG_TYPE,
+	        CHANGE_TIME		
+		) VALUES (        
+		 #if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end
+	        #{tagName,jdbcType=VARCHAR},
+	        #{tagValue,jdbcType=VARCHAR},
+	        #{tagInfo,jdbcType=VARCHAR},
+	        #{tagType,jdbcType=NUMERIC},
+	        #{changeTime,jdbcType=TIMESTAMP}		
+		)
+	</sql>		 		        
+    <!-- 插入记录-->
+	<sql id="insert_sql">
+		INSERT INTO DEVICE_START_STOP_OLD_RECORDS(        
+        TAG_NAME,
+        TAG_VALUE,
+        TAG_INFO,
+        TAG_TYPE,
+        CHANGE_TIME
+		) VALUES (        
+        #{tagName,jdbcType=VARCHAR},
+        #{tagValue,jdbcType=VARCHAR},
+        #{tagInfo,jdbcType=VARCHAR},
+        #{tagType,jdbcType=NUMERIC},
+        #{changeTime,jdbcType=TIMESTAMP}		
+		)
+	</sql>
+
+	<select id="getById" resultMap="DeviceStartStopOldRecordsResultMap" parameterType="Long">
+		<include refid="select_pre" />        
+        WHERE ID = #{id}
+	</select>
+	
+	
+	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.base.entities.DeviceStartStopOldRecords">
+		UPDATE	DEVICE_START_STOP_OLD_RECORDS
+		<set>
+        <if test="tagName != null">TAG_NAME = #{tagName,jdbcType=VARCHAR},</if>
+        <if test="tagValue != null">TAG_VALUE = #{tagValue,jdbcType=VARCHAR},</if>
+        <if test="tagInfo != null">TAG_INFO = #{tagInfo,jdbcType=VARCHAR},</if>
+        <if test="tagType != null">TAG_TYPE = #{tagType,jdbcType=NUMERIC},</if>
+        <if test="changeTime != null">CHANGE_TIME = #{changeTime,jdbcType=TIMESTAMP},</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+    <!-- 通过 ID 获取对象-->
+	<delete id="deleteById" parameterType="Long">
+		DELETE FROM DEVICE_START_STOP_OLD_RECORDS WHERE ID = #{id}
+	</delete>
+	<sql id="condition_sql">
+		<where>
+        <if test="id != null "> ID = #{id} and </if>
+        <if test="tagName != null and tagName != ''">	TAG_NAME like '%'+#{tagName}+'%' and </if>
+        <if test="tagValue != null and tagValue != ''">	TAG_VALUE like '%'+#{tagValue}+'%' and </if>
+        <if test="tagInfo != null and tagInfo != ''">	TAG_INFO like '%'+#{tagInfo}+'%' and </if>
+        <if test="tagType != null "> TAG_TYPE = #{tagType} and </if>
+        1=1 
+		</where>
+	</sql>
+    
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.base.entities.DeviceStartStopOldRecords" resultMap="DeviceStartStopOldRecordsResultMap">
+		<include refid="select_pre" />
+		<include refid="condition_sql" />
+		ORDER BY ID DESC
+	</select>	
+
+    <select id="countByCondition" parameterType="com.supconit.base.entities.DeviceStartStopOldRecords" resultType="long">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+    
+    <!-- 删除多条记录-->
+	<delete id="deleteByIds">
+        DELETE FROM DEVICE_START_STOP_OLD_RECORDS WHERE ID in 
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+
+	</delete>
+	<!-- 查询新增的启停记录-->
+	<select id="findNewData" resultMap="DeviceStartStopOldRecordsResultMap" parameterType="Long">
+		SELECT 
+	        A.ID,
+	        A.TAG_NAME,
+	        A.TAG_VALUE,
+	        A.TAG_INFO,
+	        A.TAG_TYPE,
+	        A.CHANGE_TIME,
+	        C.ID AS DEVICE_ID		
+        FROM 
+        	DEVICE_START_STOP_OLD_RECORDS A ,M_MONITOROBJECTTAG B,DEVICE C
+    	WHERE 
+    		A.TAG_NAME = B.TAGNAME
+	    	AND B.MONITORID = C.DEVICE_CODE
+	    	AND 
+	    	CHANGE_TIME >(SELECT  CASE WHEN ISNULL(MAX(START_TIME),DATEADD(YEAR,-10,GETDATE()))>ISNULL(MAX(STOP_TIME),DATEADD(YEAR,-10,GETDATE()))
+							THEN ISNULL(MAX(START_TIME),DATEADD(YEAR,-10,GETDATE()))
+							ELSE ISNULL(MAX(STOP_TIME),DATEADD(YEAR,-10,GETDATE()))
+							END 
+						  FROM DEVICE_START_STOP_RECORDS)
+    	ORDER BY A.TAG_NAME,A.CHANGE_TIME
+
+	</select>
+</mapper>

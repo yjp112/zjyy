@@ -1,0 +1,213 @@
+.warn .ui_lt, .warn .ui_rt, .warn .ui_l, .warn .ui_r, .warn .ui_lb, .warn .ui_b, .warn .ui_t, .warn .ui_rb {
+    background: 0
+}
+
+.warn .ui_inner {
+    border: 1px solid #c91018
+}
+.ui_title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+    cursor: move;
+    background: #ddd;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    padding: 0 100px 0 0;
+    padding-top: 0px;
+    padding-right: 100px;
+    padding-bottom: 0px;
+    padding-left: 0px;
+}
+.warn .ui_title {
+    background-color: #e73e1c;
+    background: -webkit-gradient(linear, left top, left bottom, from(#e73e1c), to(#b02c12));
+    background: -moz-linear-gradient(top, #e73e1c, #b02c12);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#e73e1c', endColorstr='#b02c12');
+    background: -o-linear-gradient(top, #e73e1c, #b02c12);
+    background: linear-gradient(top, #e73e1c, #b02c12);
+
+}
+.ui-table thead tr{
+    background-color:#596fa4;
+    background:-webkit-gradient(linear, left top, left bottom, from(#596fa4), to(#3c517c));
+    background:-moz-linear-gradient(top, #596fa4, #3c517c);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#596fa4', endColorstr='#3c517c');
+    background:-o-linear-gradient(top, #596fa4, #3c517c);
+    background:linear-gradient(top, #596fa4, #3c517c);
+    position:relative;border-left:1px solid #ddd;border-right:1px solid #ddd;overflow:hidden;
+    color: #fff;
+}
+.ui-table-warn thead tr{ background: #fafafc;}
+.ui-table-warn thead th{ color: #000;}
+.ui-table-warn thead th{ color: #000; font-size: 12px;}
+.ui-tiptext { font-weight: bold;}
+.ui-tiptext-warning .iconfont { color: #f54a1c; font-weight: normal;}
+.ui-table th{color: #fff;}
+.ui_min, .ui_max, .ui_close, .ui_res {
+    color: #fff;
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    line-height: 18px;
+}
+.ui_title_buttons {
+    top: 3px;
+    right: 5px;
+}
+
+.ui_title_buttons {
+    position: absolute;
+    cursor: pointer;
+    font-size: 0;
+    letter-spacing: -.5em;
+}
+.ui_title{
+    background-color:#4b8bf5;
+    background:-webkit-gradient(linear, left top, left bottom, from(#4b8bf5), to(#4b8bf5));
+    background:-moz-linear-gradient(top, #4b8bf5, #4b8bf5);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#4b8bf5', endColorstr='#4b8bf5');
+    background:-o-linear-gradient(top, #4b8bf5, #4b8bf5);
+    background:linear-gradient(top, #4b8bf5, #4b8bf5);
+    border-bottom:none;
+    height: 29px;
+    line-height: 29px;
+    color: #fff;
+}
+.ui_state_focus .ui_title{color: #fff;}
+.ui_state_drag .ui_title{border-bottom: none;}
+.ui_main{ background: #fff;}
+a.ui_close:link { color: #fff;}
+.ui_min_b{ border-bottom:2px solid #fff;}
+.ui_res_t, .ui_res_b, .ui_max_b{ border:1px solid #fff;border-top-width:3px;}
+
+.ztree li span.button { width: 18px;}
+.ui-table-warn td {
+    font-family: 'ËÎÌå';
+}
+
+.warn p {
+    padding-left: 10px;
+    font-family: 'ËÎÌå';
+    font-size: 12px;
+}
+
+.ui-tiptext-container-warning {
+    background: #fcf8e3;
+}
+
+p.ui-tiptext-warning {
+    font-size: 13px;
+}
+
+.warn .ui-table tbody td a {
+    color: #bd3630;
+    text-decoration: none;
+}
+
+.warn .ui-table tbody td a:hover {
+    text-decoration: underline;
+}
+
+.warn .warn-tit td {
+    font-size: 12px;
+    color: #000;
+}
+
+.warn-foot {
+    height: 59px;
+    line-height: 59px;
+    background: #f0f0f0;
+    padding-left: 10px;
+}
+
+.warn-foot div {
+    color: #000;
+    font-size: 12px;
+}
+
+.ui-table {
+    border-collapse: collapse;
+    width: 100%;
+    text-align: left;
+    color: gray;
+    border-top: 1px solid #d9d9d9;
+    border-left: 1px solid #d9d9d9;
+}
+
+.ui_dialog .info-sign1 {
+    color: #ff0000;
+}
+
+.ui_dialog .info-sign2 {
+    color: #ffa500;
+}
+
+.ui_dialog .info-sign3 {
+    color: #ffff00;
+}
+
+.ui_dialog .info-sign4 {
+    color: #008000;
+}
+
+.info-sign1 {
+    color: #ff0000;
+}
+
+.info-sign2 {
+    color: #ffa500;
+}
+
+.info-sign3 {
+    color: #ffff00;
+}
+
+.info-sign4 {
+    color: #008000;
+}
+
+.ui-montrol-box {
+    width: 634px;
+    padding-top: 20px;
+    height: 110px;
+    margin-left: 20px;
+    border: 1px solid #c0d0d9;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.ui-montrol-box .ui-montrol-title {
+    width: 60px;
+    height: 26px;
+    line-height: 26px;
+    padding-left: 10px;
+    font-size: 14px;
+    position: absolute;
+    top: -13px;
+    left: 10px;
+    background: #fff;
+}
+
+.ui-montrol-box .ui-select {
+    width: 180px;
+    margin-bottom: 5px;
+}
+
+.flexigrid table tr.alarm-level-colorful-sign1 {
+    background: #ffcccc;
+}
+
+.flexigrid table tr.alarm-level-colorful-sign2 {
+    background: #ffeeee;
+}
+
+.flexigrid table tr.alarm-level-colorful-sign3 {
+    background: #ffffdd;
+}
+
+.flexigrid table tr.alarm-level-colorful-sign4 {
+    background: #008000;
+}

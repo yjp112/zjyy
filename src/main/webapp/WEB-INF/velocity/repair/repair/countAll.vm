@@ -1,0 +1,66 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<div class="ui-layout-north" style="border-right:solid 1px #e1e5e6;" id="searchLayout">
+<form id="queryForm" class="ui-form">
+	<input id="fresh" type="hidden" value=""/>
+    <table width="100%">
+          <tr>
+	         <td >
+	           <table class="ui-search-table" >
+                  <tr>
+                  <td class="ui-search-name first" style="width: 100px;">年度：</td>
+                  <td class="ui-search-c" >
+                  		<input id="repairYear" type="text" name="repairYear"  value="$!{year}"/>
+                  </td>
+            </tr>
+	           </table>
+	         </td>
+            <td width="150" valign="top" style="padding-top:4px;">
+              <button class="hc_btn k-primary" id="queryBtns"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+            <td></td>
+          </tr>
+        </table>
+</form>
+</div>
+
+  <div class="ui-layout-center" id="subMain">
+    
+  </div>
+#parse("index/_footer.vm")  
+
+<script type="text/javascript">
+var chart = null;
+var _iframe_layout, _left_layout, _inner_layout;
+$(document).ready(function(){
+_iframe_layout = $('body').layout({
+  defaults: {
+    resizable: false,
+    closable: false,
+    spacing_open: 5
+  },
+  north: {
+    size: 0.1
+  }
+});
+	//加载时间控件
+    $("#repairYear").hcDatePicker({
+ 		start: "decade",
+ 		depth: "decade",
+        format: "yyyy",
+        culture: "zh-CN"
+     });
+	 
+	 var year = $("#repairYear").val();
+	 $("#subMain").load('$!{rc.contextPath}/repair/repairReport/countAllYear?year='+year);
+});
+
+    $("#queryBtns").click(function(){
+		reply();
+		return false;
+	});
+</script>
+</body>
+</html>

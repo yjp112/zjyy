@@ -1,0 +1,144 @@
+<OBJECT ID="TestOCX"  width="0" height="0" CODEBASE="$!{rc.contextPath}/download/dc_card/hundureD8eActive.ocx" class="hundureD8eActive.ocx" CLASSID="CLSID:FBDA651F-2228-41D7-8C63-98BD44D85D91"></OBJECT>
+<script type="text/javascript">
+
+$(document).ready(function(){
+		var count = 0;
+		function addRow(){
+			var num = $("#number").val();
+			var next =1;
+			if(num==0){
+				next=1;
+			}else{
+				next=Number(num)+1;
+			}
+			var $tr = $("#stock").find("tr:last");
+			var exp = new RegExp("\\["+num+"\\]","g");
+			var exps = new RegExp("-"+num,"g");
+			var html = "<tr>"+$($tr).html().replace(exp,"["+next+"]")+"</tr>";
+			html = html.replace(">"+num+"<",">"+next+"<").replace(exps,"-"+next);
+			$("#number").val(next);
+			//var clear = new RegExp("value=\".*\"","g");
+			//html = html.replaceAll(clear, "value=\"\"", false);
+			$($tr).after(html);
+			var $tr = $("#stock").find("tr:last");
+			$.each($tr.find("input"),function(i,item){
+				$(item).attr("value","");
+			});
+			//console.info($tr.find("input"));
+		}
+		
+		function getNowFormatDate() {
+		    var date = new Date();
+		    var seperator1 = "-";
+		    var seperator2 = ":";
+		    var month = date.getMonth() + 1;
+		    var strDate = date.getDate();
+		    if (month >= 1 && month <= 9) {
+		        month = "0" + month;
+		    }
+		    if (strDate >= 0 && strDate <= 9) {
+		        strDate = "0" + strDate;
+		    }
+		    var currentdate = date.getFullYear() + seperator1 + month + seperator1 + strDate
+		            + " " + date.getHours() + seperator2 + date.getMinutes()
+		            + seperator2 + date.getSeconds();
+		    return currentdate;
+		} 
+		#if(($!type)==1)
+		    function readCardCode(){
+		    	var obj =document.getElementById("TestOCX");
+		    	var cardNo=obj.BSTRReadCard();
+	            if(cardNo!=""){
+	            	var iscard=0;
+		       		 $("input[name$='.visitorCardNo']").each(function(){
+		   			     if($(this).val()==cardNo){
+		   			    	 iscard=1;
+		   			    	 return false;
+		   			     }
+		   			 });
+		       		 
+		       		 if(iscard==0){
+		       			 $("input[name$='.visitorCardNo']").each(function(i){
+		       			     if($(this).val()==""){
+		       			    	 $(this).val(cardNo);
+		       			    	 $("input[name$='.grantTime']:eq("+i+")").val(getNowFormatDate());
+		       			    	 iscard=1;
+		       			    	 webcam.snap();
+		       			    	 return false;
+		       			     }
+		       			 });
+		       		 }
+		       		 if(iscard==0){
+		       			addRow();
+		       			$("input[name$='.visitorCardNo']").each(function(i){
+		       			     if($(this).val()==""){
+		       			    	 $(this).val(cardNo);
+		       			    	 $("input[name$='.grantTime']:eq("+i+")").val(getNowFormatDate());
+		       			    	 iscard=1;
+		       			    	 webcam.snap();	
+		       			    	 return false;
+		       			     }
+		       			 });
+		       		 }
+	            }
+	        }
+		   setInterval(readCardCode,3000);
+	   #end
+	   
+	   #if(($!type)==2)
+		    function returnCardCode(){
+		    	var obj =document.getElementById("TestOCX");
+		    	var readCardError = false;
+		    	var cardNo  = null;
+		    	try{
+		    	 cardNo=obj.BSTRReadCard();
+		    	}catch(e){
+		    		count++;
+		    		//cardNo = "0789671668";		    		
+		    		readCardError = true;
+		    	}
+		    	if(readCardError){
+		    		alert("读取卡号失败！");
+		    		return;
+		    	}
+	            if(cardNo!=""&&cardNo!=null){
+	            	var iscard=0;
+//	            	if(count>1){
+//	            		return;
+//	            	}
+	            	$.ajax({
+	                      type: "post",
+	                      cache: false,
+	                      url: "$!rc.contextPath/visitor/reception2/leaveByCardNo",
+	                      data: "cardNo=" + cardNo,
+	                      success:function(msg){
+	                    	  //console.log(msg);
+	                    	  if(null!=msg.id){
+	                    	  var currentNumber = $("tr td.linenumber").length;
+	                    	  //console.log(currentNumber);
+	                    	  var trString = "<tr>"
+	                    	  +"<td class='input-equilong line-number'>"+(currentNumber+1)+"</td>"
+	                    	  +"<td><input readonly class='k-textbox'  name='visitorList["+currentNumber+"].visitorName' value="+(msg.visitorName==undefined?"":msg.visitorName)+" ></td>"
+	                    	  +"<td><input  readonly class='k-textbox'  name='visitorList["+currentNumber+"].visitorUnit' value="+(msg.visitorUnit==undefined?"":msg.visitorUnit)+" ></td>"
+	                    	  +"<td><input readonly  class='k-textbox'  name='visitorList["+currentNumber+"].visitorCardNo' value="+(msg.visitorCardNo==undefined?"":msg.visitorCardNo)+" ></td>"
+	                    	  +"<td><input readonly  class='k-textbox'  name='visitorList["+currentNumber+"].grantTime' value="+(msg.grantTime==undefined?"":msg.grantTime)+" ></td>" 
+	                    	  +"<td><input readonly class='k-textbox'   name='visitorList["+currentNumber+"].returnTime' value="+(msg.returnTime==undefined?"":msg.returnTime)+" ></td>"
+	                    	  +"<td><input readonly class='k-textbox'  name='visitorList["+currentNumber+"].visitorReturnCard' value="+(msg.visitorReturnCard=="1"?"是":"否")+"  ></td>"
+	                    	  +"</tr>";
+	                    	  $("#leftvisitors").append(trString);
+	                    	  }else{
+	                    		  alert("系统中无卡号为"+cardNo+"的访客信息！");
+	                    	  }
+						}, error: function (xhr, status, error) {
+							notify("查询卡号信息失败，请检查网络！","error");
+	                      }
+	                  });
+
+	            }
+	        }
+            setInterval(returnCardCode,4000);
+	   #end
+	 
+});   
+
+</script>

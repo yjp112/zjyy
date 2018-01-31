@@ -1,0 +1,19 @@
+<form id="collectError_form" method="post" action="$!{rc.contextPath}/nhgl/query/collectError/save" class="ui-form">
+    <input type="hidden" name="id" value="$!{collectError.id}">
+    <input type="hidden" name="nhType" value="$!{collectError.nhType}">
+    <fieldset>
+		<div class="ui-form-item">
+			<label class="ui-label"><span class="ui-form-required">*</span>是否正确:</label>
+			<input type="radio" id="yy" class="ui-radio" name="humanConfirm" #if("$!{collectError.humanConfirm}"=="Y") checked #end value="Y"><span class="ui-form-text">异常</span>
+			<input type="radio" id="nn" class="ui-radio" name="humanConfirm" #if("$!{collectError.humanConfirm}"=="N") checked #end value="N"><span class="ui-form-text">正常</span>
+		</div>
+	</fieldset>
+</form>
+<script type="text/javascript">
+  	$(document).ready(function(){
+  		var f='$!{collectError.humanConfirm}';
+  		if(f==''){
+  			$("#yy").attr('checked',true);
+  		}
+  	})
+</script>

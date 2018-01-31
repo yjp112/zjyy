@@ -1,0 +1,113 @@
+<div data-page="sign" class="page page-about">
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="navbar-inner">
+                <div class="navbar-left">
+                    <a href="#" class="link back">
+                        <i class="icon icon-c-back only-icon"></i>
+                    </a>
+                </div>
+                <div class="navbar-center">功能简介</div>
+                <div class="navbar-right"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-content">
+        <div class="list-block">
+            <ul>
+                <li>
+                    <div class="block-content">
+                        <div class="block-title">
+                            <span class="title">待办流程</span>
+                        </div>
+                        <div class="block-inner">
+                            <div class="inner-dec">
+                                <p>
+                                    待办流程主要是针对已流转到自身的流程，需要根据不同的流程内容进行及时的处理。
+                                </p>
+                            </div>
+                            <div class="row">
+                                <img class="col-50" src="$!{mobile_static_url}images/sign/pic1.png" alt=""/>
+                                <img class="col-50" src="$!{mobile_static_url}images/sign/pic2.png" alt=""/>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="block-content">
+                        <div class="block-title">
+                            <span class="title">已办流程</span>
+                        </div>
+                        <div class="block-inner">
+                            <div class="inner-dec">
+                                <p>
+                                    已办流程主要是针对自身办过的流程，可以根据自身的需求去查看流程的去向以及目前流程所在的节点、处理的情况等等。
+                                </p>
+                            </div>
+                            <div class="row">
+                                <img class="col-50" src="$!{mobile_static_url}images/sign/pic3.png" alt=""/>
+                                <img class="col-50" src="$!{mobile_static_url}images/sign/pic4.png" alt=""/>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="block-content">
+                        <div class="block-title">
+                            <span class="title">考勤管理</span>
+                        </div>
+                        <div class="block-inner">
+                            <div class="inner-dec">
+                                <p>
+                                    考勤管理主要是针对在职员工方便查询自身当天的考勤情况以及历史的考勤的信息，方便确认考勤异常的行为时间。
+                                </p>
+                            </div>
+                            <div class="row">
+                                <img class="col-50" src="$!{mobile_static_url}images/sign/pic5.png" alt=""/>
+                                <img class="col-50" src="$!{mobile_static_url}images/sign/pic6.png" alt=""/>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="block-content">
+                        <div class="block-title">
+                            <span class="title">访客登记</span>
+                        </div>
+                        <div class="block-inner">
+                            <div class="inner-dec">
+                                <p>
+                                    访客登记主要是针对在职员工方便预约登记以及修改将要来访客人，并且能够查询已访客人的情况。
+                                </p>
+                            </div>
+                            <div class="row">
+                                <img class="col-50" src="$!{mobile_static_url}images/sign/pic7.png" alt=""/>
+                                <img class="col-50" src="$!{mobile_static_url}images/sign/pic8.png" alt=""/>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="block-content">
+                        <div class="block-title">
+                            <span class="title">我的</span>
+                        </div>
+                        <div class="block-inner">
+                            <div class="inner-dec">
+                                <p>
+                                    我的主要是个人信息的一些展示以及一些基础功能的简介、设置等。
+                                </p>
+                            </div>
+                            <div class="row">
+                                <img class="col-50" src="$!{mobile_static_url}images/sign/pic10.png" alt=""/>
+                                <img class="col-50" src="$!{mobile_static_url}images/sign/pic9.png" alt=""/>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,160 @@
+#parse("index/_header.vm")
+</head>
+<body>
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<form class="ui-form" id='queryForm'>
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+                <tr>
+                  <td class="ui-search-name first">创建时间：</td>
+				  
+				  <td class="ui-search-c">
+		                  	<input id="startTime" type="text" name="startTime" />
+							<span class="ui-form-text">至</span> 
+							<input id="endTime" type="text" name="endTime" />
+		                  </td>
+				  <td class="ui-search-name first">流程状态：</td>
+				  <td class="ui-search-c">
+		               <select name="result" class="k-textbox" >
+			               	<option value="">--请选择--</option>
+	   						#foreach($!{e} in $!{reslutList})
+	   						<option value="$!{e.enumValue}">$!{e.enumText}</option>
+	   						#end          
+						</select>
+	               </td>
+                </tr>
+              </table>
+            </td>
+            <td width="180" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+#parse("index/_footer.vm") 
+
+<script type="text/javascript">
+  var _iframe_layout, _left_layout, _inner_layout;
+	$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      }
+    });
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+	
+    $('#resetBtn').click(function(){
+		clearDateWithout("startTime", "endTime");
+		$("#queryForm :text").val('');  
+    });
+
+	$('.iconfont','.ui-form-pick').each(function(){
+      $(this).click(function(){
+      	$('#treeId').val('');
+      	$('#selectBlock').hide();
+      })
+    })
+	
+	//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/employee/lunchapply/list", [{
+              field: "id",
+              hidden: true
+          }, {
+              field: "lunchcode",
+              title: "流程编号",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {     
+      		  	 title:"#: data.lunchcode==null? '':data.lunchcode #",
+      			 "class": "k-grid-equilong k-grid-nowrap"
+    		  },
+			  template:"<a href=\"javascript:view('#:data.id #')\" title=\"#: data.lunchcode #\" >#: data.lunchcode #</a>",
+              width: 200
+          }, {
+              field: "lunchTypeName",
+              title: "餐别",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+    		  attributes: {"class": "k-grid-equilong"},
+              width: 200
+          }, {
+              field: "lunchDate.split(' ')[0]",
+              title: "就餐日期",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {     
+      		  	 title:"#: data.expectVisitors==null? '':data.expectVisitors #",
+      			 "class": "k-grid-equilong k-grid-nowrap"
+    		  },
+              width: 200
+          }, {
+              field: "creator",
+              title: "申请人",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+    		  attributes: {"class": "k-grid-text"},
+              width: 200
+          }, {
+              field: "resultName",
+              title: "流程状态",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {     
+      		  	 title:"#: data.visitReason==null? '':data.visitReason #",
+      			 "class": "k-grid-text k-grid-nowrap"
+    		  },
+              width: 200
+          },{
+              field: "createDate",
+              title: "创建时间",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+    		  attributes: {"class": "k-grid-equilong"},
+              width: 250
+          }
+		  ], 
+      {
+    	  resizable:true,
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          }
+      }, {
+          serverSorting: true
+      }, [
+          #kendo_datagrid_btns("YGZZ_GZCSQ")#end
+      ]);
+		
+    });
+    commonDateWithout("startTime","endTime","yyyy-MM-dd","zh-CN");
+	
+	function view(id){
+    	quick_dialog("process_deal_dlg", "工作餐申请", "$!{rc.contextPath}/employee/lunchapply/edit?viewOnly=true&view=true&id=" +id,800, 500);
+    }
+</script>
+</body>
+</html>

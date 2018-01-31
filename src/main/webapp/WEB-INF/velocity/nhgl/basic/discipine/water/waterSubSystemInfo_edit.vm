@@ -1,0 +1,76 @@
+<script type="text/javascript">
+	 $(document).ready(function(){
+	 	$("#parentName").click(function(){
+	 		#if($!ishasChild){
+	 			alert('请不要修改有子类分项的父节点');
+	 			return;
+	 		}
+	 		#end
+			chooseWaterSubSystem("parentId","parentName","subSystemInfo_edit");
+        });  
+        
+	 	#if($!viewOnly)
+	    	$("[type=submit]", $("#subSystemInfo_edit_form")).hide();
+        	$(':input', $("#subSystemInfo_edit_form")).attr('readonly', true);
+        	$('.ui_dialog :input').attr('readonly',true);
+        	$(".ui_dialog input[type=text]").unbind( "click" ).attr('onclick','');
+        #end
+        $("#code,#parentName").blur(function(e){
+        	  setTimeout(function() {
+				var code=$("#code").val();
+        		var parentId=$("#parentId").val();
+        		if(code!="" && parentId!=""){
+        			if(parentId=="code"){
+        				$("#standardCode").val(code);
+        				return;
+        			}
+        			if(parentId == 0)
+        				$("#standardCode").val(code);
+					else
+						$("#standardCode").val(parentId+code);
+        		}
+			},1);
+        	
+        });
+        
+	 });
+</script>
+
+<form id="subSystemInfo_edit_form" method="post" action="$!{rc.contextPath}/nhgl/basic/discipine/water/save" class="ui-form">
+	<input type="hidden" name="id" value="$!{waterSubSystemInfo.id}">
+	<fieldset>
+		<div class="ui-form-item">
+			 <label class="ui-label"><span class="ui-form-required">*</span>分项编码:</label>
+	         #set($readonly='')
+	          #if(!$!{waterSubSystemInfo.id})
+	         #set($readonly='readonly')
+	          #end
+	         <input $!{readonly} id= "code" class="ui-input ui-disabled" data-rule="分项编码:required" type="text"  name="code" value="$!{waterSubSystemInfo.code}" />
+		</div>
+		<div class="ui-form-item">
+	        <label class="ui-label"><span class="ui-form-required">*</span>分项名称:</label>
+			<input class="ui-input" data-rule="分项名称:required" type="text" name="name" value="$!{waterSubSystemInfo.name}" />
+	    </div>
+	    <div class="ui-form-item">
+	        <label class="ui-label" ><span class="ui-form-required">*</span>父类别:</label>
+	        #if($!{parentName})
+	        <input readonly class="ui-input ui-input-choose" id="parentName" data-rule="父类别:required"type="text" name="parentName" id="parentName"  value="$!{parentName}"/>
+	        #else
+			<input readonly class="ui-input ui-input-choose" id="parentName" data-rule="父类别:required"type="text" name="parentName" id="parentName"  value="$!{waterSubSystemInfo.parentName}"/>
+			#end
+			#if($!{parentId})
+			<input class="ui-input" type="hidden" id="parentId" type="text"  name="parentId"   value="$!{parentId}"/>
+			#else
+			<input class="ui-input" type="hidden" id="parentId" type="text"  name="parentId"   value="$!{waterSubSystemInfo.parentId}"/>
+			#end
+	    </div>
+	    <div class="ui-form-item">
+	        <label class="ui-label"><span class="ui-form-required">*</span>标准编码:</label>
+			<input readonly class="ui-input ui-disabled" id="standardCode" data-rule="标准编码:required" type="text" name="standardCode" value="$!{waterSubSystemInfo.standardCode}" />
+	    </div>
+		<div class="ui-form-item ui-form-item-textarea colspan2">
+	        <label class="ui-label">备注:</label>
+	        <textarea class="ui-textarea" data-rule="length[~50]"  name="remark">$!{waterSubSystemInfo.remark}</textarea>
+	    </div>
+	</fieldset>
+</form>

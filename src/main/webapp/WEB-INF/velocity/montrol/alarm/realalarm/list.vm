@@ -1,0 +1,276 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<div class="ui-layout-north">
+    <form class="ui-form" id='queryForm'>
+        <table width="100%">
+            <tr>
+                <td>
+                    <table class="ui-search-table" style="width: 100%;">
+                        <tr>
+                            #if(!${deviceId})
+                                <td class="ui-search-name first" style="text-align: right;">设备编码：</td>
+                                <td class="ui-search-c">
+                                    <input id="deviceCode" class="k-textbox" type="text" name="deviceCode" style="width: 200px;">
+                                </td>
+                            #else
+                                <td class="ui-search-name first" style="text-align: right;">报警级别：</td>
+                                <td class="ui-search-c">
+                                    <select name="alarmLevel" id="alarmLevel" class="ui-combobox" style="width: 200px;">
+                                        <option value="0" selected>全部</option>
+                                        #foreach($!{e} in $!{alarmlevels})
+                                            <option value="$!{e.id}">$!{e.alarmLevel}</option>
+                                        #end
+                                    </select>
+                                </td>
+                                <input   type="hidden" name="deviceId"value="$!{deviceId}">
+                            #end
+                            <td class="ui-search-name first" style="text-align: right;">处理状态：</td>
+                            <td class="ui-search-c">
+                                <select id="handleState" class="ui-combobox" name="handleState" style="width: 200px;">
+                                    <option value="0">所有</option>
+                                    <option value="1">未处理</option>
+                                    <option value="2">处理中</option>
+                                    <option value="3">处理完成</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                        #if(!${deviceId})
+                            <td class="ui-search-name first" style="text-align: right;">报警级别：</td>
+                            <td class="ui-search-c">
+                                <select name="alarmLevel" id="alarmLevel" class="ui-combobox" style="width: 200px;">
+                                    <option value="0" selected>全部</option>
+                                    #foreach($!{e} in $!{alarmlevels})
+                                        <option value="$!{e.id}">$!{e.alarmLevel}</option>
+                                    #end
+                                </select>
+                            </td>
+                            <td class="ui-search-name first" style="text-align: right;">
+                                报警时间：
+                            </td>
+                            <td class="ui-search-c">
+                                <input id="startTime" type="text" name="startTime" style="width: 200px;"/>
+                                <span class="ui-form-text">至</span>
+                                <input id="endTime" type="text" name="endTime" style="width: 200px;"/>
+                            </td>
+                        #else
+                            <td class="ui-search-name first" style="text-align: right;">
+                                报警时间：
+                            </td>
+                            <td class="ui-search-c">
+                                <input id="startTime" type="text" name="startTime" style="width: 200px;"/>
+                            </td>
+                            <td class="ui-search-name first" style="text-align: right;">
+                                报警时间：
+                            </td>
+                            <td class="ui-search-c">
+                                <input id="endTime" type="text" name="endTime" style="width: 200px;"/>
+                            </td>
+                        #end
+
+                        </tr>
+                    </table>
+                </td>
+                <td width="200" valign="top" style="padding-top:4px;">
+                    <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+                    <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+                </td>
+                <td></td>
+            </tr>
+        </table>
+    </form>
+</div>
+<!-- tabs start -->
+
+<div class="ui-layout-center" id="tabsLayout">
+    <div id="grid"></div>
+</div>
+</body>
+<!-- tabs end -->
+
+<script>
+    //列表对象
+    var _iframe_layout;
+    $(document).ready(function () {
+
+        _iframe_layout = $('body').layout({
+            defaults: {
+                resizable: false,
+                closable: false,
+                spacing_open: 5
+            }
+        });
+        $("#resetBtn").click(function () {
+            $("#startTime").val("");
+            $("#endTime").val("");
+            $("#deviceCode").val("");
+            clearDate("startTime", "endTime");
+            var combobox = $("#alarmLevel").data("kendoComboBox");
+            combobox.value("0");
+            var handleState = $("#handleState").data("kendoComboBox");
+            handleState.value("0");
+            return false;
+        });
+        //加载时间控件
+        commonDate("startTime", "endTime", "yyyy-MM-dd HH:mm:ss", "zh-CN");
+        gird();
+    });
+
+
+    function gird() {
+        quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/hl/montrol/alarm/realalarm/list", [
+                    {
+                        field: "id",
+                        hidden: true
+                    },
+                    {
+                        field: "levelIco",
+                        template: "<div style='width:100%;text-align: center;'><i class='fa fa-info-circle' style='#:levelIco#'></i></div>",
+                        title: "级别",
+                        attributes: {style: "text-align: center"},
+                        sortable: false,
+                        width: 50
+                    },
+                    {
+                        field: "deviceName",
+                        title: "设备名称",
+                        sortable: true,
+                        width: 200,
+                        attributes: {style: "text-align: center"},
+                        template:function(dataItem){
+                            var des = dataItem.deviceName;
+                            return "<span  title='"+des+"'>"+des+"</span>";
+                        }
+                    },
+                    {
+                        field: "deviceCode",
+                        sortable: false,
+                        title: "设备编码",
+                        attributes: {style: "text-align: center"},
+                        template:function(dataItem) {
+                            var des = dataItem.deviceCode;
+                            return "<span  title='"+des+"'>"+des+"</span>";
+                        }
+                    },
+                    {
+                        field: "alarmRemark",
+                        sortable: false,
+                        title: "报警描述",
+                        attributes: {style: "text-align: center"},
+                        width: 100
+                    },
+                    {
+                        field: "showAlarmState",
+                        sortable: false,
+                        title: "报警状态",
+                        attributes: {style: "text-align: center"},
+                        width: 100,
+                    },
+                    {
+                        field: "alarmTime",
+                        sortable: true,
+                        title: "报警时间",
+                        attributes: {style: "text-align: center"},
+                        template: function (dataItem) {
+                            var date = dataItem.alarmTime;
+                            if (undefined != date) {
+                                var formatDate = date.substr(0, 19);
+                                return formatDate;
+                            } else {
+                                return "";
+                            }
+                        },
+                        width: 140
+                    },
+                    {
+                        field: "createDate",
+                        sortable: true,
+                        title: "创建时间",
+                        attributes: {style: "text-align: center"},
+                        template: function (dataItem) {
+                            var date = dataItem.createDate;
+                            if (undefined != date) {
+                                var formatDate = date.substr(0, 19);
+                                return formatDate;
+                            } else {
+                                return "";
+                            }
+                        },
+                        width: 140
+                    },
+                    {
+                        field: "alarmData",
+                        sortable: false,
+                        title: "报警值",
+                        attributes: {style: "text-align: center"},
+                        width: 80,
+                    },
+                    {
+                        field: "lastAlarmTime",
+                        sortable: false,
+                        title: "恢复时间",
+                        attributes: {style: "text-align: center"},
+                        template: function (dataItem) {
+                            var date = dataItem.lastAlarmTime;
+                            if (undefined != date) {
+                                var formatDate = date.substr(0, 19);
+                                return formatDate;
+                            } else {
+                                return "";
+                            }
+                        },
+                        width: 140
+                    },
+                    {
+                        field: "processType",
+                        sortable: false,
+                        title: "处理类型",
+                        attributes: {style: "text-align: center"},
+                        width: 80
+                    },
+                    {
+                        field: "showProcessState",
+                        sortable: false,
+                        attributes: {style: "text-align: center"},
+                        title: "处理状态",
+                        width: 80
+                    }
+                ],
+                {
+                    sortable: {
+                        mode: "multiple",
+                        allowUnsort: true
+                    }
+                }, {
+                    serverSorting: true
+                },
+                [
+                #if($!{viewOnly} != true)
+                #kendo_datagrid_btns("ALARM_SSBJGL")#end
+                #end
+                ]
+        );
+    }
+
+    //处理方法
+    function processAlarm(obj, id) {
+        quick_dialog("alarm_handle_dlg", "处理报警设备", "$!{rc.contextPath}/hl/montrol/alarm/realalarm/todoAlarm?id=" + id , 350, 250, obj);
+    }
+    
+    function processAlarm(id){
+    	if(id==0){//查看更多实时报警管理
+    		var url = '${rc.contextPath}/montrol/alarm/realalarm/list';
+    		quick_dialog("list","实时报警记录" , url, 1000,600);
+    	}else{
+    		//实时报警页面报警处理
+    		var url = '${rc.contextPath}/montrol/alarm/realalarm/viewHandle?id='+id;
+    		quick_dialog("viewhandle","查看" , url, 770,260);
+    	}
+    }
+    function m_round() {
+        return new Date().getTime();
+    }
+</script>
+#parse("index/_footer.vm")
+</html>

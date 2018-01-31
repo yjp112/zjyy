@@ -1,0 +1,319 @@
+<div class="evl">
+    <div class="evl-main">
+        <div class="evl-header">
+
+            <!--未开始评估(上次评估得分)-->
+            <div class="evl-score evl-score-init">
+                <div class="evl-logo"></div>
+                <div class="evl-details">
+                    <p class="score">
+                        上次用能评估得分
+                        <span class="score-num">100</span>
+                        ##<i class="score-rise"></i>
+                    </p>
+
+                    <p>上次评估时间：2014-7-15 </p>
+
+                    <p>建议定期评估，提升用能效率，降低能耗支出成本。</p>
+                </div>
+                <a class="btn-score-action" href="javascript:;">全面评估</a>
+            </div>
+
+            <!--正在评估-->
+            <div class="evl-score evl-score-current">
+                <div class="evl-logo logo-active"><span class="goal">80</span></div>
+                <div class="evl-details">
+                    <p class="score">正在进行评估，请稍后。。。</p>
+
+                    <div class="progress-warp">
+                        <div class="progress">
+                            <div class="progress-bar"></div>
+                        </div>
+                        <a class="btn-score-cancel" href="javascript:void(0);" title="取消"></a>
+                    </div>
+                    <p>正在评估中...</p>
+                </div>
+            </div>
+
+            <!--评估被取消-->
+            <div class="evl-score evl-score-cancel">
+                <div class="evl-logo logo-notice"></div>
+                <div class="evl-details">
+                    <p class="score">本次评估被取消</p>
+
+                    <p>已发现<span class="rpt-num color-warn">N</span>项能耗异常，请及时处理</p>
+
+                    <p>还有N项未评估，建议您重新进行完整评估
+                        <a class="score-link score-afresh" href="javascript:void(0);">重新评估</a>
+                        <a class="score-link score-back" href="javascript:void(0);">返回</a>
+                    </p>
+                </div>
+            </div>
+
+            <!--评估被取消后返回-->
+            <div class="evl-score evl-score-breakoff">
+                <div class="evl-logo logo-notice"></div>
+                <div class="evl-details">
+                    <p class="score">本次用能评估被取消</p>
+
+                    <p>建议您重新进行用能评估</p>
+
+                    <p>建议定期评估，提升用能效率，降低能耗支出成本。</p>
+                </div>
+                <a class="btn-score-action" href="javascript:;">全面评估</a>
+            </div>
+
+            <!--评估完成-->
+            <div class="evl-score evl-score-finsh">
+                <div class="evl-logo logo-warn"></div>
+                <div class="evl-details">
+                    <p class="score">
+                        本次用能评估得分
+                        <span class="score-num score-num-warn">47</span>
+                    ##<i class="score-decline"></i>
+                    </p>
+
+                    <p>已发现<span id="total_warn_num_id" class="rpt-num color-warn">N</span>项能耗异常，请及时处理</p>
+
+                    <p>
+                        <a class="score-link score-afresh" href="javascript:void(0);">重新评估</a>
+                        ##<a class="score-link score-finsh-back" href="javascript:void(0);">返回</a>
+                    </p>
+                </div>
+                ##<a class="btn-score-action" href="javascript:;">全面评估</a>
+            </div>
+
+            <!--未开始评估/评估被取消后返回建议-->
+            <div class="evl-report evl-report-tip">
+                <ul class="issue-list">
+                    <li class="issue-exception">
+                        <p><span class="issue-title">用能异常  </span><span class="issue-status">已全部开启  </span>按部门和建筑功能进行能耗使用异常评估
+                        </p>
+
+                        <p>本次启动已评估能耗：128</p>
+                    </li>
+                    <li class="issue-warn">
+                        <p><span class="issue-title">设备报警 </span><span class="issue-status">已全部开启  </span></p>
+
+                        <p>本次启动已评估能耗：128</p>
+                    </li>
+                </ul>
+            </div>
+
+            <!--正在评估/评估被取消/评估完成详情列表-->
+            <div class="evl-report evl-report-detail">
+                <div class="rpt-item rpt-item-excep">
+                    <h3 class="rpt-item-title ">用能异常<i class="icon-img icon-loading"></i></h3>
+                    <ul id="electric_error_list_id" class="rpt-list">
+
+                    </ul>
+                </div>
+                <div class="rpt-item rpt-item-warn">
+                    <h3 class="rpt-item-title">设备报警<i class="icon-img icon-loading"></i></h3>
+                    <ul id="device_error_list_id" class="rpt-list">
+
+
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $("li.c-list-li").die().live({
+        'mouseover': function () {
+            $(this).css("marginLeft", "-10px");
+        },
+        'mouseleave': function () {
+            $(this).css("marginLeft", 0);
+        }
+    });
+
+    //全面评估/重新评估按钮点击
+    $(".btn-score-action,.score-afresh").click(function () {
+        startAssess();
+    });
+    //取消评估按钮点击
+    $(".btn-score-cancel").click(function () {
+        cancelAssess();
+    });
+    //取消评估后返回按钮点击
+    $(".score-back").click(function () {
+    	
+        cancelBackAssess();
+    });
+    $(".score-finsh-back").click(function () {
+        initAssess();
+    });
+
+    $(".rpt-list-link").die("click").live("click", function () {
+
+        var $icon = $(this).find("i");
+        var $detail = $(this).find(".rpt-list-detail");
+        var state = $icon.hasClass("icon-open")? "open" : "closed";
+        if (state == "open") {
+                $icon.removeClass("icon-open").addClass("icon-closed");
+                $detail.slideUp();
+        } else if (state == "closed") {
+                $icon.removeClass("icon-closed").addClass("icon-open");
+                $detail.slideDown();
+        }
+    })
+
+
+    //设置进度条的百分比，参数为百分号前的数值（如需设置为45%则传入45即可）
+    function setProgress(percent) {
+        var width = percent / 100 * ($(".progress").width());
+        $(".progress-bar").width(width);
+    }
+    //设置当前评估分数
+    function setGoal(num) {
+        $(".goal").html(num);
+    }
+
+    function setResultDetail(type, details) {
+        var li = "<li class=\"rpt-list-item\"> "
+        var a = "<a class=\"rpt-list-link\" href=\"javascript:void(0);\">"
+        var addMark = "<i class=\"icon-img icon-closed\">";
+        var error="";
+
+##        var error = " </i> <span class=\"rpt-state state-e\">异常</span>"
+##		var errory = " </i> <span class=\"rpt-state state-y\">异常</span>"
+        var devices = "<ul class=\"rpt-list-detail\">";
+
+        var detail = "";
+        $.each(details, function (index, value) {
+            detail += li;
+##/*            if (type == 1) { //设备检测 显示设备详细扣分项
+##                detail += a + addMark;
+##            }*/
+			if(value["crLevel"]==1){
+	        	error=" </i> <span class=\"rpt-state state-y\">异常</span>";
+	        }else{
+	        	error=" </i> <span class=\"rpt-state state-e\">异常</span>"
+	        }
+            detail += error + "<span style=\"color:#fff\">" +value["content"]+ "</span>";
+##/*            if (type == 1) {
+##                $.each(value["objScores"], function (i, v) {
+##                    devices += "<li>设备" + v["deviceCode"] + "于" + v["executeTime"] + "，得分" + v["score"] + "</li>";
+##                })
+##            }*/
+
+            //detail += devices + "</ul>";
+            //detail += "</ul>";
+        })
+
+/*        if (type == 1) {
+            detail += "</a>";
+        }*/
+
+        detail += "</li>"
+        if (type == 1) {
+            $("#device_error_list_id").html(detail);
+        } else if (type == 2) {
+            $("#electric_error_list_id").html(detail);
+        }
+
+    }
+    //设置最终评估分数
+    function setScore(num) {
+        $(".score-num").html(num);
+        if (num > 60) {
+            //$(".score-decline").addClass("score-rise").removeClass("score-decline")
+            if (num == 100) {
+                $(".score-num").removeClass("score-num-warn");
+                $("div.evl-score-finsh > div.evl-logo").removeClass("logo-warn")
+            }
+        }
+    }
+    var assessTimeout;
+    //开始评估
+    function startAssess(fn) {
+        $(".evl-score,.evl-report").hide();
+        $(".evl-score-current,.evl-report-detail").show();
+        $(".icon-loading").css("display", "inline-block");
+
+
+        $.ajax("$!rc.contextPath/nhgl/evaluate", {
+            type: "POST",
+            dataType: "json"
+        }).done(function (data) {
+            if (data["TOTAL_RESULT_SCORE"] == 100) {
+                setGoalAndProgress(100)
+                setScore(100)
+
+                $("#total_warn_num_id").html(0)
+
+                $("#device_error_list_id").html("<span style=\"color:#fff\">无异常</span>")
+                $("#electric_error_list_id").html("<span style=\"color:#fff\">无异常</span>")
+            } else {
+                setGoalAndProgress(100)
+                if(data["TOTAL_RESULT_SCORE"]<0){
+                	setScore(0)
+                }else{
+                	setScore(data["TOTAL_RESULT_SCORE"])
+                }	
+                if(data["ERROR_NUM"]) {
+                    $("#total_warn_num_id").html(data["ERROR_NUM"])
+                }else{
+                    $("#total_warn_num_id").html(0)
+                }
+
+                $("#electric_warn_num_id").html(10)
+                $("#device_warn_num_id").html(10)
+
+
+                if(data["DEVICE_DETAIL"].length >0) {
+                    setResultDetail(1, data["DEVICE_DETAIL"])
+                }else {
+                    $("#device_error_list_id").html("<span style=\"color:#fff\">无异常</span>")
+                }
+
+                if(data["ENERGY_DETAIL"].length > 0) {
+                    setResultDetail(2, data["ENERGY_DETAIL"])
+                }else {
+                    $("#electric_error_list_id").html("<span style=\"color:#fff\">无异常</span>")
+                }
+            }
+        }).fail(function () {
+            //alert("ERROR");
+        });
+
+        //setProgress(21);
+        //setScore(45);
+        //setGoal(21);
+        assessTimeout = setTimeout(function () {
+            finshAssess();
+        }, 2000);
+    }
+
+    function setGoalAndProgress(num) {
+        setProgress(num);
+        setGoal(num);
+    }
+    //取消评估
+    function cancelAssess() {
+        $(".evl-score,.evl-report,.icon-loading").hide();
+        $(".evl-score-cancel,.evl-report-detail").show();
+        clearTimeout(assessTimeout);
+    }
+    //取消评估后返回
+    function cancelBackAssess() {
+        $(".evl-score,.evl-report").hide();
+        $(".evl-score-breakoff,.evl-report-tip").show();
+    }
+    //完成评估
+    function finshAssess() {
+        $(".evl-score,.evl-report,.icon-loading").hide();
+        $(".evl-score-finsh,.evl-report-detail").show();
+    }
+    //完成评估后返回
+    function initAssess() {
+        $(".evl-score,.evl-report").hide();
+        $(".evl-score-init,.evl-report-tip").show();
+    }
+
+    startAssess();
+
+</script>

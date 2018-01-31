@@ -1,0 +1,91 @@
+#parse("index/_header.vm")
+</head>
+<body>
+	<div class="ui-layout-west" style="border-right:solid 1px #e1e5e6;" id="leftTreeWrap"> 
+		<div class="ui-layout-north">
+		<div class="k-header k-grid-toolbar" style="padding-left:10px;">部门</div>
+		</div>
+    	<div class="ui-layout-center">
+  			<ul id="treeDemo_choose" class="ztree"></ul>
+    	</div>
+	</div>  
+</div>
+
+<div class="ui-layout-center" id="subMain">
+	#parse("visitor/reception/content_all.vm") 
+</div>
+#parse("index/_footer.vm")    
+
+<script type="text/javascript">
+// layout
+var _iframe_layout, _left_layout, _inner_layout;
+$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      },
+      west: {
+        size: 0.18
+      }
+    });
+
+    _left_layout = $("#leftTreeWrap").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      }
+    });
+	
+	_inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var visitorTab = $("#visitorTab").data("kendoGrid");
+              visitorTab.resize();
+          }
+      }
+    })
+	 
+});
+</script>
+<script type="text/javascript">     
+    /* zTree */ 
+    var selectId = "";
+	var selectName = "";
+      var setting = {
+    	data: {
+    		simpleData: {enable: true}
+          },
+          callback: {
+    			onClick: function(event, treeId, treeNode) {
+				    
+					$('#deptNameReceptorId').val(treeNode.id);
+	    		    $('#queryBtn_r').click();
+				    $('#deptNameLeaveId').val(treeNode.id);
+	    			$('#queryBtn_l').click();
+					$('#deptNameAllId').val(treeNode.id);
+	    			$('#queryBtn_a').click();
+    			}
+    		}
+    };
+	var zNodes = [];
+	zNodes.push({id:"10001", pId:"0", name:"中控信息", open:"true"});
+    #foreach($!{treeNode} in $!{treeList})
+        zNodes.push({id:$!{treeNode.id}, pId:$!{treeNode.pid}, name:"$!{treeNode.name}"});     
+    #end
+  	$(document).ready(function(){
+  		$.fn.zTree.init($("#treeDemo_choose"), setting,zNodes);
+  	});
+	function cancelLeftTreeSelected(){
+		$.fn.zTree.init($("#treeDemo_choose"), setting,zNodes);
+	}
+</script>
+</body>
+</html>

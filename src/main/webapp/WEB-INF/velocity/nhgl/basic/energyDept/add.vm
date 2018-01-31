@@ -1,0 +1,85 @@
+<form class="ui-form" id="document_edit_form" action="${rc.contextPath}/nhgl/basic/energyDept/save" method="post">
+    <input type="hidden" name="deviceId" id="deviceId" value="$!{wd.deviceId}" />
+    <input type="hidden" id="id" name="id"  value="$!{wd.id}" />
+    <input type="hidden" id="deptId" name="deptId"  value="$!{wd.deptId}"/>
+    <fieldset>
+		<div class="ui-form-item">
+        	  <label class="ui-label" ><span class="ui-form-required">*</span>能量表名称：</label>
+			  <input class="ui-input ui-input-choose" id="deviceName" name="deviceName" readonly="readonly" value="$!{wd.deviceName}" onclick="getDeviceEnergy('deviceId','deviceName')"/>
+        </div>
+		<div class="ui-form-item">
+        	  <label class="ui-label" ><span class="ui-form-required">*</span>部门名称：</label>
+			  <input class="ui-input ui-input-choose" id="deptName" name="deptName" readonly="readonly" value="$!{wd.deptName}" onclick="chooseDept('deptId','deptName')"/>
+        </div>
+		<div class="ui-form-item">
+        	  <label class="ui-label" ><span class="ui-form-required">*</span>分摊系数：</label>
+ 			  <input class="ui-input" maxlength="7" type="text" data-rule="分摊系数:required;float;" data-rule-float="[/^\d+(\.\d+)?$/, '请输入大于零的值']" id="ftxs" name="ftxs" value="$!{wd.ftxs}"/>
+        </div>
+    </fieldset>
+</form>
+ 
+<script type="text/javascript">
+$(document).ready(function(){
+    
+        
+});
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##<script type="text/javascript" src="${rc.contextPath}/assets/js/jquery.validate.rules.js"></script>
+##<form id="folder_form" class="ui-form" action="${rc.contextPath}/docmanager/saveFolder" method="post">
+##	<div class="ui-form-search-right" style="width:450px;margin:80px">
+##		<table id="contentPlan">
+##			<tr id="fujian">
+##				<input name="treeId" type="hidden" value="$!treeId"/>
+##				<input name="personId" type="hidden"  value="$!user.personId"/>
+##				<div class="ui-form-item">
+##        	        <label class="ui-label" for="" >创建人：</label>
+##					<input class="ui-input" name="createPersonName" readonly="readonly" value="$!user.username"/>
+##        	    </div>
+##				<div class="ui-form-item">
+##        	        <label class="ui-label" for="" >文件夹名：</label>
+##					<input class="ui-input" type="text" id="folderName" name="folderName" data-rule="文件夹名:required;"/>
+##        	    </div>
+##				<div class="ui-form-item">
+##        	        <label class="ui-label" for="" >父文件夹：</label>
+##					<input class="ui-input" name="parentolderName" readonly="readonly" value="$!parentolderName"/>
+##        	    </div>
+##			</tr>
+##        </table>
+##	</div>
+##	<div style="display:inline-block; text-align:center;margin-left:160px;">
+##		<button class="btn" type="button" onclick="quxiao()"><i class="iconfont icon-reply"></i>取消</button>
+##		<button class="btn" type="button" onclick="saveFolder()"><i class="iconfont icon-save"></i>保存</button>
+##	</div>
+##</form>
+##<script  type="text/javascript">
+##function quxiao() {
+##	//console.info(dg);
+##	var dg = dialog.focus;
+##    dg && dg.close(); 
+##	$("#folder").css("display","none");
+##}
+##function saveFolder(){
+##	
+##	$.forms.submits("#folder_form",function(){
+##		var dg = dialog.focus;
+##    	dg && dg.close();
+##		var random = Math.floor(Math.random()*1000000000000000000000000);
+##		$("#centerMain").load('$!{rc.contextPath}/docmanager/list?random='+random);
+##	});
+##}
+##</script>

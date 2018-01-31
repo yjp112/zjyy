@@ -1,0 +1,33 @@
+<form class="ui-form">
+	<fieldset>
+		<div class="ui-form-item ">
+			<label class="ui-label">部门编码：</label>
+			<span class="ui-input" title="$!{department.code}">$!{department.code}</span>
+		</div>
+		<div class="ui-form-item ">
+			<label class="ui-label">部门名称：</label>
+			<span class="ui-input" title="$!{department.name}">$!{department.name}</span>
+		</div>
+		
+		
+		
+		<div class="ui-form-item ">
+			<label class="ui-label">上级部门：</label>
+			
+			<span class="ui-input" title="$!{department.parent.name}">$!{department.parent.name}</span>
+			
+		</div>
+		<div class="ui-form-item ">
+			<label class="ui-label">部门人数：</label>
+			<span class="ui-input" title="$!{department.persons}">$!{department.persons}</span>
+		</div>
+		<div class="ui-form-item ">
+			<label class="ui-label">部门面积：</label>
+			<span class="ui-input"  title="$!{department.area}">$!{department.area}</span>
+		</div>
+		<div class="ui-form-item ui-form-item-textarea colspan2">
+      		<label class="ui-label">备注:</label>
+      		<textarea class="ui-textarea ui-readonly" readonly="readonly">$!{department.description}</textarea>
+		</div>
+	</fieldset>
+</form>

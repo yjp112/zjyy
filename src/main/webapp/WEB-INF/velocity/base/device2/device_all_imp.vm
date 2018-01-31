@@ -1,0 +1,79 @@
+#parse("index/_header.vm")
+<style type="text/css">
+#file{position:absolute;z-index:100;margin-left:-10px;opacity:0;filter:alpha(opacity:0);margin-top:-5px;height:30px;width:90px;}
+html, body {
+height: 80%;
+}
+</style>
+</head>
+<body>
+	<div class="row-fluid">
+ 		<form class="ui-form" id="myform_id" action="$!{rc.contextPath}/device/imp_exp/impDeviceAll" method="post"  enctype="multipart/form-data">
+        <div style="margin:30px"  align="center">请以EXCEL格式导入相关数据(本次导入是导入所有的数据，包含报警等级，类型，区域，点位，设备)...</div>
+        <table align="center">
+	        <br>
+	       
+
+            <tr>
+                
+                <td>
+	                <span id="uploadImg">       					
+						<input type="file" id="file" name="file" size="1" onchange="uploadeFile(value)">				
+						<a href="#" class="k-primary hc_btn" >&nbsp;选择文件</a>
+					</span>	 
+    			</td>
+                <td><input type="text" id="file-url" name="file-url" ></td>
+            </tr>
+            
+            <tr >
+	            
+	            <td align="right">
+	                <button style="width:74px" class="k-primary hc_btn" type="button" id="bt" onclick="imp()"><i class="fa fa-upload"></i>导入</button>
+	            </td>
+	            <td align="left"><a href="$!{rc.contextPath}/download/newDeviceExpTemplate.xls">模板下载</a></td>
+            </tr>
+        </table>
+		</form>
+    <div>
+	<div id="errmsg" style="color:red;padding-left:30px"></div>
+<script>
+   	 $(document).ready(function(){
+
+ 
+	 });
+   	function uploadeFile(value){
+ 		//alert(value);
+		$("#file-url").val(value);
+	} 
+	function imp(){ 
+		$("#errmsg").html("");
+		var excelFile = document.getElementById("file").value;
+		if(excelFile==''){
+			notify("请选择需要导入的文件！", "warn");
+			return false;
+		}else if(excelFile.indexOf('.xls')==-1 && excelFile.indexOf('.XLS')==-1){
+			 notify("文件格式不正确，请选择正确的Excel文件(后缀名.xls)！", "warn");
+		       return false;
+		}else{
+        	$("#myform_id").ajaxSubmit({
+             	dataType:'html',
+                success: function(responseText, statusText, xhr, $form) {
+    				if(responseText.indexOf("error")!=-1){
+    					$("#errmsg").html(responseText);
+    					notify("导入失败！","error");
+    				}else{
+						notify(responseText || "操作成功！","success");
+    				}
+    			},
+                error: function(o) {
+				   notify("ajaxSubmit error","error");
+                },
+                complete: function() {
+                    
+                }
+            }); 
+		}
+	}
+</script>
+</body>
+</html>

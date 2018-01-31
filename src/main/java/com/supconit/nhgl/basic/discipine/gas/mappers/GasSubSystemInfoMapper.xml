@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.basic.discipine.gas.entities.GasSubSystemInfo">
+
+	<resultMap type="com.supconit.nhgl.basic.discipine.gas.entities.GasSubSystemInfo" id="GasSubSystemInfoResultMap">      
+       <result property="id" column="ID" />
+        <result property="code" column="CODE" />
+        <result property="parentId" column="PARENT_ID"/>
+        <result property="name" column="NAME" />
+        <result property="remark" column="REMARK" />
+        <result property="standardCode" column="STANDARD_CODE" />
+	</resultMap>
+	<sql id="TABLE_NAME" lang="velocity">NH_GAS_SUB_SYSTEM_INFO</sql>
+	<sql id="SEQUENCE" lang="velocity">
+		SELECT SEQ_<include refid="TABLE_NAME" />.NEXTVAL FROM DUAL
+	</sql>
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+   <sql id="select_pre">
+		select
+        ID,
+        CODE,
+        PARENT_ID,
+        NAME,
+        REMARK,
+        STANDARD_CODE
+        FROM NH_GAS_SUB_SYSTEM_INFO
+	</sql>
+   <sql id="select_pre_v" lang="velocity">
+		select
+        ID,
+        CODE,
+        PARENT_ID,
+        NAME,
+        REMARK,
+        STANDARD_CODE
+        FROM NH_GAS_SUB_SYSTEM_INFO
+	</sql>
+	<sql id="select_pre_gas" lang="velocity">
+		SELECT DISTINCT
+			sub.ID,
+			sub.CODE,
+			sub.PARENT_ID,
+			sub.NAME,
+			sub.REMARK,
+			sub.STANDARD_CODE
+		FROM
+			<include refid="TABLE_NAME" /> sub
+		LEFT JOIN DEVICE d ON d.DISCIPINES_CODE = sub.CODE
+	</sql>
+	<sql id="count_pre" lang="velocity">
+		SELECT
+		COUNT(*)
+		FROM
+		<include refid="TABLE_NAME" />
+	</sql>
+	<sql id="condition_sql" lang="velocity">
+	
+	<![CDATA[
+		#where()
+				1=1
+				#if($_parameter.condition.id && $_parameter.condition.id != '')
+					AND ID= @{_parameter.condition.id,jdbcType=NUMERIC}
+				#end
+				#if($_parameter.condition.parentId && $_parameter.condition.parentId != '')
+					AND PARENT_ID= @{_parameter.condition.parentId,jdbcType=VARCHAR}
+				#end
+				#if( $_parameter.condition.standardCodes && $_parameter.condition.standardCodes.size()>0)	
+					and 
+					#repeat( $_parameter.condition.standardCodes $standardCode "," "  STANDARD_CODE IN  (" ")" )
+					    @{standardCode,jdbcType=VARCHAR}
+					#end	
+				#end
+				#if($_parameter.condition.code && $_parameter.condition.code != '')
+						#set($_code = '%' + $_parameter.condition.code + '%')
+						AND CODE LIKE @{_code,jdbcType=VARCHAR}
+				#end
+				#if($_parameter.condition.name && $_parameter.condition.name != '')
+						#set($_name = '%' + $_parameter.condition.name + '%')
+						AND NAME LIKE @{_name,jdbcType=VARCHAR}
+				#end		
+				#if($_parameter.condition.standardCode && $_parameter.condition.standardCode != '')
+						#set($_standardCode = '%' + $_parameter.condition.standardCode + '%')
+						AND STANDARD_CODE LIKE @{_standardCode,jdbcType=VARCHAR}
+				#end
+		#end
+		]]>	
+		
+	</sql>
+	<sql id="condition" lang="velocity">
+		<![CDATA[
+		#where()
+				1=1
+				#if($_parameter.condition.code && $_parameter.condition.code != '')
+					AND CODE= @{_parameter.condition.code,jdbcType=VARCHAR}
+				#end
+				#if($_parameter.condition.parentId && $_parameter.condition.parentId != '')
+					AND PARENT_ID= @{_parameter.condition.parentId,jdbcType=VARCHAR}
+				#end
+		#end
+		]]>
+	</sql>
+	<select id="findChild" resultMap="GasSubSystemInfoResultMap" parameterType="String">
+    	<include refid="select_pre"/>
+    	 WHERE STANDARD_CODE like  @{_parameter, jdbcType=VARCHAR}
+    </select>
+	<select id="selectStandardCodes" parameterType="com.supconit.nhgl.basic.discipine.gas.entities.GasSubSystemInfo" resultType="String">
+		with cte_root(ID,CODE,NAME,PARENT_ID,REMARK,STANDARD_CODE)
+		as(
+		select ID,CODE,NAME,PARENT_ID,REMARK,STANDARD_CODE from NH_GAS_SUB_SYSTEM_INFO<where><if test="standardCode != null "> STANDARD_CODE = #{standardCode}</if></where>
+		UNION all
+		select a.ID,a.CODE,a.NAME,a.PARENT_ID,a.REMARK,a.STANDARD_CODE from NH_GAS_SUB_SYSTEM_INFO a
+		INNER JOIN cte_root b on a.PARENT_ID=b.STANDARD_CODE
+		)
+		select STANDARD_CODE from cte_root 
+		<where>
+			<if test="code != null and code != ''">CODE like '%'+#{code}+'%' and</if>
+	        <if test="name != null and name !=''">NAME like '%'+#{name}+'%' and</if>
+	        <if test="remark != null and remark != ''">	REMARK like '%'+#{remark}+'%' and </if>
+	     1=1 
+		</where>	
+	</select>  
+	<sql id="standardCode_sql">
+		<![CDATA[
+		#where()
+				1=1
+				#if($_parameter.condition.standardCode && $_parameter.condition.standardCode != '')
+						AND STANDARD_CODE = @{_parameter.condition.standardCode,jdbcType=VARCHAR}
+				#end
+		#end
+		]]>	
+	</sql>
+	<select id="findByCon" resultMap="GasSubSystemInfoResultMap" parameterType="com.supconit.nhgl.basic.discipine.gas.entities.GasSubSystemInfo" lang="velocity">
+		<include refid="select_pre_v" />        
+       	<include refid="condition"/>
+	</select>
+	
+	<select id="findByConGas" resultMap="GasSubSystemInfoResultMap" parameterType="com.supconit.nhgl.basic.discipine.gas.entities.GasSubSystemInfo" lang="velocity">
+		<include refid="select_pre_gas" />        
+       	<include refid="condition"/>
+	</select>
+	<!-- 按条件查询记录-->
+	
+	<select id="findByCondition" parameterType="com.supconit.nhgl.basic.discipine.gas.entities.GasSubSystemInfo" resultMap="GasSubSystemInfoResultMap" lang="velocity" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre_v" />
+		<include refid="condition_sql" />
+		 #order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="findByCondition" parameterType="com.supconit.nhgl.basic.discipine.gas.entities.GasSubSystemInfo" resultMap="GasSubSystemInfoResultMap" lang="velocity">
+		select
+        ID,
+        CODE,
+        PARENT_ID,
+        NAME,
+        REMARK,
+        STANDARD_CODE
+         <include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+        #order($_parameter.condition,"ID DESC")
+        <include refid="_PUBLIC_V.AS_ROW_NUM" />
+         FROM <include refid="TABLE_NAME" />
+		<include refid="condition_sql" />
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="countByCondition" parameterType="com.supconit.nhgl.basic.discipine.gas.entities.GasSubSystemInfo" resultType="long" lang="velocity">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+	<select id="findById" parameterType="long" resultMap="GasSubSystemInfoResultMap">
+      <include refid="select_pre" /> 
+        where ID =@{_parameter,jdbcType=NUMERIC}
+    </select>
+    <select id="findByStandardCode" parameterType="String" resultMap="GasSubSystemInfoResultMap">
+    	<include refid="select_pre"/>
+    	   where STANDARD_CODE=@{_parameter,jdbcType=VARCHAR}
+    </select>
+    <select id="findAll" resultMap="GasSubSystemInfoResultMap">
+    	<include refid="select_pre"/>
+    </select>
+    <!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.nhgl.basic.discipine.gas.entities.GasSubSystemInfo">
+		UPDATE
+		<include refid="TABLE_NAME" />
+		#mset()
+		<![CDATA[
+			#if($_parameter.code)CODE = @{_parameter.code,jdbcType=VARCHAR},#end
+			#if($_parameter.parentId)PARENT_ID = @{_parameter.parentId,jdbcType=VARCHAR},#end
+			#if($_parameter.name)NAME = @{_parameter.name,jdbcType=VARCHAR},#end
+			#if($_parameter.remark)REMARK = @{_parameter.remark,jdbcType=VARCHAR},#end
+			#if($_parameter.standardCode)STANDARD_CODE = @{_parameter.standardCode,jdbcType=VARCHAR},#end
+		]]>
+		#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+    <insert id="insert" parameterType="com.supconit.nhgl.basic.discipine.gas.entities.GasSubSystemInfo" keyProperty="id" keyColumn="ID" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>
+		<include refid="insert_sql" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.nhgl.basic.discipine.gas.entities.GasSubSystemInfo" keyProperty="id" keyColumn="ID" databaseId="sqlserver">
+		<include refid="insert_sql" />
+		<selectKey keyProperty="id" resultType="long" order="AFTER">
+			<include refid="_PUBLIC_V.SELECT_KEY" />
+		</selectKey>
+	</insert>
+    <!-- 插入记录-->
+	 <sql id="insert_sql" lang="velocity">
+		INSERT INTO
+		<include refid="TABLE_NAME" />
+		(
+		#if($_databaseId == 'oracle') ID,#end
+		CODE,
+        PARENT_ID,
+        NAME,
+        REMARK,
+        STANDARD_CODE
+		) VALUES (
+		#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end
+		 @{_parameter.code,jdbcType=NUMERIC}
+		,@{_parameter.parentId,jdbcType=VARCHAR}
+		,@{_parameter.name,jdbcType=VARCHAR}
+		,@{_parameter.remark,jdbcType=VARCHAR}
+		,@{_parameter.standardCode,jdbcType=VARCHAR}
+		)
+	</sql>
+	<delete id="deleteById" parameterType="Long">
+		DELETE FROM <include refid="TABLE_NAME" /> WHERE ID = @{_parameter,jdbcType=NUMERIC}
+	</delete>
+	<!-- 删除多条记录-->
+	<delete id="deleteByIds">
+        DELETE FROM <include refid="TABLE_NAME" /> WHERE ID in 
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+</mapper>

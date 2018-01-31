@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.basic.otherCategoryConfig.entities.OtherCategoryConfig">
+
+	<resultMap type="com.supconit.nhgl.basic.otherCategoryConfig.entities.OtherCategoryConfig" id="otherCategoryConfigResultMap">      
+       <result property="id" column="ID"/>
+       <result property="deviceId" column="DEVICE_ID"/>
+       <result property="categoryId" column="CATEGORY_ID"/>
+       <result property="ftxs" column="FTXS"/>
+       <result property="bitNo" column="BIT_NO"/>
+       <result property="isSum" column="IS_SUM"/>
+       <result property="ruleFlag" column="RULE_FLAG"/>
+       <result property="nhType" column="NH_TYPE"/>
+       <result property="description" column="DESCRIPTION"/>
+       <result property="description1" column="DESCRIPTION1"/>
+       <result property="memo" column="MEMO"/>
+       <result property="name" column="NAME"/>
+       <result property="code" column="CODE"/>
+       <result property="deviceName" column="DEVICE_NAME"/>
+       <result property="deviceCode" column="DEVICE_CODE"/>
+       <result property="extended1" column="EXTENDED1"/>
+       <result property="locationName" column="LOCATION_NAME"/>
+	</resultMap>
+	
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+	<sql id="TABLE_NAME" lang="velocity">NH_CATEGORY_CONFIG</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>	
+	 <sql id="findFirstForWith" lang="velocity">
+		WITH AREA(ID,PARENT_ID,code,NAME,FULL_LEVEL_NAME,SORT) AS(
+		SELECT A.ID,A.PARENT_ID,A.CODE,A.NAME,A.FULL_LEVEL_NAME,A.SORT FROM NH_CATEGORY A WHERE 
+		#if($_parameter.condition.categoryId==0)
+			A.PARENT_ID=@{_parameter.condition.categoryId}
+		#else
+		 	A.ID=@{_parameter.condition.categoryId}
+	 	#end 
+		UNION ALL
+		SELECT B.ID,B.PARENT_ID,B.CODE,B.NAME,B.FULL_LEVEL_NAME,B.SORT FROM NH_CATEGORY B INNER JOIN AREA ON B.PARENT_ID=AREA.ID
+	 	)
+	</sql>
+	
+	 <sql id="select_pre" lang="velocity">
+		SELECT max(t.id) ID,t.CATEGORY_ID,t2.code,t2.FULL_LEVEL_NAME as NAME,max(t.IS_SUM) isSum,
+		 #if($_databaseId=='oracle') 
+        	func_nhcategory_bitno_join(@{_parameter.condition.nhType},t.CATEGORY_ID) DESCRIPTION,
+        #else 
+        	dbo.func_nhcategory_bitno_join(@{_parameter.condition.nhType},t.CATEGORY_ID) DESCRIPTION,
+        #end
+		max(t.memo) memo
+		FROM NH_CATEGORY_CONFIG t 
+		INNER JOIN AREA t2 ON t.CATEGORY_ID = t2.ID
+	</sql>
+	
+	<sql id="condition_sql" lang="velocity">
+	<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			1=1 		
+			#if($_p.nhType)
+				#set($_nhType = $_p.nhType)
+				AND t.NH_TYPE = @{_nhType,jdbcType=BIGINT}
+			#end
+			#if($_p.code && $_p.code != '')
+				#set($_code = '%' + $_p.code + '%')
+				AND t2.CODE LIKE @{_code,jdbcType=VARCHAR}
+			#end
+			#if($_p.name && $_p.name != '')
+				#set($_name = '%' + $_p.name + '%')
+				AND t2.NAME LIKE @{_name,jdbcType=VARCHAR}
+			#end
+			GROUP BY t.CATEGORY_ID,t2.code,t2.FULL_LEVEL_NAME 	
+		#end
+		]]>
+	</sql>
+	
+	<select id="findByCondition" parameterType="com.supconit.nhgl.basic.otherCategoryConfig.entities.OtherCategoryConfig" resultMap="otherCategoryConfigResultMap" lang="velocity" databaseId="oracle">
+		<include refid="findFirstForWith"/> 
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre"/>
+		<include refid="condition_sql"/>
+		#order($_parameter.condition,"t.CATEGORY_ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	
+	<select id="findByCondition" parameterType="com.supconit.nhgl.basic.otherCategoryConfig.entities.OtherCategoryConfig" resultMap="otherCategoryConfigResultMap" lang="velocity" databaseId="sqlserver">
+		<include refid="findFirstForWith"/> 
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT max(t.id) ID,t.CATEGORY_ID,t2.code,t2.FULL_LEVEL_NAME as NAME,max(t.IS_SUM) isSum,
+		dbo.func_nhcategory_bitno_join(@{_parameter.condition.nhType},t.CATEGORY_ID) DESCRIPTION,max(t.memo) memo
+   		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+ 		#order($_parameter.condition,"t.CATEGORY_ID DESC")
+ 		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM NH_CATEGORY_CONFIG t 
+		INNER JOIN AREA t2 ON t.CATEGORY_ID = t2.ID
+	   <include refid="condition_sql"/>
+	   <include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="countByCondition" parameterType="com.supconit.nhgl.basic.otherCategoryConfig.entities.OtherCategoryConfig" resultType="long" lang="velocity">
+		<include refid="findFirstForWith"/> 
+		SELECT count(*) co from(
+			<include refid="select_pre" />
+		    <include refid="condition_sql" />
+	    ) s
+	</select>
+	
+	
+	
+	
+	<select id="findByCategoryIdAndRule" parameterType="com.supconit.nhgl.basic.otherCategoryConfig.entities.OtherCategoryConfig" resultMap="otherCategoryConfigResultMap" lang="velocity">
+      select
+      		t1.ID,
+	        t1.DEVICE_ID,
+	        t1.FTXS,
+	        t1.BIT_NO,
+	        t2.DEVICE_NAME,
+	        t2.DEVICE_CODE,
+	        t2.EXTENDED1,
+	        t2.LOCATION_NAME
+        FROM NH_CATEGORY_CONFIG t1
+        LEFT JOIN DEVICE t2 ON t1.DEVICE_ID = t2.ID
+        where t1.CATEGORY_ID = @{categoryId} and t1.RULE_FLAG=@{ruleFlag} and t1.NH_TYPE=@{nhType}
+    </select>
+	
+	<select id="getByCondition" parameterType="com.supconit.nhgl.basic.otherCategoryConfig.entities.OtherCategoryConfig" resultMap="otherCategoryConfigResultMap" lang="velocity">
+     select
+      #if($_databaseId=='oracle') 
+        	func_nhcategory_bitno_join (@{_parameter.nhType}, @{_parameter.categoryId}) DESCRIPTION,
+        #else 
+        	dbo.func_nhcategory_bitno_join (@{_parameter.nhType}, @{_parameter.categoryId}) DESCRIPTION,
+        #end
+	        t1.*,
+	        t2.NAME,
+	        t2.CODE
+        FROM NH_CATEGORY_CONFIG t1
+        LEFT JOIN NH_CATEGORY t2 ON t1.CATEGORY_ID = t2.ID where t1.ID = @{_parameter.id}
+    </select>
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>
+		(
+		#if($_databaseId=='oracle') ID,#end   
+		DEVICE_ID,
+        CATEGORY_ID,
+        FTXS,
+        BIT_NO,
+        IS_SUM,
+        RULE_FLAG,
+        NH_TYPE,
+        DESCRIPTION,
+        MEMO
+        ) VALUES (        
+		 #if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end
+			@{_parameter.deviceId,jdbcType=NUMERIC},
+			@{_parameter.categoryId,jdbcType=NUMERIC},
+			@{_parameter.ftxs,jdbcType=NUMERIC},
+			@{_parameter.bitNo,jdbcType=VARCHAR},
+			@{_parameter.isSum,jdbcType=NUMERIC},
+			@{_parameter.ruleFlag,jdbcType=NUMERIC},
+			@{_parameter.nhType,jdbcType=NUMERIC},
+			@{_parameter.description,jdbcType=VARCHAR},
+			@{_parameter.memo,jdbcType=VARCHAR}
+		)
+	</sql>
+	 <insert  id="insert" parameterType="com.supconit.nhgl.basic.otherCategoryConfig.entities.OtherCategoryConfig" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="INSERT_SQL" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.nhgl.basic.otherCategoryConfig.entities.OtherCategoryConfig" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="INSERT_SQL"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    <delete id="deleteByCategoryId" parameterType="map">
+		DELETE FROM NH_CATEGORY_CONFIG WHERE CATEGORY_ID = #{categoryId} 
+		and NH_TYPE=#{nhType}
+	</delete>
+	<select id="countFindAll" parameterType="com.supconit.nhgl.basic.otherCategoryConfig.entities.OtherCategoryConfig" resultType="int"  lang="velocity">
+		SELECT count(1) from NH_CATEGORY_CONFIG where CATEGORY_ID=@{_parameter.categoryId} and  NH_TYPE = @{_parameter.nhType}
+	</select>
+</mapper>

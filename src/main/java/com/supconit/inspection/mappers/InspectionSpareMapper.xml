@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.inspection.entities.InspectionSpare">
+	<resultMap type="com.supconit.inspection.entities.InspectionSpare" id="inspectionSpareResultMap">      
+        <result property="id" column="ID" />
+		<result property="inspectionCode" column="INSPECTION_CODE" />
+		<result property="spareId" column="SPARE_ID"/>
+		<result property="spareCode" column="SPARE_CODE"/>
+		<result property="spareName" column="SPARE_NAME"/>
+		<result property="spareSpec" column="SPARE_SPEC"/>
+		<result property="qty" column="QTY"/>
+		<result property="money" column="MONEY"/>
+		<result property="remark" column="REMARK"/>
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">INSPECTION_SPARE</sql>
+	
+	<select id="selectInspectionSpareList" parameterType="string" resultMap="inspectionSpareResultMap" lang="velocity">
+		SELECT
+			a.ID,
+			a.INSPECTION_CODE,
+			a.SPARE_ID,
+			a.SPARE_CODE,
+			a.SPARE_NAME,
+			a.SPARE_SPEC,
+			a.QTY,
+			a.MONEY,
+			a.REMARK
+		FROM <include refid="TABLE_NAME"/> a
+		WHERE a.INSPECTION_CODE =  @{_parameter.inspectionCode,jdbcType=VARCHAR}
+	</select>
+	
+	<delete id="deleteByInspectionCode" parameterType="string" lang="velocity"> 
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE INSPECTION_CODE =  @{_parameter.inspectionCode,jdbcType=VARCHAR}
+	</delete>
+    
+	<insert id="batchInsert" databaseId="oracle">
+       INSERT ALL 
+        <foreach collection="inspectionSpareList"  separator=" " item="spare">
+            INTO <include refid="TABLE_NAME"/>(
+        	ID,
+            INSPECTION_CODE,
+            SPARE_ID,
+            SPARE_CODE,
+            SPARE_NAME,
+            SPARE_SPEC,
+            QTY,
+            MONEY,
+            REMARK
+	        ) VALUES
+            (
+            func_getseqval('SEQ_MAINTAIN_SPARE'),
+            #{inspectionCode,jdbcType=VARCHAR},
+            #{spare.spareId,jdbcType=NUMERIC},
+            #{spare.spareCode,jdbcType=VARCHAR},
+            #{spare.spareName,jdbcType=VARCHAR},
+            #{spare.spareSpec,jdbcType=VARCHAR},
+            #{spare.qty,jdbcType=NUMERIC},
+            #{spare.money,jdbcType=NUMERIC},
+            #{spare.remark,jdbcType=VARCHAR}
+            )
+        </foreach>
+        SELECT * FROM dual
+    </insert>
+
+
+    <insert id="batchInsert" databaseId="sqlserver">
+       INSERT INTO <include refid="TABLE_NAME"/>(
+            INSPECTION_CODE,
+            SPARE_ID,
+            SPARE_CODE,
+            SPARE_NAME,
+            SPARE_SPEC,
+            QTY,
+            MONEY,
+            REMARK
+	    ) VALUES
+        <foreach collection="inspectionSpareList"  separator="," item="spare">
+            (
+            #{inspectionCode,jdbcType=VARCHAR},
+            #{spare.spareId,jdbcType=NUMERIC},
+            #{spare.spareCode,jdbcType=VARCHAR},
+            #{spare.spareName,jdbcType=VARCHAR},
+            #{spare.spareSpec,jdbcType=VARCHAR},
+            #{spare.qty,jdbcType=NUMERIC},
+            #{spare.money,jdbcType=NUMERIC},
+            #{spare.remark,jdbcType=VARCHAR}
+            )
+        </foreach>
+    </insert>
+	
+	
+</mapper>

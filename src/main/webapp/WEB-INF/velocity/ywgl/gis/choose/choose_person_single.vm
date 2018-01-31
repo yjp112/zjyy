@@ -1,0 +1,306 @@
+#parse("index/_header.vm")
+</head>
+<body>	
+	<div class="ui-layout-center" id="subMain">
+    	<div class="ui-layout-north"><form class="ui-form" id='pagerForm'>	 		
+        	<table width="100%"><tr>
+        		<td><table class="ui-search-table"><tr>
+                	<td class="ui-search-name first">人员编码：</td>
+                  	<td class="ui-search-c">
+                    	<input name="code" value="" class="k-textbox" type="text">
+                 	</td>
+                  	<td class="ui-search-name">人员姓名：</td>
+                  	<td class="ui-search-c">
+                    	<input  name="name" value="" class="k-textbox" type="text">
+                  	</td>
+                </tr></table></td>
+            	<td width="150" valign="top" style="padding-top:4px;">
+              		<button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              		<button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+            	</td>
+            	<td></td>
+            </tr></table>
+    	</form></div>
+  		<div class="ui-layout-center">
+  	  		<div id="grid"></div> 
+    	</div>
+	</div>	 
+#parse("index/_footer.vm") 
+<script type="text/javascript">
+  var _iframe_layout, _left_layout, _inner_layout;
+	$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      }
+    });
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+
+    $('#resetBtn').click(function(){
+      $("#pagerForm :text").val('');  
+    }); 
+	
+	//列表
+    quick_datagrids(
+    		"#grid", 
+    		"#pagerForm", 
+    		"$!{rc.contextPath}/hl/choose/person?t=" + new Date().getTime(),
+    		[
+    			{field: "id",hidden: true}, 
+    			{field: "code",title: "人员编码",headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"},sortable: false,width: 100},
+              	{field: "name",title: "人员姓名",headerAttributes: {"class": "k-grid-equilong"},attributes: {"class": "k-grid-equilong"},sortable: false,width: 100}, 
+              	{field: "personTel",title: "电话",headerAttributes: {"class": "k-grid-num"},attributes: {"class": "k-grid-num"},sortable: false,width: 100}, 
+              	{field: "deptName",title: "部门",headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"},sortable: false,width: 100}, 
+            ],                 
+      		{sortable: {mode: "multiple",allowUnsort: true}}, 
+      		{serverSorting: true}, 
+      		[
+      			{
+              		name: "选择",
+              		icon: "fa fa-plus",
+              		onclick: function (obj, grid) {
+              			var rows = grid.select();
+            	        if (null == rows || rows.length == 0) {
+            	            notify("你还没有选择!", "warn");
+            	            return;
+            	        }    
+            	        var data = grid.dataItem(rows);
+            	       
+            		    
+            		    if("$!{dialogId}"!=""){
+            		    	//console.info("$!{dialogId}");
+            		    	//console.info("$!{txtName}");
+            		    	//人员
+	        				get_el_in_dialog("$!{dialogId}","#$!{txtId}").val(data.id);
+	        				get_el_in_dialog("$!{dialogId}","#$!{txtName}").val(data.name);  
+							resetfocus(get_el_in_dialog("$!{dialogId}","#$!{txtName}"));
+            				//部门
+            				if("$!{deptId}"!=""){
+            					//$("#$!{deptId}").val(data.deptId);
+            	        		//$("#$!{deptName}").val(data.deptName);
+	        					get_el_in_dialog("$!{dialogId}","#$!{deptId}").val(data.deptId);
+	        					get_el_in_dialog("$!{dialogId}","#$!{deptName}").val(data.deptName);  
+	        					resetfocus(get_el_in_dialog("$!{dialogId}","#$!{deptName}"));
+            				}
+            			}else{
+            				var id_v = $("#"+"$!{txtId}",window.parent["_main_frame"].document);
+							id_v.val(data.id);
+							var id_t = $("#"+"$!{txtName}",window.parent["_main_frame"].document);
+							id_t.val(data.name);
+							resetfocus($("#"+"$!{txtName}",window.parent["_main_frame"].document));
+							if("$!{deptId}"!=""){
+								var id_v = $("#"+"$!{deptId}",window.parent["_main_frame"].document);
+								id_v.val(data.deptId);
+								var id_t = $("#"+"$!{deptName}",window.parent["_main_frame"].document);
+								id_t.val(data.deptName);
+								resetfocus($("#"+"$!{deptName}",window.parent["_main_frame"].document));
+							}
+						}
+						
+						//$("#$!{txtName}",top.frames[0].document).val(data.name);
+						//$("#$!{txtId}",top.frames[0].document).val(data.id);
+            	        try{
+            	            if(typeof(extendFunc) == "function" ){
+            	                extendFunc(rows);
+            	            }
+            	        }catch(e){
+            	
+            	        }
+						grid.destroy();
+				  		$("#grid").remove();
+            	        close_dialog('selectDiloag');
+              		}
+          		} ,
+          		{
+              		name: "清空",
+              		icon: "fa fa-remove",
+              		onclick: function (obj, grid) {
+              			   
+            		    //人员
+            		    if("$!{dialogId}"!=""){
+	        				get_el_in_dialog("$!{dialogId}","#$!{txtId}").val("");
+	        				get_el_in_dialog("$!{dialogId}","#$!{txtName}").val("");
+	        				resetfocus(get_el_in_dialog("$!{dialogId}","#$!{txtName}"));
+            		    }else{
+							var id_v = $("#"+"$!{txtId}",window.parent["_main_frame"].document);
+							id_v.val("");
+							var id_t = $("#"+"$!{txtName}",window.parent["_main_frame"].document);
+							id_t.val("");
+							resetfocus(get_el_in_dialog("$!{dialogId}","#$!{deptName}"));
+						}
+            			//部门
+            			if("$!{deptId}"!=""){
+            	        	if("$!{dialogId}"!=""){
+	        					get_el_in_dialog("$!{dialogId}","#$!{deptId}").val("");
+	        					get_el_in_dialog("$!{dialogId}","#$!{deptName}").val(""); 
+	        					resetfocus($("#"+"$!{txtName}",window.parent["_main_frame"].document));
+	        				} else{
+								var id_v = $("#"+"$!{deptId}",window.parent["_main_frame"].document);
+								id_v.val("");
+								var id_t = $("#"+"$!{deptName}",window.parent["_main_frame"].document);
+								id_t.val("");
+								resetfocus($("#"+"$!{deptName}",window.parent["_main_frame"].document));
+							}          	        	
+            			}
+            	        try{
+            	            if(typeof(extendFunc) == "function" ){
+            	                extendFunc(rows);
+            	            }
+            	        }catch(e){
+            	
+            	        }
+            	        close_dialog('selectDiloag');
+              		}
+          		} 
+          	]
+      	);
+	    
+        $("#selectButton").click(function () {
+            var ids = new Array();
+            var names = new Array();
+            var data = $("#grid").getSelectedRows();
+            if (data.length == 0) {
+                alert("未选择");
+                return false;
+            } else {
+                $.each(data, function (i,p) {
+                    ids.push(p.id);
+                    names.push(p.name);
+                });
+                $("#$!{txtId}").val(ids);
+                $("#$!{txtName}").val(names);
+            	closeDialog();
+            }
+        });  
+        
+        /**
+        *
+        * DataGrid 快捷方法
+        * 参数(el)：指定装载tree的容器
+        * 参数(formId)：表单的id，自动将指定表单中的数据传送到服务器，可选
+        * 参数(readUrl)：获取数据的 URL 地址
+        * 参数(columns)：TODO
+        * 参数(options)：tree 配置，可选
+        * 参数(dsOptions)：DataSource 配置，可选
+        * 参数(operates)：生成操作按钮，可选
+        * 参数(toolbarId)：工具条的id，可选
+        **/
+        function quick_datagrids(el,formId,readUrl,columns,options,dsOptions,operates,toolbarId){
+        	options = options || {};
+        	toolbarId  = toolbarId || "#grid_toolbar_template";
+        	var _dbopt = {
+        		transport: {
+        			read: {
+        				url : readUrl,
+        				type : "GET",
+        				dataType: "json",
+        				cache: false,
+        				data : function(p){
+        					if(formId){
+        						var arr = $(formId).serializeArray();
+        						if(arr && arr.length > 0){
+        							var d = {};
+        							$.each(arr,function(idx,it){
+        								if(it.value) {
+        									d[it.name] = it.value;
+        								}
+        							});
+        							return d;
+        						}
+        					}
+        					return {};
+        				}
+        			},
+        			parameterMap: function(data, type) {
+        				if (type == "read") {
+        					data.pageNo = data.page;
+        					data.page = undefined;
+        					data.take = undefined;
+        					data.skip = undefined;
+        					delete data.page;
+        					delete data.take;
+        					delete data.skip;
+        					return data;
+        				}
+        			}
+        		},
+        		schema  :{
+        			type : "json",
+        			data  : "rows",
+        			total : "total"
+        		},
+        		serverPaging: true,
+        		pageSize: options.pageSize || 20
+        	};
+        	if(dsOptions){
+        		_dbopt = $.extend(_dbopt,dsOptions);
+        	}
+        	var _opt = {
+        		dataSource: new kendo.data.DataSource(_dbopt),
+        		toolbar: hc.template($(toolbarId).html().replace(/&lt;/g, '<').replace(/&gt;/g, '>')),
+        		height: "100%",
+        		groupable: false,
+        		selectable : true,
+        		pageable: {
+        			refresh: false,
+        			pageSizes: [5,10,20,50],
+        			input : false,
+        			buttonCount: 5
+        		},
+        		columns : columns
+        	};
+        	if(options){
+        		_opt = $.extend(_opt,options);
+        	}
+        	$(el).hcGrid(_opt);
+
+        	var $toolbar = $(".k-grid-toolbar .toolbar .grid_operates",el);
+        	if(operates && operates.length > 0){
+        		$.each(operates,function(idx,it){
+        			var $oper = $('<li><a href="javascript:void(0)">' + (it.icon ? '<i class="' + it.icon + '"></i>' : '') + it.name + '</a></li>');
+        			if(it.onclick && $.isFunction(it.onclick)){
+        				$("a",$oper).bind("click.toolbar",function(e){
+        					it.onclick(this,$(el).data("kendoGrid"));
+        				});
+        			}
+        			$toolbar.append($oper);
+        		});
+        	}
+
+        	if(formId){
+        		$(formId).submit(function(event){
+          			var _this = this;
+          			var grid = $(el).data("kendoGrid");
+          			btn_running($("*[type='submit']",_this));
+
+          			grid.dataSource.xquery({
+          				page:1,
+          				pageSize : grid.dataSource.pageSize()
+          			},function(){
+          				btn_enabled($("button[type='submit']",_this));
+          			});
+          			event.preventDefault();
+          			return false;
+          		});
+        	}
+
+        }        
+    });	
+</script>
+</body>
+</html>		

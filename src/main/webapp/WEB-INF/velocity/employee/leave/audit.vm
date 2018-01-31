@@ -1,0 +1,218 @@
+#parse("index/_header.vm")
+<link href="$!{rc.contextPath}/modules/uploadify/uploadify.css" rel="stylesheet">
+<script src="$!{rc.contextPath}/modules/uploadify/jquery.uploadify-3.1.min.js"></script>
+</head>
+<body>
+<form id="task_edit_form_id" method="post" class="ui-layout-center ui-dialog-form">
+    <input type="hidden"  name="id" value="$!{leave.id}">
+    <input type="hidden"  name="leaveCode" value="$!{leave.leaveCode}">
+    <input type="hidden"  name="createId" value="$!{leave.createId}">
+    <input type="hidden"  name="deptId" value="$!{leave.deptId}">
+        
+    <!--BPM -->
+    <input type="hidden" name="_bpm_param" value="$!{_bpm_param}"/>
+    <input type="hidden" name="_bpm_ts_id" value=""/>
+	<input type="hidden" name="bpm_ts_id" value=""/>
+    <input type="hidden" name="_bpm_enabled" value="true"/>
+	<div style="width:100%;height:94%;overflow-y:scroll;">
+	    <div class="actions">
+			#if($!leave.id)
+        	<div class="lf-btns" style="float:left;">
+                <a href="javascript:showFlowChart('$!leave.processInstanceId',1000,600);" class="lf-btn lf-btn-chart" title="查看流程图"></a>
+            </div>
+			#end
+           #if(!$!viewOnly)
+				#foreach($ts in $!_bpm_transitions)
+                  <button type="submit" class="k-primary hc_btn" id="$!ts.id" onclick="doSubmit('$!ts.id')"><i class="fa fa-database"></i>$!ts.name</button>
+                #end
+                <button class="hc_btn cancel" onclick="close_dialog('process_deal_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+           #else
+           #end
+	    </div> 	
+	
+    <table width="100%" style="padding-right:36px;">
+        <tr>
+            <td class="label"   ><label>姓名：</label></td>
+            <td ><input type="text" class="k-textbox" name="creator"  readonly  value="$!{leave.creator}"></td>
+            <td class="label"><label>部门：</label></td>
+            <td >
+                     <input type="text" class="k-textbox" name="deptName"  readonly  value="$!{leave.deptName}">
+			</td>
+        </tr>
+        <tr>
+          <td class="label">请假类别：</td>
+            <td>
+				<input type="hidden" class="k-textbox" name="leaveType"  readonly  value="$!{leave.leaveType}">
+				<select id="leaveType_id" disabled  class="k-textbox">
+						#foreach($!lType in $!listLeaveType)
+							<option value="$!{lType.enumValue}" #if($!{lType.enumValue}==$!{leave.leaveType}) selected #end>$!{lType.enumText}</option>
+						#end
+				</select>
+			</td>
+			<td class="label">申请时间：</td>
+			<td>
+                <input  id="createDate"  class="k-textbox"  name="createDate"   readonly  value="#date_format($!{leave.createDate},'yyyy-MM-dd HH:mm:ss')"  />
+            </td>
+		</tr>
+		     <tr id ="sj">
+	        	<td  class="label">开始时间：</td>
+	            <td>
+	                <input  id="startDate"  class="k-textbox"  name="startDate"  readonly value="#date_format($!{leave.startDate},'yyyy-MM-dd HH:mm:ss')"  />
+	            </td>
+				
+				<td class="label">结束时间：</td>
+	            <td>
+					<input id="endDate"  class="k-textbox"  name="endDate"  readonly value="#date_format($!{leave.endDate},'yyyy-MM-dd HH:mm:ss')"/>
+	            </td>
+	          </tr>
+              <tr id="plj">
+		        	<td  class="label">开始日期：</td>
+		            <td>
+		                <input  id="startTime"  class="k-textbox"  name="startTime" readonly value="#date_format($!{leave.startDate},'yyyy-MM-dd')"  />
+		            </td>
+					<td class="label">结束日期：</td>
+		            <td>
+						<input id="endTime"  class="k-textbox"  name="endTime"  readonly value="#date_format($!{leave.endDate},'yyyy-MM-dd')"/>
+		            </td>
+		          </tr>
+		      <tr id="plj1">
+		        	<td  class="label">开始时间：</td>
+		            <td>
+		                <input  id="startTime1"  class="k-textbox"  name="startTime1"  readonly value="#date_format($!{leave.startDate},'HH:mm:ss')"  />
+		            </td>
+					<td class="label">结束时间：</td>
+		            <td>
+						<input id="endTime1"  class="k-textbox"  name="endTime1"  readonly value="#date_format($!{leave.endDate},'HH:mm:ss')"/>
+		            </td>
+		          </tr>
+            <tr>
+            <td class="label"><label>请假天数：</label></td>
+            <td  colspan="3"><input    type="text"  class="k-textbox"  name="leaveDays"  readonly value="$!{leave.leaveDays}" style="width:35px;"> 天 <input  type="text"  class="k-textbox"  name="leaveHours"  readonly  value="$!{leave.leaveHours}"  style="width:35px;" > 小时 (请假天数[天|小时] 不能同时为空! 最小单位为1小时,其中年休假为4小时)</td>
+        </tr>
+		<tr>
+            <td class="label">请假事由：</td>
+            <td colspan="3"><textarea   id="reason" name="reason"  readonly class="k-textbox k-textarea" style="height:60px">$!{leave.reason}</textarea></td>
+        </tr>
+         <tr id="zds">
+        			<td valign="top" class="label">诊断书：</td>
+			        <td colspan="3" >
+				        <table  class="ui-table"  width="100%" cellpadding="0" cellspacing="0" border="1" id="images_table_id">
+					        <div id="filehidden"></div>
+							  <thead>
+						        <tr>
+						          <th align="left" width="40%">附件名称</th>
+						          <th align="left" width="20%" >附件类型</th>
+						          <th align="left" width="20%" >附件大小</th>
+						        </tr>
+							  </thead>
+							   <tbody>
+					          #set($index=1)
+							        #foreach($!{attach} in $!{listAttachments}) 
+							        <tr id='alreadyfile$!{index}'>
+							          <td ><a id="showImageId_$velocityCount" 	href="${rc.contextPath}/device/attachment/download?fileName=$!{attach.fileName}&path=$!{attach.storePath}"> $!{attach.fileName}</a></td>
+							          <td > $!{attach.fileType}&nbsp; </td>
+							          <td >$!{attach.fileSize}KB</td>
+							        </tr>
+							        #set($index=$index+1)
+							  #end
+							   </tbody>
+				      </table>
+             </td>
+    </tr>
+    <tr>
+       <td></td>
+       <td  colspan="3" >病假、产假、计划生育假、工伤假、疗养假需要提供诊断书。</td>
+      </tr>
+	  #if(!$!hisView)
+       <tr>
+            <td class="label"><span class="ui-form-required">*</span>审批意见：</td>
+            <td colspan="3">
+                      <select id="status" name="status" class="k-textbox"  style="width:100px;">
+                                <option value="1" >同意</option>
+                                <option value="0" >不同意</option>
+                    </select>
+                   </td>
+        </tr>
+		<tr>
+			<td colspan="4">
+				<div class="ui-co-seg" style="padding-left:36px">
+                <div class="ui-co-flow">
+                                        流转意见(流转意见提交时保存)：
+                <textarea id="_bpm_comment" class="k-textbox"  name="_bpm_comment" />$!_bpm_comment</textarea>
+                </div>
+        		</div>
+			</td>
+		</tr>
+	  #end
+	  
+	  #if($!leave.id)
+		  <tr>
+		      <td  colspan="4">
+		      	<div style="padding-left: 36px;">
+		  			#parse("bpm/bpm_audit.vm")
+		  		</div>
+		      </td>
+	      </tr>			
+	  #end
+	  
+    </table>
+</div> 
+</form>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+		      defaults: {
+		        resizable: true,
+		        closable: false,
+		        spacing_open: 5
+		      }
+	    });
+		 #if($!{leave.leaveType}==9)
+			$("#plj").show();
+	        $("#plj1").show();
+			$("#sj").hide();
+		#end
+		#if($!{leave.leaveType}!=9)
+			$("#plj").hide();
+	        $("#plj1").hide();
+		    $("#sj").show();
+		#end
+		
+		$("#form_save_id").click(function () {
+	        $("input[name='_bpm_enabled']", $("#task_edit_form_id")).val(true);
+	        $("#task_edit_form_id").attr("action", "$!rc.contextPath/employee/leave/save");
+	        currentBt = "form_save_id";
+	    });
+
+	});
+	
+    //
+    $(document).ready(function () {
+        $("#task_edit_form_id").validator({
+            valid: function (form) {
+            	form_btn_submit($("#"+currentBt),form,function(res){
+            		 validateCallback(res, "grid", "process_deal_dlg");
+					 parent.location.reload();
+                });
+            }
+        });
+    });
+     //    commonDate("startDate","endDate","yyyy-MM-dd HH:mm:ss","zh-CN");
+    commonDateWithout("startTime","endTime","yyyy-MM-dd","zh-CN");
+	commonDateHms("startTime1","endTime1","HH:mm:ss","zh-CN");
+	commonDate("startDate","endDate","yyyy-MM-dd HH:mm:ss","zh-CN");
+	
+	var currentBt = "form_save_id";
+    function doSubmit(bpmId) {
+        currentBt = bpmId;
+        $("input[name='_bpm_ts_id']").val(bpmId);
+        $("input[name='bpm_ts_id']").val(bpmId);
+        $("input[name='_bpm_enabled']", $("#task_edit_form_id")).val(true);
+        $("#task_edit_form_id").attr("action", "$!rc.contextPath/employee/leave/submit");
+        return true;
+    }
+    
+</script>
+</body>
+</html>

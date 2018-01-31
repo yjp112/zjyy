@@ -1,0 +1,199 @@
+#parse("index/_header.vm")
+</head>
+<body   style="padding-bottom:40px;">
+#parse("index/_footer.vm")  
+<script type="text/javascript">
+	var setting = {
+        data: {
+            simpleData: {
+                enable: true
+            }
+        },
+        #if($!type ==2)
+            check:{
+                enable: true,
+                chkboxType: {"Y":"ps", "N":"ps"}
+            }
+        #else
+     
+		callback: {
+				onClick: onClick
+			}
+        #end
+	};
+
+    var zNodes = []; 
+	#if($!{chooseRoot})
+    zNodes.push({id:"0", pId:"-1", name:"设备类别簇"#if($!type ==2),nocheck:true #end });
+    #end
+    #foreach($!{treeNode} in $!{treeList})
+        zNodes.push({id:$!{treeNode.id}, pId:$!{treeNode.parentId}, name:"$!{treeNode.categoryName}",fullLevelName:"$!{treeNode.fullLevelName}"});     
+    #end
+    function onClick(event, treeId, treeNode, clickFlag) {
+		//来自设备档案画面
+		if("$!{type}"=="device"){
+			showExtendProperty(treeNode.id);
+		}else if("$!{type}"=="deviceCategory"){//来自设备分类画面
+			if(!isAllowSelect(treeNode)){
+				alert("请不要选择自己或者自己的子类别作为上级类别");
+				return false;
+			}
+		}
+		var dialogId = "$!{dialogId}";
+		if(dialogId != ""){
+			get_el_in_dialog("$!{dialogId}","#"+"$!{txtId}").val(treeNode.id);
+			get_el_in_dialog("$!{dialogId}","#"+"$!{txtName}").val(treeNode.fullLevelName);
+			resetfocus(get_el_in_dialog("$!{dialogId}","#"+"$!{txtName}"));
+		}else{
+			var id_v = $("#"+"$!{txtId}",window.parent["_main_frame"].document);
+			id_v.val(treeNode.id);
+			var id_t = $("#"+"$!{txtName}",window.parent["_main_frame"].document);
+			id_t.val(treeNode.name);
+			resetfocus($("#"+"$!{txtName}",window.parent["_main_frame"].document));
+			
+		}
+		close_dialog('choose_deviceCategory');
+		//$("#$!{txtId}").val(treeNode.id);
+    	//$("#$!{txtName}").val(treeNode.name);
+    	//closeDialog();
+    	
+    }
+	
+
+   $(document).ready(function(){
+   
+	   
+        //ztree
+			$.fn.zTree.init($("#treeDemo_choose_dc"), setting,zNodes).expandAll(true);
+			treeObj = $.fn.zTree.getZTreeObj("treeDemo_choose_dc");
+			var nodes = treeObj.transformToArray(treeObj.getNodes());
+			if("$!{type}"!=1){
+				ids = stringToArray(get_el_in_dialog("$!{dialogId}","#$!{txtId}").val());
+				}
+			else 
+				ids = '';
+			if(ids.length>0){
+				
+				for(var i=0;i<nodes.length;i++){
+					if(isExist(ids,nodes[i].id)){	
+						nodes[i].checked = true;
+						treeObj.updateNode(nodes[i]);
+						
+					}
+				}
+			}
+	   
+    });
+
+    function multiChoose(){
+    
+        var ids;
+        var names;
+        //获取原数据
+        
+        if(get_el_in_dialog("$!{dialogId}","#$!{txtId}").val()!=""){
+			ids = stringToArray(get_el_in_dialog("$!{dialogId}","#$!{txtId}").val());
+			names = stringToArray(get_el_in_dialog("$!{dialogId}","#$!{txtName}").val());
+	     }else
+	     {
+	     	ids=new Array();
+	     	names=new Array();
+	     }
+        
+        
+        var treeObj = $.fn.zTree.getZTreeObj("treeDemo_choose_dc");
+        var nodes = treeObj.getCheckedNodes(true);
+        if(nodes.length > 0){
+        
+            $.each(nodes,function(i,node){
+                if(!node.isParent){
+	 				 if(!isExist(ids,node.id)){				
+		                     ids.push(node.id);
+                   			 names.push(node.name);
+		               }
+                    
+                }
+            });
+        }
+
+        if(ids.length == 0){
+            alert("请选择节点");
+            return false;
+        }
+			
+		get_el_in_dialog("$!{dialogId}","#"+"$!{txtId}").val(ids);
+		get_el_in_dialog("$!{dialogId}","#"+"$!{txtName}").val(names);
+		resetfocus(get_el_in_dialog("$!{dialogId}","#$!{txtName}"));
+		close_dialog('choose_deviceCategory');
+        return true;
+    }
+	function isAllowSelect(treeNode){
+      var oldTreeId  = $("#form_id_dc_edit input[name='id']").val();
+	  if(oldTreeId==null && oldTreeId ==""){
+		return true;
+	  }
+	  if(oldTreeId == treeNode.id ){
+		return false;
+	  }
+	  var node =  treeNode;
+	  while (node.getParentNode()!=null){
+		if(oldTreeId == node.getParentNode().id){
+			return false;
+		}else{
+			node =  node.getParentNode();
+		}		
+	  }
+	  return true;
+   }
+   function clearChoose(){
+    	if("$!{dialogId}"!=""){
+    		get_el_in_dialog("$!{dialogId}","#$!{txtId}").val("");
+    		get_el_in_dialog("$!{dialogId}","#$!{txtName}").val("");  
+    		resetfocus(get_el_in_dialog("$!{dialogId}","#"+"$!{txtName}"));
+    	}else{
+			var id_v = $("#"+"$!{txtId}",window.parent["_main_frame"].document);
+			id_v.val("");
+			var id_t = $("#"+"$!{txtName}",window.parent["_main_frame"].document);
+			id_t.val("");
+			resetfocus($("#"+"$!{txtName}",window.parent["_main_frame"].document));
+		}
+		//关闭iframe
+		close_dialog('choose_deviceCategory');
+		return true;
+    }
+   #if($!type!=2)
+           $(document).ready(function(){
+  			
+  	         $("#save").hide();
+  	          $("#cancel").hide();
+  	       });
+   #end
+</script>
+<form class="ui-layout-center ui-dialog-form">
+<!--style="height:300px;float:left;border:0px solid#F00;overflow:auto;"-->
+<div class="tree" >
+	<ul id="treeDemo_choose_dc" class="ztree"></ul>   
+</div>
+
+<!--<div class="ui-dialog-form" >-->
+	    <div class="actions" id="multiChoose">
+	        <button class="k-primary hc_btn" id="save" type="submit" onclick="multiChoose()"><i class="fa fa-plus"></i>选择</button>
+	        ##<button class="hc_btn cancel" id="cancel" onclick="close_dialog('choose_deviceCategory')" type="button"><i class="fa fa-close"></i>取 消</button>
+	  		<button class="hc_btn cancel" onclick="clearChoose()" type="button"><i class="fa fa-close"></i>清空</button>
+		</div>
+<!--</div>-->
+</form>
+<script type="text/javascript">
+	$(document).ready(function(){
+		var  _iframe_layout = $('body').layout({
+              defaults: {
+                resizable: true,
+                closable: false,
+                spacing_open: 5
+              }
+            });
+	});
+</script>
+ </body>
+</html>
+ 

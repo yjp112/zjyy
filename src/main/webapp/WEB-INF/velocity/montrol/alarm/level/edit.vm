@@ -1,0 +1,66 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<form id="myform_id" method="post" action="$!{rc.contextPath}/hl/montrol/alarm/level/save" class="ui-dialog-form">
+    <input type="hidden" name="id" value="$!{alarmLevel.id}">
+    <table width="100%">
+        <tr>
+            <td width="100" class="label"><span class="ui-form-required">*</span><label>报警级别：</label></td>
+            <td width="300">
+                <input type="text" class="k-textbox" name="alarmLevel" id="alarmLevel"
+                       value="$!{alarmLevel.alarmLevel}">
+            </td>
+            <td width="50"></td>
+        </tr>
+        <tr>
+            <td width="100" class="label"><span class="ui-form-required">*</span><label>报警等级：</label></td>
+            <td width="300">
+                <select name="alarmLNum" class="ui-combobox">
+                    <option #if($alarmLevel.alarmLNum == 1) selected #end value="1">1</option>
+                    <option #if($alarmLevel.alarmLNum == 2) selected #end value="2">2</option>
+                    <option #if($alarmLevel.alarmLNum == 3) selected #end value="3">3</option>
+                    <option #if($alarmLevel.alarmLNum == 4) selected #end value="4">4</option>
+                </select>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td class="label"><label>级别说明：</label></td>
+            <td>
+                <textarea id="textAreaId" class="k-textbox k-textarea" name="remark" cols="38"
+                          rows="2">$!{alarmLevel.remark}</textarea>
+            </td>
+            <td></td>
+        </tr>
+    </table>
+    #if($!{viewOnly} != true)
+        <div class="actions">
+            <button class="k-primary hc_btn k-button" id="alarmLevelSave" type="submit"><i class="fa fa-save"></i>保 存
+            </button>
+            <button class="hc_btn cancel k-button" onclick="close_dialog('alarmLevel_add_dlg')" type="button"><i
+                    class="fa fa-close"></i>取 消
+            </button>
+        </div>
+    #end
+
+</form>
+
+<script>
+    $(document).ready(function () {
+
+        $("#alarmLevel").focus();
+        $("#myform_id").validator({
+            fields: {
+                alarmLevel: "报警级别:required;",
+                alarmLNum: "报警等级:required; "
+            },
+            valid: function (form) {
+                form_btn_submit($("#alarmLevelSave"), form, function (res) {
+                    validateCallback(res, "grid", "alarmLevel_add_dlg");
+                });
+            }
+        });
+    });
+</script>
+</body>
+</html>	

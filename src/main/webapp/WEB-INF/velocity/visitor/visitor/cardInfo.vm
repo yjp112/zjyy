@@ -1,0 +1,52 @@
+<style>
+.input-equilong .k-textbox:hover{border:1px solid #c4deed}
+</style>
+<div id="stock" style="margin-left:-5px;margin-right:5px">
+	  <!--参数type用来控制页面元素的修改权限:1代表来访登记tab页的请求；2代表是离开登记tab页的请求；3代表的是预约登记页面中新建和修改的页面请求-->
+      <table id='tableId' style="width:100%;" class="ui-table ui-table-addRow">
+        <thead>
+        <tr>
+            <th class="input-equilong" width="30">序号</th>
+            <th class="input-text" width="80">访客证号</th>
+			<th class="input-text" width="100">发证时间</th>
+			#if(($!type)!=1)
+			<th class="input-text" width="100">收证时间</th>
+			<th class="input-text" width="80">归还访客证</th>
+			#end
+        </tr>
+        </thead>
+        <tbody class="input-equilong">
+			#set($index=0)
+			#if($!reservationVisitor.visitorList.size() > 0)
+				    #foreach($list in $!reservationVisitor.visitorList)
+						#set($index = $velocityCount)
+					 <tr>
+		                <td class="input-equilong">$velocityCount</td>
+		                <td>
+		                #if(($!type)==1)
+						<input  type="hidden" name="visitorList[$index].returnTime" value="#date_format($!{list.returnTime})">
+		                <input  type="hidden" name="visitorList[$index].visitorReturnCard" value="$!{list.visitorReturnCard}">
+						#end
+						<input  type="hidden" name="visitorList[$index].visitorPhone" value="$!{list.visitorPhone}">
+		                <input  type="hidden" name="visitorList[$index].visitorName" value="$!{list.visitorName}">
+		                <input  type="hidden" name="visitorList[$index].visitorUnit" value="$!{list.visitorUnit}">
+		                <input readonly type="text" name="visitorList[$index].visitorCardNo" value="$!{list.visitorCardNo}" class="k-textbox" /></td>
+						<td><input readonly type="text" name="visitorList[$index].grantTime" value="#date_format($!{list.grantTime})" class="k-textbox" /></td>
+						
+						#if(($!type)!=1)
+						<td><input readonly type="text" name="visitorList[$index].returnTime" value="#date_format($!{list.returnTime})" class="k-textbox" /></td>
+						<td>
+							<select #if($!view) disabled #end class="k-textbox" name="visitorList[$index].visitorReturnCard">
+								<option value=''>--请选择--</option>
+								#foreach($enumDetail in $!visitorRETURNENList)
+		                        <option  value="$!enumDetail.enumValue" #if($!enumDetail.enumValue ==$!{list.visitorReturnCard}) selected="selected" #end>$!enumDetail.enumText</option>
+		                        #end
+			                </select>	
+				        </td>
+						#end
+					 </tr>
+				 #end 	
+		    #end
+        </tbody>
+        </table>
+</div>

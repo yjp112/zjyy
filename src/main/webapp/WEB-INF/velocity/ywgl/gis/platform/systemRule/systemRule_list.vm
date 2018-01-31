@@ -1,0 +1,197 @@
+#parse("index/_header.vm")
+<style>
+.fa-upload{
+	color:#4A0;
+}
+.fa-download{
+	color:#4A0;
+}
+</style>
+</head>
+<body>
+  <div class="ui-layout-west" style="border-right:solid 1px #e1e5e6;" id="leftTreeWrap">
+			<div class="ui-layout-north">
+			
+				<div class="k-header k-grid-toolbar" style="padding-left:10px;">系统簇</div>
+			</div>
+      <div class="ui-layout-center">
+  		  <ul id="systemRuleTree" class="ztree"></ul>
+      </div>
+  </div>
+
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<form class="ui-form" id='queryForm'>
+    		<div class="ui-form-group" style="display:none" id='selectBlock2'>
+    			<div class="ui-form-item ui-form-item-block">
+    			  <label class="ui-label">您已选择：</label>
+    				  <span class="ui-form-pick">
+    					  <input id="treeId" type="hidden" name="treeId" value="$!{treeId}">
+    					  <strong>系统簇：</strong><em id='treeNodeText'></em><i class="iconfont icon-remove-sign"></i>
+    				  </span>
+    			</div>
+    		</div>	
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+                <tr>
+                  <td class="ui-search-name first">系统编码：</td>
+                  <td class="ui-search-c">
+                    <input name="code" value="$!systemRule.Code" class="k-textbox" type="text">
+                  </td>
+                  
+                </tr>
+              </table>
+            </td>
+            <td width="150" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn" onclick="cancelLeftTreeSelected();"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+            <td></td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+#parse("index/_footer.vm") 
+
+<script type="text/javascript">
+  var _iframe_layout, _left_layout, _inner_layout;
+	$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      },
+      west: {
+        size: 0.18
+      }
+    });
+
+    _left_layout = $("#leftTreeWrap").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      }
+    });
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+
+    $('#resetBtn').click(function(){
+      $("#queryForm :text").val('');  
+    });
+
+		$('.iconfont','.ui-form-pick').each(function(){
+      $(this).click(function(){
+      	$('#treeId').val('');
+      	$('#selectBlock').hide();
+        //$(this).parent().remove();
+      })
+    })
+	
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/hl/gis/platform/systemRule/list", [{
+              field: "id",
+              hidden: true
+          }, {
+              field: "code",
+              title: "系统编码",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              template:"<a href=\"javascript:void(0)\" title=\"查看#: data.code #的详细信息\" onclick=\"quick_dialog('systemRule_add_dlg','查看#:data.code #的信息','$!{rc.contextPath}/hl/gis/platform/systemRule/edit?viewOnly=true&id=#: data.id #',370,400)\">#: data.code #</a>",
+              width: 150
+          }, {
+              field: "name",
+              title: "系统名称",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+    		  #*attributes: {"class": "k-grid-text"},*#
+              attributes: {     
+      		  	 title:"#: data.name==null? '':data.name #",
+      			 "class": "k-grid-text k-grid-nowrap"
+    		  },
+              width: 150
+          }, {
+              field: "fullName",
+              title: "父系统",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              width: 150
+          },{
+              field: "fullCode",
+              title: "全名",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              width: 150
+          }], 
+      {
+    	  resizable:true,
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          }
+      }, {
+          serverSorting: true
+      }, [
+	  #kendo_datagrid_btns("SYSTEMRULE")#end 
+      ]);
+		
+    });
+	
+	
+	
+    /* zTree */
+    var setting = {
+    	data: {
+    		simpleData: {enable: true}
+          },
+          callback: {
+    			onClick: function(event, treeId, treeNode) {
+    				 $('#treeId').val(treeNode.id);
+    			 	 $('#treeNodeText').text(treeNode.name);
+    			 	 $('#selectBlock').show();
+    				 $('#queryBtn').click();
+    			}
+    		}
+    };
+  	var zNodes = [];  
+  	zNodes.push({id:"0", pId:"-1", name:"系统簇", open:"true"});   
+  	#foreach($!{treeNode} in $!{treeList})
+      	zNodes.push({id:$!{treeNode.id}, pId:$!{treeNode.parentId}, name:"$!{treeNode.name}"});     
+  	#end
+
+  	$(document).ready(function(){
+  		$.fn.zTree.init($("#systemRuleTree"), setting,zNodes);
+  	});
+	
+	function cancelLeftTreeSelected(){
+		$('#treeId').val("");
+    	$('#treeNodeText').text("");
+    	$('#selectBlock').show();
+    	$('#queryBtn').click();
+		//$.fn.zTree.init($("#systemRuleTree"), setting,zNodes);
+	}
+</script>
+</body>
+</html>

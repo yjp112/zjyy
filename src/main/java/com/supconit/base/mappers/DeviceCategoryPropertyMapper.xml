@@ -1,0 +1,128 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.base.entities.DeviceCategoryProperty">
+
+	<resultMap type="com.supconit.base.entities.DeviceCategoryProperty" id="DeviceCategoryPropertyResultMap">      
+        <result property="id" column="ID" />
+        <result property="propertyId" column="PROPERTY_ID" />
+        <result property="categoryId" column="CATEGORY_ID" />
+        <result property="propertySort" column="PROPERTY_SORT" />
+        
+        <result property="propertyName" column="PROPERTY_NAME" />
+	</resultMap>
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+	<sql id="TABLE_NAME" lang="velocity">DEVICE_CATEGORY_PROPERTY</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>	
+    <!-- 获取记录列表-->
+	<sql id="select_pre">
+    select 
+        ID,
+        PROPERTY_ID,
+        CATEGORY_ID,
+        PROPERTY_SORT		
+		FROM
+		DEVICE_CATEGORY_PROPERTY
+	</sql>
+	<sql id="count_pre">
+		SELECT
+		COUNT(*)
+		FROM
+		DEVICE_CATEGORY_PROPERTY
+	</sql>
+	<sql id="sequence">SELECT SEQ_HO_USER.NEXTVAL FROM DUAL</sql>
+    <insert id="insert" parameterType="com.supconit.base.entities.DeviceCategoryProperty" keyProperty="id" keyColumn="ID"  lang="velocity" databaseId="sqlserver">
+		<include refid="INSERT_SQL" />
+         <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    
+    </insert>
+    <insert id="insert" parameterType="com.supconit.base.entities.DeviceCategoryProperty" 
+		keyProperty="id" keyColumn="ID" 		lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>        
+		<include refid="INSERT_SQL" />
+	</insert>
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>
+		(#if($_databaseId=='oracle') ID,#end	 
+			PROPERTY_ID,
+	        CATEGORY_ID,
+	        PROPERTY_SORT
+		) VALUES (
+		#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end    
+			@{_parameter.propertyId,jdbcType=NUMERIC},
+	        @{_parameter.categoryId,jdbcType=NUMERIC},
+	        @{_parameter.propertySort,jdbcType=NUMERIC}		
+		) 
+	</sql>
+    <!-- 插入记录-->
+	<sql id="insert_sql">
+		INSERT INTO DEVICE_CATEGORY_PROPERTY(        
+        PROPERTY_ID,
+        CATEGORY_ID,
+        PROPERTY_SORT
+		) VALUES (        
+        #{propertyId,jdbcType=NUMERIC},
+        #{categoryId,jdbcType=NUMERIC},
+        #{propertySort,jdbcType=NUMERIC}		
+		)
+	</sql>
+
+	<select id="getById" resultMap="DeviceCategoryPropertyResultMap" parameterType="Long">
+		<include refid="select_pre" />        
+        WHERE ID = #{id}
+	</select>
+
+	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.base.entities.DeviceCategoryProperty">
+		UPDATE	DEVICE_CATEGORY_PROPERTY
+		<set>
+        <if test="propertyId != null">PROPERTY_ID = #{propertyId,jdbcType=NUMERIC},</if>
+        <if test="categoryId != null">CATEGORY_ID = #{categoryId,jdbcType=NUMERIC},</if>
+        <if test="propertySort != null">PROPERTY_SORT = #{propertySort,jdbcType=NUMERIC},</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+    <!-- 通过 ID 获取对象-->
+	<delete id="deleteById" parameterType="Long">
+		DELETE FROM DEVICE_CATEGORY_PROPERTY WHERE ID = #{id}
+	</delete>
+	<sql id="condition_sql">
+		<where>
+        <if test="id != null "> ID = #{id} and </if>
+        <if test="propertyId != null "> PROPERTY_ID = #{propertyId} and </if>
+        <if test="categoryId != null "> CATEGORY_ID = #{categoryId} and </if>
+        1=1 
+		</where>
+	</sql>
+    
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.base.entities.DeviceCategoryProperty" resultMap="DeviceCategoryPropertyResultMap">
+		<include refid="select_pre" />
+		<include refid="condition_sql" />
+		ORDER BY ID DESC
+	</select>	
+
+    <select id="countByCondition" parameterType="com.supconit.base.entities.DeviceCategoryProperty" resultType="long">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+    
+    <!-- 删除多条记录-->
+	<delete id="deleteByIds">
+        DELETE FROM DEVICE_CATEGORY_PROPERTY WHERE ID in 
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+
+	</delete>
+    <!-- 通过category ID delete对象-->
+	<delete id="deleteByCategoryId" parameterType="Long">
+		DELETE FROM DEVICE_CATEGORY_PROPERTY WHERE CATEGORY_ID = #{categoryId}
+	</delete>
+</mapper>

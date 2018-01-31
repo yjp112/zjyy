@@ -1,0 +1,88 @@
+#parse("index/_header.vm")
+</head>
+<body style="padding-bottom:40px;">
+<form id="myform_id" method="post" action="$!{rc.contextPath}/base/deviceSpareIn/detailsave" class="ui-layout-center ui-dialog-form">
+    <input type="hidden" name="id" value="$!{spareDetail.id}">
+    <input type="hidden" name="remainder" value="$!{spareDetail.remainder}">
+    <input type="hidden" name="deviceSpareInId" id="deviceSpareInId" value="$!{spareDetail.deviceSpareInId}">
+    <table width="100%">
+        <tr>
+            <td class="label"><span class="ui-form-required">*</span><label>备件名称：</label></td>
+            <td width="66%"><input type="text" class="k-textbox" name="spareName" value="$!{spareDetail.spareName}"></td>
+            <td width="8%"></td>
+        </tr>
+        <tr>
+            <td class="label">型号/规格：</td>
+            <td><input type="text" class="k-textbox" name="spareSpac" value="$!{spareDetail.spareSpac}"></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td class="label">备件厂商：</td>
+            <td><input type="text" class="k-textbox" name="spareMaker" value="$!{spareDetail.spareMaker}"></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td class="label">用途：</td>
+            <td><input type="text" class="k-textbox" name="purpose" value="$!{spareDetail.purpose}"></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td class="label">价格(元)：</td>
+            <td><input type="text" class="k-textbox" name="price" value="$!{spareDetail.price}"></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td class="label"><span class="ui-form-required">*</span>数量：</td>
+            <td><input type="text" class="k-textbox" name="total" value="$!{spareDetail.total}"></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td class="label">序号：</td>
+            <td><input type="text" class="k-textbox" name="sortIdx" value="$!{spareDetail.sortIdx}"></td>
+            <td></td>
+        </tr>
+    </table>
+    <div class="actions">
+        <button class="k-primary hc_btn" id="save_button_id" type="submit"><i class="fa fa-save"></i>保 存</button>
+        <button class="hc_btn cancel" onclick="close_dialog('spareDetail_add_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+    </div>
+
+</form>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+	      defaults: {
+	        resizable: true,
+	        closable: false,
+	        spacing_open: 5
+	      }
+	    });
+	});
+    $(document).ready(function () {
+     if($("#deviceSpareInId").val()==''){
+     	$("#deviceSpareInId").val($!{deviceSpareInId});
+     }
+        $("#myform_id").validator({
+            fields: {
+                spareName: "备件名称:required;length[~15]",
+                spareSpac:"型号/规格:length[~50]",
+                spareMaker:"备件厂商:length[~50]",
+                purpose:"用途:length[~30]",
+                price:"价格:xiaoshu;length[~11]",
+                total:"数量:required;digits;length[~11]",
+                sortIdx:"序号:digits;length[~11]"
+            },
+            valid: function (form) {
+                form_btn_submit($("#save_button_id"), form, function (res) {
+                    validateCallback(res, "grid", "spareDetail_add_dlg");
+                });
+            }
+        });
+    });
+        #if($!viewOnly)
+        setAllReadonly();
+        #end
+</script>
+</body>
+</html>

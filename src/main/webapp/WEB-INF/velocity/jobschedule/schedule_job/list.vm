@@ -1,0 +1,177 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<div class="ui-layout-center" id="subMain">
+	<div class="ui-layout-north">
+		 <form class="ui-form" id='queryForm'>
+	     <table width="100%">
+	       <tr>
+	         <td>
+	           <table class="ui-search-table">
+	             <tr>
+	               <td class="ui-search-name first">JOB 名称：：</td>
+	               <td class="ui-search-c">
+	                 <input name="condition.jobName"  class="k-textbox" type="text"  maxlength="32">
+	               </td>
+	               <td class="ui-search-name">JOB 状态:</td>
+	               <td class="ui-search-c">
+	                 	<select class="ui-select" name="condition.status">
+							$!{status}
+		                </select>
+		                </select>
+	               </td>
+	           </table>
+	         </td>
+	         <td width="150" valign="top" style="padding-top:4px;">
+	           <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+	           <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+	         </td>
+	         <td></td>
+	       </tr>
+	     </table>
+	 	</form>
+	</div>
+	<div class="ui-layout-center">
+	  <div id="grid"></div> 
+     </div>
+</div>
+#parse("index/_footer.vm") 
+<script type="text/javascript">
+     var _iframe_layout,_inner_layout;
+	$(document).ready(function(){
+		_iframe_layout = $('body').layout({
+		      defaults: {
+		        resizable: false,
+		        closable: false,
+		        spacing_open: 5
+		      }
+		    });
+		 _inner_layout = $("#subMain").layout({
+		      defaults: {
+		        resizable: false,
+		        closable: false,
+		        spacing_open: 0
+		      },
+		      center: {
+		          onresize_end: function () {
+		              var grid = $("#grid").data("kendoGrid");
+		              grid.resize();
+		          }
+		      }
+     })
+
+    $('#resetBtn').click(function(){
+      $("#queryForm :text").val('');  
+    });
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/jobschedule/schedule-job/list", [{
+              field: "id",
+              hidden: true
+          }, {
+              field: "jobSubject",
+              title: "主题",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+            
+          }, {
+              field: "jobName",
+              title: "名称",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+          	  attributes: {"class": "k-grid-text"}
+              
+          }, {
+              field: "statusText",
+              title: "状态",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "groupName",
+              sortable: false, 
+              title: "分组名称",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "beanOrClassText",
+              sortable: false,
+              title: "bean/class",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "targetObject",
+              sortable: false,
+              title: "target_object",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "targetMethod",
+              sortable: false,
+              title: "target_method",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "targetArguments",
+              sortable: false,
+              title: "target_Arguments",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "cronExpression",
+              sortable: false,
+              title: "cron表达式",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "nextDate",
+              sortable: false,
+              title: "下次执行时间",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "startDate",
+              sortable: false,
+              title: "开始时间",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "endDate",
+              sortable: false,
+              title: "结束时间",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "ignoreErrorText",
+              sortable: false,
+              title: "忽略错误",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "concurrentText",
+              sortable: false,
+              title: "并发执行",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "description",
+              sortable: false,
+              title: "描述",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }
+          
+          ], 
+      {
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          },resizable:true
+      }, {
+          serverSorting: true
+      }, [
+      	#kendo_datagrid_btns("JOBSCHEDULE_SCHEDULE_JOB")#end
+      ]);
+		
+    });    
+</script>

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.employee.lunchapply.entities.LunchApply">
+	<resultMap type="com.supconit.employee.lunchapply.entities.LunchApply" id="lunchSupplyResultMap">
+		<result property="id" column="ID"/>
+        <result property="processInstanceId" column="PROCESS_INSTANCE_ID"/>
+        <result property="lunchcode" column="LUNCH_CODE"/>
+        <result property="lunchType" column="LUNCH_TYPE"/>
+        <result property="lunchDate" column="LUNCH_DATE"/>
+        <result property="reason" column="REASON"/>
+        <result property="result" column="RESULT"/>
+        <result property="createId" column="CREATE_ID"/>
+        <result property="creator" column="CREATOR"/>
+        <result property="createDate" column="CREATE_DATE"/>
+        <result property="updateId" column="UPDATE_ID"/>
+        <result property="updator" column="UPDATOR"/>
+        <result property="updateDate" column="UPDATE_DATE"/>
+        <result property="deptName" column="DEPTNAME"/>
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">LUNCH_APPLY</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	<sql id="select_pre" lang="velocity">
+		SELECT
+			a.ID,
+			a.PROCESS_INSTANCE_ID,
+			a.LUNCH_CODE,
+	        a.LUNCH_TYPE,
+	        a.LUNCH_DATE,
+	        a.REASON,
+	        a.RESULT,
+	        a.CREATE_ID,
+	        a.CREATOR,
+	        a.CREATE_DATE,
+	        hd.NAME DEPTNAME
+		FROM  <include refid="TABLE_NAME"/> a
+		LEFT JOIN HO_DEPARTMENT hd on a.DEPT_ID = hd.ID
+	</sql>
+	
+	<sql id="count_pre" lang="velocity">SELECT COUNT(*) FROM <include refid="TABLE_NAME"/> a </sql>
+	
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			#if($_p.startTime && $_p.startTime != '')
+				#set($_startTime = $_p.startTime)
+				AND a.LUNCH_DATE >= @{_startTime,jdbcType=TIMESTAMP}
+			#end
+			#if($_p.endTime && $_p.endTime != '')
+				#set($_endTime = $_p.endTime)
+				AND a.LUNCH_DATE <= @{_endTime,jdbcType=TIMESTAMP}
+			#end
+			#if($_p.result && $_p.result != '')
+				#set($_result = $_p.result)
+				AND a.RESULT = @{_result,jdbcType=INTEGER}
+			#end
+			#if($_p.createId)
+				#set($_createId = $_p.createId)
+				AND a.CREATE_ID = @{_createId,jdbcType=INTEGER}
+			#end
+		#end
+		]]>	
+    </sql>
+	
+    <!-- 插入记录-->
+    <sql id="insert_sql" lang="velocity">
+        INSERT INTO <include refid="TABLE_NAME"/>(
+        	#if($_databaseId == 'oracle') ID, #end
+			LUNCH_CODE,
+	        LUNCH_TYPE,
+	        LUNCH_DATE,
+	        REASON,
+	        RESULT,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE,
+	        DEPT_ID
+        ) VALUES (
+        	#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end
+	        @{_parameter.lunchcode,jdbcType=VARCHAR},
+	        @{_parameter.lunchType,jdbcType=INTEGER},
+	        @{_parameter.lunchDate,jdbcType=DATE},
+	        @{_parameter.reason,jdbcType=VARCHAR},
+	        @{_parameter.result,jdbcType=INTEGER},
+	        @{_parameter.createId,jdbcType=NUMERIC},
+	        @{_parameter.creator,jdbcType=VARCHAR},
+	        @{_parameter.createDate,jdbcType=TIMESTAMP},
+	        @{_parameter.deptId,jdbcType=INTEGER}
+        )
+    </sql>
+    
+    <insert id="insert" parameterType="com.supconit.employee.lunchapply.entities.LunchApply" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="insert_sql" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.employee.lunchapply.entities.LunchApply" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    
+	<!-- 更新记录-->
+	<update id="update"  parameterType="com.supconit.employee.lunchapply.entities.LunchApply" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+			#mset()
+				<![CDATA[
+			        #if($_parameter.result)RESULT = @{_parameter.result,jdbcType=INTEGER},#end
+			         #if($_parameter.reason)REASON = @{_parameter.reason,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateId)UPDATE_ID = @{_parameter.updateId,jdbcType=NUMERIC},#end
+			        #if($_parameter.updator)UPDATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateDate)UPDATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+			    ]]>
+			#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+	
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.employee.lunchapply.entities.LunchApply" resultMap="lunchSupplyResultMap" lang="velocity" databaseId="oracle">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre"/>
+		<include refid="condition_sql"/>
+		#order($_parameter.condition,"a.ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.employee.lunchapply.entities.LunchApply" resultMap="lunchSupplyResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			a.ID,
+			a.PROCESS_INSTANCE_ID,
+			a.LUNCH_CODE,
+	        a.LUNCH_TYPE,
+	        a.LUNCH_DATE,
+	        a.REASON,
+	        a.RESULT,
+	        a.CREATE_ID,
+	        a.CREATOR,
+	        a.CREATE_DATE,
+	        hd.NAME DEPTNAME
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"a.ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/> a
+		LEFT JOIN HO_DEPARTMENT hd on a.DEPT_ID = hd.ID
+		<include refid="condition_sql"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countByConditions" resultType="long" lang="velocity">
+        <include refid="count_pre"/>
+        <include refid="condition_sql"/>
+    </select>
+    
+    <select id="getById" resultMap="lunchSupplyResultMap" parameterType="long" lang="velocity">
+		<include refid="select_pre"/>
+		WHERE a.ID = @{_parameter.id, jdbcType=NUMERIC}
+	</select>
+	
+	<delete id="deleteById" parameterType="long" lang="velocity"> 
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</delete>
+	
+	<select id="countLunchNumOfCurrentDay" resultType="Integer" lang="velocity">
+        SELECT
+        	COUNT(*)
+        FROM <include refid="TABLE_NAME"/>
+        WHERE
+			LUNCH_DATE >= @{_parameter.currentDay,jdbcType=TIMESTAMP}
+    </select>
+	
+</mapper>

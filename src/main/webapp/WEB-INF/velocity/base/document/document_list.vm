@@ -1,0 +1,324 @@
+#parse("index/_header.vm")
+<style>
+    .ztree {
+        overflow: auto;
+    }
+</style>
+</head>
+<body>
+  <div class="ui-layout-west" style="border-right:solid 1px #e1e5e6;" id="leftTreeWrap">
+			<div class="ui-layout-center">
+				    <div id="tabstrip" class="k-header k-grid-toolbar" style="padding-left:10px;">
+					    <ul>
+					        <li class="k-state-active">区域</li>
+					        <li>类别</li>
+					    </ul>
+						 <div id="tabstrip-1">
+						    <span class="k-header k-grid-toolbar" style="padding-left:10px;padding-top:10px;">地理区域</span>
+				  		  <ul id="geoAreaTree" class="ztree"></ul>
+				        </div>
+					    <div id="tabstrip-2">
+					       <span class="k-header k-grid-toolbar" style="padding-left:10px;padding-top:10px;">设备类别</span>
+				  		  <ul id="deviceTree" class="ztree"></ul>
+				        </div>
+				    </div >
+				    
+			        
+			</div>
+      
+  </div>
+
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<form class="ui-form" id='queryForm'>
+    		<div class="ui-form-group" style="display:none" id='selectBlock2'>
+    			<div class="ui-form-item ui-form-item-block">
+    			  <label class="ui-label">您已选择：</label>
+		    		 <span class="ui-form-pick"  id='selectBlock_g' style="display:none" >
+							  <input id="areaId" type="hidden" name="areaId" value="$!{document.areaId}">
+							  <strong>安装位置：</strong><em id='areaName'></em><i class="iconfont icon-remove-sign" name="i_g"></i>
+					  </span>
+    				  <span class="ui-form-pick"  id='selectBlock_c' style="display:none" >
+						  <input id="categoryId" type="hidden" name="categoryId" value="$!{document.categoryId}">
+						  <strong>设备类别：</strong><em id='categoryName'></em><i class="iconfont icon-remove-sign" name="i_c"></i>
+				    </span>
+    				  
+    			</div>
+    		</div>	
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+                <tr>
+					<td class="ui-search-name first">设备编码：</td>
+					<td class="ui-search-c">
+						<input name="deviceCode" class="k-textbox" type="text" value="$!{deviceCode}">
+					</td>
+					
+                    <td class="ui-search-name first">文档编号：</td>
+                    <td class="ui-search-c">
+                        <input class="k-textbox" type="text" name="docNo" value="$!document.docNo"  maxlength="32">
+                    </td>
+                    <td class="ui-search-name">文档名称：</td>
+                    <td class="ui-search-c">
+                       <input class="k-textbox" type="text" name="docTitle" value="$!document.docTitle" maxlength="32">
+                    </td>
+        			
+        			<td class="ui-search-name">关键字：</td>
+                    <td class="ui-search-c">
+                       <input class="k-textbox" type="text" name="docKey" value="$!document.docKey" maxlength="32">
+                    </td>
+                </tr>
+				<tr>
+					
+					<td class="ui-search-name">文档分类：</td>
+        			<td class="ui-search-c">
+                          <select name="docType"  class="k-textbox" >
+							<option value="">--请选择--</option>
+                	      #foreach($!{e} in $!{lstStatus})
+                        	<option value="$!{e.enumValue}" >$!{e.enumText}</option>
+						  #end
+                	   </select>
+                    </td>
+    				<td class="ui-search-name">创建人：</td>
+                    <td class="ui-search-c">
+                         <input class="k-textbox" type="text" name="creator" value="$!document.creator" maxlength="32">
+                    </td>
+    				  
+                    <td class="ui-search-name first">创建时间：</td>
+                    <td colspan="4">
+    	                <input id="startTime"  name="startTime" value="" />
+    	 			     <span class="ui-form-text">至</span>
+    	 			    <input id="endTime"  name="endTime" value=""/>
+    	            </td>
+                </tr>
+              </table>
+            </td>
+            <td width="180" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn" onclick="cancelLeftTreeSelected();"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+            <td></td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+  #parse("index/_footer.vm") 
+<script type="text/javascript">
+  var _iframe_layout, _left_layout, _inner_layout,containerHeight;
+	$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      },
+      west: {
+        size: 0.18
+      }
+    });
+
+    _left_layout = $("#leftTreeWrap").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+    	center: {
+    	  onresize_end:function(){
+              containerHeight = _left_layout.state.container.innerHeight-78;
+              $("#geoAreaTree").css("height",containerHeight);
+              $("#deviceTree").css("height",containerHeight);
+  		}
+      }
+    });
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+   
+
+    $('#resetBtn').click(function(){
+	  clearDate("startTime", "endTime");
+      $("#queryForm :text").val('');  
+	 
+    });
+
+		$('.iconfont','.ui-form-pick').each(function(){
+      $(this).click(function(){
+      	$('#treeId').val('');
+      	$('#selectBlock').hide();
+        //$(this).parent().remove();
+      })
+    });
+		 $("#tabstrip").hcTabStrip({
+	            animation: {
+	                // fade-out current tab over 1000 milliseconds
+	                close: {
+	                    duration: 1000,
+	                    effects: "fadeOut"
+	                },
+	               // fade-in new tab over 500 milliseconds
+	               open: {
+	                   duration: 500,
+	                   effects: "fadeIn"
+	               }
+	           }
+	        });
+			
+		 commonDate("startTime","endTime","yyyy-MM-dd HH:mm:ss","zh-CN");	
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/document/page", [{
+              field: "id",
+              hidden: true
+          }, {
+              field: "docNo",
+              title: "文档编号",
+              sortable: false,
+              template:"<a href=\"javascript:void(0)\" title=\"查看#: data.docNo #的详细信息\" onclick=\"quick_dialog_ref('document_add_dlg','查看#:data.docNo #的信息','$!{rc.contextPath}/document/edit?showFlag=1&id=#: data.id #',550,580)\">#: data.docNo #</a>",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}        
+          }, {
+              field: "docTitle",
+              title: "文档名称",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          },{
+              field: "areaName",
+              title: "区域",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {title:"#: data.areaName==null? '':data.areaName #","class": "k-grid-text k-grid-nowrap"},
+		  },{
+              field: "categoryName",
+              title: "设备类别",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "docKey",
+              sortable: false,
+              title: "关键字",
+              headerAttributes: {"class": "k-grid-text"},
+		  	  attributes: {"class": "k-grid-text"}
+          	  
+          }, {
+              field: "docTypeName",
+              title: "文档分类",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          	 
+          }, {
+              field: "times",
+              sortable: false,
+              title: "访问次数",
+             headerAttributes: {"class": "k-grid-num"},
+			 attributes: {"class": "k-grid-num"},
+          	 width:90
+          }, {
+              field: "creator",
+              title: "创建人",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          	  
+          }, {
+              field: "createDate",
+              sortable: false,
+              title: "创建时间",
+              headerAttributes: {"class": "k-grid-equilong"},
+			  template:"<span title='#: data.createDate #' > #: data.createDate #</span>",
+			  attributes: {style: "text-align: center;text-overflow: clip;overflow: hidden;white-space: nowrap" },
+            width:180
+          }
+          
+          ], 
+      {
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          },resizable:true
+      }, {
+          serverSorting: true
+      }, [
+		#if(!$!{deviceCode} || $!{deviceCode} =='')
+			#kendo_datagrid_btns("JCXX_WDGL")#end
+		#end
+      ]);
+
+        $("#geoAreaTree").css("height", _left_layout.state.container.outerHeight - 78);
+        $("#deviceTree").css("height", _left_layout.state.container.outerHeight - 78);
+    }); 
+	
+    /* zTree */
+    var setting = {
+    	data: {
+    		simpleData: {enable: true}
+          },
+          callback: {
+    			onClick: function(event, treeId, treeNode, clickFlag) {
+    				if(treeId=="geoAreaTree"){
+    					$('#areaId').val(treeNode.id);
+	    			 	 $('#areaName').text(treeNode.name);
+	    			 	 $('#selectBlock').show();
+	    				 $('#queryBtn').click();
+    				}else{
+        	  
+	        	         $('#categoryId').val(treeNode.id);
+	    			 	 $('#categoryName').text(treeNode.name);
+	    			 	 $('#selectBlock').show();
+	    				 $('#queryBtn').click();
+    				 }
+    				$("#queryBtn").click();
+    			}
+    		}
+    };
+  	var zNodes1 = [];  
+  	zNodes1.push({id:"0", pId:"-1", name:"地理区域簇",open:true}); 
+  	#foreach($!{treeNode1} in $!{treeListLou})
+      	zNodes1.push({id:$!{treeNode1.id}, pId:$!{treeNode1.parentId}, name:"$!{treeNode1.areaName}"});      
+  	#end
+  	var zNodes2 = [];  
+  	zNodes2.push({id:"0", pId:"-1", name:"设备类别簇",open:true}); 
+  	#foreach($!{treeNode2} in $!{treeListType})
+      	zNodes2.push({id:$!{treeNode2.id}, pId:$!{treeNode2.parentId}, name:"$!{treeNode2.categoryName}"});      
+  	#end
+  	$(document).ready(function(){
+  		##$.fn.zTree.init($("#geoAreaTree"), setting,zNodes1).expandAll(true);
+  		$.fn.zTree.init($("#geoAreaTree"), setting,zNodes1);
+  		$.fn.zTree.init($("#deviceTree"), setting,zNodes2);
+  	});
+	
+	function cancelLeftTreeSelected(){
+		$.fn.zTree.init($("#geoAreaTree"), setting,zNodes1);
+  		$.fn.zTree.init($("#deviceTree"), setting,zNodes2);
+	}
+	
+	
+	function edited_callback() {
+        var grid = get_grid("#grid");
+		if(grid.dataSource){
+            grid.dataSource.read();
+        }else{
+            $grid.data("kendoGrid").dataSource.read();
+        }
+    }
+	
+	
+</script>

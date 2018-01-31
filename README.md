@@ -1,0 +1,14 @@
+alarm:报警
+base：设备档案、随机备件、区域、枚举、附件
+common：其他模块需要用到的基础类,一般放工具类
+duty:排班
+maintain：保养
+inspection：巡检
+meeting：会议室管理
+nhgl:能耗
+repair:维修
+employee：员工自助
+spare：备品备件
+visitor：访客
+ywgl：运维管理，如新风、排风、视频、门禁等
+emergency：应急处理

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<toolbox>
+	<tool>
+		<key>date</key>
+		<scope>application</scope>
+		<class>org.apache.velocity.tools.generic.ComparisonDateTool</class>
+		<parameter name="format" value="yyyy-MM-dd" />
+		<parameter name="depth" value="2" />
+		<parameter name="skip" value="month" />
+	</tool>
+</toolbox>
+

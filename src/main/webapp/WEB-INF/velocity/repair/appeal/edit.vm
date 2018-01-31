@@ -1,0 +1,203 @@
+#parse("index/_header.vm")
+<style > 
+.chooseBox{width:240px;height:140px;border:#cccccc 1px solid;overflow:auto;}
+.chooseUl li{height:22px;line-height:22px;cursor:pointer;padding-left:6px;margin-bottom:1px;}
+.choosePick{background:#6ebffe;color:#FFF;}
+.t_c{text-align:center;} 
+ul{ margin:0; padding:0;} 
+##td{border:1px solid#F00;}
+.photo{ width:138px;}
+.left{text-align:left;}
+.right{text-align:right;}
+.center{text-align:center;}
+.justify{text-align:justify;}
+</style>
+</head>
+<body  style="padding-bottom:40px;">
+<form id="form_id_dc_edit"  class="ui-layout-center ui-dialog-form"  method="post" action="$!{rc.contextPath}/repair/repairEvtCategory/save" >
+		  <input type="hidden"  name="id" value="$!{repairEvtCategory.id}"  />
+		  <input type="hidden" id="propertyIds" name="propertyIds" ></input>
+		  <input type="hidden" id="propertySorts" name="propertySorts" ></input>		  
+	      <table width="100%" >	      
+	       	<tr >
+		        
+		        <td width="150" class="label"><span class="ui-form-required">*</span><label>类别名称：</label></td>
+		        <td width="250" ><input class="k-textbox" type="text" name="categoryName" value="$!{repairEvtCategory.categoryName}"/></td>
+				<td width="100"></td>
+			</tr>
+	      	<tr>
+					<tr>
+	
+				
+		        <td class="label"><label>父类别：</label></td>
+		        <td >		        	
+		        	<span class="k-textbox k-space-right" #if($!{viewOnly} != true) onclick="chooseRepair('parentId','parentName')" #end>
+	                     <input class="k-textbox" id="parentId" type="hidden" name="parentId" type="text"  value="$!{repairEvtCategory.parentId}">
+	                     <input class="k-textbox" id="parentName" name="parentName" type="text" value="$!{repairEvtCategory.parentName}" readonly >
+						 <a href="#" class="k-icon k-i-search">&nbsp;</a>
+	                </span>                                
+		        </td>	
+					</tr>
+				<tr>
+							<td class="label"><label>紧急程度：</td>
+									<td class="ui-search-c inputText">
+										<select name="emergency" class="k-textbox" #if($!{showFlag})disabled="true"#end >  
+											#foreach($!{e} in $!{lstStatus})
+												<option value="$!{e.enumValue}" #if($!{repairEvtCategory.emergency}==$!{e.enumValue}) selected="selected" #end>$!{e.enumText}</option>
+											#end
+										</select>
+									</td>
+				</tr>
+				<tr>
+				<td width="150" class="label"><span class="ui-form-required">*</span><label>完成时间（小时）：</label></td>
+		        <td width="250" ><input id="repair_time" class="k-textbox" type="text" name="finishtime" value="$!{repairEvtCategory.finishtime}"/></td>
+				</tr>
+				<tr>
+	      		<td  class="label"><span class="ui-form-required">*</span><label >排序：</label></td>
+	   	        <td  ><input id="repair_seq" class="k-textbox" type="text" name="sortidx" value="$!{repairEvtCategory.sortidx}"/></td>
+				<td ></td>
+					</tr>
+			</tr>
+
+	     
+	      		<td  class="label" valign="top"><label for="" >备注：</label></td>
+	        	<td  colspan="1"><textarea  id="textAreaId"  cols="1" rows="3" class="k-textbox k-textarea"  name="remark">$!{repairEvtCategory.remark}</textarea></td>
+				<td ></td>
+			</tr>
+		</table>
+		<div class="actions">
+	        <button class="k-primary hc_btn" id="repairSave" onclick="before()" type="submit"><i class="fa fa-save"></i>保 存</button>
+	        <button class="hc_btn cancel" onclick="close_dialog('repairEvtCategory_add_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+	    </div>
+</form>
+</body>
+<script type="text/javascript">
+	$(document).ready(function(){
+		var  _iframe_layout = $('body').layout({
+              defaults: {
+                resizable: true,
+                closable: false,
+                spacing_open: 5
+              }
+            });
+	});
+</script>
+<script>
+
+function findByCodeName(){
+	var codeName =$("#txtCodeName").val();
+	if(codeName==null || codeName==""){
+		codeName="[";//全查询
+	}
+	$(".subclass li").each(function(){
+		if($(this).html().indexOf(codeName)!=-1 && $(".subclassPick li[subId='"+$(this).attr("subId")+"']:visible").length==0){//筛选
+			$(this).show();
+		}else{
+			$(this).hide();
+		}
+	})	
+}
+
+function chooseRepair(txtId, txtName, type, dialogId) {
+	quick_dialog(
+        "choose_dept",
+        "选择维修类别",
+        "$!{rc.contextPath}/repair/repairEvtCategory/repair?txtId=" + txtId + "&txtName=" + txtName + "&type=" + type +"&dialogId" + dialogId,
+        280,
+        400 
+    );
+}
+
+function selectBotn(from,to){
+	$("."+from+" li").each(function(){
+		if($(this).hasClass("choosePick")){//已选中
+			var sbuId = $(this).attr("subId");
+			$(this).removeClass("choosePick");
+			$(this).hide();
+			$("."+to+" li[subId='"+sbuId+"']").show();
+			$("."+to+" li[subId='"+sbuId+"']").css("white-space","nowrap");
+		}
+	})
+	
+}
+
+ function before(){
+	//获取类别属性信息
+	var subIds = new Array();
+	var sorts = new Array();
+	$.each($("ul[name='all_sub'] li[subId]:visible"), function(i,val){  
+		subIds.push($(val).attr("subId"));
+		sorts.push(i);
+	}); 
+	$("#propertyIds").val(subIds);
+	$("#propertySorts").val(sorts);
+ }
+  function addSelectClass($obj){
+	if($obj.hasClass("choosePick")){
+		$obj.removeClass("choosePick");
+	}else{
+		$obj.addClass("choosePick");
+	}	
+ }
+
+    $(document).ready(function(){
+	 	$('#form_id_dc_edit').validator({
+		rules: {
+			xiaoshus:[/^([1-9]?\d{0,3}(\.\d)?)$/,"请输入10000以内1位小数或整数"]
+		},
+        fields: {
+          
+			categoryName: "类别名称:required; length[~50]",
+			finishtime: "完成时间:required;xiaoshus;",
+			sortidx: "排序:required;digits;length[~10]",
+			remark: "length[~200]"
+          },
+            valid:function(form){
+                form_btn_submit($("#repairSave"),form,function(res){
+                    //console.log(res);
+                    validateCallback(res,"grid","repairEvtCategory_add_dlg");
+                    return false;
+                });
+            }
+        });
+		//repairEvtCategory.id为空就查询全部数据
+		//findByCategoryId("$!{repairEvtCategory.id}");
+		$("#file_upload").attr("style","margin-left:150;margin-top:20");
+		
+		//包含子类别
+		 $("#lastNode_id").change(function(){
+		     if($(this).attr("checked")){
+			 	$("#divProperty1").hide();		
+				$("#divProperty2").hide();
+			 }else{
+			 	$("#divProperty1").show();	
+				$("#divProperty2").show();	
+			 }
+   	   	 });
+		
+		//查看模式
+		/*#if($!{showFlag})
+			setAllReadonly("dialog");
+			$("#file_upload").hide();
+		#else
+			initUpload();
+		#end*/	
+		
+        /*#if($!viewOnly)
+        	setAllReadonly("dialog");
+			$("#file_upload").hide();
+		#else
+			initUpload();
+        #end*/
+
+		var viewSign = $!{viewOnly};
+		if(viewSign == true){
+        	setAllReadonly("dialog");
+			$("#file_upload").hide();		
+		}
+		else{
+			//initUpload();
+		}
+      });
+</script>
+</html>

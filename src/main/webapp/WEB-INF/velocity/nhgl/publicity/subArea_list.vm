@@ -1,0 +1,76 @@
+	<div>
+		<table id="pagerTable" style="display: none"></table>
+    </div>
+    <script type="text/javascript"> 
+			var attach = '$!{attach}';
+			var nhType = '$!{nhType}';
+			var parentId = $!{parentId};
+			var startMonth = '$!{startMonth}';
+			var endMonth = '$!{endMonth}';
+			var areaTypeName = "";
+			if(nhType == 1){
+				device = "耗电总量(kWh)";
+				areaTypeName = "单位面积耗电量（kWh/m²）";
+				areaTypeNum = "untilEle";
+			}else{
+				device = "耗水总量(t)";
+				areaTypeName = "单位面积耗水量（t/m²）";
+				areaTypeNum = "untilWater";
+			}
+			$(document).ready(function(){
+				var formatFunc = function(value,row){
+					var num = fInt(row.totalMonthValue);
+					return num;
+				}
+				var formatFunc2 = function(value,row){
+					var num = fNum2(value);
+					return num;
+				}
+				var url= "";
+				var colModel = "";
+				if(attach == 'area'){
+					if(nhType == 1)
+						url = "$!{rc.contextPath}/nhgl/publicity/getElectricASubAllList?parentId="+parentId+"&startMonth="+startMonth+"&endMonth="+endMonth;
+					else
+						url = "$!{rc.contextPath}/nhgl/publicity/getWaterASubAllList?parentId="+parentId+"&startMonth="+startMonth+"&endMonth="+endMonth;
+					colModel = [
+						{display: "序号", name: "idxh", width: 100,align:'center'},
+						{display: "区域名称", name: "areaName", width: 100,align:'left'},
+						{display: "分项名称", name: "itemName", width: 100,align:'left'},
+						{display: "面积", name: "area", width: 100,align:'right'},
+						{display: areaTypeName, name: areaTypeNum, width: 150,format:formatFunc2,align:'right'},
+						{display: device, name: "totalMonthValue", width: 100,format:formatFunc,align:'right'}
+						];
+				}else{
+					if(nhType == 1)
+						url = "$!{rc.contextPath}/nhgl/publicity/getElectricDSubAllList?parentId="+parentId+"&startMonth="+startMonth+"&endMonth="+endMonth;
+					else
+						url = "$!{rc.contextPath}/nhgl/publicity/getWaterDSubAllList?parentId="+parentId+"&startMonth="+startMonth+"&endMonth="+endMonth;
+					colModel = [
+						{display: "序号", name: "idxh", width: 100,align:'center'},
+						{display: "部门名称", name: "deptFullName", width: 100,align:'left'},
+						{display: "分项名称", name: "itemName", width: 100,align:'left'},
+						{display: "面积", name: "area", width: 100,align:'right'},
+						{display: areaTypeName, name: areaTypeNum, width: 150,format:formatFunc2,align:'right'},
+						{display: device, name: "totalMonthValue",format:formatFunc, width: 100,align:'right'}
+						];
+				}				
+				$("#pagerTable").datagrid({
+				url: url,
+				dataType: "json",
+				method: "GET",
+				usepager: true,
+				rpOptions: [10, 20, 40, 50],pageSize:20,
+				showOperate: false,
+				colModel: colModel
+				,sortname: "num"
+				,sortorder: "asc"
+				,useRp: true
+				,usepager: true
+				,showTableToggleBtn: true
+				,width: 713
+				,height: 605
+				});
+				fNumPage();
+			});
+     </script>

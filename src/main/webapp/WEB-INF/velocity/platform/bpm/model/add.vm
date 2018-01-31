@@ -1,0 +1,54 @@
+
+<form class="ui-form" id="bpm_model_add_form" action="$!{rc.contextPath}/platform/bpm/model/add" method="post">
+  <fieldset>
+  	<div class="ui-form-item">
+      			<label class="ui-label" for="">名称:</label>
+      			      			<input class="ui-input" type="text" name="name" value=""
+      					 data-rule="名称: length[~64];"       			/>
+      			    		</div>
+    		    	    		    		<div class="ui-form-item ">
+      			<label class="ui-label" for="">KEY:</label>
+      			      			<input class="ui-input" type="text" name="key" value=""
+      					 data-rule="KEY: length[~128];"       			/>
+      			    		</div>
+    		    	    		    		<div class="ui-form-item ui-form-item-textarea colspan2">
+      			<label class="ui-label" for="">备注:</label>
+      			      			<textarea 	 data-rule="备注: length[~255];"  class="ui-textarea" name="description"></textarea>
+      			    		</div>
+    		    	  </fieldset>
+  
+  
+  
+
+</form>
+#*
+<div class="pageContent">
+	<form id="platform_workflow_model_create_form" method="post" action="$!{rc.contextPath}/platform/bpm/model/create" class="pageForm required-validate" onsubmit="return validateCallback(this, dialogAjaxDone);">
+		<input type="hidden" name="id" value="$!{model.id}"/>
+		<div class="pageFormContent " layoutH="56">
+			<div>
+    			<dl class="nowrap compact">
+                    <dt>名称</dt>
+                    <dd><input type="text" id="workflow_model_create_name" name="name" value="" maxlength="32" class="required" style="width:300px" /></dd>
+                </dl>
+				<dl class="nowrap compact">
+                    <dt>KEY</dt>
+                    <dd><input type="text" id="workflow_model_create_key" name="key" value="" maxlength="32" class="required" style="width:300px" /></dd>
+                </dl>
+				<dl class="nowrap compact">
+                    <dt>描述</dt>
+                    <dd><textarea id="workflow_model_create_description" name="description" style="width:300px;height:80px"></textarea></dd>
+                </dl>
+            </div>
+		</div>
+		<div class="formBar">
+			<ul>
+				<li><div class="buttonActive"><div class="buttonContent"><button type="submit">保存</button></div></div></li>
+				<li>
+					<div class="button"><div class="buttonContent"><button type="button" class="close">取消</button></div></div>
+				</li>
+			</ul>
+		</div>
+	</form>
+</div>
+*#

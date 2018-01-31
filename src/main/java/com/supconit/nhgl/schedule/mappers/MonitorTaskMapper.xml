@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.schedule.entites.MonitorTask">
+
+	<resultMap type="com.supconit.nhgl.schedule.entites.MonitorTask" id="JcrwResultMap">
+					<id property="id" column="ID" />
+							<result property="taskCode" column="TASK_CODE" />
+							<result property="taskName" column="TASK_NAME" />
+							<result property="taskType" column="TASK_TYPE" />
+							<result property="taskVesting" column="TASK_VESTING" />
+							<result property="taskDesc" column="TASK_DESC" />
+							<result property="noticeTmpl" column="NOTICE_TMPL" />
+							<result property="categoryText" column="categoryText"/>
+							<result property="startDate" column="startDate"/>
+							<result property="endDate" column="endDate"/>
+							<result property="jobId" column="JOB_ID" />
+				</resultMap>
+	
+	
+	<sql id="TABLE_NAME" lang="velocity">NH_MONITOR_TASK</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	<sql id="SELECT_PRE" lang="velocity">SELECT * FROM <include refid="TABLE_NAME"/></sql>
+	<sql id="COUNT_PRE" lang="velocity">SELECT COUNT(1) FROM <include refid="TABLE_NAME"/></sql>
+	<sql id="SELECT_TASKPRE" lang="velocity">
+	SELECT 
+			a.ID,
+			a.TASK_CODE,
+			a.TASK_NAME,
+			a.TASK_TYPE,
+			a.TASK_VESTING,
+			a.JOB_ID,
+			a.TASK_DESC,
+			b.CATAGORY_TEXT as categoryText,
+			c.START_DATE as startDate,
+			c.END_DATE as endDate</sql>
+	<sql id="SEARCH_CONDITION_SQL" lang="velocity">
+		<![CDATA[
+		#where()
+																																												#end
+		]]>	
+	</sql>
+	<sql id="SEARCH_CONDITION_TASKSQL" lang="velocity">
+		<![CDATA[
+		#where()
+			#if($_parameter.condition.taskType)
+				a.TASK_TYPE IN ( SELECT ID FROM my1 ) and
+			#end
+			#if($_parameter.condition.taskVesting)
+				a.TASK_VESTING = @{_parameter.condition.taskVesting, jdbcType=NUMERIC} and
+			#end
+			#if($_parameter.condition.taskName)
+				#set($_code = '%'+$_parameter.condition.taskName+'%')
+				a.TASK_NAME LIKE @{_code, jdbcType=VARCHAR} and
+			#end
+			1=1
+		#end
+		]]>
+	</sql>
+	<select id="getById" resultMap="JcrwResultMap" parameterType="long" lang="velocity">
+		<include refid="SELECT_PRE" />
+				WHERE ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+	
+	<select id="getByTaskType" resultMap="JcrwResultMap" parameterType="long" lang="velocity">
+		<include refid="SELECT_PRE" />
+				WHERE TASK_TYPE = @{_parameter, jdbcType=NUMERIC}
+	</select>
+	
+	<select id="selectByTaskCode" resultMap="JcrwResultMap" parameterType="java.lang.String" lang="velocity">
+		<include refid="SELECT_PRE"/>
+			WHERE TASK_CODE = @{_parameter.taskCode, jdbcType=VARCHAR}
+	</select>
+	
+	<select id="selectPager" lang="velocity" resultMap="JcrwResultMap">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="SELECT_PRE"/>
+		<include refid="SEARCH_CONDITION_SQL"/>
+		#order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	
+	<select id="selectPager" lang="velocity" resultMap="JcrwResultMap" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT * 
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/>
+		<include refid="SEARCH_CONDITION_SQL"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+
+	<select id="selectTaskPager" lang="velocity" resultMap="JcrwResultMap" parameterType="com.supconit.nhgl.schedule.entites.MonitorTask" >
+		WITH my1(id,catagory_text,catagory_code,parent_code,remark) as(
+		SELECT a.id,a.catagory_text,a.catagory_code,a.parent_code,a.remark FROM NH_TASK_CATAGORY a WHERE a.id = @{_parameter.condition.taskType, jdbcType=NUMERIC}  
+		UNION ALL
+		SELECT a.id,a.catagory_text,a.catagory_code,a.parent_code,a.remark FROM NH_TASK_CATAGORY a,my1  b WHERE  b.CATAGORY_CODE = a.PARENT_CODE)
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="SELECT_TASKPRE"/>
+		FROM NH_MONITOR_TASK a 
+			left join NH_TASK_EXECUTION_PLAN c ON a. TASK_CODE = c.TASK_CODE
+			left join NH_TASK_CATAGORY b ON a.TASK_TYPE = b.ID
+		<include refid="SEARCH_CONDITION_TASKSQL"/>
+		#order($_parameter.condition,"a.ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	
+	<select id="selectTaskPager" lang="velocity" resultMap="JcrwResultMap" databaseId="sqlserver">
+		with my1 as(
+			select * from NH_TASK_CATAGORY a where a.id = @{_parameter.condition.taskType, jdbcType=NUMERIC}  
+			union all select a.* from my1, NH_TASK_CATAGORY a where my1.CATAGORY_CODE = a.PARENT_CODE      
+		)
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="SELECT_TASKPRE"/>
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"a.ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM NH_MONITOR_TASK a 
+			left join NH_TASK_EXECUTION_PLAN c ON a. TASK_CODE = c.TASK_CODE
+			left join NH_TASK_CATAGORY b ON a.TASK_TYPE = b.ID
+		<include refid="SEARCH_CONDITION_TASKSQL"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	
+	<select id="findById" parameterType="long" resultMap="JcrwResultMap">
+		SELECT 
+			a.TASK_CODE,
+			a.TASK_NAME,
+			a.TASK_TYPE,
+			a.TASK_VESTING,
+			a.TASK_DESC,
+			b.CATAGORY_TEXT as categoryText,
+			c.START_DATE as startDate,
+			c.END_DATE as endDate
+		FROM NH_MONITOR_TASK a 
+			left join NH_TASK_EXECUTION_PLAN c ON a. TASK_CODE = c.TASK_CODE
+			left join NH_TASK_CATAGORY b ON a.TASK_TYPE = b.ID
+		WHERE a.ID = #{id}
+	</select>
+	
+	<select id="countTaskPager" lang="velocity" resultType="long">
+		with my1 as(
+			select * from NH_TASK_CATAGORY a where a.id = @{_parameter.condition.taskType, jdbcType=NUMERIC}  
+			union all select a.* from my1, NH_TASK_CATAGORY a where my1.CATAGORY_CODE = a.PARENT_CODE      
+		)
+		select count(1) FROM NH_MONITOR_TASK a 
+			left join NH_TASK_EXECUTION_PLAN c ON a. TASK_CODE = c.TASK_CODE
+			left join NH_TASK_CATAGORY b ON a.TASK_TYPE = b.ID
+		<include refid="SEARCH_CONDITION_TASKSQL"/>
+	</select>
+	
+	<select id="countPager" lang="velocity" resultType="long">
+		<include refid="COUNT_PRE"/><include refid="SEARCH_CONDITION_SQL"/>
+	</select>
+	
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>(
+															#if($_databaseId == 'oracle') ID,#end
+																TASK_CODE
+																					,TASK_NAME
+																					,TASK_TYPE
+																					,TASK_VESTING
+																					,TASK_DESC
+																					,NOTICE_TMPL
+																					,JOB_ID
+														) VALUES (
+															#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end
+																@{_parameter.taskCode,jdbcType=VARCHAR}
+																					,@{_parameter.taskName,jdbcType=VARCHAR}
+																					,@{_parameter.taskType,jdbcType=NUMERIC}
+																					,@{_parameter.taskVesting,jdbcType=NUMERIC}
+																					,@{_parameter.taskDesc,jdbcType=VARCHAR}
+																					,@{_parameter.noticeTmpl,jdbcType=VARCHAR}
+																					,@{_parameter.jobId,jdbcType=NUMERIC}
+														)
+	</sql>
+	
+	<insert id="insert" parameterType="com.supconit.nhgl.schedule.entites.MonitorTask" 
+		keyProperty="id" keyColumn="ID" 		lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>        <include refid="INSERT_SQL" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.nhgl.schedule.entites.MonitorTask" 
+		keyProperty="id" keyColumn="ID" 		 lang="velocity">
+        <include refid="INSERT_SQL"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>    </insert>
+    
+	<update id="update" parameterType="com.supconit.nhgl.schedule.entites.MonitorTask" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/> 
+		#mset()
+		<![CDATA[
+																							#if($_parameter.taskCode)TASK_CODE = @{_parameter.taskCode,jdbcType=VARCHAR},#end
+																#if($_parameter.taskName)TASK_NAME = @{_parameter.taskName,jdbcType=VARCHAR},#end
+																#if($_parameter.taskType)TASK_TYPE = @{_parameter.taskType,jdbcType=NUMERIC},#end
+																#if($_parameter.taskVesting)TASK_VESTING = @{_parameter.taskVesting,jdbcType=NUMERIC},#end
+																#if($_parameter.taskDesc)TASK_DESC = @{_parameter.taskDesc,jdbcType=VARCHAR},#end
+																#if($_parameter.noticeTmpl)NOTICE_TMPL = @{_parameter.noticeTmpl,jdbcType=VARCHAR},#end
+																#if($_parameter.jobId)JOB_ID = @{_parameter.jobId,jdbcType=NUMERIC},#end
+									]]>
+		#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+	
+	<delete id="deleteById" parameterType="long" lang="velocity">
+		DELETE FROM <include refid="TABLE_NAME" /> WHERE ID = @{_parameter,jdbcType=NUMERIC}
+	</delete>
+    		
+</mapper>

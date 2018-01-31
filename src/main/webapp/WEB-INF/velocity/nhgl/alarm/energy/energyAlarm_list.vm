@@ -1,0 +1,67 @@
+<div class="ui-layout-center" id="subMain">
+	<table id="energyAlarm_datalist" class="fn-hide"></table>
+</div>
+<div class="ui-layout-north">
+	<div class="ui-module-name">
+    	<label id="menuName">#crumbs("$!menu.code",1)</label>
+    </div>
+	## #bread_crumbs("NHGL_YNYCBJ")
+	<form id="energyAlarm_list_search" class="ui-form ui-form-search fn-clear">
+			<div class="ui-form-search-left">
+				<div class="ui-form-item-larger">
+			  		<label class="ui-label">报警时间：</label>
+	          		<input id="start" type="text" name="start"  class="ui-input ui-input-small  Wdate"  onclick="WdatePicker({dateFmt:'yyyy-MM-dd',maxDate:'#F{$dp.$D(\'end\')}'})" value="#date_format($!energyAlarm.start,'yyyy-MM-dd')"/>
+		      		<span class="ui-form-text">至</span> 
+					<input id="end" type="text" name="end"  class="ui-input ui-input-small  Wdate"  onclick="WdatePicker({dateFmt:'yyyy-MM-dd',minDate:'#F{$dp.$D(\'start\')}'})" value="#date_format($!energyAlarm.end,'yyyy-MM-dd')"/>
+				</div>
+			</div>
+			<div class="ui-form-search-right">
+				<button type="submit" id="subButton" class="btn btn-primary"><i class="iconfont icon-search"></i> 查&nbsp;询</button>
+			</div>
+		</form>
+</div>
+<script type="text/javascript">
+	$(document).ready(function(){
+		if(T.innerLayout&&!T.innerLayout.destroyed){
+			T.innerLayout.destroy();
+		}
+		T.innerLayout = $("#centerMain").layout({
+			defaults : {
+				resizable : false,
+				closable : false,
+				spacing_open : 5
+			},
+			onresize_end : function(){
+				$("#energyAlarm_datalist").datagridResize({width:T.innerLayout.state.center.innerWidth,height:T.innerLayout.state.center.innerHeight});
+			}
+		});
+		var energyAlarm_datagrid=$("#energyAlarm_datalist").datagrid({
+			url:'$!{rc.contextPath}/nhgl/alarm/energy/page',
+			dataType: "json",
+			method: "GET",
+			singleSelected : true,
+			striped : false,
+			height:  T.innerLayout.center.state.innerHeight,
+			width :  T.innerLayout.center.state.innerWidth,
+			showOrderNumber : true,
+			useRp : true,
+			usepager: true,
+    		rpOptions: [10, 20, 40, 50],
+    		pageSize: 20,
+    		searchFormId:"energyAlarm_list_search",
+    		searchCallback:function(datagrid){},
+    		onSuccess:function(table,grid){
+    			if(!grid)return ;
+    		},
+    		colModel:[
+    			{"display":"序号"},
+    			{display: "报警时间", name: "alarmTime",width:"140",align:"center"},
+    			{display: "报警设备",name:"deviceCode",width:"450",align:"left"},
+	            {display: "报警说明", name: "content",width:"800",algin:"left"}
+    		],
+    		buttons : [
+	            #data_grid_buttons('NHGL_YNYCBJ')#end
+	        ]
+		});
+	});
+</script> 

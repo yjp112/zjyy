@@ -1,0 +1,422 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.base.entities.DutyGroupPerson">
+
+	<resultMap type="com.supconit.base.entities.DutyGroupPerson" id="DutyGroupPersonResultMap">      
+        <result property="id" column="ID" />
+        <result property="personId" column="PERSON_ID" />
+        <result property="personName" column="PERSON_NAME" />
+        <result property="groupId" column="GROUP_ID" />
+        <result property="postDesc" column="POST_DESC" />
+        <result property="createId" column="CREATE_ID" />
+        <result property="creator" column="CREATOR" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="updateId" column="UPDATE_ID" />
+        <result property="updator" column="UPDATOR" />
+        <result property="updateDate" column="UPDATE_DATE" />
+        <result property="postId" column="POST_ID" />
+        <result property="post" column="POST" />
+        <result property="groupName" column="groupName" />
+        <result property="code" column="CODE" />
+	</resultMap>
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+	<sql id="TABLE_NAME" lang="velocity">DUTY_GROUP_PERSON</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	<sql id="select_pre" lang="velocity">
+        SELECT
+        dgp.*, dg.GROUP_NAME AS groupName,
+            (
+            SELECT
+            enum_text
+            FROM
+            ENUM_DETAIL ed
+            WHERE
+            ed.type_id = 16
+            AND ed.enum_value = dgp.POST_ID
+            ) post
+            FROM
+            DUTY_GROUP_PERSON dgp
+        LEFT  JOIN DUTY_GROUP dg ON dgp.GROUP_ID = dg.ID
+	</sql>
+	<sql id="count_pre" lang="velocity">
+        SELECT count(*)
+        FROM DUTY_GROUP_PERSON dgp INNER JOIN DUTY_GROUP dg ON dgp.GROUP_ID = dg.ID
+	</sql>
+	<sql id="sequence">SELECT SEQ_HO_USER.NEXTVAL FROM DUAL</sql>
+	<insert id="insert" parameterType="com.supconit.base.entities.DutyGroupPerson" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="INSERT_SQL"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    <insert id="insert" parameterType="com.supconit.base.entities.DutyGroupPerson" 
+		keyProperty="id" keyColumn="ID" 		lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>        
+		<include refid="INSERT_SQL" />
+	</insert>	
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>
+		(#if($_databaseId=='oracle') ID,#end   
+        PERSON_ID,
+        PERSON_NAME,
+        GROUP_ID,
+        POST_DESC,
+        CREATE_ID,
+        CREATOR,
+        CREATE_DATE,
+        UPDATE_ID,
+        UPDATOR,
+        UPDATE_DATE,
+        POST_ID
+        ) VALUES (        
+		#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end
+		@{_parameter.personId,jdbcType=NUMERIC},
+        @{_parameter.personName,jdbcType=VARCHAR},
+        @{_parameter.groupId,jdbcType=NUMERIC},
+        @{_parameter.postDesc,jdbcType=VARCHAR},
+        @{_parameter.createId,jdbcType=NUMERIC},
+        @{_parameter.creator,jdbcType=VARCHAR},
+        @{_parameter.createDate,jdbcType=DATE},
+        @{_parameter.updateId,jdbcType=NUMERIC},
+        @{_parameter.updator,jdbcType=VARCHAR},
+        @{_parameter.updateDate,jdbcType=DATE},
+        @{_parameter.postId,jdbcType=NUMERIC}
+        )
+	</sql>		  
+
+
+	<select id="getById" resultMap="DutyGroupPersonResultMap" parameterType="Long">
+		SELECT
+        dgp.*, dg.GROUP_NAME AS groupName,
+            (
+            SELECT
+            enum_text
+            FROM
+            ENUM_DETAIL ed
+            WHERE
+            ed.type_id = 16
+            AND ed.enum_value = dgp.POST_ID
+            ) post
+            FROM
+            DUTY_GROUP_PERSON dgp
+        LEFT  JOIN DUTY_GROUP dg ON dgp.GROUP_ID = dg.ID       
+        WHERE dgp.ID = #{id}
+	</select>
+	
+	<select id="findGroupPersons" resultMap="DutyGroupPersonResultMap" parameterType="Long">
+		SELECT
+        dgp.*, dg.GROUP_NAME AS groupName,
+            (
+            SELECT
+            enum_text
+            FROM
+            ENUM_DETAIL ed
+            WHERE
+            ed.type_id = 16
+            AND ed.enum_value = dgp.POST_ID
+            ) post
+            FROM
+            DUTY_GROUP_PERSON dgp
+        LEFT  JOIN DUTY_GROUP dg ON dgp.GROUP_ID = dg.ID 
+        WHERE dgp.GROUP_ID = #{groupId}
+	</select>
+
+    <select id="findAllPersons" resultMap="DutyGroupPersonResultMap" parameterType="Long">
+       SELECT * FROM DUTY_GROUP_PERSON
+    </select>
+
+    <select id="findGroupByPerson" resultMap="DutyGroupPersonResultMap" parameterType="Long">
+        SELECT
+        dgp.*, dg.GROUP_NAME AS groupName,
+            (
+            SELECT
+            enum_text
+            FROM
+            ENUM_DETAIL ed
+            WHERE
+            ed.type_id = 16
+            AND ed.enum_value = dgp.POST_ID
+            ) post
+            FROM
+            DUTY_GROUP_PERSON dgp
+        LEFT  JOIN DUTY_GROUP dg ON dgp.GROUP_ID = dg.ID
+        WHERE dgp.PERSON_ID = #{personId}
+    </select>
+	
+	<select id="findByGroupIds" resultMap="DutyGroupPersonResultMap" parameterType="list">
+        SELECT
+            dgp.*, dg.GROUP_NAME AS groupName,
+            (
+            SELECT
+            enum_text
+            FROM
+            ENUM_DETAIL ed
+            WHERE
+            ed.type_id = 16
+            AND ed.enum_value = dgp.POST_ID
+            ) post
+            FROM
+            DUTY_GROUP_PERSON dgp
+        LEFT  JOIN DUTY_GROUP dg ON dgp.GROUP_ID = dg.ID
+        <where>
+	        dgp.GROUP_ID in 
+			<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</where>
+		ORDER BY dgp.ID ASC
+	</select>
+	
+	
+	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.base.entities.DutyGroupPerson">
+		UPDATE	DUTY_GROUP_PERSON
+		<set>
+        <if test="personId != null">PERSON_ID = #{personId,jdbcType=NUMERIC},</if>
+        <if test="personName != null">PERSON_NAME = #{personName,jdbcType=VARCHAR},</if>
+        <if test="groupId != null">GROUP_ID = #{groupId,jdbcType=NUMERIC},</if>
+        <if test="postDesc != null">POST_DESC = #{postDesc,jdbcType=VARCHAR},</if>
+        <if test="createId != null">CREATE_ID = #{createId,jdbcType=NUMERIC},</if>
+        <if test="creator != null">CREATOR = #{creator,jdbcType=VARCHAR},</if>
+        <if test="createDate != null">CREATE_DATE = #{createDate,jdbcType=DATE},</if>
+        <if test="updateId != null">UPDATE_ID = #{updateId,jdbcType=NUMERIC},</if>
+        <if test="updator != null">UPDATOR = #{updator,jdbcType=VARCHAR},</if>
+        <if test="updateDate != null">UPDATE_DATE = #{updateDate,jdbcType=DATE},</if>
+        <if test="postId != null">POST_ID = #{postId,jdbcType=NUMERIC},</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+    <!-- 通过 ID 获取对象-->
+	<delete id="deleteById" parameterType="Long">
+		DELETE FROM DUTY_GROUP_PERSON WHERE ID = #{id}
+	</delete>
+	<sql id="condition_sql" lang="velocity">
+	<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			1=1 		
+			#if($_p.id)
+				#set($_id = $_p.id)
+				AND dgp.ID = @{_id,jdbcType=BIGINT}
+			#end
+			#if($_p.personId)
+				#set($_personId = $_p.personId)
+				AND dgp.PERSON_ID = @{_personId,jdbcType=NUMERIC}
+			#end
+			#if($_p.personName && $_p.personName != '')
+				#set($_personName = '%' + $_p.personName + '%')
+				AND dgp.PERSON_NAME like @{_personName,jdbcType=VARCHAR}
+			#end
+			#if($_p.groupId)
+				#set($_groupId = $_p.groupId)
+				AND dgp.GROUP_ID = @{_groupId,jdbcType=NUMERIC}
+			#end
+			#if($_p.postDesc && $_p.postDesc != '')
+				#set($_postDesc = '%' + $_p.postDesc + '%')
+				AND dgp.POST_DESC like @{_postDesc,jdbcType=VARCHAR}
+			#end
+			#if($_p.searchText && $_p.searchText != '')
+				#set($_searchText = '%' + $_p.searchText + '%')
+				AND (dgp.PERSON_NAME like @{_searchText,jdbcType=VARCHAR} or dgp.POST_DESC like @{_searchText,jdbcType=VARCHAR})
+			#end
+			#if($_p.searchDutyGroupList && $_p.searchDutyGroupList.size()>0)	
+				#set($_searchDutyGroupList =$_p.searchDutyGroupList)
+				and 
+				#repeat( $_searchDutyGroupList $subs "," "dgp.GROUP_ID in (" ")" )
+				    @{subs,jdbcType=BIGINT}
+				#end	
+			#end
+		 #end
+		 ]]>
+	</sql>
+    
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.base.entities.DutyGroupPerson" resultMap="DutyGroupPersonResultMap" lang="velocity" databaseId="sqlserver">
+	<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+ 	SELECT A.*,(SELECT  enum_text FROM ENUM_DETAIL ed WHERE ed.type_id = 16 AND ed.enum_value = A.MP) post
+ 	<include refid="_PUBLIC_V.ROW_NUMBER_OVER" />
+ 	#order($_parameter.condition,"A.ID ASC") 
+	<include refid="_PUBLIC_V.AS_ROW_NUM" />   
+    FROM      
+    ( SELECT
+            dgp.id ,
+            MAX (hp.CODE) code,
+            MAX (hp.person_telephone) tel,
+            MAX (dgp.person_id) person_id,
+            dgp.person_name person_name,
+            MAX (dgp.group_id) group_id,
+            MAX (dgp.post_desc) post_desc,
+            MAX (dgp.post_id) post_id,
+            MAX (dg.GROUP_NAME) AS groupName,
+            MAX(hd.position_code) MP
+        FROM
+            DUTY_GROUP_PERSON dgp
+            LEFT JOIN DUTY_GROUP dg ON dgp.GROUP_ID = dg.ID
+            LEFT JOIN HO_DEPARTMENT_PERSON hd ON dgp.PERSON_ID = hd.PERSON_ID
+            LEFT JOIN HO_PERSON hp ON dgp.PERSON_ID=hp.ID
+            GROUP BY
+        DGP.PERSON_NAME,DGP.id) A
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			1=1 		
+			#if($_p.id)
+				#set($_id = $_p.id)
+				AND A.ID = @{_id,jdbcType=BIGINT}
+			#end
+			#if($_p.personId)
+				#set($_personId = $_p.personId)
+				AND A.PERSON_ID = @{_personId,jdbcType=NUMERIC}
+			#end
+			#if($_p.personName && $_p.personName != '')
+				#set($_personName = '%' + $_p.personName + '%')
+				AND A.PERSON_NAME like @{_personName,jdbcType=VARCHAR}
+			#end
+			#if($_p.groupId)
+				#set($_groupId = $_p.groupId)
+				AND A.GROUP_ID = @{_groupId,jdbcType=NUMERIC}
+			#end
+			#if($_p.postDesc && $_p.postDesc != '')
+				#set($_postDesc = '%' + $_p.postDesc + '%')
+				AND A.POST_DESC like @{_postDesc,jdbcType=VARCHAR}
+			#end
+			#if($_p.searchText && $_p.searchText != '')
+				#set($_searchText = '%' + $_p.searchText + '%')
+				AND (A.PERSON_NAME like @{_searchText,jdbcType=VARCHAR} or dgp.POST_DESC like @{_searchText,jdbcType=VARCHAR})
+			#end
+			#if($_p.searchDutyGroupList && $_p.searchDutyGroupList.size()>0)	
+				#set($_searchDutyGroupList =$_p.searchDutyGroupList)
+				and 
+				#repeat( $_searchDutyGroupList $subs "," "A.GROUP_ID in (" ")" )
+				    @{subs,jdbcType=BIGINT}
+				#end	
+			#end
+		 #end
+		 ]]>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+	<select id="findByCondition" parameterType="com.supconit.base.entities.DutyGroupPerson" resultMap="DutyGroupPersonResultMap" lang="velocity" databaseId="oracle">
+	<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+ 	SELECT A.*,(SELECT  enum_text FROM ENUM_DETAIL ed WHERE ed.type_id = 16 AND ed.enum_value = A.MP) post
+    FROM      
+    ( SELECT
+            dgp.id ,
+            MAX (hp.CODE) code,
+            MAX (hp.person_telephone) tel,
+            MAX (dgp.person_id) person_id,
+            dgp.person_name person_name,
+            MAX (dgp.group_id) group_id,
+            MAX (dgp.post_desc) post_desc,
+            MAX (dgp.post_id) post_id,
+            MAX (dg.GROUP_NAME) AS groupName,
+            MAX(hd.position_code) MP
+        FROM
+            DUTY_GROUP_PERSON dgp
+            LEFT JOIN DUTY_GROUP dg ON dgp.GROUP_ID = dg.ID
+            LEFT JOIN HO_DEPARTMENT_PERSON hd ON dgp.PERSON_ID = hd.PERSON_ID
+            LEFT JOIN HO_PERSON hp ON dgp.PERSON_ID=hp.ID
+            GROUP BY
+        DGP.PERSON_NAME,DGP.id) A
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			1=1 		
+			#if($_p.id)
+				#set($_id = $_p.id)
+				AND A.ID = @{_id,jdbcType=BIGINT}
+			#end
+			#if($_p.personId)
+				#set($_personId = $_p.personId)
+				AND A.PERSON_ID = @{_personId,jdbcType=NUMERIC}
+			#end
+			#if($_p.personName && $_p.personName != '')
+				#set($_personName = '%' + $_p.personName + '%')
+				AND A.PERSON_NAME like @{_personName,jdbcType=VARCHAR}
+			#end
+			#if($_p.groupId)
+				#set($_groupId = $_p.groupId)
+				AND A.GROUP_ID = @{_groupId,jdbcType=NUMERIC}
+			#end
+			#if($_p.postDesc && $_p.postDesc != '')
+				#set($_postDesc = '%' + $_p.postDesc + '%')
+				AND A.POST_DESC like @{_postDesc,jdbcType=VARCHAR}
+			#end
+			#if($_p.searchText && $_p.searchText != '')
+				#set($_searchText = '%' + $_p.searchText + '%')
+				AND (A.PERSON_NAME like @{_searchText,jdbcType=VARCHAR} or dgp.POST_DESC like @{_searchText,jdbcType=VARCHAR})
+			#end
+			#if($_p.searchDutyGroupList && $_p.searchDutyGroupList.size()>0)	
+				#set($_searchDutyGroupList =$_p.searchDutyGroupList)
+				and 
+				#repeat( $_searchDutyGroupList $subs "," "A.GROUP_ID in (" ")" )
+				    @{subs,jdbcType=BIGINT}
+				#end	
+			#end
+		 #end
+		 ]]>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countByCondition" parameterType="com.supconit.base.entities.DutyGroupPerson" resultType="long" lang="velocity">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+
+    <select id="searchDutyGroupPersons" parameterType="com.supconit.base.entities.DutyGroupPerson" resultMap="DutyGroupPersonResultMap" lang="velocity">
+        SELECT G.*
+        FROM DUTY_GROUP_PERSON G
+        WHERE G.GROUP_ID =
+        (SELECT GROUP_ID FROM DUTY_GROUP_PERSON
+        <![CDATA[
+            #where()
+                #if($_parameter.personId && $_parameter.personId!='')
+				    AND PERSON_ID = @{_parameter.personId,jdbcType=VARCHAR}
+                #end
+            #end
+        ]]>
+        )
+    </select>
+
+    <!-- 删除多条记录-->
+	<delete id="deleteByIds">
+        DELETE FROM DUTY_GROUP_PERSON WHERE ID in 
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+
+	</delete>
+	
+	<select id="findPersonCodeByGroupIdAndPostId" resultType="string" lang="velocity">
+        SELECT
+        	hp.CODE
+		FROM DUTY_GROUP_PERSON dgp
+        LEFT JOIN HO_PERSON hp ON dgp.PERSON_ID = hp.ID
+        WHERE 
+        	dgp.GROUP_ID = @{_parameter.groupId, jdbcType=BIGINT}
+        AND
+        	dgp.POST_ID = @{_parameter.postId, jdbcType=BIGINT}
+    </select>
+    
+    <select id="countExistByCondition" parameterType="com.supconit.base.entities.DutyGroupPerson" resultType="long" lang="velocity">
+		select count(*) from <include refid="TABLE_NAME" /> a
+		where 1=1
+		#if($_parameter.id)
+			#set($_id = $_parameter.id)
+			AND A.ID != @{_id,jdbcType=BIGINT}
+		#end
+		#if($_parameter.personId)
+			#set($_personId = $_parameter.personId)
+			AND A.PERSON_ID = @{_personId,jdbcType=BIGINT}
+		#end
+		#if($_parameter.groupId)
+			#set($_groupId = $_parameter.groupId)
+			AND A.GROUP_ID = @{_groupId,jdbcType=BIGINT}
+		#end
+	</select>
+
+</mapper>

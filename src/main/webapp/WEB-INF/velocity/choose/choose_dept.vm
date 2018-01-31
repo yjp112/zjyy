@@ -1,0 +1,96 @@
+#parse("index/_header.vm")
+</head>
+<body style="padding-bottom:40px;">
+#parse("index/_footer.vm")  
+<script type="text/javascript">
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+	      defaults: {
+	        resizable: true,
+	        closable: false,
+	        spacing_open: 5
+	      }
+	    });
+	});
+	
+    var setting = {
+	data: {
+		simpleData: {enable: true}
+      },
+      callback: {
+			onClick: function(event, treeId, treeNode) {
+				if("$!{dialogId}"!=""&&"$!{dialogId}"!="undefined"){
+	        		get_el_in_dialog("$!{dialogId}","#$!{txtId}").val(treeNode.id);
+	        		getFullDeptName(treeNode.id,"$!{dialogId}");
+	        		resetfocus(get_el_in_dialog("$!{dialogId}","#$!{txtName}"));
+            	}else{
+					var id_v = $("#"+"$!{txtId}",window.parent["_main_frame"].document);
+					id_v.val(treeNode.id);
+					getFullDeptName(treeNode.id,"$!{dialogId}");
+					resetfocus($("#"+"$!{txtName}",window.parent["_main_frame"].document));
+					//选择后需要做的特别动作
+					if("$!{afterAction}"!=""){
+						window.parent["_main_frame"].afterAction();
+					}
+				}
+				//关闭iframe
+				close_dialog('choose_dept');
+				
+    			//window.close();
+			}
+		}
+    };
+    var zNodes = [];    
+    #foreach($!{treeNode} in $!{treeList})
+        zNodes.push({id:$!{treeNode.id}, pId:$!{treeNode.pid}, name:"$!{treeNode.name}"});     
+    #end
+   $(document).ready(function(){
+		$.fn.zTree.init($("#treeDemo_choose"), setting,zNodes).expandAll(true);
+    });
+    
+    function clearChoose(){
+    	if("$!{dialogId}"!=""){
+    		get_el_in_dialog("$!{dialogId}","#$!{txtId}").val("");
+    		get_el_in_dialog("$!{dialogId}","#$!{txtName}").val("");  
+    		resetfocus(get_el_in_dialog("$!{dialogId}","#$!{txtName}"));
+    	}else{
+			var id_v = $("#"+"$!{txtId}",window.parent["_main_frame"].document);
+			id_v.val("");
+			var id_t = $("#"+"$!{txtName}",window.parent["_main_frame"].document);
+			id_t.val("");
+			resetfocus($("#"+"$!{txtName}",window.parent["_main_frame"].document));
+		}
+		//关闭iframe
+		close_dialog('choose_dept');
+		return true;
+    }
+    
+    function getFullDeptName(deptId,dialogId){
+    	$.ajax({
+			type: "post",
+			async: false,
+			url: "$!{rc.contextPath}/choose/getFullDeptName?deptId="+deptId,
+			dataType:'json',
+			success: function (data) {
+				if("$!{dialogId}"!=""&&"$!{dialogId}"!="undefined"){
+					get_el_in_dialog("$!{dialogId}","#$!{txtName}").val(data);
+				}else{
+					var id_t = $("#"+"$!{txtName}",window.parent["_main_frame"].document);
+					id_t.val(data);
+				}
+			}
+		});
+    }
+</script>
+
+<div class="ui-layout-center ui-dialog-form">
+	<div class="tree">
+		<ul id="treeDemo_choose" class="ztree"></ul>   
+	</div>
+	<div class="actions">
+		<button class="hc_btn cancel" onclick="clearChoose()" type="button"><i class="fa fa-close"></i>清空</button>
+	</div>
+</div>
+  </body>
+</html>
+

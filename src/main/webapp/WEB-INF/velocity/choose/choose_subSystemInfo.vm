@@ -1,0 +1,68 @@
+<script type="text/javascript">
+var ids =[];
+#foreach($ID in $!{ids})
+	ids.push($!{ID});
+#end
+	var setting = {
+	data: {
+		simpleData: {enable: true}
+      },
+      view : {
+			fontCss : function(treeId, treeNode){
+				for(var i=0;i<ids.length;i++){
+					if(treeNode.sid == ids[i]){
+						//treeNode
+						return {color : "rgb(83, 84, 84)"};
+					}
+				}
+			}
+		},
+      callback: {
+			onClick: function(event, treeId, treeNode) {
+				for(var i=0;i<ids.length;i++){
+					if(treeNode.sid == ids[i]){
+						 return false;
+					}
+				}
+				if(treeNode.id != '0'){
+					$("#"+"$!{txtId}").val(treeNode.id);
+				}else{
+					$("#"+"$!{txtId}").val("");
+				}
+				$("#"+"$!{txtName}").val(treeNode.name); 
+    			closeDialog();
+    			inputChooseClear();
+				
+			}
+		}
+    };
+
+var zNodes = [];  
+#foreach($!{treeNode} in $!{treeDatas})
+	zNodes.push({id:"$!{treeNode.standardCode}",sid:$!{treeNode.id}, pId:"$!{treeNode.parentCode}", name:"$!{treeNode.name}"});
+#end
+	function okClick(){
+    	var zTree = $.fn.zTree.getZTreeObj("subSystemInfoTree");
+    	var nodes=zTree.getCheckedNodes(true);
+    	if (nodes.length == 0) {
+    	   alert("未选择");
+		   return false;
+    	}else{
+    		if (parent){
+    			$("#"+"$!{txtId}").val(nodes[0].id);
+    			$("#"+"$!{txtName}").val(nodes[0].name); 
+    		}
+    		
+    	}
+		return true;
+	}
+   $(document).ready(function(){
+		//ztree
+		//console.log($!{treeDatas});
+		$.fn.zTree.init($("#subSystemInfoTree"), setting,zNodes).expandAll(true);
+    });
+</script>
+  <div class="tree">
+	<ul id="subSystemInfoTree" class="ztree"></ul>   
+  </div>
+ 

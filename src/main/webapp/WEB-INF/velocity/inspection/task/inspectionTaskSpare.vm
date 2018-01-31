@@ -1,0 +1,276 @@
+<table id='spare_tableId' class="ui-table ">
+	<thead>
+		<tr>
+			<th style="text-align: center;">序号</th>
+			<th style="width:200px;">配件编号</th>
+			<th style="width:120px;">配件名称</th>
+			<th>规格型号</th>
+			<th>数量(个)</th>
+			<th>金额(元)</th>
+			<th width="10"> #if(!$viewOnly)<a href="#" class="fa fa-plus spare_addRow"></i></a>#end</th>
+		</tr>
+	</thead>
+	<tbody>
+		#if($!task.inspectionSpareList && $!task.inspectionSpareList.size()>0)
+			#set($index = 0)
+			#foreach($!spare in $!task.inspectionSpareList)
+				<tr>
+					<td style="text-align: center;"><span class="rowNumber">$velocityCount</span></td>
+					<td class="inputText">
+						<input type="hidden" name="inspectionSpareList[$!index].spareId" value="$!spare.spareId"/>
+						<span class="k-textbox k-space-right" style="width:100%;background: #F5F5F5;">
+							<input readonly type="text" id="spareCode" name="inspectionSpareList[$!index].spareCode" value="$!spare.spareCode" style="background: #F5F5F5;" />
+								#if(!$!viewOnly) <a href="#" class="k-icon k-i-search" name="spareCode">&nbsp;</a> #end
+						</span>
+					</td>
+					<td><input readonly type="text" class="k-textbox" id="spareName" name="inspectionSpareList[$!index].spareName"
+							value="$!spare.spareName" /></td>
+					<td><input readonly type="text" class="k-textbox" name="inspectionSpareList[$!index].spareSpec"
+							value="$!spare.spareSpec"/></td>
+                    <td><input  type="text" class="k-textbox" name="inspectionSpareList[$!index].qty" value="$!spare.qty" 
+							onkeyup=" isNum(this);"/></td>
+					<td><input  type="text" class="k-textbox" name="inspectionSpareList[$!index].money" value="$!spare.money" onkeyup="isDigits(this);"/></td>
+					<td> #if(!$viewOnly)<i class="fa fa-remove spare_delRow"></i>#end
+				</tr>
+				#set($index =$index + 1)
+			#end
+			#else
+				#if(!$viewOnly)
+				#foreach($row in [0..0])
+					<tr>
+						<td style="text-align: center;"><span class="rowNumber">1</span></td>
+						<td class="inputText">
+							<input type="hidden" name="inspectionSpareList[$row].spareId" value=""/>
+							<span class="k-textbox k-space-right" style="width: 100%;background: #F5F5F5;">
+								<input readonly type="text" id="spareCode" name="inspectionSpareList[$row].spareCode" value="" style="background: #F5F5F5;"/>
+								#if(!$!viewOnly)<a href="#" class="k-icon k-i-search" name="spareCode">&nbsp;</a>#end
+							</span>
+						</td>
+						<td><input readonly type="text" class="k-textbox" id="spareName" name="inspectionSpareList[$row].spareName" value=""/></td>
+						<td><input readonly type="text" class="k-textbox" name="inspectionSpareList[$row].spareSpec" value=""/></td>
+						<td><input type="text" class="k-textbox" name="inspectionSpareList[$row].qty" value=""onkeyup=" isNum(this);"></td>
+						<td><input type="text" class="k-textbox" name="inspectionSpareList[$row].money" value="" onkeyup="isDigits(this);"/></td>
+						<td> #if(!$viewOnly)<i class="fa fa-remove spare_delRow"></i>#end</td>
+					</tr>
+				#end
+				#end
+		#end
+		<tr>
+			<td>合计</td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td> </td>
+			<td><input type="text" readonly id="sumMoney" class="k-textbox"/></td>
+			<td></td>
+		</tr>
+	</tbody>
+</table>
+	
+<script type="text/javascript">
+    var $item_tr;
+    $(function () {
+
+        $(".addRow").btnAddRow({rowNumColumn: "rowNumber"}, function () {
+            sumMoney();
+        });
+        $(".delRow").btnDelRow(function () {
+            sumMoney();
+        });
+
+        $("#item_tableId").on("change", "input[name$='.qty'],input[name$='.price']", function () {
+            sumMoney();
+        })
+
+        function sumMoney() {
+            $("tr:gt(0):not(:last)", $("#item_tableId")).each(function (i, tr) {
+                var qty = $("input[name$='.qty']", this);
+                var price = $("input[name$='.price']", this);
+                var money = $("input[name$='.money']", this);
+                //计算当前行的价格
+                var p = $.trim(price.val());
+                var q = $.trim(qty.val());
+                var m = formatMoney(p * q * 1.0);
+                if (m != '') money.val(m);
+                //计算总价格
+                totalMoney();
+            });
+            repairSumMoney($("#total_money_id", $("#item_tableId")).val(), $("#sumMoney", $("#spare_tableId")).val(),1)
+        }
+
+        totalMoney();
+
+    });
+
+    function totalMoney() {
+        var t = 0.00;
+        $.each($("input[name$='.money']", $("#item_tableId")), function (i, n) {
+            var a = $.trim($(n).val());
+            t = t + a * 1.0;
+        });
+        $("#total_money_id", $("#item_tableId")).val(formatMoney(t));
+    }
+    function mutipy($a,$b) {
+        var a = $.trim($a.val());
+        var b = $.trim($b.val());
+        if (a == '' || b == '') {
+            return '';
+        }
+        return formatMoney(a * b * 1.0);
+    }
+    function sum(arr) {
+        var s = 0;
+        $(arr).each(function (i, item) {
+            var val = $.trim($(item).val());
+            s = s + val * 1.0
+        })
+        return formatMoney(s);
+    }
+
+    function extendFunc(dataRow){
+        $("input[name$='.description']",$item_tr).val(dataRow.categoryName);
+        $("input[name$='.unit']",$item_tr).val(dataRow.unit);
+        $("input[name$='.originPrice']",$tr).val(dataRow.price);
+        $("input[name$='.price']",$item_tr).val(dataRow.price);
+        $("input[name$='.qty']",$item_tr).val(1);//数量默认给1
+        $("input[name$='.qty']",$item_tr).change();
+    }
+
+    function extendClearFunc(o){
+        if(o){
+            $item_tr = $(o).parents("tr");
+        }
+        $("input[name$='.description']",$item_tr).val("");
+        $("input[name$='.unit']",$item_tr).val("");
+        $("input[name$='.originPrice']",$tr).val("");
+        $("input[name$='.price']",$item_tr).val("");
+        $("input[name$='.qty']",$item_tr).val("");//数量默认给1
+        $("input[name$='.qty']",$item_tr).change();
+    }
+
+</script>
+
+<script type="text/javascript">
+    /* 备件相关js */
+    var $tr ;
+    var $spareTable = $("#spare_tableId");
+    $(function () {
+        $(".spare_addRow").btnAddRow({rowNumColumn: "rowNumber"}, function () {
+            caculate();
+        });
+        $(".spare_delRow").btnDelRow(function () {
+            caculate();
+        });
+
+        $("#spare_tableId").on("click", "a[name ='spareCode']", function () {
+                $tr= $(this).parents("tr");
+            quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/spare/spare/lookup?txtId=spareCategoryId&txtName=spareCategoryName", 900, 500);
+        })
+
+        caculate();
+        #if('$!viewOnly')
+                $("[type=submit]", $("#myform_id")).hide();
+                $(':input').attr('readonly', "readonly");
+                $("input[type=text]",$('#myform_id')).unbind( "click" ).attr('onclick','');
+                $('#item_tableId tr').each(function (i, tr) {
+                    $('th:last', tr).remove();
+                    $('td:last', tr).remove();
+                });
+                $("input[name='repairType']", $("#myform_id")).attr("disabled", "disabled");
+                $('#spare_tableId tr').each(function (i, tr) {
+                    $('th:last', tr).remove();
+                    $('td:last', tr).remove();
+                });
+                $('#images_table_id tr').each(function (i, tr) {
+                    $('th:last', tr).remove();
+                    $('td:last', tr).remove();
+                });
+
+                $("input[name='repairType']", $("#myform_id")).attr("disabled", "disabled");
+
+                $(".addRow").unbind("click");
+                $(".delRow").unbind("click");
+                $("#tab1").off("click");
+        #end
+    });
+
+    function caculate() {
+        var $table = $('#spare_tableId');
+        var $sumQty = $('#sumQty',$table);
+        var $sumMoney = $('#sumMoney',$table);
+
+        var $allQty  = $("input[name$='.qty']",$table);
+        var $allMoney= $("input[name$='.money']",$table);
+        $('tr:gt(0):not(:last)',$table).each(function (i, tr) {
+            var $qty= $("input[name$='.qty']", this);
+            var $prc= $("input[name$='.price']", this);
+            var $money= $("input[name$='.money']", this);
+
+            $($qty).add($prc).change(function () {
+                var v = mutipy($qty,$prc);
+                if (v != '') {
+                        $money.val(v);
+                }
+                var v1 = sum($allQty);
+                    $sumQty.val(v1);
+                var v2 = sum($allMoney)
+                    $sumMoney.val(v2);
+
+            });
+            $($money).change(function () {
+                var v1 = sum($allQty);
+                    $sumQty.val(v1);
+                var v2 = sum($allMoney);
+                    $sumMoney.val(v2);
+            });
+        });
+        var v1 = sum($allQty);
+            $sumQty.val(v1);
+        var v2 = sum($allMoney);
+            $sumMoney.val(v2);
+
+    }
+
+    function spareCheckedCallback(dataRow) {
+        $("input[name$='.spareId']",$tr).val(dataRow.id);
+        $("input[name$='.spareName']",$tr).val(dataRow.spareName);
+        $("input[name$='.spareCode']",$tr).val(dataRow.spareCode);
+        $("input[name$='.spareSpec']",$tr).val(dataRow.spec);
+        $("input[name$='.price']",$tr).val(dataRow.price);
+        $("input[name$='.qty']",$tr).focus();
+        $("input[name$='.qty']",$tr).blur();
+        $("input[name$='.qty']",$tr).val(1);
+        caculate();
+        $("input[name$='.qty']",$tr).change();
+
+    }
+    function spareCheckedClearCallback(dataRow) {
+        $("input[name$='.spareId']",$tr).val("");
+        $("input[name$='.spareName']",$tr).val("");
+        $("input[name$='.spareCode']",$tr).val("");
+        $("input[name$='.spareSpec']",$tr).val("");
+        $("input[name$='.price']",$tr).val("");
+        $("input[name$='.qty']",$tr).val("");
+        $("input[name$='.money']",$tr).val("");
+        $("input[name$='.qty']",$tr).focus();
+        $("input[name$='.qty']",$tr).blur();
+        caculate();
+        $("input[name$='.qty']",$tr).change();
+    }
+function isDigits(e){
+   var v = $(e).val();
+   if(!v)return;
+   if(v.toString().length>20){
+        alert("请输入20位以内的数字");
+        $(e).val("");
+		caculate();
+        return;
+    }
+   if(!v.match(/^\d+(\.)?(\d+)?$/)){
+       alert("请输入数字");
+       $(e).val("");
+	   caculate();
+       return false;
+   }
+}
+</script>

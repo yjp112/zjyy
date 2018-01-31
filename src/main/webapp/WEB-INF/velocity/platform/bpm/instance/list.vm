@@ -1,0 +1,62 @@
+<div class="ui-layout-center" id="subMain"><table id="wf_instance_manage_datalist" class="fn-hide"></table></div>
+<div class="ui-layout-north">
+	#bread_crumbs('WF_PROCESS_INSTANCE')
+	<form id="wf_instance_manage_list_search" class="ui-form ui-form-search fn-clear">
+		<div class="ui-form-search-left">
+	    	<div class="ui-form-item">
+				<label class="ui-label">KEY：</label>
+	    		<input class="ui-input" type="text" name="key" value="$!{key}" placeholder="请输入完整的KEY" />
+	    	</div>
+	    </div>
+		<div class="ui-form-search-right">
+			<button type="submit" class="btn btn-primary"><i class="iconfont icon-search"></i> 查&nbsp;询</button>
+		</div>
+	</form>
+</div>
+<script type="text/javascript">
+	var wf_instance_manage_datagrid;
+	$(function(){
+		if(_inner_layout) _inner_layout.destroy();
+		_inner_layout = $("#centerMain").layout({
+			defaults : {
+				resizable : false,
+				closable : false,
+				spacing_open : 5
+			},
+			onresize_end : function(){
+				$("#wf_instance_manage_datalist").datagridResize({width:_inner_layout.state.center.innerWidth,height:_inner_layout.state.center.innerHeight});
+			}
+		});
+		
+		wf_instance_manage_datagrid = $("#wf_instance_manage_datalist").datagrid({
+			url: '$!{rc.contextPath}/bpm/instance/list',
+			dataType: "json",
+			method: "POST",
+			singleSelected : true,
+			striped : false,
+			height:  _inner_layout.center.state.innerHeight,
+			width :  _inner_layout.center.state.innerWidth,
+			showOrderNumber : true,
+			useRp : true,
+			usepager: true,
+    		rpOptions: [10, 20, 40, 50],
+    		pageSize: 20,
+    		searchFormId : "wf_instance_manage_list_search",
+    		searchCallback : function(datagrid){
+    			
+    		},
+			colModel : [
+				{"display":"序号"},
+				{"display": "流程实例ID","name": "id",width:80},
+				{"display": "流程定义ID","name": "processDefinitionId",width:350},
+				{"display": "KEY","name": "processDefinitionId.split(':')[0]",width:300},
+				{"display": "版本","name": "processDefinitionId.split(':')[1]",width:120},
+				{"display": "业务实体ID","name": "businessKey",width:100,align:"center"},
+				{"display": "当前节点","name": "currentNode",width:200,align:"center"}
+	    	],
+			buttons : [
+				#data_grid_buttons("WF_PROCESS_INSTANCE")#end
+			]
+		});
+	});
+</script>

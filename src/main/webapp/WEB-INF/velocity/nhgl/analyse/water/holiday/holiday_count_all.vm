@@ -1,0 +1,178 @@
+ <script type="text/javascript" src="$!{nhgl_static_custom_url}/echarts_2/esl.js"> </script>
+  <script type="text/javascript" src="$!{nhgl_static_custom_url}/echarts_2/echartsUtil.js"></script>
+ ##最上方的固定列表
+     <div class="nh-chart" id="mix$!{num}">
+       </div>	
+	##下方的列别
+	<div class="nh-grid">
+	<table class="nh-table" >
+        <thead>
+			<tr>
+                <th class="nh-table-num">日期</th>
+				<th class="nh-table-num">今年(t)</th>
+				<th class="nh-table-num">去年(t)</th>
+				<th class="nh-table-num">同比涨幅(%)</th>
+			</tr>
+		</thead>
+		#foreach($day in $hlist)
+			<tr>
+                <td class="nh-table-num">$day.holidayName</td>
+				<td class="fInt" style="text-align:center">$day.totalDayValue</td>
+				<td class="fInt" style="text-align:center">$day.totalYoy</td>
+				<td style="text-align:center">$day.percent</td>
+			</tr>
+		#end
+    </table>
+    </div>
+  <script type="text/javascript">
+  	var myChart;
+	var option;
+  $(document).ready(function(){
+  		fNumPage();
+    	var percentD = '$!nhDay.percentD';
+  		var percentN='$!nhDay.percentN'
+  		var dayTimeEleTotal='$!nhDay.DayDaytimeValue';
+  		var nightEleTotal='$!nhDay.DayNightValue';
+  		var sTime='$!nhDay.DayOfMonthKey';
+  		$("#sTime1").text(sTime);
+  		$("#sTime2").text(sTime);
+		if(dayTimeEleTotal == 0)
+			$("#dayTimeTotal").text("0.00");
+		else
+			$("#dayTimeTotal").text(dayTimeEleTotal);
+		if(nightEleTotal==0)
+			$("#nightTotal").text("0.00");
+		else
+			$("#nightTotal").text(nightEleTotal);  		
+  		if(percentD >0){
+			$("#percentD").text('增长'+percentD+'%');
+		}
+		else if(percentD == 0){
+			$("#percentD").text('持平');
+		}
+		else{
+			$("#percentD").text('下降'+(-percentD)+'%');
+		}
+		if(percentD == 0){
+			$("#rudD").removeClass();
+			$("#rudD").addClass("count-item count-item-unchanged");
+		}
+		else if(percentD > 0){
+			$("#rudD").removeClass();
+			$("#rudD").addClass("count-item count-item-rise");
+		}
+		else {
+			$("#rudD").removeClass();
+			$("#rudD").addClass("count-item count-item-decline");
+		}
+		
+		fNumPage();
+		var allHeight = $("#chart_content_id").height();
+		var header = $(".nh-header").height();
+		var content = $(".nh-content").height();
+		if(content > allHeight-header-40)
+			$("#content").css("height",content);
+		else
+			$("#content").css("height",allHeight-header-40);
+		$(".ui-tab-panels").css("height",allHeight-header-40);
+		if(percentN >0){
+			$("#percentN").text('增长'+percentN+'%');
+		}
+		else if(percentN == 0){
+			$("#percentN").text('持平');
+		}
+		else{
+			$("#percentN").text('下降'+(-percentN)+'%');
+		}
+		if(percentN == 0){
+			$("#rudN").removeClass();
+			$("#rudN").addClass("count-item count-item-unchanged");
+		}
+		else if(percentN > 0){
+			$("#rudN").removeClass();
+			$("#rudN").addClass("count-item count-item-rise");
+		}
+		else {
+			$("#rudN").removeClass();
+			$("#rudN").addClass("count-item count-item-decline");
+		}
+  
+  
+  		var contextPath = "$!{rc.contextPath}";
+		//混合图总量
+		option = {
+			 title : {
+        	        text: '$!{title}',
+        	        x:'center'
+        	    },
+			    tooltip : {
+			        trigger: 'axis',
+					formatter:function(params,ticket)
+					{
+						var str="";
+						for(var i=0;i<params.length;i++){
+							str = str + params[i][0]+" : "+params[i][2];
+
+							if(params[i][0] == "同比涨幅")
+								str = str + " %"+"</br>";
+							else
+								str = str + " " + water+"</br>";
+						}
+						return str;
+					}
+			    },
+			    legend: {
+				//orient : 'vertical',
+        	        x : 'right',
+        	        y : 'top',
+			        data:['本年','去年','同比涨幅']
+			    },
+			    xAxis : [
+			        {
+			            type : 'category',
+			            data : '$!holidayMap.dayList'.split(",")
+			        }
+			    ],
+			    yAxis : [
+			        {
+			            type : 'value',
+			            name : '水量('+water+')',
+##			            axisLabel : {
+##			                formatter: '{value}'//这里可以去掉ml
+##			            },
+			            splitArea : {show : true}
+			        },
+			        {
+			            type : 'value',
+			            name : '同比涨幅',
+			            axisLabel : {
+			                formatter: '{value}%'//这里也可以去掉°C
+			            },
+			            splitLine : {show : false}
+			        }
+			    ],
+			    series : [
+			        {
+			            name:'本年',
+			            type:'bar',
+			            data:'$!holidayMap.dayString'.split(",")
+			        },
+			        {
+			            name:'去年',
+			            type:'bar',
+			            data:'$!holidayMap.dayLastString'.split(",")
+			        },
+			        {
+			            name:'同比涨幅',
+			            type:'line',
+			            yAxisIndex: 1,
+			            data:'$!holidayMap.precent'.split(",")
+			        }
+			    ]
+			};
+		initEcharts("mix$!{num}",option);
+		
+	})
+	$(".nh-grid").circular();
+  </script> 
+   

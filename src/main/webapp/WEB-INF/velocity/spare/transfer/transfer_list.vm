@@ -1,0 +1,146 @@
+#parse("index/_header.vm")
+</head>
+<body>
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<form class="ui-form" id='queryForm'>
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+                <tr>
+                  <td class="ui-search-name first">调拨单号：</td>
+                  <td class="ui-search-c">
+					<input class="k-textbox" type="text" name="transferCode" value="$!transfer.transferCode">
+                  </td>
+                  <td class="ui-search-name">调拨日期：</td>
+                  <td class="ui-search-c" rowspan="2">
+                      <input id="startTransferTime" type="text" name="startTransferTime"     />
+					  <span class="ui-form-text">至</span> 
+					  <input id="endTransferTime" type="text" name="endTransferTime"     />
+                  </td>
+				  <td class="ui-search-name">调入仓库：</td>
+                  <td class="ui-search-c">
+                       <select class="k-textbox" name="inWarehouseId">
+        					<option value=''>--请选择--</option>
+        			    	${inWarehouseOptions}
+        			    </select>
+                  </td>
+                </tr>
+              </table>
+            </td>
+            <td width="180" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+            <td></td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+  #parse("index/_footer.vm")  
+<script type="text/javascript">
+  var _iframe_layout, _left_layout, _inner_layout;
+	$(document).ready(function(){
+		commonDateWithout("startTransferTime","endTransferTime","yyyy-MM-dd","zh-CN");
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      }
+    });
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+
+    $('#resetBtn').click(function(){
+      $("#queryForm :text").val('');  
+    });
+
+	$('.iconfont','.ui-form-pick').each(function(){
+      $(this).click(function(){
+      	$('#treeId').val('');
+      	$('#selectBlock').hide();
+      })
+    })
+	
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/spare/transfer/list?t="+new Date().getTime(), [{
+              field: "id",
+              hidden: true
+          }, {
+              field: "transferCode",
+              title: "调拨单号",
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"},
+              sortable: false,
+			   template:"<a href=\"javascript:void(0)\" title=\"查看#: data.transferCode #的详细信息\" onclick=\"window.location.href='$!{rc.contextPath}/spare/transfer/edit?viewOnly=true&id=#: data.id #'\">#: data.transferCode #</a>"
+          }, {
+              field: "inWarehouseName",
+              title: "调入仓库",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              sortable: false
+              
+          }, {
+              field: "outWarehouseName",
+              title: "调出仓库",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              sortable: false
+          }
+		  , {
+              field: "statusName",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"},
+              title: "调拨状态"
+          }, {
+              field: "transferPersonName",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              title: "调拨人"
+          }, {
+              field: "transferTime",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"},
+              title: "调拨日期"
+          }],
+     	 {
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          },resizable:true
+      }, {
+          serverSorting: true
+      }, [{
+              name: "添加",
+              icon: "fa fa-plus",
+              onclick: function (obj, grid) {
+			  	 window.location.href = '$!{rc.contextPath}/platform/bpm/start?_bpm_process_key=TRANSFER_PROCESS';
+    			 
+			  }
+          }
+      ]);
+		
+    });
+  
+</script>

@@ -1,0 +1,140 @@
+<!-- 左侧信息列表 -->
+<div class="map_menu" id="G_MapMenu">
+    <!--loading-->
+    <div id="loadingCeng"
+         style="display:none;width:340px;height:520px;position:absolute;z-index:1100;background-position:155px 120px;background-attachment:fixed;"
+         class="ui-loading"></div>
+    <div class="tabs" id="G_Tabs">
+        <ul class="clearfix">
+            <li class="sysCf sysCf-on on"><a class="tab"><span class="icon-sysCf icon-sysCf-on"></span>选择楼层</a></li>
+        ##<li class="eqsearch "><a class="tab"><i class="iconfont icon-search"></i>设备查询</a></li>
+        </ul>
+    </div>
+    <div id="G_MapMuneCon" class="bgcol_edfce2">
+        <!---------------选择楼层---------------->
+        <div id="G_MapMuneCon_tabA">
+            <div class="sd-floor">
+                #if($!allLou)
+                    #foreach($!eachLou in $!allLou.entrySet())
+                        <a areaCode="$!eachLou.key.id" id="ceng_$!eachLou.key.id"href="javascript:void(0);" onclick='ui_floor_click($(this))'>
+                            	<h2 id="lou_$!eachLou.key.id">$!eachLou.key.areaName</h2>
+                        </a>
+
+                        <ul class="floor-list">
+                            #foreach($!louceng in $!eachLou.value)
+                                <li
+                                    #if("$!louceng.remark"=="alarm" or "$!louceng.remark"=="yes")
+                                        #if("$!louceng.remark"=="yes")
+                                            class="floor-item"
+                                        #else
+                                            class="floor-item floor-item-warn"
+                                        #end
+                                    #else
+                                            class="floor-item floor-item-disabled"
+                                    #end>
+                                    <a areaCode="$!louceng.id" id="ceng_$!louceng.id" isShowCeng="$!louceng.remark" href="javascript:void(0);" onclick='ui_floor_click($(this))'>$!louceng.areaName</a>
+                                </li>
+                            #end
+                        </ul>
+                    #end
+                #end
+            </div>
+        </div>
+        <!---------------设备查询---------------->
+        <div id="G_MapMuneCon_tabB">
+            <div class="ui-search">
+                <div class="ui-label" style="width:auto;">大楼</div>
+                <select id="selLou" class="ui-select" style="width:100px;margin-right:10px;">
+                    #foreach($geoArea in $lstLou)
+                        #set($showFlag1=0)
+                        #foreach($a in $lstShowLou)
+                            #if($!{a.id}==$!{geoArea.id})
+                                #set($showFlag1=1)
+                            #end
+                        #end
+                        #if($showFlag1==1)
+                            <option value="$!{geoArea.id}">$!{geoArea.areaName}</option>#end
+                    #end
+                </select>
+
+                <div class="ui-label" style="width:auto;">&nbsp;&nbsp;&nbsp;&nbsp;状态</div>
+                <select id="selStatus" class="ui-select" style="width:100px">
+                    <option value="">全部</option>
+                    #if("$!{haveOpenClose}"=="true")
+                        <option value="0">关</option>
+                        <option value="1">开</option>
+                    #end
+                    <option value="2">报警</option>
+                </select>
+
+                <div style="width:300px;height:5px;float:left"></div>
+                <div class="ui-label" style="width:auto;padding-top:10px;">设备</div>
+                <div class="ui-search-inputBox">
+                    <div class="fn-left"><input type="text" id="txtCodeName" class="ui-search-input" value=""/></div>
+                </div>
+                <button type="button" class="btn ui-btn-1" id="btn_select" style="margin-top:5px;"
+                        onclick="findDevices('select')"><i class="iconfont icon-search"></i>搜索
+                </button>
+
+            </div>
+            <div class="itemsTitle">
+                <div class="items-nav">
+                    <!--<div class="items-nav-inputBox">
+                      <input type="checkbox" class="checkAll" onclick="checkAll();"/>
+                    </div>
+                    <a href="#" class="items-nav-btn">全选</a>
+                    <a href="#" class="items-nav-btn">操作</a>-->
+                    <div class="batch-box fn-hide">
+                        <ul>
+                            <li><a href="#" class="">开</a></li>
+                            <li><a href="#" class="">关</a></li>
+                        </ul>
+                    </div>
+                </div>
+                共<span id="spnTotal">0</span>条结果
+            </div>
+            <div id="G_ItemListsBox" class="text-center" style="overflow-y:auto;">
+                <ul class="item_lists item_list_plant text-center" id="G_ItemLists">
+                    <!--deviceList-->
+                </ul>
+                <div class="ui-paging">
+                    <em class="ui-paging-info">第<em class="ui-paging-bold"><i id="spnPage">0</i>/<i
+                            id="spnTotalPage">0</i></em>页</em>
+                  <span id="pageLR">
+                      <i class="iconfont icon-long-arrow-left"></i> 上一页
+                  </span>
+                    <a id="pageLW" style="display:none;" href="javascript:void(0)" class="ui-paging-last"
+                       onclick="findDevices('left');">
+                        <i class="iconfont icon-long-arrow-left"></i> 上一页
+                    </a>
+    			  <span id="pageRR">
+    				下一页 <i class="iconfont icon-long-arrow-right"></i>
+                  </span>
+                    <a id="pageRW" style="display:none;" href="javascript:void(0)" class="ui-paging-last"
+                       onclick="findDevices('right');">
+                        下一页 <i class="iconfont icon-long-arrow-right"></i>
+                    </a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+    	debugger;
+    	var a="$!allLou.entrySet()"
+        //设备查询
+        $("#txtCodeName").keydown(function (e) {
+            if (e.keyCode == 13) {
+                $("#btn_select").click();
+            }
+        })
+    })
+    function check(dd){
+    	debugger
+    	return true;
+    
+    }
+</script>

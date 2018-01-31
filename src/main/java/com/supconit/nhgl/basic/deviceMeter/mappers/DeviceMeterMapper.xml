@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.basic.deviceMeter.entities.DeviceMeter">
+
+	<resultMap type="com.supconit.nhgl.basic.deviceMeter.entities.DeviceMeter" id="DeviceMeterResultMap">      
+       <result property="id" column="ID" jdbcType="NUMERIC"/>
+        <result property="deviceId" column="DEVICE_ID" jdbcType="NUMERIC" />
+        <result property="deviceMeterId" column="DEVICE_METER_ID" jdbcType="NUMERIC"/>
+        <result property="shareProportion" column="SHARE_PROPORTION" jdbcType="VARCHAR"/>
+        <result property="isValid" column="IS_VALID" jdbcType="NUMERIC" />
+        <result property="invalidDate" column="INVALID_DATE" jdbcType="VARCHAR" />
+        <result property="linkTime" column="LINK_TIME" jdbcType="VARCHAR" />
+        <result property="electricCode" column="electricCode" jdbcType="VARCHAR" />
+        <result property="electricName" column="electricName" jdbcType="VARCHAR" />
+        <result property="deviceCode" column="deviceCode" jdbcType="VARCHAR" />
+        <result property="deviceName" column="deviceName" jdbcType="VARCHAR" />
+        <result property="useDepartMent" column="useDepartMent" jdbcType="VARCHAR" />
+        <result property="manageDepartMent" column="manageDepartMent" jdbcType="VARCHAR" />
+        <result property="locationName" column="locationName" jdbcType="VARCHAR" />
+        <result property="locationId" column="locationId" jdbcType="NUMERIC" />
+        
+	</resultMap>
+	<sql id="TABLE_NAME" lang="velocity">NH_DEVICE_METER</sql>
+	<sql id="SEQUENCE" lang="velocity">
+		SELECT SEQ_<include refid="TABLE_NAME" />.NEXTVAL FROM DUAL
+	</sql>
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+   <sql id="select_pre" lang="velocity">
+		select
+	        t1.ID,
+	        t1.DEVICE_ID,
+	        t1.DEVICE_METER_ID,
+	        t1.SHARE_PROPORTION,
+	        t1.IS_VALID,
+	        t1.INVALID_DATE,
+	        t1.LINK_TIME,
+	        t3.DEVICE_CODE as electricCode,
+	        t3.DEVICE_NAME as electricName,
+	        t2.DEVICE_CODE as deviceCode,
+	        t2.DEVICE_NAME as deviceName,
+	        t4.NAME as useDepartMent,
+	        t5.NAME as manageDepartMent,
+	        t6.FULL_LEVEL_NAME as locationName,
+	        t2.LOCATION_ID as locationId
+        FROM NH_DEVICE_METER t1
+        LEFT JOIN DEVICE t2 ON t1.DEVICE_ID = t2.ID
+        LEFT JOIN DEVICE t3 ON t1.DEVICE_METER_ID = t3.ID
+        LEFT JOIN HO_DEPARTMENT t4 ON t4.ID=t2.USE_DEPARTMENT_ID
+        LEFT JOIN HO_DEPARTMENT t5 ON t5.ID=t2.MANAGE_DEPARTMENT_ID
+        LEFT JOIN GEO_AREA t6 ON t6.ID=t2.LOCATION_ID
+	</sql>
+	<sql id="count_pre" lang="velocity">
+		SELECT
+		COUNT(*)
+		FROM
+		NH_DEVICE_METER t1
+		LEFT JOIN DEVICE t2 ON t1.DEVICE_ID = t2.ID
+        LEFT JOIN DEVICE t3 ON t1.DEVICE_METER_ID = t3.ID
+        LEFT JOIN HO_DEPARTMENT t4 ON t4.ID=t2.USE_DEPARTMENT_ID
+        LEFT JOIN HO_DEPARTMENT t5 ON t5.ID=t2.MANAGE_DEPARTMENT_ID
+        LEFT JOIN GEO_AREA t6 ON t6.ID=t2.LOCATION_ID
+	</sql>
+	<sql id="condition_sql">
+		<where>
+        <if test="id != null "> t1.ID = #{id} and </if>
+        <if test="deviceCode !=null and deviceCode !=''">t2.DEVICE_CODE LIKE '%'+#{deviceCode}+'%' and</if>
+        <if test="electricCode !=null and electricCode !=''">t3.DEVICE_CODE LIKE '%'+#{electricCode}+'%' and</if>
+        <if test="electricName !=null and electricName !=''">t3.DEVICE_NAME LIKE '%'+#{electricName}+'%' and</if>
+        <if test="subCode !=null and subCode !=''">t3.DISCIPINES_CODE LIKE #{subCode}+'%' and</if>
+        <if test="locationId !=null and locationId !=''">t2.LOCATION_ID in(select id from GEO_AREA WHERE ID = #{locationId} or PARENT_ID=#{locationId}) AND </if>
+        <if test="deviceMeterId != null">t1.DEVICE_METER_ID=#{deviceMeterId} and</if>
+        1=1 
+		</where>
+	</sql>
+	<!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.nhgl.basic.deviceMeter.entities.DeviceMeter" resultMap="DeviceMeterResultMap">
+		<include refid="select_pre"/>
+		<include refid="condition_sql"/>
+	</select>
+	<select id="countByCondition" parameterType="com.supconit.nhgl.basic.deviceMeter.entities.DeviceMeter" resultType="long">
+		<include refid="count_pre"/>
+		<include refid="condition_sql"/>
+	</select>
+	<select id="getById" parameterType="long" resultMap="DeviceMeterResultMap">
+      <include refid="select_pre" /> 
+        where t1.ID = #{id}
+    </select>
+    
+    
+    
+    <!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.nhgl.basic.deviceMeter.entities.DeviceMeter">
+		UPDATE	NH_DEVICE_METER
+		<set>
+        <if test="deviceId != null">DEVICE_ID = #{deviceId,jdbcType=VARCHAR},</if>
+        <if test="deviceMeterId !=null">DEVICE_METER_ID=#{deviceMeterId,jdbcType=NUMERIC},</if>
+        <if test="shareProportion !=null">SHARE_PROPORTION=#{shareProportion,jdbcType=VARCHAR},</if>
+        <if test="isValid != null">IS_VALID = #{isValid,jdbcType=NUMERIC},</if>
+        <if test="invalidDate != null">INVALID_DATE = #{invalidDate,jdbcType=VARCHAR},</if>
+        <if test="linkTime != null">LINK_TIME = #{linkTime,jdbcType=VARCHAR},</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+	<insert id="insert" parameterType="com.supconit.nhgl.basic.deviceMeter.entities.DeviceMeter" keyProperty="id" keyColumn="ID" databaseId="sqlserver">
+		<include refid="insert_sql" />
+        <!-- 获取记录主键 microsoft sql server -->
+		<selectKey keyProperty="id" resultType="Long" order="AFTER">
+			select @@identity
+		</selectKey>
+	</insert>
+    
+    <insert id="insertList" parameterType="java.util.List" keyProperty="id" keyColumn="ID" databaseId="sqlserver">
+    	INSERT INTO NH_DEVICE_METER( 
+        DEVICE_ID,
+        DEVICE_METER_ID,
+        SHARE_PROPORTION,
+        IS_VALID,
+        INVALID_DATE,
+        LINK_TIME
+		) VALUES 
+		<foreach collection="list" item="item" separator="," >  
+			(
+				#{item.deviceId,jdbcType=NUMERIC},      
+		        #{item.deviceMeterId,jdbcType=NUMERIC},
+		        #{item.shareProportion,jdbcType=VARCHAR},
+		        #{item.isValid,jdbcType=NUMERIC},
+		        #{item.invalidDate,jdbcType=VARCHAR},
+		        #{item.linkTime,jdbcType=VARCHAR}
+			)
+		</foreach>  
+    </insert>
+    
+    <!-- 插入记录-->
+	<sql id="insert_sql">
+		INSERT INTO NH_DEVICE_METER( 
+        DEVICE_ID,
+        DEVICE_METER_ID,
+        SHARE_PROPORTION,
+        IS_VALID,
+        INVALID_DATE,
+        LINK_TIME
+		) VALUES (  
+		#{deviceId,jdbcType=NUMERIC},      
+        #{deviceMeterId,jdbcType=NUMERIC},
+        #{shareProportion,jdbcType=VARCHAR},
+        #{isValid,jdbcType=NUMERIC},
+        #{invalidDate,jdbcType=VARCHAR},
+        #{linkTime,jdbcType=VARCHAR}
+		)
+	</sql>
+	<delete id="deleteById" parameterType="Long">
+		DELETE FROM NH_DEVICE_METER WHERE ID = #{id}
+	</delete>
+	
+	<delete id="deleteByDeviceId" parameterType="Long">
+		DELETE FROM NH_DEVICE_METER 
+		<where>
+			<if test="deviceMeterId != null">DEVICE_METER_ID = #{deviceMeterId} and</if>
+			<if test="isValid != null">IS_VALID = #{isValid} and</if>
+			1=1
+		</where>
+	</delete>
+	<!-- 删除多条记录-->
+	<delete id="deleteByIds">
+        DELETE FROM NH_DEVICE_METER WHERE ID in 
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+</mapper>

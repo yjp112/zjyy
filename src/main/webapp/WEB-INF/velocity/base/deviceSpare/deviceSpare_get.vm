@@ -1,0 +1,261 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+        <form class="ui-form" id='queryForm'>
+            <input type="hidden" name="id" id="id" value="$!{device.id}" />
+            <input type="hidden" name="deviceId" id="deviceId" value="$!{device.deviceId}" />
+            <table width="100%">
+                <tr>
+                    <td>
+                        <table class="ui-search-table" width="100%">
+                            <tr>
+                                <td class="ui-search-name first" align="right">部门：</td>
+                                <td class="ui-search-c">
+##                                <span class="k-textbox k-space-right" onclick="chooseDept('deptId','deptName','','')">
+									<input type="text" readonly id="deptName" name="deptName" value="$!{device.deptName}" class="k-textbox" />
+##									<a href="#" class="k-icon k-i-search">&nbsp;</a>
+##								</span>
+                                <input type="hidden" name="deptId" id="deptId" value="$!{device.deptId}"/>
+                                </td>
+                                <td class="ui-search-name"  align="right">入库人：</td>
+                                <td class="ui-search-c">
+								<input type="text" readonly id="creator" name="creator" value="$!{device.creator}" class="k-textbox" />
+                                <input type="hidden" id="createId" name="createId" value=" $!{device.createId}"/>
+                                </td>
+                                <td class="ui-search-name first"  align="right">入库时间：</td>
+                                <td class="ui-search-c">
+                                 <input type="text" readonly  name="createDate" id="createDate" value="#date_format($!{device.createDate},'yyyy-MM-dd')" class="k-textbox" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="ui-search-name first"  align="right">保管员：</td>
+                                <td class="ui-search-c">
+                                 <input type="text"readonly  name="storeMan" value=" $!{device.storeMan}" class="k-textbox" />
+                                </td>
+                                <td class="ui-search-name"  align="right">资产管理员：</td>
+                                <td class="ui-search-c">
+                                <input type="text"readonly  name="assetmanager" value="$!{device.assetmanager}" class="k-textbox" />
+                                </td>
+                                <td class="ui-search-name first"  align="right">验收时间：</td>
+                                <td class="ui-search-c">
+                                 <input type="text" readonly  id="checkDate" name="checkDate" id="checkDate" value="#date_format($!{device.checkDate},'yyyy-MM-dd')" class="k-textbox" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="ui-search-name first"  align="right">设备名称：</td>
+                                <td class="ui-search-c">
+                                 <input type="text" name="deviceName"  id="deviceName" readonly value="$!{device.deviceName}" class="k-textbox" />
+                                </td>
+                                <td class="ui-search-name first"  align="right">生产厂商：</td>
+                                <td class="ui-search-c">
+                                 <input type="text" readonly name="supplierName" value="$!{device.supplierName}" class="k-textbox" />
+                                </td>
+                                
+                            </tr>
+                        </table>
+                    </td>
+                    <td width="150" valign="top" style="padding-top:4px;">
+##                        <button type="submit" class="hc_btn k-primary" id="queryBtn" style="display:none;"><i class="fa fa-search"></i>查询</button>
+                        <a class="hc_btn k-primary"  onclick="reply()" style="background-color: #1ab38d;border-color: #1ab38d;"><i class="fa fa-reply"></i>返回</a>
+                    </td>
+                    <td></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+   <form id="deviceSpare_form"  method="post" action="$!{rc.contextPath}/base/deviceSpareIn/spareOutsave">
+	    <div class="ui-layout-center">
+	        <div id="grid"></div>
+	    </div>
+    </form>
+</div>
+#parse("index/_footer.vm")
+<script type="text/javascript">
+var _iframe_layout, _left_layout, _inner_layout;
+$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+        defaults: {
+            resizable: false,
+            closable: false,
+            spacing_open: 5
+        }
+    });
+
+    _inner_layout = $("#subMain").layout({
+        defaults: {
+            resizable: false,
+            closable: false,
+            spacing_open: 0
+        },
+        center: {
+            onresize_end: function () {
+                var grid = $("#grid").data("kendoGrid");
+                grid.resize();
+            }
+        }
+    })
+    
+    var deviceSpareInId='$!{device.id}';
+    //列表
+    quick_datagrid("#grid", "", "$!{rc.contextPath}/base/deviceSpareIn/detailPage?deviceSpareInId="+deviceSpareInId, [{
+        field: "id",
+        hidden: true
+    },{
+        field: "spareName",
+        title: "备件名称", 
+		headerAttributes: {"class": "k-grid-text"},
+        attributes: {"class": "k-grid-text"},
+		width: "70px"
+
+    }, {
+        field: "spareSpac",
+        title: "规格/型号",
+		headerAttributes: {"class": "k-grid-text"},
+        attributes: {"class": "k-grid-text"},
+		width: "70px"
+    }, {
+        field: "total",
+        title: "数量",
+		headerAttributes: {"class": "k-grid-num"},
+        attributes: {"class": "k-grid-num"},
+		width: "110px"
+    }
+    , {
+        field: "spareMaker",
+        title: "备件厂商", 
+		headerAttributes: {"class": "k-grid-text"},
+        attributes: {"class": "k-grid-text"},
+		width: "110px"
+    }
+    ,{
+    	field:"purpose",
+    	title:"用途",
+		headerAttributes: {"class": "k-grid-text"},
+        attributes: {"class": "k-grid-text"},
+		width:"110px"
+    }
+    ,{
+    	field:"price",
+    	title:"价格",
+		headerAttributes: {"class": "k-grid-num"},
+        attributes: {"class": "k-grid-num"},
+		width:"110px"
+    }
+    ,{
+    	field:"remainder",
+    	title:"余量",
+		headerAttributes: {"class": "k-grid-num"},
+        attributes: {"class": "k-grid-num"},
+		width:"110px"
+    }
+    ,{
+    	field:"getSum",
+    	title:"取用数量",
+		headerAttributes: {"class": "k-grid-num"},
+        attributes: {"class": "k-grid-num"},
+		width:"110px",
+    	template:function(data){
+	      var i=_constants.DATA_GRID_NUMBER_START-1;
+	      var str='';
+	      	str="<input name='deviceSpareOutlst["+i+"].getSum' class='k-textbox' style='width:90%' type='text'>"+
+	      	"<input type='hidden' name='deviceSpareOutlst["+i+"].spareId' id='spareId' value='"+data.id+"' />"
+	      return str;
+	      }
+    }
+    ,{
+    	field:"getor",
+    	title:"取用人",
+		headerAttributes: {"class": "k-grid-text"},
+        attributes: {"class": "k-grid-text"},
+		width:"110px",
+    	template:function(data){
+	      var i=_constants.DATA_GRID_NUMBER_START-1;
+	      var str='';
+	      	str="<input name='deviceSpareOutlst["+i+"].getor' class='k-textbox' style='width:90%' type='text'>"
+	      return str;
+	    }
+    }
+    ,{
+    	field:"getDate",
+    	title:"取用时间",
+		headerAttributes: {"class": "k-grid-equilong"},
+        attributes: {"class": "k-grid-equilong"},
+		width:"110px",
+    	template:function(data){
+	      var i=_constants.DATA_GRID_NUMBER_START-1;
+	      var str='';
+	      	str="<input  id='getDate"+i+"' onclick='chooseDate("+i+")' name='deviceSpareOutlst["+i+"].getDate' class='k-input' style='width:100%' type='text'>"
+	      return str;
+	    }    
+    }
+    ,{
+    	field:"affirmor",
+    	title:"确认人",
+		headerAttributes: {"class": "k-grid-text"},
+        attributes: {"class": "k-grid-text"},
+		width:"110px",
+    	template:function(data){
+	      var i=_constants.DATA_GRID_NUMBER_START-1;
+	      var str='';
+	      	str="<input name='deviceSpareOutlst["+i+"].affirmor' class='k-textbox' style='width:90%' type='text'>"
+	      return str;
+	    }    	
+    }
+    ,{
+    	field:"remark",
+    	title:"备注",
+		headerAttributes: {"class": "k-grid-text"},
+        attributes: {"class": "k-grid-text"},
+		width:"110px",
+    	template:function(data){
+	      var i=_constants.DATA_GRID_NUMBER_START-1;
+	      var str='';
+	      	str="<input name='deviceSpareOutlst["+i+"].remark' class='k-textbox' style='width:90%' type='text'>"
+	      return str;
+	    }    	
+    }
+    ],
+        {
+            sortable: {
+                mode: "multiple",
+                allowUnsort: true
+            },
+            selectable: 'multiple'
+        }, {
+            serverSorting: true
+        }, [
+                {
+                    name: "保存",
+                    icon: "fa fa-plus",
+                    onclick: function (obj,grid) {
+                        var row = grid.columns;
+                        if(row .length>0){
+                           
+					      $("#deviceSpare_form").validator({
+					            fields:{
+					            },
+					            valid:function(form){
+					                form_btn_submit(null,form,function(res){
+					                	$("#grid").data("kendoGrid").dataSource.read();
+##					                    validateCallback(res,"grid",null);
+					                });
+					            }   });
+		                    }
+	                    }
+                    }
+        ]
+    );
+   		
+});
+function reply(){
+    window.location.href= "$!{rc.contextPath}/base/deviceSpareIn/list";
+}
+function chooseDate(index){
+ 	$("#deviceSpare_form #getDate"+index).hcDatePicker({
+                format: "yyyy-MM-dd",
+                culture: "zh-CN",
+            })
+   }
+</script>

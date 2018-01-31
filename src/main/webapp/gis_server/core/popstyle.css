@@ -1,0 +1,28 @@
+.olFramedCloudPopupContent1{
+	padding-top:1px;
+	padding-left:5px;
+	padding-right:5px;
+	padding-bottom:5px;
+}
+.titleDisplayClass{
+	padding-top:0px;
+	padding-left:0px;
+	padding-right:0px;
+	padding-bottom:5px;
+	font-weight:bolder;
+	color:#fff;
+	height:22px; 
+}
+.titleDiv{
+	width:auto;
+	height:22px;
+	line-height:22px;
+	min-height:22px;
+	_height:22px;
+	font-size:14px;
+	font-weight:bold;
+	color:#efefef;
+}
+.contentDiv{
+	margin-top:10px;
+}

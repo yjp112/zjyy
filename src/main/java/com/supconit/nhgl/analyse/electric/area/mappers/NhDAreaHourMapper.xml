@@ -1,0 +1,457 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.analyse.electric.area.entities.NhDAreaHour">
+	<resultMap type="com.supconit.nhgl.analyse.electric.area.entities.NhDAreaHour" id="NhDAreaHourMap">
+		<result property="id" column="ID" />
+		<result property="areaId" column="AREA_ID" />
+		<result property="itemCode" column="ITEM_CODE" />
+		<!-- <result property="total" column="TOTAL" /> -->
+		<result property="incremental" column="INCREMENTAL" />
+		<result property="collectDate" column="COLLECT_DATE" jdbcType="DATE" javaType="java.util.Date"/>
+		<result property="collectHour" column="COLLECT_HOUR" />
+		<result property="collectTime" column="COLLECT_TIME" />
+		
+		<result property="standardCode" column="STANDARD_CODE" />
+		<result property="parentCode" column="PARENT_CODE" />
+		
+        <result property="start" column="START"/>
+        <result property="end" column="END"/>
+        <result property="name" column="name"/>
+        <result property="parentId" column="parentId"/>
+        <result property="areaName" column="AREA_NAME"/>
+        <result property="parentId" column="PARENT_ID"/>
+        <result property="itemName" column="itemName"/>
+        <result property="percentP" column="percentP"/>
+        <result property="lastTotal" column="lastTotal"/>
+	</resultMap>
+	<select id="getAllSubElectricty" resultMap="NhDAreaHourMap"
+		parameterType="com.supconit.nhgl.analyse.electric.area.entities.NhDAreaHour" lang="velocity">
+		<![CDATA[
+		SELECT
+			t.ID,
+			t.STANDARD_CODE,
+			t.PARENT_CODE,
+			t.NAME,
+			#if($_databaseId=='oracle')
+			nvl(
+			(
+				SELECT
+					SUM (d.INCREMENTAL)
+				FROM
+					NH_D_AREA_HOUR d
+				INNER JOIN 
+					TABLE(func_getnhitem(1, t.STANDARD_CODE))
+				i ON d.ITEM_CODE = i.STANDARD_CODE
+				INNER JOIN 
+					 VIEW_NH_D_AREA A ON d.AREA_ID=A.ID
+		    where 1=1
+			    #if($_parameter.collectDate)
+  					and d.COLLECT_TIME>=@{_parameter.collectDate,jdbcType=DATE}
+				    and d.COLLECT_TIME<=@{_parameter.collectTime,jdbcType=TIMESTAMP}
+			    #end
+			    AND A.area_code='ROOT'
+			),0)
+			#else
+			ISNULL((
+				SELECT
+					SUM (d.INCREMENTAL)
+				FROM
+					NH_D_AREA_HOUR d
+				INNER JOIN 
+					func_getnhitem(1, t.STANDARD_CODE)
+				i ON d.ITEM_CODE = i.STANDARD_CODE
+				INNER JOIN 
+					 VIEW_NH_D_AREA A ON d.AREA_ID=A.ID
+		    where 1=1
+				  #if($_parameter.collectDate)
+  					and d.COLLECT_TIME>=@{_parameter.collectDate,jdbcType=DATE}
+				    and d.COLLECT_TIME<=@{_parameter.collectTime,jdbcType=TIMESTAMP}
+			    #end
+			    AND A.area_code='ROOT'
+			),0)
+			#end
+			TOTAL
+		FROM
+			NH_ITEM t
+		WHERE
+			t.NH_TYPE = @{_parameter.nhType,jdbcType=NUMERIC} 
+			order by t.STANDARD_CODE
+		]]>
+	</select>
+	<select id="getDayofSubElectricty" resultMap="NhDAreaHourMap"
+		parameterType="com.supconit.nhgl.analyse.electric.area.entities.NhDAreaHour" lang="velocity">
+		<![CDATA[
+		SELECT
+			d.COLLECT_HOUR,
+			#if($_databaseId=='oracle')
+				nvl(sum(d.INCREMENTAL),0)
+			#else
+				isnull(sum(d.INCREMENTAL),0)
+			#end	
+			TOTAL
+		FROM
+			NH_D_AREA_HOUR d
+			INNER JOIN 
+			#if($_databaseId=='oracle')
+				TABLE(func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.standardCode,jdbcType=VARCHAR}))
+			#else
+				func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.standardCode,jdbcType=VARCHAR})
+			#end
+			i ON d.ITEM_CODE = i.STANDARD_CODE
+   		where d.COLLECT_DATE=@{_parameter.now,jdbcType=DATE}
+				#if($_parameter.start)
+						AND d.COLLECT_HOUR >=@{_parameter.start,jdbcType=NUMERIC}
+				#end
+				#if($_parameter.end)
+						AND d.COLLECT_HOUR <=@{_parameter.end,jdbcType=NUMERIC}
+				#end
+        GROUP BY d.COLLECT_HOUR
+		]]>
+	</select>
+	<select id="getSumDayofSubElectricty" resultMap="NhDAreaHourMap"
+		parameterType="com.supconit.nhgl.analyse.electric.area.entities.NhDAreaHour" lang="velocity">
+		<![CDATA[
+		SELECT
+			#if($_databaseId=='oracle')
+				nvl(sum(d.INCREMENTAL),0)
+			#else
+				isnull(sum(d.INCREMENTAL),0)
+			#end	
+			TOTAL
+		FROM
+			NH_D_AREA_HOUR d
+			INNER JOIN 
+			#if($_databaseId=='oracle')
+				TABLE(func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR}))
+			#else
+				func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR})
+			#end
+			i ON d.ITEM_CODE = i.STANDARD_CODE
+   		where d.COLLECT_DATE=@{_parameter.now,jdbcType=DATE}
+				#if($_parameter.start)
+						AND d.COLLECT_HOUR >=@{_parameter.start,jdbcType=NUMERIC}
+				#end
+				#if($_parameter.end)
+						AND d.COLLECT_HOUR <=@{_parameter.end,jdbcType=NUMERIC}
+				#end
+		]]>
+	</select>
+	<select id="getTwoDayofSubElectricty" resultMap="NhDAreaHourMap"
+		parameterType="com.supconit.nhgl.analyse.electric.area.entities.NhDAreaHour" lang="velocity">
+		<![CDATA[
+		SELECT
+			COLLECT_DATE,
+			#if($_databaseId=='oracle')
+				nvl(sum(d.INCREMENTAL),0)
+			#else
+				isnull(sum(d.INCREMENTAL),0)
+			#end	
+			TOTAL
+		FROM
+			NH_D_AREA_HOUR d
+			INNER JOIN 
+			#if($_databaseId=='oracle')
+				TABLE(func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.standardCode,jdbcType=VARCHAR}))
+			#else
+				func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.standardCode,jdbcType=VARCHAR})
+			#end
+			i ON d.ITEM_CODE = i.STANDARD_CODE
+   		where d.COLLECT_DATE  in (@{_parameter.now,jdbcType=DATE},@{_parameter.lastDay,jdbcType=DATE})
+				#if($_parameter.start)
+						AND d.COLLECT_HOUR >=@{_parameter.start,jdbcType=NUMERIC}
+				#end
+				#if($_parameter.end)
+						AND d.COLLECT_HOUR <=@{_parameter.end,jdbcType=NUMERIC}
+				#end
+		GROUP BY d.COLLECT_DATE
+		order by collect_Date
+		]]>
+	</select>
+	<select id="getAllAreaElectricty" resultMap="NhDAreaHourMap"
+		parameterType="com.supconit.nhgl.analyse.electric.area.entities.NhDAreaHour" lang="velocity">
+		<![CDATA[
+		SELECT 
+			A.ID AREA_ID,
+			A.AREA_NAME AREA_NAME, 
+			#if($_databaseId=='oracle')
+				NVL(SUM(B.INCREMENTAL),0)
+			#else
+				ISNULL(SUM(B.INCREMENTAL),0)
+			#end
+			TOTAL,
+			A.PARENT_ID
+		FROM 
+			VIEW_NH_D_AREA A
+		LEFT JOIN(
+			SELECT t.* FROM NH_D_AREA_HOUR t 
+			INNER JOIN 
+			#if($_databaseId=='oracle')
+				TABLE(func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.standardCode,jdbcType=VARCHAR}))
+			#else
+				func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.standardCode,jdbcType=VARCHAR})
+			#end
+		 	t2 ON t.ITEM_CODE=t2.standard_code
+			where 1=1
+			#if($_parameter.collectDate)
+				and t.COLLECT_DATE>=@{_parameter.collectDate,jdbcType=DATE}
+				and t.COLLECT_TIME<=@{_parameter.collectTime,jdbcType=TIMESTAMP}
+			#end
+		) B ON B.AREA_ID=A.ID
+		GROUP BY A.ID,A.AREA_NAME,A.PARENT_ID,A.SORT
+		ORDER BY A.SORT
+		]]>
+	</select>
+	<select id="getDayofAreaElectricty" resultMap="NhDAreaHourMap"
+		parameterType="com.supconit.nhgl.analyse.electric.area.entities.NhDAreaHour" lang="velocity">
+		<![CDATA[
+			SELECT
+				d.COLLECT_HOUR,
+				#if($_databaseId=='oracle')
+					nvl(sum(D.INCREMENTAL),0)
+				#else
+					isnull(sum(D.INCREMENTAL),0)
+				#end	
+				TOTAL
+			FROM
+				NH_D_AREA_HOUR d
+				INNER JOIN 
+				#if($_databaseId=='oracle')
+					TABLE(func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.standardCode,jdbcType=VARCHAR}))
+				#else
+					func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.standardCode,jdbcType=VARCHAR})
+				#end
+				 i ON d.ITEM_CODE = i.STANDARD_CODE
+				INNER JOIN 
+					 VIEW_NH_D_AREA A ON d.AREA_ID=A.ID
+		    where 1=1 
+  		 		#if($_parameter.collectDate)
+  					and d.COLLECT_DATE>=@{_parameter.collectDate,jdbcType=DATE}
+				    and d.COLLECT_TIME<=@{_parameter.collectTime,jdbcType=TIMESTAMP}
+			    #end
+	   			#if($_parameter.areaId)
+						AND A.ID =@{_parameter.areaId,jdbcType=NUMERIC}
+				#else
+						AND A.area_code='ROOT'
+				#end
+		    GROUP BY D.COLLECT_HOUR
+		]]>
+	</select>
+	<select id="getTwoDayofAreaElectricty" resultMap="NhDAreaHourMap"
+		parameterType="com.supconit.nhgl.analyse.electric.area.entities.NhDAreaHour" lang="velocity">
+		<![CDATA[
+		SELECT
+			T.COLLECT_DATE,
+			#if($_databaseId=='oracle')
+				nvl(SUM (T.INCREMENTAL),0) AS total,
+				(SELECT
+					NVL(SUM(Y.INCREMENTAL),0)
+				FROM NH_D_AREA_HOUR Y
+				INNER JOIN 
+					TABLE(func_getnhitem(1,@{_parameter.standardCode,jdbcType=VARCHAR}))F ON Y.ITEM_CODE = F.STANDARD_CODE
+				INNER JOIN 
+					VIEW_NH_D_AREA U ON U.ID=Y.AREA_ID
+				WHERE Y.COLLECT_TIME > @{_parameter.lastDay,jdbcType = TIMESTAMP}-1
+					AND Y.COLLECT_TIME <= @{_parameter.now,jdbcType = TIMESTAMP}-1
+					#if($_parameter.areaId)
+							AND U.ID =@{_parameter.areaId,jdbcType=NUMERIC}
+					#else
+							AND U.area_code='ROOT'
+					#end
+				) AS lastTotal
+			#else
+				ISNULL(SUM (T.INCREMENTAL),0) AS total,
+				(SELECT 
+					ISNULL(SUM(Y.INCREMENTAL),0) 
+				FROM NH_D_AREA_HOUR Y
+				INNER JOIN 
+					func_getnhitem(1,@{_parameter.standardCode,jdbcType=VARCHAR})F ON Y.ITEM_CODE = F.STANDARD_CODE
+				INNER JOIN 
+					VIEW_NH_D_AREA U ON U.ID=Y.AREA_ID
+				WHERE Y.COLLECT_TIME > dateadd(day , -1, @{_parameter.lastDay,jdbcType = TIMESTAMP})
+					AND Y.COLLECT_TIME <= dateadd(day , -1, @{_parameter.now,jdbcType = TIMESTAMP})
+					#if($_parameter.areaId)
+							AND U.ID =@{_parameter.areaId,jdbcType=NUMERIC}
+					#else
+							AND U.area_code='ROOT'
+					#end
+				)AS lastTotal
+			#end
+		FROM
+			NH_D_AREA_HOUR T
+			INNER JOIN 
+			#if($_databaseId=='oracle')
+				TABLE(func_getnhitem(1,@{_parameter.standardCode,jdbcType=VARCHAR}))
+			#else
+				func_getnhitem(1,@{_parameter.standardCode,jdbcType=VARCHAR})
+			#end
+				i ON T.ITEM_CODE = i.STANDARD_CODE
+			INNER JOIN 
+					VIEW_NH_D_AREA A ON A.ID=T.AREA_ID
+			where 1=1
+			    AND T.COLLECT_TIME > @{_parameter.lastDay,jdbcType = TIMESTAMP}
+				AND T.COLLECT_TIME <= @{_parameter.now,jdbcType = TIMESTAMP}
+				#if($_parameter.areaId)
+						AND A.ID =@{_parameter.areaId,jdbcType=NUMERIC}
+				#else
+						AND A.area_code='ROOT'
+				#end
+		GROUP BY T.COLLECT_DATE
+		]]>
+	</select>
+	
+	<select id="getSubInfoDetailByArea" resultMap="NhDAreaHourMap"
+		parameterType="com.supconit.nhgl.analyse.electric.area.entities.NhDAreaHour" lang="velocity">
+		<![CDATA[
+		SELECT
+			t.ID,
+			t.STANDARD_CODE,
+			t.PARENT_CODE,
+			t.NAME,
+			#if($_databaseId=='oracle')
+			nvl(
+			(
+				SELECT
+					SUM (d.INCREMENTAL)
+				FROM
+					NH_D_AREA_HOUR d
+				INNER JOIN 
+					TABLE(func_getnhitem(1, t.STANDARD_CODE))
+				i ON d.ITEM_CODE = i.STANDARD_CODE
+				INNER JOIN 
+					 VIEW_NH_D_AREA A ON d.AREA_ID=A.ID
+		    where 1=1
+		    	#if($_parameter.collectDate)
+  					and d.COLLECT_TIME>=@{_parameter.collectDate,jdbcType=DATE}
+				    and d.COLLECT_TIME<=@{_parameter.collectTime,jdbcType=TIMESTAMP}
+			    #end
+			    AND A.area_code='ROOT'
+			),0)
+			#else
+			ISNULL((
+				SELECT
+					SUM (d.INCREMENTAL)
+				FROM
+					NH_D_AREA_HOUR d
+				INNER JOIN 
+					func_getnhitem(1, t.STANDARD_CODE)
+				i ON d.ITEM_CODE = i.STANDARD_CODE
+				INNER JOIN 
+					 VIEW_NH_D_AREA A ON d.AREA_ID=A.ID
+		    where 1=1
+				#if($_parameter.collectDate)
+  					and d.COLLECT_TIME>=@{_parameter.collectDate,jdbcType=DATE}
+				    and d.COLLECT_TIME<=@{_parameter.collectTime,jdbcType=TIMESTAMP}
+			    #end
+			    AND A.area_code='ROOT'
+			),0)
+			#end
+			TOTAL,
+			#if($_databaseId=='oracle')
+			nvl(
+			(
+				SELECT
+					SUM (d.INCREMENTAL)
+				FROM
+					NH_D_AREA_HOUR d
+				INNER JOIN 
+					TABLE(func_getnhitem(1, t.STANDARD_CODE))
+				i ON d.ITEM_CODE = i.STANDARD_CODE
+				INNER JOIN 
+					 VIEW_NH_D_AREA A ON d.AREA_ID=A.ID
+		    where 1=1
+		    	#if($_parameter.collectDate)
+  					and d.COLLECT_TIME>=@{_parameter.collectDate,jdbcType=DATE}-1
+				    and d.COLLECT_TIME<=@{_parameter.collectTime,jdbcType=TIMESTAMP}-1
+			    #end
+			    AND A.area_code='ROOT'
+			),0)
+			#else
+			ISNULL((
+				SELECT
+					SUM (d.INCREMENTAL)
+				FROM
+					NH_D_AREA_HOUR d
+				INNER JOIN 
+					func_getnhitem(1, t.STANDARD_CODE)
+				i ON d.ITEM_CODE = i.STANDARD_CODE
+				INNER JOIN 
+					 VIEW_NH_D_AREA A ON d.AREA_ID=A.ID
+		    where 1=1
+		    	#if($_parameter.collectDate)
+  					and d.COLLECT_TIME>=dateadd(DAY, -1, @{_parameter.collectDate,jdbcType=DATE})
+				    and d.COLLECT_TIME<=dateadd(DAY, -1, @{_parameter.collectTime,jdbcType=TIMESTAMP})
+			    #end
+			    AND A.area_code='ROOT'
+			),0)
+			#end lastTotal		
+		FROM
+			NH_ITEM t
+		WHERE
+			t.NH_TYPE = 1 and t.parent_code='0'
+			order by t.STANDARD_CODE
+		]]>
+	</select>
+	
+	<select id="getAreaDetail" resultMap="NhDAreaHourMap"
+		parameterType="com.supconit.nhgl.analyse.electric.area.entities.NhDAreaHour" lang="velocity">
+		<![CDATA[
+		SELECT 
+			A.ID AREA_ID,
+			A.AREA_NAME NAME, 
+			#if($_databaseId=='oracle')
+				NVL(SUM(B.INCREMENTAL),0)
+			#else
+				ISNULL(SUM(B.INCREMENTAL),0)
+			#end
+			TOTAL
+		FROM 
+			VIEW_NH_D_AREA A
+		LEFT JOIN(
+			SELECT t.* FROM NH_D_AREA_HOUR t 
+			INNER JOIN 
+			#if($_databaseId=='oracle')
+				TABLE(func_getnhitem(1,@{_parameter.standardCode,jdbcType=VARCHAR}))
+			#else
+				func_getnhitem(1,@{_parameter.standardCode,jdbcType=VARCHAR})
+			#end
+		 	t2 ON t.ITEM_CODE=t2.standard_code
+			where 1=1
+			#if($_parameter.collectDate)
+ 				and t.COLLECT_DATE>=@{_parameter.collectDate,jdbcType=DATE}
+			    and t.COLLECT_TIME<=@{_parameter.collectTime,jdbcType=TIMESTAMP}
+		    #end
+		) B ON B.AREA_ID=A.ID
+		where a.parent_id=@{_parameter.parentId,jdbcType=NUMERIC}
+		GROUP BY A.ID,A.AREA_NAME
+		ORDER BY A.ID
+		]]>
+	</select>
+	
+	<select id="getDayElectric" resultMap="NhDAreaHourMap"
+		parameterType="com.supconit.nhgl.analyse.electric.area.entities.NhDAreaHour" lang="velocity">
+		<![CDATA[
+		SELECT
+			a.COLLECT_HOUR,
+			#if($_databaseId == 'oracle')
+				NVL(sum(INCREMENTAL),0) 
+			#else
+				ISNULL(sum(INCREMENTAL),0) 
+			#end  as total 
+		FROM
+			NH_D_AREA_HOUR a INNER JOIN VIEW_NH_D_AREA v ON a.AREA_ID=v.ID
+			#where()
+				#if($_parameter.now)
+					a.COLLECT_DATE = @{_parameter.now,jdbcType = DATE}
+				#end
+				#if($_parameter.parentId)
+					AND  v.PARENT_ID = @{_parameter.parentId,jdbcType = NUMERIC}
+				#end
+			#end
+		]]>
+		GROUP BY a.COLLECT_HOUR,a.COLLECT_DATE
+		ORDER BY COLLECT_HOUR asc
+	</select>
+</mapper>

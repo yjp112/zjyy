@@ -1,0 +1,252 @@
+#parse("index/_header.vm")
+</head>
+<body>
+  <div class="ui-layout-west" style="border-right:solid 1px #e1e5e6;" id="leftTreeWrap">
+			<div class="ui-layout-north">
+				<div class="k-header k-grid-toolbar" style="padding-left:10px;">备件类别</div>
+			</div>
+      <div class="ui-layout-center">
+  		  <ul id="geoAreaTree" class="ztree"></ul>
+      </div>
+  </div>
+
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<form class="ui-form" id='queryForm'>
+    		<div class="ui-form-group" style="display:none" id='selectBlock2'>
+    			<div class="ui-form-item ui-form-item-block">
+    			  <label class="ui-label">您已选择：</label>
+    				  <span class="ui-form-pick">
+    					  <input id="spareCategoryId" type="hidden" name="spareCategoryId" value="$!spare.spareCategoryId" />
+    					  <strong>备件类别：</strong><em id='treeNodeText'></em><i class="iconfont icon-remove-sign"></i>
+    				  </span>
+    			</div>
+    		</div>	
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+                <tr>
+                  <td class="ui-search-name first">备件编码：</td>
+                  <td class="ui-search-c">
+					  <input class="k-textbox" type="text" name="spareCode" value="$!spare.spareCode">
+                  </td>
+                  <td class="ui-search-name">备件名称：</td>
+                  <td class="ui-search-c">
+					 <input class="k-textbox" type="text" name="spareName" value="$!spare.spareName">
+                  </td>
+                </tr>
+              </table>
+            </td>
+            <td width="180" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn" onclick="cancelLeftTreeSelected();"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+            <td></td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+ #parse("index/_footer.vm")  
+<script type="text/javascript">
+  var _iframe_layout, _left_layout, _inner_layout;
+	$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      },
+      west: {
+        size: 0.18
+      }
+    });
+
+    _left_layout = $("#leftTreeWrap").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      }
+    });
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+
+    $('#resetBtn').click(function(){
+	  $('#spareCategoryId').val('');
+      $("#queryForm :text").val('');  
+    });
+
+		$('.iconfont','.ui-form-pick').each(function(){
+      $(this).click(function(){
+      	$('#spareCategoryId').val('');
+      	$('#selectBlock').hide();
+        //$(this).parent().remove();
+      })
+    })
+	
+		//列表 "$!{rc.contextPath}/spare/spare/list?_t="+new Date().getTime()
+    quick_datagrid("#grid", "#queryForm",  "$!{rc.contextPath}/spare/spare/list?_t="+new Date().getTime(),
+		[{
+              field: "id",
+              hidden: true
+          }, {
+              field: "spareCode",
+              title: "备件编码",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              sortable: false,
+			   template:"<a href=\"javascript:void(0)\" title=\"查看#: data.spareCode #的详细信息\" onclick=\"quick_dialog('spare_add_dlg','查看#:data.spareCode #的信息','$!{rc.contextPath}/spare/spare/edit?viewOnly=true&id=#: data.id #',750,370)\">#: data.spareCode #</a>"
+          }, {
+              field: "spareName",
+              title: "备件名称",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              sortable: false, 
+              template:"<li alt=\"#: data.spareName #\" title=\"#: data.spareName #\" >#: data.spareName #</li>"
+              
+          }, {
+              field: "spareCategoryName",
+              title: "备件类别",
+              headerAttributes: {"class": "k-grid-text"},
+			  attributes: {     
+  		  		 title:"#: data.spareCategoryName==null? '':data.spareCategoryName #",
+  				 "class": "k-grid-text k-grid-nowrap"
+		  	  },
+              sortable: false, 
+              template:"#: data.spareCategoryName==null? '':data.spareCategoryName #"
+              
+          }, {
+              field: "model",
+              title: "备件型号",
+              headerAttributes: {"class": "k-grid-text"},
+               attributes: {     
+  		  		 title:"#: data.model==null? '':data.model #",
+  				 "class": "k-grid-text k-grid-nowrap"
+		  	  },
+              sortable: false, 
+              template:function(data){
+                 var str='';
+                 var model='';
+                 if(data.model!=null)
+                    model=data.model;
+                 str="<li alt='"+model+"' title='"+model+"'>"+model+"</li>";
+                 return str;
+              }
+              
+          }, {
+              field: "spec",
+              title: "备件规格",
+              headerAttributes: {"class": "k-grid-text"},
+               attributes: {     
+  		  		 title:"#: data.spec==null? '':data.spec #",
+  				 "class": "k-grid-text k-grid-nowrap"
+		  	  },
+              sortable: false, 
+              template:function(data){
+              	var str='';
+              	var spec='';
+              	if(data.spec!=null)
+              		spec=data.spec;
+              	str="<li alt='"+spec+"' title='"+spec+"'>"+spec+"</li>";
+              	return str;
+              }
+              
+          }, {
+              field: "lowerQty",
+              title: "最低库存",
+              headerAttributes: {"class": "k-grid-num"},
+              attributes: {"class": "k-grid-num"},
+              template:function(dataItem){
+            	  if(dataItem.lowerQty != null)
+            		  return fInt(dataItem.lowerQty);
+            	  else return '';
+              },
+              sortable: false
+          }
+		  , {
+              field: "upperQty",
+              title: "最高库存",
+              headerAttributes: {"class": "k-grid-num"},
+              attributes: {"class": "k-grid-num"},
+              template:function(dataItem){
+            	  if(dataItem.upperQty != null)
+            		  return fInt(dataItem.upperQty);
+            	  else return '';
+              },
+              sortable: false
+              
+          }
+		  , {
+              field: "safeQty",
+              title: "安全库存",
+              headerAttributes: {"class": "k-grid-num"},
+              attributes: {"class": "k-grid-num"},
+              template:function(dataItem){
+            	  if(dataItem.safeQty != null)
+            		  return fInt(dataItem.safeQty);
+            	  else return '';
+              },
+              sortable: false
+              
+          }],
+		  
+      	{
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          },resizable:true
+      }, {
+          serverSorting: true
+      }, [
+      #kendo_datagrid_btns("BJGL_BJXX")#end
+      ]);
+		
+    });
+
+    /* zTree */
+    var setting = {
+    	data: {
+    		simpleData: {enable: true}
+          },
+          callback: {
+    			onClick: function(event, treeId, treeNode) {
+    				  $('#spareCategoryId').val(treeNode.id);
+    			 	 $('#treeNodeText').text(treeNode.name);
+    			 	 $('#selectBlock').show();
+    				 $('#queryBtn').click();
+    			}
+    		}
+    };
+  	var zNodes = [];  
+  	//zNodes.push({id:"0", pId:"-1", name:"地理区域簇"});   
+  	#foreach($!{treeNode} in $!{treeDatas})
+      	zNodes.push({id:$!{treeNode.id}, pId:$!{treeNode.parentId}, name:"$!{treeNode.categoryName}"});      
+  	#end
+
+  	$(document).ready(function(){
+  		$.fn.zTree.init($("#geoAreaTree"), setting,zNodes).expandAll(true);
+  	});
+	
+	function cancelLeftTreeSelected(){
+		$.fn.zTree.init($("#geoAreaTree"), setting,zNodes).expandAll(true);
+	}
+</script>
+</body>
+</html>

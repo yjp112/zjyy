@@ -1,0 +1,514 @@
+#parse("index/_header.vm")
+<style>
+    .fa-upload {
+        color: #4A0;
+    }
+
+    .fa-download {
+        color: #4A0;
+    }
+    .ztree {
+        overflow: auto;
+    }
+</style>
+</head>
+
+<body>
+<div class="ui-layout-west" style="border-right:solid 1px #e1e5e6;" id="leftTreeWrap">
+    <div class="ui-layout-center">
+        <div id="tabstrip" class="k-header k-grid-toolbar" style="padding-left:10px;">
+            <ul>
+                <li class="k-state-active">区域</li>
+                <li>类别</li>
+            </ul>
+            <div id="tabstrip-1">
+                <span class="k-header k-grid-toolbar" style="padding-left:10px;">地理区域</span>
+                <ul id="geoAreaTree" class="ztree"></ul>
+            </div>
+            <div id="tabstrip-2">
+                <span class="k-header k-grid-toolbar" style="padding-left:10px;">设备类别</span>
+                <ul id="deviceTree" class="ztree"></ul>
+            </div>
+        </div>
+
+
+    </div>
+
+</div>
+
+<div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+        <form class="ui-form" id='queryForm'>
+            <div class="ui-form-group" style="display:none" id='selectBlock2'>
+                <div class="ui-form-item ui-form-item-block">
+                    <label class="ui-label">您已选择：</label>
+    				  <span class="ui-form-pick">
+    					  <input id="locationId" type="hidden" name="locationId" value="$!{device.locationId}">
+					      <strong>安装位置：</strong><em id='categoryName'></em><i class="iconfont icon-remove-sign"
+                                                                              name="i_g"></i>
+    				  </span>
+    				  <span class="ui-form-pick">
+	    				  <input id="categoryId" type="hidden" name="categoryId" value="$!{device.categoryId}">
+						  <strong>设备类别：</strong><em id='categoryName'></em><i class="iconfont icon-remove-sign"
+                                                                              name="i_c"></i>
+					  </span>
+
+                </div>
+            </div>
+            <table width="100%">
+                <tr>
+                    <td>
+                        <table class="ui-search-table">
+                            <tr>
+                                <td class="ui-search-name first">hpid：</td>
+                                <td class="ui-search-c">
+                                    <input class="k-textbox" type="text" name="hpid" value="$!device.hpid"
+                                           maxlength="32">
+                                </td>
+
+                                <td class="ui-search-name">设备名称：</td>
+                                <td class="ui-search-c">
+                                    <input class="k-textbox" type="text" name="deviceName" value="$!device.deviceName"
+                                           maxlength="50">
+                                </td>
+                                <td class="ui-search-name first">设备编码：</td>
+                                <td class="ui-search-c">
+                                    <input class="k-textbox" type="text" name="deviceCode" value="$!device.deviceCode"
+                                           maxlength="32">
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td width="150" valign="top" style="padding-top:4px;">
+                        <button type="submit" class="hc_btn k-primary" id="btnSelect"><i class="fa fa-search"></i>查询
+                        </button>
+                        <button type="reset" class="hc_btn" id="resetBtn" onclick="cancelLeftTreeSelected();"><i
+                                class="fa fa-refresh"></i>重置
+                        </button>
+                    </td>
+                    <td></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div class="ui-layout-center">
+        <div id="grid"></div>
+    </div>
+</div>
+    #parse("index/_footer.vm")
+<script type="text/javascript">
+var _iframe_layout, _left_layout, _inner_layout;
+$(document).ready(function () {
+    _iframe_layout = $('body').layout({
+        defaults: {
+            resizable: false,
+            closable: false,
+            spacing_open: 5
+        },
+        west: {
+            size: 0.18
+        }
+    });
+
+    _left_layout = $("#leftTreeWrap").layout({
+        defaults: {
+            resizable: false,
+            closable: false,
+            spacing_open: 0
+        },
+        center: {
+            onresize_end: function () {
+                containerHeight = _left_layout.state.container.innerHeight-78;
+                $("#geoAreaTree").css("height",containerHeight);
+                $("#deviceTree").css("height",containerHeight);
+            }
+        }
+    });
+
+    _inner_layout = $("#subMain").layout({
+        defaults: {
+            resizable: false,
+            closable: false,
+            spacing_open: 0
+        },
+        center: {
+            onresize_end: function () {
+                var grid = $("#grid").data("kendoGrid");
+                grid.resize();
+            }
+        }
+    })
+
+    $('#resetBtn').click(function () {
+        $("#queryForm :text").val('');
+    });
+
+    $('.iconfont', '.ui-form-pick').each(function () {
+        $(this).click(function () {
+            $('#treeId').val('');
+            $('#selectBlock').hide();
+            //$(this).parent().remove();
+        })
+    });
+    $("#tabstrip").hcTabStrip({
+        animation: {
+            // fade-out current tab over 1000 milliseconds
+            close: {
+                duration: 1000,
+                effects: "fadeOut"
+            },
+            // fade-in new tab over 500 milliseconds
+            open: {
+                duration: 500,
+                effects: "fadeIn"
+            }
+        }
+    });
+    //父类别查询条件清空
+    $('.iconfont', '.ui-form-pick').each(function () {
+        $(this).click(function () {
+            if ($(this).attr("name") == "i_g") {
+                $('#locationId').val('');
+                $('#selectBlock_g').hide();
+            } else {
+                $('#categoryId').val('');
+                $('#selectBlock_c').hide();
+            }
+
+            if ($("#selectBlock_g:visible").length == 0 && $("#selectBlock_c:visible").length == 0) {
+                $('#selectBlock').hide();
+            }
+        })
+    })
+    $.fn.zTree.init($("#geoAreaTree"), setting, zNodes1);
+    $.fn.zTree.init($("#deviceTree"), setting, zNodes2);
+
+
+    //列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/device/imp_exp/expDevicePage", [
+                {
+                    field: "id",
+                    hidden: true
+                },
+                {
+                    width: 50,
+                    headerTemplate: '<input type="checkbox" id="check-all"/>',
+                    template: '<div style="text-align:center;"><input type="checkbox" name="check" onclick="uncheck()" /></div>'
+                },
+                {
+                    field: "id",
+                    title: "Id",
+                    sortable: false,
+                    headerAttributes: {"class": "k-grid-text"},
+                    attributes: {"class": "k-grid-text"}
+
+                },
+                {
+                    field: "hpid",
+                    title: "hpid",
+                    sortable: false,
+                    template: function (cs) {
+                        if (cs.hpid != null)
+                            return "<a title=" + cs.hpid + " >" + cs.hpid + "</a>";
+                        else
+                            return '';
+                    },
+                    headerAttributes: {"class": "k-grid-text"},
+                    attributes: {"class": "k-grid-text"}
+
+                },
+                {
+                    field: "deviceName",
+                    title: "设备名称",
+                    sortable: false,
+                    headerAttributes: {"class": "k-grid-text"},
+                #*attributes: {"class": "k-grid-text"},*#
+                    attributes: {
+                        title: "#: data.deviceName==null? '':data.deviceName #",
+                        "class": "k-grid-text k-grid-nowrap"
+                    }
+
+                },
+                {
+                    field: "categoryName",
+                    title: "设备类别",
+                    sortable: false,
+                    headerAttributes: {"class": "k-grid-text"},
+                    attributes: {"class": "k-grid-text"}
+                },
+                {
+                    field: "deviceCode",
+                    title: "设备编码",
+                    sortable: false,
+                    template: "<a href=\"javascript:void(0)\" title=\"查看#: data.deviceCode #的详细信息\" onclick=\"window.location.href='$!{rc.contextPath}/device/device/edit?showFlag=1&flage=1&id=#: data.id #'\">#: data.deviceCode #</a>",
+                    headerAttributes: {"class": "k-grid-text"},
+                    attributes: {"class": "k-grid-text"}
+
+                } ,
+                {
+                    field: "deviceSpec",
+                    title: "规格型号",
+                    sortable: false,
+                    headerAttributes: {"class": "k-grid-text"},
+                #*attributes: {"class": "k-grid-text"},*#
+                    attributes: {
+                        title: "#: data.deviceSpec==null? '':data.deviceSpec #",
+                        "class": "k-grid-text k-grid-nowrap"
+                    }
+                },
+                {
+                    field: "locationName",
+                    sortable: false,
+                    title: "安装位置",
+                    headerAttributes: {"class": "k-grid-text"},
+                #*attributes: {"class": "k-grid-text"},*#
+                    attributes: {
+                        title: "#: data.locationName==null? '':data.locationName #",
+                        "class": "k-grid-text k-grid-nowrap"
+                    }
+                },
+                {
+                    field: "managePersonName",
+                    title: "管理负责人",
+                    sortable: false,
+                    headerAttributes: {"class": "k-grid-equilong"},
+                #*attributes: {"class": "k-grid-text"},*#
+                    attributes: {
+                        title: "#: data.managePersonName==null? '':data.managePersonName #",
+                        "class": "k-grid-equilong k-grid-nowrap"
+                    }
+                },
+                {
+                    field: "statusName",
+                    sortable: false,
+                    title: "使用状态",
+                    headerAttributes: {"class": "k-grid-equilong"},
+                    attributes: {"class": "k-grid-equilong"}
+
+                }
+
+            ],
+            {
+                sortable: {
+                    mode: "multiple",
+                    allowUnsort: true
+                }, resizable: true
+
+            }, {
+                serverSorting: true
+            }, [
+                {
+                    name: "添加",
+                    icon: "fa fa-plus",
+                    onclick: function (obj) {
+                        window.location.href = "$!{rc.contextPath}/device/device/edit?flage=1"
+                    }
+                },
+                {
+                    name: "修改",
+                    icon: "fa fa-pencil",
+                    onclick: function (obj, grid) {
+                        var cs = getCheckedData("#grid", "input[name='check']");
+                        var ids = [];
+                        if (null == cs || cs.length == 0) {
+                            notify("请选择要修改的项", "error");
+                            return;
+                        }
+                        for (var i = 0; i < cs.length; i++) {
+                            //console.info(cs[i].id);
+                            ids.push(cs[i].id);
+                        }
+
+                        if (ids.length == 0) {
+                            notify("没有选中需要修改的选项！", "warn");
+                            return;
+                        } else if (ids.length > 1) {
+                            notify("请选中一项进行修改！", "warn");
+                            return;
+                        }
+                        window.location.href = "$!{rc.contextPath}/device/device/edit?flage=1&id=" + ids;
+                    }
+                },
+                {
+                    name: "删除",
+                    icon: "fa fa-remove",
+                    onclick: function (obj, grid) {
+                        var cs = getCheckedData("#grid", "input[name='check']");
+                        var ids = [];
+                        if (null == cs || cs.length == 0) {
+                            notify("请选择要删除的项", "error");
+                            return;
+                        }
+                        for (var i = 0; i < cs.length; i++) {
+                            ids.push(cs[i].id);
+                        }
+
+                        if (ids.length == 0) {
+                            notify("没有选中需要删除的选项！", "warn");
+                            return;
+                        }
+
+                        if (!confirm("确定要删除吗？"))return;
+                        else {
+                            $.ajax({
+                                type: "post",
+                                cache: false,
+                                url: "$!rc.contextPath/device/imp_exp/delete",
+                                data: "ids=" + ids,
+                                success: function (msg) {
+                                    if (msg.status == "fail") {
+                                        notify(msg.message);
+                                    } else {
+                                        notify("删除成功", "success");
+                                        edited_callback(grid);
+                                    }
+
+                                }, error: function (xhr, status, error) {
+                                    notify("删除失败，请检查网络！", "error");
+                                }
+                            });
+                        }
+                    }
+                },
+                {
+                    name: "导入设备",
+                    icon: "fa fa-upload",
+                    onclick: function (obj, grid) {
+                        //window.open("$!{rc.contextPath}/device/imp_exp/imp","_blank");
+                        quick_dialog("device_exp_add_dlg", "导入页面", "$!{rc.contextPath}/device/imp_exp/imp", 450, 230, obj);
+                    }
+                },
+                {
+                    name: "导入全部",
+                    icon: "fa fa-upload",
+                    onclick: function (obj, grid) {
+                        quick_dialog("device_exp_add_dlg", "导入页面", "$!{rc.contextPath}/device/imp_exp/impall", 450, 230, obj);
+                    }
+                },
+                {
+                    name: "导出",
+                    icon: "fa fa-download",
+                    onclick: function (obj, grid) {
+                        var locationId = $("input[name='locationId']").val();
+                        var categoryId = $("input[name='categoryId']").val();
+                        var hpid = $("input[name='hpid']").val();
+                        var deviceCode = $("input[name='deviceCode']").val();
+                        var deviceName = $("input[name='deviceName']").val();
+                        window.location.href = "$!{rc.contextPath}/device/imp_exp/expDevice?locationId=" + locationId + "&categoryId=" + categoryId + "&hpid=" + hpid + "&deviceCode=" + deviceCode + "&deviceName=" + deviceName;
+
+
+                    }
+                }
+            ]);
+    checkALL("#check-all", "input[name='check']");
+
+    $("#geoAreaTree").css("height", _left_layout.state.container.outerHeight - 78);
+    $("#deviceTree").css("height", _left_layout.state.container.outerHeight - 78);
+});
+
+
+/* zTree */
+var setting = {
+    data: {
+        simpleData: {enable: true}
+    },
+    callback: {
+        onClick: function (event, treeId, treeNode) {
+            if (treeId == "geoAreaTree") {
+                $('#locationId').val(treeNode.id);
+                $('#locationName').text(treeNode.name);
+                $('#selectBlock').show();
+                $('#selectBlock_g').show();
+            } else {
+
+                $('#categoryId').val(treeNode.id);
+                $('#categoryName').text(treeNode.name);
+                $('#selectBlock').show();
+                $('#selectBlock_c').show();
+            }
+            $("#btnSelect").click();
+        }
+    }
+};
+var zNodes1 = [];
+zNodes1.push({id: "0", pId: "-1", name: "地理区域簇", open: true});
+    #foreach($!{treeNode1} in $!{treeListLou})
+    zNodes1.push({id:$!{treeNode1.id}, pId:$!{treeNode1.parentId}, name: "$!{treeNode1.areaName}"});
+    #end
+var zNodes2 = [];
+zNodes2.push({id: "0", pId: "-1", name: "设备类别簇", open: true});
+    #foreach($!{treeNode2} in $!{treeListType})
+    zNodes2.push({id:$!{treeNode2.id}, pId:$!{treeNode2.parentId}, name: "$!{treeNode2.categoryName}"});
+    #end
+
+function deletes(com, grid, obj) {
+    var data = obj.getSelectedRows();
+    if (data.length == 0) {
+        alert("请选择要处理的项");
+        return;
+    }
+    var ids = [];
+    for (var i = 0; i < data.length; i++) {
+        ids.push(data[i].id);
+    }
+    dialog.confirm("确定要删除操作吗？", function () {
+        $.ajax({
+            type: "post",
+            cache: false,
+            url: "$!rc.contextPath/device/imp_exp/delete",
+            data: "ids=" + ids,
+            success: function (response) {
+                if (response.status == "error") {
+                    showErrorMsg(response.message);
+                } else if (response.status == "success") {
+                    if (response.data.message) {
+                        showSuccessMsg(response.data.message);
+                    }
+                    if (response.data.next) {
+                        if (response.data.next == ".") {//刷新datagrid
+                            obj.flexReload();
+                        } else if (response.data.next == "x") {
+                            return;
+                        } else {//刷新maincontent  例子：response.data.next：  相对路径
+                            loadMain(response.data.next);
+                        }
+                    }
+
+                }
+            }, error: function (xhr, status, error) {
+                var response = $.parseJSON(xhr.responseText);
+                if (response.error) {
+                    response = response.error;
+                }
+                showErrorMsg(response.message);
+            }
+        });
+    });
+}
+function checkBoxAll() {
+    /*$("#check-all").change(function(){
+        var isChecked = this.checked;
+        $.each($("input[name='check']"),function(i,v){
+            v.checked = isChecked;
+        });
+    });*/
+
+}
+function uncheck() {
+    var flag = 0;
+    if (document.getElementById("check-all").checked) {
+        document.getElementById("check-all").checked = false;
+    }
+    $.each($("input[name='check']"), function (i, v) {
+        if (v.checked == false)
+            flag = 1;
+    });
+    if (flag != 1)
+        document.getElementById("check-all").checked = true;
+}
+
+function cancelLeftTreeSelected() {
+    $.fn.zTree.init($("#geoAreaTree"), setting, zNodes1);
+    $.fn.zTree.init($("#deviceTree"), setting, zNodes2);
+}
+</script>

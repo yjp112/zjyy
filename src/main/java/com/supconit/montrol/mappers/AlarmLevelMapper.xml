@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 学习可参看：http://www.mybatis.org/core/zh/index.html -->
+
+<mapper namespace="com.supconit.montrol.entity.MAlarmLevel">
+
+	<resultMap type="com.supconit.montrol.entity.MAlarmLevel" id="DataResultMap">
+		<id property="id" column="ID" />
+		<result property="alarmLevel" column="ALARMLEVEL" />
+		<result property="alarmLNum" column="ALARMRANK" />
+		<result property="remark" column="LEVELREMARK" />
+	</resultMap>
+
+    <sql id="TABLE_NAME" lang="velocity">A_ALARMLEVEL</sql>
+    <sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+    <sql id="COUNT_PRE" lang="velocity">SELECT COUNT(1) FROM <include refid="TABLE_NAME"/></sql>
+    <sql id="SELECT_PRE" lang="velocity">SELECT * FROM  <include refid="TABLE_NAME"/>
+    </sql>
+    <sql id="SEARCH_CONDITION_SQL" lang="velocity">
+        <![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			#if($_p.alarmLevel && $_p.alarmLevel != '')
+				#set($_alarmLevel = '%' + $_p.alarmLevel + '%')
+				AND ALARMLEVEL LIKE @{_alarmLevel}
+			#end
+		#end
+		]]>
+    </sql>
+	<select id="findAllLevels" resultMap="DataResultMap">
+        <include refid="SELECT_PRE"/>
+        ORDER BY ID
+	</select>
+
+	<select id="findLevelByName" resultMap="DataResultMap" parameterType="java.lang.String">
+    <include refid="SELECT_PRE"/>
+    WHERE ALARMLEVEL = @{_parameter, jdbcType=NUMERIC}
+</select>
+
+    <select id="findLevelByCondition" resultMap="DataResultMap" parameterType="com.supconit.montrol.entity.MAlarmLevel" lang="velocity">
+        <include refid="SELECT_PRE"/>
+        WHERE (ALARMLEVEL = @{_parameter.alarmLevel,jdbcType=VARCHAR} or ALARMRANK  =@{_parameter.alarmLNum,jdbcType=NUMERIC})
+         #if($_parameter.id)and id != @{_parameter.id,jdbcType=NUMERIC}#end
+    </select>
+
+    <sql id="INSERT_SQL" lang="velocity">
+        INSERT INTO <include refid="TABLE_NAME"/>(
+        #if($_databaseId == 'oracle') ID, #end
+        ALARMLEVEL,
+        LEVELREMARK,
+        ALARMRANK
+        ) VALUES (
+        #if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end
+        @{_parameter.alarmLevel,jdbcType=VARCHAR},
+        @{_parameter.remark,jdbcType=VARCHAR},
+        @{_parameter.alarmLNum,jdbcType=NUMERIC}
+        )
+    </sql>
+    <insert id="insert" parameterType="com.supconit.montrol.entity.MAlarmLevel" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+        <selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="INSERT_SQL" />
+    </insert>
+    <insert id="insert" parameterType="com.supconit.montrol.entity.MAlarmLevel" keyProperty="id" keyColumn="ID" lang="velocity">
+        <include refid="INSERT_SQL"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+
+    <update id="update" parameterType="com.supconit.montrol.entity.MAlarmLevel" lang="velocity">
+        UPDATE <include refid="TABLE_NAME"/>
+        #mset()
+        <![CDATA[
+		        #if($_parameter.alarmLevel)ALARMLEVEL = @{_parameter.alarmLevel,jdbcType=VARCHAR},#end
+		        #if($_parameter.remark)LEVELREMARK = @{_parameter.remark,jdbcType=VARCHAR},#end
+		        #if($_parameter.alarmLNum)ALARMRANK = @{_parameter.alarmLNum,jdbcType=NUMERIC},#end
+		        ]]>
+        #end
+        WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+    </update>
+
+    <delete id="deleteById" parameterType="long" lang="velocity">
+        DELETE FROM <include refid="TABLE_NAME"/> WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+    </delete>
+
+    <select id="getById" parameterType="long" resultMap="DataResultMap" lang="velocity">
+        <include refid="SELECT_PRE"/>
+        WHERE ID = @{_parameter, jdbcType=NUMERIC}
+    </select>
+
+    <select id="selectPager" lang="velocity" resultMap="DataResultMap" parameterType="com.supconit.montrol.entity.MAlarmLevel">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+        <include refid="SELECT_PRE"/>
+        <include refid="SEARCH_CONDITION_SQL"/>
+        #order($_parameter.condition,"ID ")
+        <include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="selectPager" lang="velocity" resultMap="DataResultMap" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+        SELECT *
+        <include refid="_PUBLIC_V.ROW_NUMBER_OVER" />
+        #order($_parameter.condition,"ID ")
+        <include refid="_PUBLIC_V.AS_ROW_NUM" />
+        FROM <include refid="TABLE_NAME"/>
+        <include refid="SEARCH_CONDITION_SQL"/>
+        <include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countPager" lang="velocity" resultType="long">
+        <include refid="COUNT_PRE"/><include refid="SEARCH_CONDITION_SQL"/>
+    </select>
+</mapper>

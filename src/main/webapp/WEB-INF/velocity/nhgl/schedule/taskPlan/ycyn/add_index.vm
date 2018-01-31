@@ -1,0 +1,75 @@
+<style type="text/css">
+.fixed-width-auto {
+  width: 1200px;
+  margin: 0 auto;
+  //border:1px solid blue;
+}
+.module-a {
+  ##background: red;
+  //border:1px solid red;
+  overflow:auto;
+}
+
+.module-b {
+  ##background: black;
+  padding-left:110px;
+  //border:1px solid black;
+}
+.chooseBox{
+	width:100%;
+	height:300px;
+	border:#cccccc 1px solid;
+	overflow:auto;
+}
+.chooseUl li{
+	height:22px;
+	line-height:22px;
+	cursor:pointer;
+	padding-left:6px;
+	margin-bottom:1px;
+	width:240px;
+}
+.choosePick{
+	background:#6ebffe;
+	color:#FFF;
+}
+.t_c{
+	text-align:center;  
+} 
+.mt_10{ margin-top:10px;}
+ul{ margin:0; padding:0;} 
+</style>
+##<form  id="patient_edit_form" action="$!{rc.contextPath}/sos/patient/save" method="post">
+#bread_crumbs("NHGL_YCYNJCSZ")
+<div class="fixed-width-auto">
+	<div id="tab-container" class='ui-tab'>
+         <ul class='ui-tab-items'>
+           <li class='ui-tab-item'><a href="#tab1">设备运行状态</a></li>
+           <li class='ui-tab-item'><a href="#tab2">用能消耗(电)</a></li>
+           <li class='ui-tab-item'><a href="#tab3">用能消耗(水)</a></li>
+           <li class='ui-tab-item'><a href="#tab4">用能消耗(气)</a></li>
+         </ul>
+         <div class='ui-tab-panels'>
+              <div id="tab1" class='ui-tab-panel'>
+    				#parse("nhgl/basic/ycyn/tabs/device_runtime.vm")
+              </div>
+              <div id="tab2" class='ui-tab-panel'>
+              		电##parse("nhgl/basic/ycyn/tabs/device_runtime.vm")
+              </div>
+              <div id="tab3" class='ui-tab-panel'>
+              		水##parse("nhgl/basic/ycyn/tabs/device_runtime.vm")
+              </div>
+              <div id="tab4" class='ui-tab-panel'>
+              		气##parse("nhgl/basic/ycyn/tabs/device_runtime.vm")
+              </div>
+          </div>
+     </div>
+</div>
+##</form>	
+<script type="text/javascript">
+	 $(document).ready(function(){
+		$('#tab-container').easytabs();
+	 });
+    $(document).ready(function(){
+    });
+</script>

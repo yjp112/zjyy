@@ -1,0 +1,259 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.base.entities.Contract">
+
+	<resultMap type="com.supconit.base.entities.Contract" id="ContractResultMap">      
+        <result property="id" column="ID" />
+        <result property="contractCode" column="CONTRACT_CODE" />
+        <result property="contractName" column="CONTRACT_NAME" />
+        <result property="contractA" column="CONTRACT_A" />
+        <result property="contractB" column="CONTRACT_B" />
+        <result property="contractStatus" column="CONTRACT_STATUS" />
+        <result property="beginDate" column="BEGIN_DATE" />
+        <result property="endDate" column="END_DATE" />
+        <result property="contractDesc" column="CONTRACT_DESC" />
+        <result property="createId" column="CREATE_ID" />
+        <result property="creator" column="CREATOR" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="updateId" column="UPDATE_ID" />
+        <result property="updator" column="UPDATOR" />
+        <result property="updateDate" column="UPDATE_DATE" />
+        
+        <result property="contractStatusName" column="CONTRACT_STATUS_NAME" />
+	</resultMap>
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+    <!-- 获取记录列表-->
+	<sql id="select_pre" lang="velocity">
+    select 
+        A.ID,
+        A.CONTRACT_CODE,
+        A.CONTRACT_NAME,
+        A.CONTRACT_A,
+        A.CONTRACT_B,
+        A.CONTRACT_STATUS,
+        A.BEGIN_DATE,
+        A.END_DATE,
+        A.CONTRACT_DESC,
+        A.CREATE_ID,
+        A.CREATOR,
+        A.CREATE_DATE,
+        A.UPDATE_ID,
+        A.UPDATOR,
+        A.UPDATE_DATE
+		FROM
+	    CONTRACT A
+	</sql>
+	<sql id="count_pre" lang="velocity">
+		SELECT
+		COUNT(*)
+		FROM
+		CONTRACT A
+	</sql>
+	<sql id="TABLE_NAME" lang="velocity">CONTRACT</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>	
+	<insert id="insert" parameterType="com.supconit.base.entities.Contract" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    <insert id="insert" parameterType="com.supconit.base.entities.Contract" 
+		keyProperty="id" keyColumn="ID" 		lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>        
+		<include refid="INSERT_SQL" />
+	</insert>    
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>
+		(#if($_databaseId=='oracle') ID,#end	
+	        CONTRACT_CODE,
+	        CONTRACT_NAME,
+	        CONTRACT_A,
+	        CONTRACT_B,
+	        CONTRACT_STATUS,
+	        BEGIN_DATE,
+	        END_DATE,
+	        CONTRACT_DESC,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE		
+		) VALUES (        
+		 #if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end	
+	        @{_parameter.contractCode,jdbcType=VARCHAR},
+	        @{_parameter.contractName,jdbcType=VARCHAR},
+	        @{_parameter.contractA,jdbcType=VARCHAR},
+	        @{_parameter.contractB,jdbcType=VARCHAR},
+	        @{_parameter.contractStatus,jdbcType=NUMERIC},
+	        @{_parameter.beginDate,jdbcType=DATE},
+	        @{_parameter.endDate,jdbcType=DATE},
+	        @{_parameter.contractDesc,jdbcType=VARCHAR},
+	        @{_parameter.createId,jdbcType=NUMERIC},
+	        @{_parameter.creator,jdbcType=VARCHAR},
+	        @{_parameter.createDate,jdbcType=TIMESTAMP}	
+		)
+	</sql>		 	         
+    <!-- 插入记录-->
+	<sql id="insert_sql">
+		INSERT INTO CONTRACT(        
+        CONTRACT_CODE,
+        CONTRACT_NAME,
+        CONTRACT_A,
+        CONTRACT_B,
+        CONTRACT_STATUS,
+        BEGIN_DATE,
+        END_DATE,
+        CONTRACT_DESC,
+        CREATE_ID,
+        CREATOR,
+        CREATE_DATE
+		) VALUES (        
+        #{contractCode,jdbcType=VARCHAR},
+        #{contractName,jdbcType=VARCHAR},
+        #{contractA,jdbcType=VARCHAR},
+        #{contractB,jdbcType=VARCHAR},
+        #{contractStatus,jdbcType=NUMERIC},
+        #{beginDate,jdbcType=DATE},
+        #{endDate,jdbcType=DATE},
+        #{contractDesc,jdbcType=VARCHAR},
+        #{createId,jdbcType=NUMERIC},
+        #{creator,jdbcType=VARCHAR},
+        #{createDate,jdbcType=TIMESTAMP}	
+		)
+	</sql>
+
+	<select id="getById" resultMap="ContractResultMap" parameterType="Long">
+    select 
+        A.ID,
+        A.CONTRACT_CODE,
+        A.CONTRACT_NAME,
+        A.CONTRACT_A,
+        A.CONTRACT_B,
+        A.CONTRACT_STATUS,
+        A.BEGIN_DATE,
+        A.END_DATE,
+        A.CONTRACT_DESC,
+        A.CREATE_ID,
+        A.CREATOR,
+        A.CREATE_DATE,
+        A.UPDATE_ID,
+        A.UPDATOR,
+        A.UPDATE_DATE,
+        E1.ENUM_TEXT AS CONTRACT_STATUS_NAME	
+		FROM
+	    CONTRACT A
+	    LEFT JOIN ENUM_DETAIL E1
+        ON A.CONTRACT_STATUS = E1.ENUM_VALUE 
+        AND E1.TYPE_ID = 6     
+        WHERE  A.ID = #{id}
+	</select>
+	
+	
+	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.base.entities.Contract">
+		UPDATE	CONTRACT
+		<set>
+        CONTRACT_CODE = #{contractCode,jdbcType=VARCHAR},
+        CONTRACT_NAME = #{contractName,jdbcType=VARCHAR},
+        CONTRACT_A = #{contractA,jdbcType=VARCHAR},
+        CONTRACT_B = #{contractB,jdbcType=VARCHAR},
+        CONTRACT_STATUS = #{contractStatus,jdbcType=NUMERIC},
+        BEGIN_DATE = #{beginDate,jdbcType=DATE},
+        END_DATE = #{endDate,jdbcType=DATE},
+        CONTRACT_DESC = #{contractDesc,jdbcType=VARCHAR},
+        <if test="updateId != null">UPDATE_ID = #{updateId,jdbcType=NUMERIC},</if>
+        <if test="updator != null">UPDATOR = #{updator,jdbcType=VARCHAR},</if>
+        <if test="updateDate != null">UPDATE_DATE = #{updateDate,jdbcType=TIMESTAMP},</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+    <!-- 通过 ID 获取对象-->
+	<delete id="deleteById" parameterType="Long">
+		DELETE FROM CONTRACT WHERE ID = #{id}
+	</delete>
+	<sql id="condition_sql" lang="velocity">
+	<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			1=1 		
+			#if($_p.id)
+				#set($_id = $_p.id)
+				AND A.ID = @{_id,jdbcType=BIGINT}
+			#end
+			#if($_p.contractCode && $_p.contractCode != '')
+				#set($_contractCode = '%' + $_p.contractCode + '%')
+				AND A.CONTRACT_CODE LIKE @{_contractCode,jdbcType=VARCHAR}
+			#end	
+			#if($_p.contractName && $_p.contractName != '')
+				#set($_contractName = '%' + $_p.contractName + '%')
+				AND A.CONTRACT_NAME LIKE @{_contractName,jdbcType=VARCHAR}
+			#end	
+			#if($_p.contractA && $_p.contractA != '')
+				#set($_contractA = '%' + $_p.contractA + '%')
+				AND A.CONTRACT_A LIKE @{_contractA,jdbcType=VARCHAR}
+			#end	
+			#if($_p.contractB && $_p.contractB != '')
+				#set($_contractB = '%' + $_p.contractB + '%')
+				AND A.CONTRACT_B LIKE @{_contractB,jdbcType=VARCHAR}
+			#end	
+			#if($_p.contractStatus)
+				#set($_contractStatus = $_p.contractStatus)
+				AND A.CONTRACT_STATUS = @{_contractStatus,jdbcType=NUMERIC}
+			#end	
+		#end							
+		]]>	
+	</sql>
+    
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.base.entities.Contract" resultMap="ContractResultMap" lang="velocity" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre" />
+		<include refid="condition_sql" />
+		#order($_parameter.condition,"A.ID DESC")
+ 		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.base.entities.Contract" resultMap="ContractResultMap" lang="velocity" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+	    select 
+	        A.ID,
+	        A.CONTRACT_CODE,
+	        A.CONTRACT_NAME,
+	        A.CONTRACT_A,
+	        A.CONTRACT_B,
+	        A.CONTRACT_STATUS,
+	        A.BEGIN_DATE,
+	        A.END_DATE,
+	        A.CONTRACT_DESC,
+	        A.CREATE_ID,
+	        A.CREATOR,
+	        A.CREATE_DATE,
+	        A.UPDATE_ID,
+	        A.UPDATOR,
+	        A.UPDATE_DATE
+	        <include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+ 			#order($_parameter.condition,"A.ID DESC")
+ 			<include refid="_PUBLIC_V.AS_ROW_NUM" />	
+			FROM
+		    CONTRACT A
+		<include refid="condition_sql" />
+ 		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+
+    <select id="countByCondition" parameterType="com.supconit.base.entities.Contract" resultType="long" lang="velocity">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>	    
+    <!-- 删除多条记录-->
+	<delete id="deleteByIds">
+        DELETE FROM CONTRACT WHERE ID in 
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+
+	</delete>
+
+</mapper>

@@ -1,0 +1,79 @@
+#parse("index/_header.vm")
+</head>
+<body style="padding-bottom:40px;">
+<form id="myform_id" method="post" action="$!{rc.contextPath}/hl/gis/platform/init/save" class="ui-layout-center ui-dialog-form">
+    <input type="hidden" name="id" id="initLayer_id" value="$!{initLayer.id}">
+    <table width="100%">
+        <tr>
+            <td class="label"><span class="ui-form-required" >*</span><label>GIS服务器地址：</label></td>
+            <td><input type="text" class="k-textbox"   name="gisServerIp" value="$!{initLayer.gisServerIp}"></td>
+            <td ></td>
+
+            <td class="label"><span class="ui-form-required">*</span>GIS服务器端口号：</td>
+            <td><input type="text" class="k-textbox" name="gisServerPort" value="$!{initLayer.gisServerPort}"></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td class="label"><span class="ui-form-required">*</span>GIS工作空间：</td>
+            <td><input type="text" class="k-textbox" name="gisWorkSpace" value="$!{initLayer.gisWorkSpace}"></td>
+            <td></td>
+
+            <td class="label"><span class="ui-form-required" >*</span>GIS服务器部署路径：</td>
+            <td><input type="text" class="k-textbox"  name="gisTomcatWebapp" value="$!{initLayer.gisTomcatWebapp}"></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td class="label"><span class="ui-form-required" >*</span>地图设备状态刷新时间：</td>
+            <td><input type="text" class="k-textbox"  name="refreshTime" value="$!{initLayer.refreshTime}"></td>
+            <td>毫秒</td>
+            <td class="label"><span class="ui-form-required" >*</span>框选设备状态刷新时间：</td>
+            <td><input type="text" class="k-textbox" name="refreshFindTime" value="$!{initLayer.refreshFindTime}"></td>
+            <td>毫秒</td>
+        </tr>
+        <tr>
+            <td class="label"><span class="ui-form-required" >*</span>单击设备状态刷新时间：</td>
+            <td><input type="text" class="k-textbox"name="refreshOneTime" value="$!{initLayer.refreshOneTime}"></td>
+            <td>毫秒</td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    </table>
+    <div class="actions">
+        <button class="k-primary hc_btn" id="save_button_id" type="submit"><i class="fa fa-save"></i>保 存</button>
+        <button class="k-primary hc_btn" ><i class="fa fa-save"></i>刷新缓存</button>
+        <button class="k-primary hc_btn" ><i class="fa fa-save"></i>数据库初始化</button>
+    </div>
+</form>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+	      defaults: {
+	        resizable: true,
+	        closable: false,
+	        spacing_open: 5
+	      }
+	    });
+	});
+    $(document).ready(function () {
+        $("#myform_id").validator({
+            fields: {
+                gisServerIp: "GIS服务器地址:required;",
+                gisServerPort: "GIS服务器端口号:required;integer;range[1~65535] ",
+                gisWorkSpace: "GIS工作空间:required;",
+                gisTomcatWebapp: "GIS服务器部署路径:required",
+                refreshTime: "地图设备状态刷新时间:required;integer;",
+                refreshFindTime: "框选设备状态刷新时间:required;integer;",
+                refreshOneTime: "单击设备状态刷新时间:required;integer;"
+            },
+            valid: function (form) {
+                form_btn_submit($("#save_button_id5"), form, function (res) {
+                    validateCallback(res);
+                });
+            }
+        });
+    });
+</script>
+</body>
+</html>

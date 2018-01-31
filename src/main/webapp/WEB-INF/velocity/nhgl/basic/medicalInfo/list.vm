@@ -1,0 +1,96 @@
+<div class="ui-layout-center" id="subMain">
+	<div class="ui-layout-center">
+		<table id="medical_datalist" class="fn-hide"></table>
+	</div>
+	<div class="ui-layout-north">
+		<div class="ui-module-name">#crumbs("$!menu.code",1)</div>
+		<form id="medical_list_search" class="ui-form ui-form-search fn-clear">
+			<div class="ui-form-search-left">
+				<div class="ui-form-item">
+		            <label class="ui-label">月份：</label>
+		            <input id="monthKey" type="text" name="monthKey"  class="ui-input ui-input-small  Wdate"  onclick="WdatePicker({dateFmt:'yyyy-MM',maxDate:'%y-%M-%d'})" value="#date_format($!device.startTime,'yyyy-MM')"/>
+				</div>
+			</div>	
+			<div class="ui-form-search-right">
+					<button type="submit" id="subButton" class="btn btn-primary"><i class="iconfont icon-search"></i> 查&nbsp;询</button>
+					<!--button type="button" id="subButton" class="btn btn-primary"><i class="iconfont"></i> 重&nbsp;置</button-->
+			</div>
+		</form>
+	</div>
+</div>
+<!--<div class="ui-layout-north">
+	#bread_crumbs("NHGL_CJGL")
+</div>
+-->
+  <script type="text/javascript">
+  	$(document).ready(function(){
+		if(T.innerLayout&&!T.innerLayout.destroyed){
+			T.innerLayout.destroy();
+		}
+		T.innerLayout = $("#centerMain").layout({
+        defaults : {
+            resizable : false,
+            closable : false,
+            spacing_open : 5
+        },
+        west : {
+            size : 250,
+            resizable : true,
+            resizerTip : "移动改变大小",
+            closable : true,
+            togglerTip_open : "隐藏",
+            togglerTip_closed : "打开"
+        },
+        onresize_end : function(){
+            $("#collectlist_box").box("resize");
+        }
+    });
+    	_content_layouts.push(T.innerLayout);
+		_inner_layout=$("#subMain").layout({
+			defaults:{
+				resizabel:false,
+				closable: false,
+				spacing_open:5
+			},
+			onresize_end:function(){
+				$("#medical_datalist").datagridResize({width:_inner_layout.state.center.innerWidth+20,height:_inner_layout.state.center.innerHeight});
+			}
+		});
+		$("#collectlist_box").box({
+        	width : function(){return 'auto';},
+        	height : function(){return T.innerLayout.state.west.innerHeight-26;}
+    	});
+		var collect_datagrid=$("#medical_datalist").datagrid({
+			url:'$!{rc.contextPath}/nhgl/basic/medicalInfo/page',
+			dataType: "json",
+			method: "POST",
+			singleSelected : true,
+			striped : false,
+			height:  _inner_layout.center.state.innerHeight,
+			width :  _inner_layout.center.state.innerWidth,
+			showOrderNumber : true,
+			useRp : true,
+			usepager: true,
+    		rpOptions: [10, 20, 40, 50],
+    		pageSize: 20,
+    		searchFormId:"medical_list_search",
+    		searchCallback:function(datagrid){},
+    		onSuccess:function(table,grid){
+    			if(!grid)return ;
+    		},
+    		colModel:[
+    			{"display":"序号"},
+				{"display":"ID",name:"ID",hide:"true"},
+    			{display: "月份", name: "monthKey",width:150},
+    			{display: "门诊量", name: "outpatient",width:150,align:"right"},
+	            {display: "住院量", name: "inpatient",width:150,align:"right"},
+	            {display: "手术量", name: "operation",width:150,align:"right"},
+	            {display: "设备运行台数", name: "runDevice",width:150,align:"right"},
+	            {display: "平均温度", name: "avgTemperataure",width:150,align:"right"}
+    		],
+    		buttons : [
+	            #data_grid_buttons('NHGL_YLSJ')#end
+	        ]
+		});
+	}); 
+  </script>

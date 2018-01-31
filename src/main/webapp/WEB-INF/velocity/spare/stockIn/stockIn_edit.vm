@@ -1,0 +1,430 @@
+#parse("index/_header.vm")
+<style>
+	.ui-composer .ui-co-table .ui-input-choose{
+		width:100%;
+	}
+</style>
+</head>
+<body style="padding-bottom:40px;">
+	<form id="myform_id" class="ui-layout-center ui-dialog-form" method="post" action="$!{rc.contextPath}/spare/stockIn/save" >
+		 <input type="hidden" name="id" value="$!{stockIn.id}">
+		 <input type="hidden" name="_bpm_param" value="$!{_bpm_param}"/>
+         <input type="hidden" name="_bpm_ts_id" value=""/>
+         <input type="hidden" name="_bpm_enabled" value="false"/>
+       <div class="ui-composer">
+     <div class="ui-co-seg">
+	   <table class="ui-co-table" width="100%" >
+        <tr>
+            <td  class="label input-num"><span class="ui-form-required">#if(!($!viewOnly)) * #end</span>入库单号：</td>
+            <td class="inputText">
+				<input readonly type="text"  name="spareCode" value="$!stockIn.stockInCode" class="k-textbox readonly-normal" />
+            </td>
+            <td class="label input-num"><span class="ui-form-required">#if(!($!viewOnly)) * #end</span>仓库：</td>
+            <td class="inputText">
+				<select class="k-textbox" name="warehouseId">
+                  $!inWarehouseOptions
+                </select>
+			</td>
+       
+            <td  class="label input-num"><span class="ui-form-required">#if(!($!viewOnly)) * #end</span>入库来源：</td>
+            <td class="inputText">
+				 <select class="k-textbox" name="inType">
+                        $!inTypeSelectOptions
+                 </select>
+			</td>
+            
+        </tr>
+        <tr>
+			<td class="label input-num"><span class="ui-form-required">#if(!($!viewOnly)) * #end</span>入库日期：</td>
+			<td class="inputText">
+			 <input type="text" name="inTime" class="k-textbox"  id="inTime"  value="#date_format($!stockIn.inTime,'yyyy-MM-dd HH:mm:ss')" />
+			</td>
+            <td class="label input-num">采购人：</td>
+			<td class="inputText">
+				#if(!($!viewOnly))<span class="k-textbox k-space-right" id="inPersonNames">#end
+					<input type="hidden" id="inPersonId"  name="inPersonId" value="$!{stockIn.inPersonId}" class="k-textbox"/>
+					<input readonly emptyFunc="emptyInPerson" type="text" id="inPersonName" name="inPersonName" value="$!{stockIn.inPersonName}" class="k-textbox ui-input-choose" />	
+					 #if(!($!viewOnly))<a href="#" class="k-icon k-i-search">&nbsp;</a>
+                </span>#end
+			</td>
+            <td class="label input-num">验收人：</td>
+			<td class="inputText">
+				#if(!($!viewOnly))<span class="k-textbox k-space-right" id="checkerNames">#end
+					<input type="hidden" id="checkerId" name="checkerId" value="$!{stockIn.checkerId}" class="ui-input"/>
+					<input readonly type="text" id="checkerName" name="checkerName" value="$!{stockIn.checkerName}" class="k-textbox ui-input-choose" />		
+					#if(!($!viewOnly))<a href="#" class="k-icon k-i-search">&nbsp;</a>
+                </span>#end
+			</td>
+            
+        </tr>
+		<tr>
+			<td class="label input-num">供应商：</td>
+			<td class="inputText">
+				#if(!($!viewOnly))<span class="k-textbox k-space-right" id="supplierNames">#end
+					 <input type="hidden" id="supplierId" name="supplierId" value="$!{stockIn.supplierId}" class="k-textbox" />
+					 <input readonly emptyFunc="emptySupplier" type="text" id="supplierName" name="supplierName" value="$!{stockIn.supplierName}" class="k-textbox ui-input-choose" />
+					 #if(!($!viewOnly))<a href="#" class="k-icon k-i-search">&nbsp;</a>
+                </span>#end
+			</td>
+			 <td class="label input-num"><label>发票号：</label></td>
+            <td class="inputText">
+			   <input type="text"  name="invoiceNo" value="$!{stockIn.invoiceNo}"  class="k-textbox"/>
+            </td>
+		</tr>
+        <tr>
+            <td class="label input-num">入库摘要：</td>
+            <td colspan="3" class="inputText">
+				<textarea  id="textAreaId" style="width:510px;" class="k-textbox k-textarea" type="text" name="descripton">$!{stockIn.descripton}</textarea>
+			</td>
+        </tr>
+    </table>
+	 
+	 <div class="ui-segline"></div>
+	 <div id="stock">
+	<table  class="ui-table " id="stock">
+        <thead>
+        <tr>
+            <th width="50px" class="k-header input-equilong">序号</th>
+            <th class="k-header input-text">备件名称</th>
+            <th class="k-header input-text">备件编码</th>
+            <th class="k-header input-text">备件规格</th>
+            <th class="k-header input-text">备件型号</th>
+            <th class="k-header input-num">单价(元)</th>
+            <th class="k-header input-num">入库数量</th>
+            <th class="k-header input-num">金额(元)</th>
+            <th class="k-header input-text">备注</th>
+            #if(!($!viewOnly))
+            	<th ><a href="javascript:void(0)" id="addRow" title="添加行"><i class="fa fa-plus-circle"></i></a></th>
+            #end
+        </tr>
+        </thead>
+        <tbody>
+			#set($index=0)
+			#set($sy = 0)
+		    #foreach($list in $!stockIn.stockInDetailList)
+				
+				#set($sy = $velocityCount)
+			 <tr>
+                <td class="input-equilong">$velocityCount<input type="hidden"    value="$index" class="k-textbox"/></td>
+                <td >
+					<span class="k-textbox k-space-right" #if(!($!viewOnly)) onclick="choose('$index');" #end>
+					   <input type="hidden" name="stockInDetailList[$index].spareId" id="IdspareName-$index" value="$!{list.spareId}">
+                       <input readonly  type="text" name="stockInDetailList[$index].spareName" id="spareName-$index" value="$!{list.spareName}" class="k-textbox ui-input-choose  input-text"/>
+					   <a href="#" class="k-icon k-i-search">&nbsp;</a>
+					</span>
+                </td>
+                <td><input readonly type="text" name="stockInDetailList[$index].spareCode" id="spareCodespareName-$index" value="$!{list.spareCode}"  class="k-textbox input-text"/></td>
+                <td><input readonly type="text" name="stockInDetailList[$index].spec" id="specspareName-$index" value="$!{list.spec}" class="k-textbox input-text"/></td>
+                <td><input readonly type="text" name="stockInDetailList[$index].model" id="modelspareName-$index" value="$!{list.model}"  class="k-textbox input-text"/></td>
+                <td><input type="text" name="stockInDetailList[$index].prc" id="prcspareName-$index" value="$!{list.prc}" class="k-textbox input-num fNum2" onblur="priceAccount(this,'0')"/></td>
+                <td><input type="text" name="stockInDetailList[$index].qty" value="$!{list.qty}"  id="qtyspareName-$index" class="k-textbox input-num fInt" onblur="priceAccount(this,'1')"/></td>
+                <td><input type="text" name="stockInDetailList[$index].money" value="$!{list.money}" id="moneyspareName-$index" class="k-textbox input-num fNum2"/></td>
+                <td><input valid="[{max_length: 100}]" ype="text" name="stockInDetailList[$index].remark" id="remarkspareName-$index" value="$!{list.remark}"  class="k-textbox"/></td>
+                #if(!($!viewOnly))
+                	<td><a onclick="delRow(this);"  class="del"  href="javascript:void(0);" title="删除"><i class="fa fa-close"></i></a></td>
+                #end
+            </tr>
+			#set($index = $index+1)
+		 #end	
+		 #if($!stockIn.stockInDetailList.size()>= 5)
+		 #else
+		 	#set($sy = $sy + 1)
+			#foreach($j in [$sy..5])
+			  <tr>
+                <td class="input-equilong">$j</td>
+                <td >
+					<span class="k-textbox k-space-right" #if(!($!viewOnly)) onclick="choose('$j');" #end>
+					 <input type="hidden" name="stockInDetailList[$j].spareId"  id="IdspareName-$j" value="$!{list.spareId}">
+                     <input readonly   type="text" name="stockInDetailList[$j].spareName" id="spareName-$j" value="$!{list.spareName}" class="k-textbox ui-input-choose input-text"/>
+					 <a href="#" class="k-icon k-i-search">&nbsp;</a>
+					</span>
+                </td>
+                <td><input readonly type="text" name="stockInDetailList[$j].spareCode" id="spareCodespareName-$j" value="$!{list.spareCode}"  class="k-textbox  input-text"/></td>
+                <td><input readonly type="text" name="stockInDetailList[$j].spec" id="specspareName-$j" value="$!{list.spec}" class="k-textbox input-text"/></td>
+                <td><input readonly type="text" name="stockInDetailList[$j].model" id="modelspareName-$j" value="$!{list.model}"  class="k-textbox input-text"/></td>
+                <td><input type="text" name="stockInDetailList[$j].prc" id="prcspareName-$j" value="$!{list.prc}"  class="k-textbox input-num fNum2" onblur="priceAccount(this,'0')" /></td>
+                <td><input type="text" name="stockInDetailList[$j].qty" value="$!{list.qty}" id="qtyspareName-$j" class="k-textbox input-num fInt" onblur="priceAccount(this,'1')" /></td>
+                <td><input type="text" name="stockInDetailList[$j].money" id="moneyspareName-$j" value="$!{list.money}" class="k-textbox input-num fNum2" readonly/></td>
+                <td><input valid="[{max_length: 100}]" ype="text" name="stockInDetailList[$j].remark" id="remarkspareName-$j" value="$!{list.remark}"  class="k-textbox"/></td>
+                #if(!($!viewOnly))
+                	<td><a onclick="delRow(this);" class="del" href="javascript:void(0);" title="删除"><i class="fa fa-close"></i></a></td>
+                #end
+            </tr>
+			#end
+		 #end	
+		  <tr>
+            <td class="input-equilong">合计</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td><input readonly id='sumQty' type="text" name="sumQty" value="$!{list.qty}"  class="k-textbox input-num fInt"/></td>
+            <td><input readonly id='sumMoney' type="text" name="sumMoney" value="$!{list.money}"  class="k-textbox input-num fNum2"/></td>
+            <td></td>
+            #if(!($!viewOnly))
+            	<td></td>
+            #end
+        </tr>
+        </tbody>
+    	</table>
+		</div>
+		</div>
+	  #if($!stockIn.processInstanceId!='')
+		<div class="ui-co-seg">
+         #parse("bpm/bpm_audit.vm")
+		</div>
+      #end	
+	##默认来存储已经存在的行
+	<input type="hidden" value="$!stockIn.stockInDetailList.size()" id="number" />
+	<input type="hidden" value="" id="d" />
+	<div class="actions">
+	  #foreach($ts in $!_bpm_transitions)
+        #set($delete=false)
+        <button type="submit" class="k-primary hc_btn" id="st" onclick="doSubmit('processDone','$!ts.id',true)">
+            #if($!ts.id.contains("reject"))
+                <i class="fa fa-reply"></i>
+            #else
+                <i class="fa fa-upload"></i>
+            #end
+            #if($!ts.id=="submit_1"&&$!{stockIn.id})
+                #set($delete=true)
+            #end
+            $!ts.name</button>
+        #end
+        <button class="k-primary hc_btn" type="submit" id="bt" onclick="doSubmit('processDone');"><i class="fa fa-save"></i>保存</button>
+        #if($!delete)
+            <button class="k-primary hc_btn" type="submit" onclick="doSubmit('deleteProcessInstance');"><i class="fa fa-remove"></i>删除</button>
+        #end
+        <a class="k-primary hc_btn" onclick="window.location.href='$!{rc.contextPath}/spare/stockIn/go';"><i class="fa fa-reply"></i>返回</a>
+		#if($!stockIn.processInstanceId!='')
+            <ul class="ui-action">
+            ##<li class="ui-action-item"><a href="#"><i class="iconfont icon-print"></i> </a> </li>
+                <li class="ui-action-item"><a href="#"><i class="iconfont icon-list-alt"></i> </a> </li>
+                <li class="ui-action-item"><a href="#" onclick="showFlowChart('$!stockIn.processInstanceId',800,600);"><i class="iconfont icon-sitemap"></i> </a> </li>
+            </ul>
+        #end
+	</div>
+
+	</form>
+	 </div>
+
+	<script type="text/javascript">
+	
+	
+	$("#inPersonNames").click(function() {
+			if("$!viewOnly" != "true")
+       		quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/choose/personPage?type=1&txtId=inPersonId&txtName=inPersonName",1135, 540);
+		});	
+		
+	$("#checkerNames").click(function() {
+			if("$!viewOnly" != "true")
+       		quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/choose/personPage?type=1&txtId=checkerId&txtName=checkerName",1135, 540);
+		});	  
+	$("#supplierNames").click(function() {
+       		if(!'$!{viewOnly}')
+			quick_dialog("selectDiloag", "厂商选择", "$!{rc.contextPath}/base/supplier/lookup/supplierId/supplierName?flag=0", 950, 400);
+    });
+	
+	function choose(o){
+		var nameId = "spareName-"+o;
+		var id = "Id"+nameId;
+	 	quick_dialog("selectDiloag", "备件选择", "$!{rc.contextPath}/spare/spare/lookup?txtId="+id+"&txtName="+nameId+"&_t="+new Date().getTime(), 950, 400);
+	 
+	 }
+	
+	function doSubmit(type,flowId,bpmEnabled) {
+	   // alert(type);
+        if(flowId){
+            $("input[name='_bpm_ts_id']").val(flowId);
+        }
+        if(bpmEnabled){
+            $("input[name='_bpm_enabled']").val(bpmEnabled);
+			$("#d").val(1);
+        }else{
+			$("#d").val(0);
+		}
+        var ctn = "$!rc.contextPath/spare/stockIn/"+type;
+        $("#myform_id").attr("action", ctn);
+        //$("#stockIn_form_id").submit();
+        return true;
+    }
+	
+	##根据单价和数量计算总价格
+	function priceAccount(o,flag){
+	#if(!($!viewOnly)) 
+    	 var nums = $(o).val();//这行必须是数字
+		 if('1'==flag)
+		 {
+    	 if("" == nums || !isZzs(nums))
+		 {
+    		 $(o).val("");
+		 } else
+			{
+		 var i = $(o).attr("id").split("-")[1];
+    	 var price = 0;
+    	 price = $("#prcspareName-"+i).val();
+    	 var p = Number(nums)*Number(price);
+    	 if(p!=0)
+    	   	$("#moneyspareName-"+i).val(p);		
+    	   count();
+			}
+			} else 
+			{
+			if("" == nums || !isDigtal(nums))
+		{
+    		 $(o).val("");
+		} else
+			{
+			 if("" == nums || !isDigtal(nums))
+		{
+    		 $(o).val("");
+		} else
+			{
+		 var i = $(o).attr("id").split("-")[1];
+    	 var price = 0;
+    	 price = $("#qtyspareName-"+i).val();
+    	 var p = Number(nums)*Number(price);
+    	 if(p!=0)
+    	   	$("#moneyspareName-"+i).val(p);		
+    	   count();
+			}
+			}
+			}
+			
+		#end
+	}
+	##计算合计
+	function count(){
+		var qty = $("input[name$='.qty']");
+	    var pric = $("input[name$='.money']")
+		var account = 0;
+		var moneys = 0;
+		$.each(qty,function(i,item){
+			account+=Number($(item).val());
+		});
+		$.each(pric,function(i,item){
+			moneys+=Number($(item).val());
+		});
+		$("#sumQty").val(account);
+		$("#sumMoney").val(moneys);
+	
+	}
+	##删除行
+	function delRow(o){
+	    
+		var num = $("#number").val();
+		if(Number(num)==0)
+    		 num = 5;
+		if(Number(num)!=1){
+			var tr = $(o).parent("td").parent("tr");
+			var vs = tr.nextAll();
+			num = Number(tr.find("td:first").html());
+			tr.remove();
+			var next = num+1;
+			$.each(vs,function(i,item){
+				var str = $(item)[0].innerHTML;
+				var exp = new RegExp("\\["+next+"\\]","g");
+    			var exps = new RegExp("-"+next,"g");
+    			var html = str.replace(exp,"["+num+"]");
+    			html = html.replace(">"+next+"<",">"+num+"<").replace(exps,"-"+num);
+				num++;next++;
+				$(item).html(html);
+				
+			
+			})
+        	$("#number").val(num-2);
+			count();
+    		
+		}
+	
+	}
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+              defaults: {
+                resizable: true,
+                closable: false,
+                spacing_open: 5
+              }
+            });
+		 #if(!$!viewOnly)
+		 	commonSingleDate("inTime","yyyy-MM-dd HH:mm:ss","zh-CN")
+		 #end
+		/*$("#inTime").hcDateTimePicker({
+       	 	format: "yyyy-MM-dd HH:mm:ss",
+			culture: "zh-CN"
+    	});	*/
+		##进入页面就进行计算
+		count();
+		##添加删除行	
+		$("#addRow").click(function(){
+			var num = $("#number").val();
+			if(Number(num)==0)num=5;
+			var next = Number(num)+1;
+			var $tr = $("#stock").find("tr")[num];
+			var str = "stockInDetailList["+num+"]";
+			var exp = new RegExp("\\["+num+"\\]","g");
+			var exps = new RegExp("-"+num,"g");
+			var cos  = new RegExp("\\'"+num+"\\'","g");
+			var html = "<tr>"+$($tr).html().replace(exp,"["+next+"]")+"</tr>";
+			html = html.replace(">"+num+"<",">"+next+"<").replace(exps,"-"+next).replace(cos,"'"+next+"'");
+			$("#number").val(next);
+			$($tr).after(html);
+			
+			
+			$("#stock input[name='stockInDetailList["+next+"].spareId']").val("");
+			$("#stock input[name='stockInDetailList["+next+"].spareName']").val("");
+			$("#stock input[name='stockInDetailList["+next+"].spareCode']").val("");
+			$("#stock input[name='stockInDetailList["+next+"].spec']").val("");
+			$("#stock input[name='stockInDetailList["+next+"].model']").val("");
+			$("#stock input[name='stockInDetailList["+next+"].prc']").val("");
+			$("#stock input[name='stockInDetailList["+next+"].qty']").val("");
+			$("#stock input[name='stockInDetailList["+next+"].money']").val("");
+			$("#stock input[name='stockInDetailList["+next+"].remark']").val("");
+			
+			
+		})
+
+        $("#myform_id").validator({
+            fields:{
+				stockInCode: "入库单号:required; length[~20]",
+    		    warehouseId: "仓库:required; length[~50]",
+    		    inType: "入库来源:required;",
+    		    inTime: "入库日期: required;",
+    		    checkerName: "验收人: required;",
+    			invoiceNo: "发票号:length[~30]",
+    		    descripton: "入库摘要: length[~500]",
+            },
+            valid:function(form){
+				var id=$("#d").val(); 
+				var bt = "#st";
+				if('0'==id)bt = '#bt';
+                form_btn_submit($(bt),form,function(res){
+                    validateCallback(res);
+					
+                });
+            }
+        });
+  });
+   $(document).ready(function(){
+        #if($!viewOnly)
+        	#if(!$!_bpm_transitions)
+            $('[type=submit]').hide();
+            #end
+            $(':input:not(#_bpm_comment)').attr('readonly',true);
+            $('select').attr('disabled',true);
+            $("input[type=text]").unbind( "click" ).attr('onclick','');
+            $('#tableId tr').each(function(i,tr){
+                $('th:last',tr).remove();
+                $('td:last',tr).remove();
+            });
+			$("#addRow").unbind( "click" ).attr('onclick','');
+			$(".del").unbind( "click" ).attr('onclick','');
+			/*var datetimepicker = $("#inTime").data("kendoDateTimePicker");
+			datetimepicker.enable(false);*/
+        #end
+       // fNumPage();
+    });
+	
+  </script>
+  #parse("index/_footer.vm")  

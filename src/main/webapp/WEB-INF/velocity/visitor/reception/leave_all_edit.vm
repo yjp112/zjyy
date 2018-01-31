@@ -1,0 +1,176 @@
+#parse("index/_header.vm")
+<script src="$!{main_static_custom_url}/js/webcam/webcam.js"></script>
+<script src="$!{main_static_custom_url}/js/jquery.slideBox.js"></script>
+<link href="$!{main_static_custom_url}/css/jquery.slideBox.css" rel="stylesheet">
+<style>
+.ui-dialog-form{padding:0;bottom:0!improtant;margin-bottom:38px;}
+#title{
+	text-align:center;
+	padding-top:5px;
+	margin-bottom:-15px;
+	margin:0;
+	font-wight:bold;
+	line-height:30px;
+	font-size: 20px;
+}
+</style>
+</head>
+<body>
+<div class="ui-layout-north diglog-title">离开登记</div>
+<div class="ui-layout-center dialog-form ui-dialog-form">
+	<form id="myform_id" method="post" action="$!{rc.contextPath}/visitor/reception2/leave">
+		<input readonly type="text" name="actualLeaveTime" class="k-textbox" id="actualLeaveTime" value="#date_format($!{reservationVisitor.actualLeaveTime})"/>
+		<input readonly type="text" class="k-textbox" id ="revokeTime" name="revokeTime" value="#date_format($!{reservationVisitor.revokeTime})" ></td>
+		<input type="hidden" name="id" value="$!{reservationVisitor.id}"/>
+		<input type="hidden" name="actualVisitors" value="$!{reservationVisitor.actualVisitors}"/>
+   		<input type="hidden" name="number" value="$!reservationVisitor.visitorList.size()" id="number" />
+	<div class="ui-layout-center">
+	  <div   class="label" id="title" >访客卡信息</div>
+		<table width="100%">
+	          <tr>
+		            <td colspan="3" >            
+		    			<div class="ui-co-cont ui-co-nob">
+		    			    #parse("visitor/dc_card/allactive.vm")	    
+							#parse("visitor/visitor/allcardInfo.vm")
+		    			</div>
+					</td>
+			  </tr>	
+	    </table>
+	</div>
+
+
+	</form>
+</div>
+
+<script type="text/javascript">
+function my_completion_handler(msg) {
+	webcam.reset();
+	$("#items").append('<li><img src="' +'${imageTempPath}' + msg + '"></li>');
+	var filehidden = "<input type='hidden' name='fileorignal' value='" + msg + "' id='fileorignal" + index + "'/><input type='hidden' name='filename' value='" + msg + "' id='filename" + index + "'/>";
+	$("#filehidden").append(filehidden);
+	index++;
+	$("#results").slideBox();
+}
+</script>
+
+<script type="text/javascript">
+
+function validateCallback(response, dataGridId,dialogId) {
+
+    if (response.status == "success") {
+        alert(response.data.message || "操作成功！");
+        if (response.data.next) {
+             if (parent) {//dialog中有iframe
+                 if (parent.$("#_main_frame")) {
+                	 $("#queryBtn_l",window.opener.document).click();
+                	 window.close();
+                 }
+             }
+        }
+    }
+}  
+
+	
+	
+	//将val写入value
+	function writes(o){
+		$(o).attr("value",$(o).val());
+	}
+	var id;
+	function a(id){
+	   var id = id;
+	}
+	##验证是否为数字、字母、下划线并长度不能大于50
+    	function vaild_number()
+    	{    
+			var visitorCardNo = $("input[name$='.visitorCardNo']");
+			$.each(visitorCardNo,function(i,item){
+    			if("" == $(item).val() || !isLetters($(item).val())||$(item).val().length>50)
+    			{
+    				$(item).val("");
+    			}
+    		});
+    	}
+	##删除行
+	function delRow(o){
+		var num = $("#number").val();
+		if(Number(num)==0)num=1;
+		if(Number(num)!=1){	 
+        	var tr = $(o).parent("td").parent("tr");
+			var vs = tr.nextAll();
+			num = Number(tr.find("td:first").html());
+			tr.remove();
+			var next = num+1;
+			$.each(vs,function(i,item){
+				var str = $(item)[0].innerHTML;
+				var exp = new RegExp("\\["+next+"\\]","g");
+    			var exps = new RegExp("-"+next,"g");
+    			var html = str.replace(exp,"["+num+"]");
+    			html = html.replace(">"+next+"<",">"+num+"<").replace(exps,"-"+num);
+				num++;next++;
+				$(item).html(html);
+			})
+        	$("#number").val(num-1);
+		}
+	
+	}
+	$(document).ready(function(){
+		$("#results").slideBox();
+		
+		$('body').layout({
+              defaults: {
+                resizable: true,
+                closable: false,
+                spacing_open: 0
+              },
+              north: {
+            	    size: 34
+            	  }
+            });	
+		$('.ui-dialog-form').layout({
+             defaults: {
+               resizable: true,
+               closable: false,
+               spacing_open: 0
+             },
+             south: {
+           	    size: 38
+           	  },
+           	  east: {
+           		  size: 330
+           	  }
+           });
+
+		##添加行	
+		$("#addRow").click(function(){
+			var num = $("#number").val();
+			if(num==0)num=1;
+			var next = Number(num)+1;
+			var $tr = $("#stock").find("tr:last");
+			var exp = new RegExp("\\["+num+"\\]","g");
+			var exps = new RegExp("-"+num,"g");
+			var html = "<tr>"+$($tr).html().replace(exp,"["+next+"]")+"</tr>";
+			html = html.replace(">"+num+"<",">"+next+"<").replace(exps,"-"+next);
+			$("#number").val(next);
+			//var clear = new RegExp("value=\".*\"","g");
+			//html = html.replaceAll(clear, "value=\"\"", false);
+			$($tr).after(html);
+			var $tr = $("#stock").find("tr:last");
+			$.each($tr.find("input"),function(i,item){
+				$(item).attr("value","");
+			});
+			//console.info($tr.find("input"));
+			
+		})
+        $("#myform_id").validator({
+             valid: function (form) {
+                form_btn_submit($("#save_button_id"), form, function (res) {
+                    validateCallback(res, "grid", "leave_register_dlg");
+                });
+            }
+        });
+	    commonSingleDateWithout("visitTime","yyyy-MM-dd","zh-CN");
+     });
+</script>
+</body>
+</html>

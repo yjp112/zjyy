@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=8">
+<!--无gis的系统，直接显示单个flash-->
+<link rel="stylesheet" href="${projectName}/gis_server/flash/css/custom.css"/>
+<link rel="stylesheet" href="${projectName}/gis_server/flash/css/demo.css"/>
+<script type="text/javascript" src="${projectName}/gis_server/flash/js/hcjs-debug.js"></script>
+<script type="text/javascript" src="${projectName}/gis_server/flash/js/demo.js"></script>
+<style>
+html{background:#fff;}
+*{
+margin:0;
+padding:0;
+}
+html,body{
+ height:100%;
+}
+ .ui-tab-v .ui-tab-items-v{
+ margin-top:5px;
+ }
+</style>
+</head>
+<body >
+#if($!hasLeftLayout)
+<div style="height: 99%;">
+	<div style="float:left;width:42px;height:100%;border-right:2px solid #0c4a25;">
+		<div id="tabs" class="ui-tab ui-tab-v">
+		  <ul class="ui-tab-items ui-tab-items-v" id="ul_buildings">
+
+	            #foreach($!row in $!leftLayout)
+	            <li class="ui-tab-item #if($!row.selected) current #end" onclick="swithTab('$!{row.finalBtnUrl}')">
+                    <a href="javascript:void(0);"><div>$!{row.btnName}</div></a>
+	            </li>
+		        #end
+	          
+		  </ul>
+		</div>    	
+    </div>
+    <div style="margin-left:44px;height:100%;">
+        <div style="height:100%;">
+	  		<iframe id="layoutContent" frameborder="0" scrolling="no" width="100%" height="100%"
+				src="$!{defaultSelectedLayout.finalBtnUrl}"
+				marginheight="0" marginwidth="0"  allowtransparency="true">
+			</iframe>
+        </div>
+    </div>
+    
+</div>
+#end
+
+
+##右侧固定
+#if($!hasRightLayout)
+<div>
+	<div  style="float:right;width:42px;height:100%;border-left:2px solid #0c4a25;">
+		<div style="width:100%;height:100%">
+			<div id="tabs" class="ui-tab ui-tab-v ui-tab-v-r">
+			  <ul class="leftDiv ui-tab-items ui-tab-items-v" id="ul_buildings">
+		            
+		            #foreach($!row in $!rightLayout)
+		            <li class="ui-tab-item #if($!row.selected) current #end" onclick="swithTab('$!{row.finalBtnUrl}')">
+                        <a href="javascript:void(0);"><div>$!{row.btnName}</div></a>
+			        </li>
+			        #end
+		            
+			  </ul>
+			</div>
+		</div>
+	</div>
+	<div style="margin-right:44px; background:green;height:100%">
+	  		<iframe id="layoutContent" frameborder="0" scrolling="no" width="100%" height="100%"
+				src="$!{defaultSelectedLayout.finalBtnUrl}"
+				marginheight="0" marginwidth="0"  allowtransparency="true">
+			</iframe>  		
+	</div>
+</div>
+#end
+
+
+##两侧固定
+#if($!hasBothLayout)
+   <div> 
+       <div style="width:42px;height:100%; float:right;border-left:2px solid #0c4a25;">
+ 			<div id="tabs" class="ui-tab ui-tab-v ui-tab-v-r">
+			  <ul class="leftDiv ui-tab-items ui-tab-items-v" id="ul_buildings">
+		            #foreach($!row in $!rightLayout)
+                        <li class="ui-tab-item #if($!row.selected) current #end" onclick="swithTab('$!{row.finalBtnUrl}')">
+                            <a href="javascript:void(0);"><div>$!{row.btnName}</div></a>
+                        </li>
+			        #end
+			  </ul>
+			</div>      	
+       	</div>
+       <div style="width:42px;height:100%; float:left;border-right:2px solid #0c4a25;">
+			<div id="tabs" class="ui-tab ui-tab-v">
+			  <ul class="leftDiv ui-tab-items ui-tab-items-v" id="ul_buildings">
+		            #foreach($!row in $!leftLayout)
+                        <li class="ui-tab-item #if($!row.selected) current #end" id="leftBtnli">
+                            <a href="javascript:void(0);" onclick="swithTab('$!{row.finalBtnUrl}')"><div>$!{row.btnName}</div></a>
+                        </li>
+			        #end
+		            
+			  </ul>
+			</div>       	
+       	</div>
+       <div style="height:100%;margin-left:44px;margin-right:44px;">
+	  		<iframe id="layoutContent" frameborder="0" scrolling="no" width="100%" height="100%"
+				src="$!{defaultSelectedLayout.finalBtnUrl}"
+				marginheight="0" marginwidth="0"  allowtransparency="true">
+			</iframe>  	       	
+       	</div>
+    </div>
+#end
+<script type="text/javascript">
+	function swithTab(url){
+		 document.getElementById("layoutContent").src =url;
+	}
+	function addClickClass($obj){
+		$(".ui-tab-items").find(".ui-tab-item").removeClass("current");
+		$obj.addClass("current").siblings().removeClass("current");
+	}
+	$(document).ready(function(){
+		$(".ui-tab-items").find(".ui-tab-item").click(function(event){
+			addClickClass($(this));
+		});
+	});
+</script>
+</body>
+</html>

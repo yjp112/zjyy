@@ -1,0 +1,262 @@
+## 引入文件头部及css
+#set($_title=$!{index_title})
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$!{_title}</title>
+        <link rel="stylesheet" href="$!{main_static_custom_url}/css/appwindow.css?t=20140604092444" />
+		<link href="$!{main_static_hc_url}/css/font-awesome.min.css" rel="stylesheet">
+		<script src="$!{platform_static_url}/js/hcjs.js?t=20140604092444" type="text/javascript"></script>
+		<script src="$!{main_static_hc_url}/js/jquery-1.11.1.js"></script>
+		<style >
+
+        </style>
+	</head>
+<body scroll=no class="ui-app-body">
+	<div class="app-content">
+		<div class="logo"></div>
+		<div class="app-items">
+			<div class="app-item item1 hover1">
+				<a href="$!{rc.contextPath}/index/ROOT_ABGL" target="_blank"><div class="item-AB"></div></a>
+				<a href="$!{rc.contextPath}/index/ROOT_FKGL" target="_blank">
+					<div class="item-FK1"></div>
+					<div class="item-FK2"></div>
+				</a>
+			</div>
+			<div class="app-item item2">
+				<a href="$!{rc.contextPath}/index/ROOT_NHGL"  target="_blank"><div class="item-NH"></div></a>
+				<a href="$!{rc.contextPath}/index/ROOT_NBGL"  target="_blank"><div class="item-JD"></div></a>
+			</div>
+			<div class="app-item item3">
+				<a href="$!{rc.contextPath}/index/ROOT_SBXJ" target="_blank"><div class="item-SBXJ"></div></a>
+				<a href="$!{rc.contextPath}/index/ROOT_SBWX" target="_blank"><div class="item-SBWX"></div></a>
+			</div>
+			<div class="app-item item4">
+				<a href="$!{rc.contextPath}/index/ROOT_SBDA" target="_blank"><div class="item-SBDA"></div></a>
+				<a href="$!{rc.contextPath}/index/ROOT_SBBY" target="_blank"><div class="item-SBBY"></div></a>
+			</div>
+			<div class="app-item item5">
+				<a href="http://172.20.112.151/" target="_blank"><div class="item-YKT"></div></a>
+				<a href="$!{rc.contextPath}/index/ROOT_YGZZ" target="_blank"><div class="item-YG"></div></a>
+			</div>
+			<div class="app-item item6">
+				<a href="$!{rc.contextPath}/index/ROOT_FZJC" target="_blank"><div class="item-JC"></div></a>
+                <a href="$!{rc.contextPath}/index/ROOT_3D" target="_blank"><div class="item-SW"></div></a>
+			</div>
+		</div>
+	</div>
+	<div class="ui-app-copyright">
+		Copyright &copy; 2003-$date.yyyy  浙江浙大中控信息技术有限公司
+	</div>
+</body>
+<script>
+	$(function(){
+		$('.app-item div').hover(
+				function(){
+			var aa = $(this).attr('class');
+			
+			$('.app-item').removeClass('hover1 hover2');
+			
+			if(aa == 'item-AB'){
+				$('.item1').addClass('hover1');
+			}
+			if(aa == 'item-FK1' || aa == 'item-FK2'){
+				$('.item1').addClass('hover2');
+			}
+			if(aa == 'item-NH'){
+				$('.item2').addClass('hover1');
+			}
+			if(aa == 'item-JD'){
+				$('.item2').addClass('hover2');
+			}
+			if(aa == 'item-SBXJ'){
+				$('.item3').addClass('hover1');
+			}
+			if(aa == 'item-SBWX'){
+				$('.item3').addClass('hover2');
+			}
+			if(aa == 'item-SBDA'){
+				$('.item4').addClass('hover1');
+			}
+			if(aa == 'item-SBBY'){
+				$('.item4').addClass('hover2');
+			}
+			if(aa == 'item-YKT'){
+				$('.item5').addClass('hover1');
+			}
+			if(aa == 'item-YG'){
+				$('.item5').addClass('hover2');
+			}
+			if(aa == 'item-JC'){
+				$('.item6').addClass('hover2');
+			}
+            if(aa == 'item-SW'){
+                $('.item6').addClass('hover1');
+            }
+			
+		});
+	});
+
+</script>
+<!-- 	<body scroll=no class="ui-app-body">
+		<div class="ui-layout-center ui-app-container" id="AppWindow">
+			<div class="ui-app-visible-box">
+				<div class="ui-app-content">
+				</div> 	
+			</div>
+			<div class="ui-app-nav-wrap">
+				<ul class="ui-app-nav"></ul>
+			</div>
+		</div>
+
+		<div class="ui-layout-north">
+			##<div class="app-logo"></div>
+			##<a class="ui-header-logout" href="$!{rc.contextPath}/index/logout"><i class="fa fa-power-off"></i>注销</a>
+		</div>
+
+		<div class="ui-layout-west">
+			<a class="app-left"></a>
+		</div>
+		<div class="ui-layout-east">
+			<a class="app-right"></a>
+		</div>
+
+		<div class="ui-layout-south app-footer" id="foot">
+			
+		</div>
+		<div class="ui-app-copyright">
+				Copyright © 2003-$date.yyyy  浙江浙大中控信息技术有限公司
+		</div>
+	<script>
+	var _app_layout	
+	$(document).ready(function () {
+		var _WE = document.body.clientWidth*0.1;
+		_app_layout = $('body').layout({ 
+			defaults : {
+				resizable : false,
+				closable : false,
+				spacing_open : 0
+			},
+			north : {
+				size : 170
+			},
+			south : {
+				size : 45
+			},
+			west : {
+				size : _WE
+			},
+			east : {
+				size : _WE
+			},
+		});
+
+		init();
+	});
+
+	#nonSafetyMenu("systemMenu","ROOT")#end
+	var menuArr = [];	
+	#foreach( $system in $!systemMenu.children)
+	     #if($!system.display && $!system.code!='ROOT_SYSTEM' && $!system.code!='ROOT_FUNCTION')
+	     	#if ((!$system.linkUrl)||(!$system.linkUrl ==""))
+ 	        	menuArr.push({code:'$!system.code', name:'$!system.name', url:'$!{rc.contextPath}/index/$!system.code'});
+ 	        #else
+ 	        	menuArr.push({code:'$!system.code', name:'$!system.name', url:'$system.linkUrl'});
+ 	        #end
+	     #end
+	#end
+	
+	
+	var w_left, page; //每次模拟换页div移动距离, 页数
+	var total_num = menuArr.length;//app总数
+	var itemImg_url = "$!{main_static_custom_url}/css/images/";
+
+	// 获得每个appItem的长宽
+	var item_wh = 280; //item_wh = $(".ui-app-appItem").outerWidth();
+	var item_ht = 250; //item_ht = $(".ui-app-appItem").outerHeight();
+
+	var content = "";
+
+
+	function init(){
+		var str = "", nav = "";	
+		//app横向数量
+		var w_num = Math.min(Math.floor(parseInt($("#AppWindow").width())/item_wh),4); 
+		//app纵向数量
+		var h_num = Math.min(Math.floor(parseInt($("#AppWindow").height())/item_ht),2); 
+		//每页app数量
+		var pageNum = h_num*w_num; 
+		//总页数
+		page = Math.ceil(total_num/pageNum); 
+		//翻页的小圆点box
+		//$(".ui-app-nav-wrap").width(page*35); 
+		//每次模拟换页div移动距离
+		w_left = w_num * item_wh; 
+
+		for(var i = 0 ; i < page ; i++ ){	
+			if(i==0){
+				nav +="<li class=\"ui-app-trigger ui-app-trigger-active\"></li>";
+			}else{
+				nav +="<li class=\"ui-app-trigger\"></li>";
+			}		
+			var start = i * pageNum+1;
+			var end = i * pageNum+pageNum;
+			var cont = "<div class=\"item\" style=\"float:left\">";
+			for(var j = start; j <= end ; j++){
+				if(j<=total_num){
+				var codes = menuArr[j-1].code;
+				var names = menuArr[j-1].name;
+				var urls = menuArr[j-1].url;
+					cont +="<div class=\"ui-app-appItem\"><div class=\"appItem-bg\"><a href=\""+urls+"\" target=\"_blank\"><img src=\""+itemImg_url+"app-img-"+codes+".png\" /><div class=\"appItem-text\">"+names+"</div></a></div></div>";
+				}		 
+			}
+			cont +="</div>";	
+			str += cont;	
+		
+		}
+		$(".ui-app-content").html(str);	
+		$(".ui-app-nav").html(nav);
+
+		//给页面元素设置高度和宽度
+		$(".ui-app-visible-box").width(item_wh*w_num);		
+		$(".ui-app-content").width(page*w_num*item_wh).height(item_ht*h_num).animate({left:0+'px'}, 200);
+		$(".ui-app-content .item").width(item_wh*w_num).height(item_ht*h_num);	
+
+		// 通过下面圆点图表进行APP翻页
+		$(".ui-app-trigger").click(function(){
+			var index = $(this).index();
+			$(this).addClass("ui-app-trigger-active").siblings().removeClass("ui-app-trigger-active");
+			var left = -(w_left*index);
+			$(".ui-app-content").animate({left:left+'px'}, 200);
+		})
+	}
+	
+	// 窗口resize事件，重新排版app item.
+	window.onresize = init;
+	
+	// APP左右翻页事件
+	var active_idx = 0;
+	$(".app-left").click(function(){
+		active_idx = $(".ui-app-trigger-active").index();
+		if(active_idx > 0){
+			$(".ui-app-trigger").eq(active_idx).removeClass("ui-app-trigger-active");
+			$(".ui-app-trigger").eq(active_idx-1).addClass("ui-app-trigger-active");
+			var left = -(w_left*active_idx - w_left);
+			$(".ui-app-content").animate({left:left+'px'}, 200);
+		};
+	})
+	$(".app-right").click(function(){
+		active_idx = $(".ui-app-trigger-active").index();
+		if(active_idx < page-1){
+			$(".ui-app-trigger").eq(active_idx).removeClass("ui-app-trigger-active");
+			$(".ui-app-trigger").eq(active_idx+1).addClass("ui-app-trigger-active");
+			var left = -(w_left*active_idx + w_left);
+			$(".ui-app-content").animate({left:left+'px'}, 200);
+		};
+	})
+	 
+	
+	</script> 
+	</body> -->
+</html>

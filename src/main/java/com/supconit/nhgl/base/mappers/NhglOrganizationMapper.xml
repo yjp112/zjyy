@@ -1,0 +1,134 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.base.entities.NhglOrganization">
+	<resultMap type="com.supconit.nhgl.base.entities.NhglOrganization" id="NhglDataResultMap">      
+        <result property="id" column="ID" />
+        <result property="personId" column="PERSON_ID" />
+        <result property="deptId" column="DEPARTMENT_ID" />
+        <result property="personName" column="PERSON_NAME" />
+        <result property="deptName" column="DEPT_NAME" />
+        <result property="fullDeptName" column="FULL_DEPT_NAME" />
+        <result property="personCode" column="PERSONCODE" />
+        <result property="positionCode" column="POSITION_CODE" />
+        <result property="postId" column="POST_ID" />
+        <result property="leaderId" column="LEADER_ID" />
+        <result property="lunch" column="LUNCH" />
+        <result property="pId" column="PID" />
+	</resultMap>
+	
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+
+	<select id="getFullDeptNameByDeptId" parameterType="long" resultType="string" lang="velocity">
+		select FUNC_NHDEPT_CONCAT(@{_parameter, jdbcType=NUMERIC}) FULL_DEPT_NAME from dual
+	</select>	
+	<select id="getFullDeptNameByDeptId" parameterType="long" resultType="string" lang="velocity"  databaseId="sqlserver">
+		select dbo.FUNC_NHDEPT_CONCAT(@{_parameter, jdbcType=NUMERIC}) FULL_DEPT_NAME
+	</select>	
+	<select id="getFullDeptNameByPersonId" parameterType="long" resultMap="NhglDataResultMap" lang="velocity">
+		select t.person_id,t.person_name,t.dept_id DEPARTMENT_ID,t.dept_name,FUNC_NHDEPT_CONCAT(t.dept_id)FULL_DEPT_NAME
+		  from (select p.id person_id,p.name person_name,d.id dept_id,d.name dept_name
+		          from ho_department_person dp
+		         inner join ho_person p
+		            on dp.person_id = p.id
+		         inner join ho_department d
+		            on d.id = dp.department_id
+		         where p.id = @{_parameter, jdbcType=NUMERIC}) t
+	</select>	
+	<select id="getFullDeptNameByPersonId" parameterType="long" resultMap="NhglDataResultMap" lang="velocity"   databaseId="sqlserver">
+		select t.person_id,t.person_name,t.dept_id DEPARTMENT_ID,t.dept_name,dbo.FUNC_NHDEPT_CONCAT(t.dept_id)FULL_DEPT_NAME
+		  from (select p.id person_id,p.name person_name,d.id dept_id,d.name dept_name
+		          from ho_department_person dp
+		         inner join ho_person p
+		            on dp.person_id = p.id
+		         inner join ho_department d
+		            on d.id = dp.department_id
+		         where p.id = @{_parameter, jdbcType=NUMERIC}) t
+	</select>
+		
+	<select id="getPersonPositionByOrganization" parameterType="com.supconit.nhgl.base.entities.NhglOrganization" resultMap="NhglDataResultMap" lang="velocity">
+		SELECT DP.PERSON_ID, DP.DEPARTMENT_ID, DP.POST_ID, DP.LEADER_ID,DP.LUNCH,HP.CODE PERSONCODE,HD.PID
+		FROM HO_DEPARTMENT_PERSON DP
+		LEFT JOIN HO_PERSON HP ON DP.LEADER_ID = HP.ID
+		LEFT JOIN HO_DEPARTMENT HD ON DP.DEPARTMENT_ID = HD.ID
+		WHERE 1=1 
+		#if($_parameter.personId)
+				AND DP.PERSON_ID = @{_parameter.personId, jdbcType=NUMERIC}
+		#end
+		#if($_parameter.deptId)
+				AND DP.DEPARTMENT_ID = @{_parameter.deptId, jdbcType=NUMERIC}
+		#end
+		#if($_parameter.postId)
+				AND DP.POST_ID = @{_parameter.postId, jdbcType=NUMERIC}
+		#end
+		#if($_parameter.leaderId)
+				AND DP.LEADER_ID = @{_parameter.leaderId, jdbcType=NUMERIC}
+		#end
+		ORDER BY DP.POST_ID
+	</select>
+	
+	<select id="getPersonCodesByRoleCode" resultMap="NhglDataResultMap" lang="velocity">
+		select hp.code personCode
+		from HO_ROLE hr
+		left join HO_USER_ROLE hur
+			on hr.id = hur.role_id
+		left join HO_USER hu
+			on hur.user_id = hu.id
+		left join HO_PERSON hp
+			on hu.person_id = hp.id
+		where hr.code = @{_parameter.roleCode, jdbcType=VARCHAR}
+	</select>
+		
+	<select id="getPersonListByDeptAndLunch" parameterType="com.supconit.nhgl.base.entities.NhglOrganization" resultMap="NhglDataResultMap" lang="velocity">
+		SELECT DP.PERSON_ID, DP.DEPARTMENT_ID,DP.LUNCH,HP.CODE PERSONCODE,HP.NAME PERSON_NAME,HD.PID
+		FROM HO_DEPARTMENT_PERSON DP
+		LEFT JOIN HO_PERSON HP ON DP.PERSON_ID = HP.ID
+		LEFT JOIN HO_DEPARTMENT HD ON DP.DEPARTMENT_ID = HD.ID
+		WHERE DP.LUNCH = 1 
+		#if($_parameter.deptId)
+				AND DP.DEPARTMENT_ID = @{_parameter.deptId, jdbcType=NUMERIC}
+		#end
+		#if($_parameter.personId)
+				AND DP.PERSON_ID = @{_parameter.personId, jdbcType=NUMERIC}
+		#end
+	</select>
+	
+	<select id="findSubPostionById" parameterType="com.supconit.nhgl.base.entities.NhDept" resultMap="resultPostionMap" lang="velocity">
+			<![CDATA[
+		select * from (SELECT T.ID||'' id,T.PID,T.NAME FROM HO_DEPARTMENT T 
+			WHERE 
+			 	T.LFT <= @{_parameter.lft,jdbcType=NUMERIC} AND T.RGT >=@{_parameter.rgt,jdbcType=NUMERIC} 
+			union all
+			SELECT t.id||'_'||T2.id id,t.id pid,T2.NAME FROM HO_DEPARTMENT T inner JOIN HO_POSITION T2
+			ON T.ID=T2.DEPARTMENT_ID 
+			WHERE 
+			 	T.LFT <= @{_parameter.lft,jdbcType=NUMERIC} AND T.RGT >= @{_parameter.rgt,jdbcType=NUMERIC}
+		)t3 order by id asc
+ 		]]>
+	</select>
+	<select id="findSubPostionById" parameterType="com.supconit.nhgl.base.entities.NhDept" resultMap="resultPostionMap" lang="velocity" databaseId="sqlserver">
+		<![CDATA[
+			select * from (SELECT convert(varchar(50),T.ID) id,T.PID,T.NAME FROM HO_DEPARTMENT T 
+			WHERE 
+				T.LFT <= @{_parameter.lft,jdbcType=NUMERIC} AND T.RGT >=@{_parameter.rgt,jdbcType=NUMERIC} 
+			union all
+			SELECT convert(varchar(50),t.id)+'_'+convert(varchar(50), T2.id) id,t.id pid,T2.NAME FROM HO_DEPARTMENT T inner JOIN HO_POSITION T2
+			ON T.ID=T2.DEPARTMENT_ID 
+			WHERE 
+				T.LFT <= @{_parameter.lft,jdbcType=NUMERIC} AND T.RGT >= @{_parameter.rgt,jdbcType=NUMERIC}
+			)t3 order by id asc
+ 		]]>
+	</select>
+	<select id="findDepartmentById" parameterType="Long" resultType="com.supconit.honeycomb.business.organization.entities.Department"  lang="velocity">
+		SELECT * FROM HO_DEPARTMENT D  WHERE D.ID=@{_parameter, jdbcType=NUMERIC}
+	</select>
+	 <resultMap type="com.supconit.base.entities.ExPosition" id="resultPostionMap">
+		<result property="id" column="ID" />
+        <result property="pid" column="PID" />
+        <result property="name" column="NAME" />
+	</resultMap>
+</mapper>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.meeting.entities.MeetingPerson">
+	<resultMap type="com.supconit.meeting.entities.MeetingPerson" id="personResultMap">
+		<result property="id" column="ID"/>
+        <result property="name" column="NAME"/>
+        <result property="tel" column="PERSON_TELEPHONE"/>
+        <result property="email" column="PERSON_EMAIL"/>
+        <result property="code" column="CODE"/>
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">HO_PERSON</sql>
+	
+	<sql id="select_pre" lang="velocity">
+		SELECT
+			hp.ID,
+			hp.NAME,
+			hp.PERSON_TELEPHONE,
+			hp.PERSON_EMAIL,
+			hp.CODE
+		FROM <include refid="TABLE_NAME"/> hp
+	</sql>
+	
+	<sql id="count_pre" lang="velocity">SELECT COUNT(*) FROM <include refid="TABLE_NAME"/> hp </sql>
+	
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			#if($_p.code && $_p.code != '')
+				#set($_code = '%' + $_p.code + '%')
+				AND hp.CODE LIKE @{_code} ESCAPE '/' 
+			#end
+			#if($_p.name && $_p.name != '')
+				#set($_name = $_p.name)
+				AND hp.NAME = @{_name}
+			#end
+			#if($_p.reserveId)
+				#set($_reserveId =$_p.reserveId)
+				AND hp.ID in (
+					SELECT 
+						mp.PERSON_ID
+					FROM METTING_PERSON mp
+					WHERE mp.ROOM_RESERVATION_ID = @{_reserveId}
+				)
+			#end
+		#end
+		]]>	
+    </sql>
+    
+	<select id="selectPersonAndDeptInfo" parameterType="long" resultMap="personResultMap" lang="velocity">
+		<include refid="select_pre"/>
+        WHERE hp.ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+	
+	<select id="selectAttendees" parameterType="long" resultMap="personResultMap" lang="velocity">
+		<include refid="select_pre"/>
+		<include refid="condition_sql"/>
+	</select>
+	
+</mapper>

@@ -1,0 +1,74 @@
+<script type="text/javascript">
+	 var nhType = $!{nhType};
+	 $(document).ready(function(){
+	 	$("#parentName").click(function(){
+	 		#if($!ishasChild){
+	 			alert('请不要修改有子类分项的父节点');
+	 			return;
+	 		}
+	 		#end
+			chooseSubSystem("parentCode","parentName","subSystemInfo_edit",nhType,"$!{subSystemInfo.id}");
+        });  
+        
+	 	#if($!viewOnly)
+	    	$("[type=submit]", $("#subSystemInfo_edit_form")).hide();
+        	$(':input', $("#subSystemInfo_edit_form")).attr('readonly', true);
+        	$('.ui_dialog :input').attr('readonly',true);
+        	$(".ui_dialog input[type=text]").unbind( "click" ).attr('onclick','');
+        #end
+        $("#code,#parentName").blur(function(e){
+        	  setTimeout(function() {
+				var code=$("#code").val();
+        		var parentCode=$("#parentCode").val();
+        		if(code!="" && parentCode!=""){
+        			if(parentCode=="code"){
+        				$("#standardCode").val(code);
+        				return;
+        			}
+        			if(parentCode == 0)
+        				$("#standardCode").val(code);
+					else
+						$("#standardCode").val(parentCode+code);
+        		}
+			},10);
+        	
+        });
+        
+	 });
+</script>
+
+<form id="subSystemInfo_edit_form" method="post" action="$!{rc.contextPath}/nhgl/basic/discipine/save" class="ui-form">
+	<input type="hidden" name="id" value="$!{subSystemInfo.id}">
+	<input type="hidden" name="nhType" value="$!{nhType}">
+	<fieldset>
+		<div class="ui-form-item">
+			 <label class="ui-label">#if(!$!viewOnly)<span class="ui-form-required">*</span>#end分项编码:</label>
+	         <input id= "code" class="ui-input ui-disabled" data-rule="分项编码:required" type="text"  name="code" value="$!{subSystemInfo.code}" />
+		</div>
+		<div class="ui-form-item">
+	        <label class="ui-label">#if(!$!viewOnly)<span class="ui-form-required">*</span>#end分项名称:</label>
+			<input class="ui-input" data-rule="分项名称:required" type="text" name="name" value="$!{subSystemInfo.name}" />
+	    </div>
+	    <div class="ui-form-item">
+	        <label class="ui-label" >#if(!$!viewOnly)<span class="ui-form-required">*</span>#end父类别:</label>
+	        #if($!{parentName})
+	        <input readonly class="ui-input ui-input-choose" id="parentName" data-rule="父类别:required"type="text" name="parentName" value="$!{parentName}"/>
+	        #else
+			<input readonly class="ui-input ui-input-choose" id="parentName" data-rule="父类别:required"type="text" name="parentName" value="$!{subSystemInfo.parentName}"/>
+			#end
+			#if($!{parentCode})
+			<input class="ui-input" type="hidden" id="parentCode" type="text"  name="parentCode"   value="$!{parentCode}"/>
+			#else
+			<input class="ui-input" type="hidden" id="parentCode" type="text"  name="parentCode"   value="$!{subSystemInfo.parentCode}"/>
+			#end
+	    </div>
+	    <div class="ui-form-item">
+	        <label class="ui-label">#if(!$!viewOnly)<span class="ui-form-required">*</span>#end标准编码:</label>
+			<input class="ui-input ui-disabled" id="standardCode" data-rule="标准编码:required" type="text" name="standardCode" value="$!{subSystemInfo.standardCode}" />
+	    </div>
+		<div class="ui-form-item ui-form-item-textarea colspan2">
+	        <label class="ui-label">备注:</label>
+	        <textarea class="ui-textarea" data-rule="length[~50]"  name="remark">$!{subSystemInfo.remark}</textarea>
+	    </div>
+	</fieldset>
+</form>

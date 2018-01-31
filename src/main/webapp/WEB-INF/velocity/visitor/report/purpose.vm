@@ -1,0 +1,186 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<div class="ui-layout-north" style="border-right:solid 1px #e1e5e6;" id="searchLayout">
+  <form class="ui-form" id='queryForm'>	
+	<input type="hidden" name="type" value="$!{type}">
+        <table width="100%">
+          <tr>
+	         <td >
+	           <table class="ui-search-table" >
+                  <tr>
+                  <td class="ui-search-name first" style="width: 100px;">统计时间：</td>
+                  <td class="ui-search-c" >
+					<input id="beginDate_id"  class="k-textbox" type="text" name="startMonths" value="$!{startMonth}" />
+					<span class="ui-form-text">至</span> 
+					<input class="k-textbox" id="endDate_id" type="text" name="endMonths" value="$!{endMonth}" />
+                  </td>
+            </tr>
+	           </table>
+	         </td>
+            <td width="150" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+            </td>
+            <td></td>
+          </tr>
+        </table>
+    </form>
+</div>
+
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<div id="graphic_rate_id" style="height:300px">
+    	</div>
+    </div>
+    <div class="ui-layout-center">
+  	  <div id="grid" style="display:none;"></div> 
+    </div>
+  </div>
+#parse("index/_footer.vm")  
+<script src="$!rc.contextPath/main_static/custom/js/echarts/echarts.js"></script>
+
+<script type="text/javascript">
+
+var myRateChart = null;
+var flag = 0;
+
+var _iframe_layout, _left_layout, _inner_layout;
+$(document).ready(function(){
+_iframe_layout = $('body').layout({
+  defaults: {
+    resizable: false,
+    closable: false,
+    spacing_open: 5
+  },
+  north: {
+    size: 0.1
+  }
+});
+
+_inner_layout = $("#subMain").layout({
+    defaults: {
+      resizable: false,
+      closable: false,
+      spacing_open: 0
+    },
+    north:{
+    	size: 0.6
+    },
+    center: {
+        onresize_end: function () {
+            var grid = $("#grid").data("kendoGrid");
+            grid.resize();
+        }
+    }
+  });
+  
+  
+//列表
+quick_datagrid("#grid", "#queryForm", "$!rc.contextPath/visitor/report/list?r=" + new Date(), [{
+          field: "id",
+          hidden: true
+      }
+	  ], 
+  {
+      sortable: {
+          mode: "multiple",
+          allowUnsort: true
+      },
+      pageable:false, 
+      showNumber:false,resizable:true
+      
+  },{
+	  change:generateRateChart
+  }, {
+      serverSorting: true
+  });
+  
+//加载时间控件
+ commonMonthWithout("beginDate_id", "endDate_id", "yyyy-MM", "zh-CN");
+
+});
+
+
+//加载chart
+function loadEchart(option){
+        require.config({
+            packages: [
+                {
+                    name: 'echarts',
+                    location: '$!rc.contextPath/main_static/custom/js/echarts',
+                    main: 'echarts'
+                }
+            ]
+        });
+        require(
+                [
+                    'echarts',
+                    'echarts/chart/pie'
+                ],
+                function(ec) {
+                	
+                    myRateChart = ec.init(document.getElementById('graphic_rate_id'));
+                    myRateChart.setOption(option);
+                }
+        )
+    }
+
+    function generateRateChart(grid,g) {
+
+        var datas = new Array();
+        var shortcut = new Array();
+
+        var data = grid.items;
+		$.each(data,function(index,o){
+			var tmp="{value:"+o.visitorNum+",name:'"+o.visitPurpose+"'}";
+			var j = (new Function("return " + tmp))();
+            datas.push(j);
+            shortcut.push(o.visitPurpose);
+        });
+        option = {
+            title : {
+                text: '访客人数',
+                subtext: '事由',
+                x:'center'
+            },
+            tooltip : {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+			legend: {
+                orient : 'vertical',
+                x : 'right',
+                data:shortcut
+            },
+            calculable : true,
+            series : [
+                {
+                    name:'访客人数',
+                    type:'pie',
+                    radius : '55%',
+                    center: ['50%', '60%'],
+                    data:(function(){
+						return datas;
+					})()
+                }
+            ]
+        };
+                    
+
+        
+        if(myRateChart==null){
+            loadEchart(option);
+        }else{
+            if(data.length!=0){
+				loadEchart(option);
+                myRateChart.setOption(option);
+            }else{
+                myRateChart.clear();
+				myRateChart.setOption(option);
+            }
+        }
+    }
+	
+</script>
+</body>
+</html>

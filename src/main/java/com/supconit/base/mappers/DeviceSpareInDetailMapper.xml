@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.base.entities.DeviceSpareInDetail">
+
+	<resultMap type="com.supconit.base.entities.DeviceSpareInDetail" id="DeviceSpareInDetailResultMap">
+		<result property="id" column="ID"/> 
+        <result property="deviceSpareInId" column="DEVICE_SPARE_IN_ID" />
+        <result property="spareName" column="SPARE_NAME" />
+        <result property="spareSpac" column="SPARE_SPAC" />
+        <result property="spareMaker" column="SPARE_MAKER" />
+        <result property="purpose" column="PURPOSE" />
+        <result property="price" column="PRICE" />
+        <result property="total" column="TOTAL" />
+        <result property="remainder" column="REMAINDER" />
+        <result property="sortIdx" column="SORT_IDX" />
+        <result property="createId" column="CREATE_ID" />
+        <result property="creator" column="CREATOR" />
+        <result property="createDate" column="CREATE_DATE" />
+        
+        <result property="used" column="USED" />
+        <result property="spareImg" column="FILE_NAME" />
+        
+        <collection 
+        property="deviceSpareOutList" javaType="DeviceSpareOut">
+        <result property="id" column="d_ID" />
+        <result property="spareId" column="d_SPARE_ID" />
+        <result property="getSum" column="d_GET_SUM" />
+        <result property="getDate" column="d_GET_DATE" />
+        <result property="getor" column="d_GETOR" />
+        <result property="affirmor" column="d_AFFIRMOR" />
+        <result property="remark" column="d_REMARK" />
+        </collection>
+	</resultMap>
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+    <!-- 获取记录列表-->
+    <sql id="select_pre" lang="velocity">
+	    select 
+		    a.ID,
+			a.DEVICE_SPARE_IN_ID,
+			a.SPARE_NAME,
+			a.SPARE_SPAC,
+			a.SPARE_MAKER,
+			a.PURPOSE,
+			a.PRICE,
+			a.TOTAL,
+			a.REMAINDER,
+			a.SORT_IDX
+		from 
+			 DEVICE_SPARE_IN_DETAIL a 
+    </sql>
+    <sql id="count_pre" lang="velocity">
+		SELECT
+		COUNT(1)
+		FROM
+			 DEVICE_SPARE_IN_DETAIL a 
+	</sql>
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+			#where()
+				#set($_p = $_parameter.condition)
+				1=1 
+				#if($_p.deviceSpareInId)
+					#set($_deviceSpareInId = $_p.deviceSpareInId)
+					AND a.DEVICE_SPARE_IN_ID = @{_deviceSpareInId,jdbcType=BIGINT}
+				#end
+				#if($_p.spareName && $_p.spareName != '')
+					#set($_spareName = '%' + $_p.spareName + '%')
+					AND a.SPARE_NAME LIKE @{_spareName,jdbcType=VARCHAR}
+				#end
+			#end
+		]]>
+	</sql>
+	<sql id="TABLE_NAME" lang="velocity">DEVICE_SPARE_IN_DETAIL</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>	
+	<insert id="insert" parameterType="com.supconit.base.entities.DeviceSpareInDetail" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="INSERT_SQL"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    <insert id="insert" parameterType="com.supconit.base.entities.DeviceSpareInDetail" 
+		keyProperty="id" keyColumn="ID" 		lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>        
+		<include refid="INSERT_SQL" />
+	</insert>    
+    <!-- 插入记录-->
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>
+		(#if($_databaseId=='oracle') ID,#end	
+			DEVICE_SPARE_IN_ID,
+	        SPARE_NAME,
+	        SPARE_SPAC,
+	        SPARE_MAKER,
+	        PURPOSE,
+	        PRICE,
+	        TOTAL,
+	        REMAINDER,
+	        SORT_IDX    
+	    ) VALUES (        
+		 #if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end
+			@{_parameter.deviceSpareInId,jdbcType=NUMERIC},
+	        @{_parameter.spareName,jdbcType=VARCHAR},
+	        @{_parameter.spareSpac,jdbcType=VARCHAR},
+	        @{_parameter.spareMaker,jdbcType=VARCHAR},
+	        @{_parameter.purpose,jdbcType=VARCHAR},
+	        @{_parameter.price,jdbcType=NUMERIC},
+	        @{_parameter.total,jdbcType=NUMERIC},
+	        @{_parameter.remainder,jdbcType=NUMERIC},
+	        @{_parameter.sortIdx,jdbcType=NUMERIC}
+			)
+	</sql>
+	
+    	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.base.entities.DeviceSpareInDetail">
+		UPDATE	DEVICE_SPARE_IN_DETAIL
+		<set>
+        <if test="deviceSpareInId != null">DEVICE_SPARE_IN_ID = #{deviceSpareInId,jdbcType=NUMERIC},</if>
+        <if test="spareName != null">SPARE_NAME = #{spareName,jdbcType=VARCHAR},</if>
+        <if test="spareSpac != null">SPARE_SPAC = #{spareSpac,jdbcType=VARCHAR},</if>
+        <if test="spareMaker != null">SPARE_MAKER = #{spareMaker,jdbcType=VARCHAR},</if>
+        <if test="purpose != null">PURPOSE = #{purpose,jdbcType=VARCHAR},</if>
+        <if test="price != null">PRICE = #{price,jdbcType=NUMERIC},</if>
+        <if test="total != null">TOTAL = #{total,jdbcType=NUMERIC},</if>
+        <if test="remainder != null">REMAINDER = #{remainder,jdbcType=NUMERIC},</if>
+        <if test="sortIdx != null">SORT_IDX = #{sortIdx,jdbcType=NUMERIC},</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.base.entities.DeviceSpareInDetail" resultMap="DeviceSpareInDetailResultMap" lang="velocity" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre" />
+		<include refid="condition_sql" />
+		#order($_parameter.condition,"a.SORT_IDX DESC")
+ 		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+	<select id="findByCondition" parameterType="com.supconit.base.entities.DeviceSpareInDetail" resultMap="DeviceSpareInDetailResultMap" lang="velocity" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		select 
+		    a.ID,
+			a.DEVICE_SPARE_IN_ID,
+			a.SPARE_NAME,
+			a.SPARE_SPAC,
+			a.SPARE_MAKER,
+			a.PURPOSE,
+			a.PRICE,
+			a.TOTAL,
+			a.REMAINDER,
+			a.SORT_IDX 
+			<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+			#order($_parameter.condition,"a.SORT_IDX DESC")
+ 			<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		from 
+			DEVICE_SPARE_IN_DETAIL a 
+		<include refid="condition_sql" />
+ 		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+
+    <select id="countByCondition" parameterType="com.supconit.base.entities.DeviceSpareInDetail" resultType="long" lang="velocity"> 
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+	<select id="findListBySpareId" resultMap="DeviceSpareInDetailResultMap" parameterType="Long">
+		select 
+		    a.*,
+			c.get_sum d_get_sum,
+			c.get_date d_get_date,
+			c.getor d_getor,
+			c.AFFIRMOR d_AFFIRMOR,
+			c.remark d_remark  
+		from 
+			 DEVICE_SPARE_IN_DETAIL a 
+			 left join DEVICE_SPARE_OUT c on a.id=c.spare_id
+		where a.DEVICE_SPARE_IN_ID=#{spareId}
+		order by a.sort_idx desc
+	</select>
+	<select id="findById" parameterType="Long" resultMap="DeviceSpareInDetailResultMap">
+		 select 
+		    *
+		from 
+			 DEVICE_SPARE_IN_DETAIL  
+		where id=#{id}
+	</select>
+	<select id="findTopOne" resultMap="DeviceSpareInDetailResultMap" databaseId="sqlserver">
+		 select 
+		    top(1)*
+		from 
+			 DEVICE_SPARE_IN_DETAIL 
+	    order by id desc
+	</select>
+	<select id="findTopOne" resultMap="DeviceSpareInDetailResultMap" databaseId="oracle">
+		 select * from (select 
+		    *
+		from 
+			 DEVICE_SPARE_IN_DETAIL 
+	    order by id desc) where rownum=1
+	</select>
+	    <!-- 删除多条记录-->
+	<delete id="deleteByIds">
+        DELETE FROM DEVICE_SPARE_IN_DETAIL WHERE ID in 
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<!-- DElETE -->
+	<delete id="deleteById" parameterType="long">
+		delete from DEVICE_SPARE_IN_DETAIL where  ID = #{id}
+	</delete>
+</mapper>

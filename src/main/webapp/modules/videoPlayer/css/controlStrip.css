@@ -1,0 +1,45 @@
+@charset "utf-8";
+/* code by shenjiankang 2013/4/1 */
+
+body{margin:0;padding:0;}
+a{text-decoration:none; color:#000; cursor:pointer;}
+.idContainer{ width:208px; height:26px; position:relative;float:left;}
+.axisBox{
+	overflow:hidden;
+	}
+.idAxis{
+	width:100%;
+	height:10px;
+	background:#CCC;
+	position:absolute;
+	top:8px;
+	}
+.idAxisNow{
+	width:1px;
+	height:10px;
+	background:#00F;
+	}
+.idDrag{
+	width:8px;
+	height:26px;
+	background:#333;
+	}
+.idHandle{
+	width:100%;
+	height:100%;
+	cursor:pointer;
+	}
+.plus{
+	display:block;
+	width:16px;
+	height:16px;
+	background:#0F9;
+	float:left;
+	}
+.reduce{
+	display:block;
+	width:16px;
+	height:16px;
+	background:#0F9;
+	float:left;
+	}

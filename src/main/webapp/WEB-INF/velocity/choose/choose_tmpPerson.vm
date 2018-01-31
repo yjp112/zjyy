@@ -1,0 +1,186 @@
+#parse("index/_header.vm")
+</head>
+<body>
+	<div class="ui-layout-west" style="border-right:solid 1px #e1e5e6;" id="leftTreeWrap">
+    	<div class="ui-layout-north">
+    		<div class="k-header k-grid-toolbar" style="padding-left:10px;">部门信息</div>
+    	</div>
+    	<div class="ui-layout-center">
+			<div class="tree">
+				<ul id="deptTree" class="ztree"></ul>
+			</div>
+    	</div>
+	</div>
+  
+	<div class="ui-layout-center" id="subMain">
+    	<div class="ui-layout-north">
+			<form class="ui-form" id='pagerForm'>	
+				<input id="treeId" type="hidden" name="deptId" value="$!{treeId}">
+            	<table width="100%">
+    				<tr>
+                		<td><table class="ui-search-table"><tr>
+                        	<td class="ui-search-name first">人员编码：</td>
+                          	<td class="ui-search-c">
+                            	<input name="code" value="" class="k-textbox" type="text">
+                         	</td>
+                          	<td class="ui-search-name">人员姓名：</td>
+                          	<td class="ui-search-c">
+                            	<input  name="name" value="" class="k-textbox" type="text">
+                          	</td>
+                        </tr></table></td>
+                    	<td width="150" valign="top" style="padding-top:4px;">
+                      		<button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+                      		<button type="reset" class="hc_btn" id="resetBtn" onclick="cancelLeftTreeSelected();"><i class="fa fa-refresh"></i>重置</button>
+                    	</td>
+                    	<td></td>
+                	</tr>
+    			</table>
+    		</form>
+		</div>
+  		<div class="ui-layout-center">
+  	  		<div id="grid"></div> 
+    	</div>
+	</div>	 
+#parse("index/_footer.vm") 
+<script type="text/javascript">
+  var _iframe_layout, _left_layout, _inner_layout;
+	$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      }
+    });
+    _left_layout = $('#leftTreeWrap').layout({
+        defaults: {
+            resizable: false,
+            closable: false,
+            spacing_open: 5
+          },
+          north: {
+        	  size:28
+          }
+        });
+    
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+
+    $('#resetBtn').click(function(){
+      $("#pagerForm :text").val('');  
+    }); 
+	
+	//列表
+    quick_datagrid(
+    		"#grid", 
+    		"#pagerForm", 
+    		"$!{rc.contextPath}/choose/person?t=" + new Date().getTime(),
+    		[
+    			{field: "id",hidden: true}, 
+    			{field: "code",title: "人员编码",headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"},sortable: false,width: 100},
+              	{field: "name",title: "人员姓名",headerAttributes: {"class": "k-grid-equilong"},attributes: {"class": "k-grid-equilong"},sortable: false,width: 100}, 
+              	{field: "personTelephone",title: "电话",headerAttributes: {"class": "k-grid-num"},attributes: {"class": "k-grid-num"},sortable: false,width: 100}, 
+              	{field: "deptName",title: "部门",headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"},sortable: false,width: 400}, 
+            ],
+			#if($!{multi})
+      		{sortable: {mode: "multiple",allowUnsort: true},selectable:"multiple, row"},
+			#else
+			{sortable: {mode: "multiple",allowUnsort: true}}, 
+			#end
+      		{serverSorting: true}, 
+      		[
+      			{
+              		name: "选择",
+              		icon: "fa fa-plus",
+              		onclick: function (obj, grid) {
+              			var rows = grid.select();
+            	        if (null == rows || rows.length == 0) {
+            	            notify("你还没有选择!", "warn");
+            	            return;
+            	        }
+                        debugger;
+						#if($!{multi})
+                            console.log("暂时不用！");
+            			#else
+            				var data = grid.dataItem(rows);
+                            get_el_in_dialog("tmpPersonAdd","#$!{txtId}").val(data.id);
+                            get_el_in_dialog("tmpPersonAdd","#$!{txtName}").val(data.name);
+                            get_el_in_dialog("tmpPersonAdd","#cardNo").val(data.description);
+                            resetfocus(get_el_in_dialog("tmpPersonAdd","#$!{txtName}"));
+            			#end
+                	    close_dialog('selectDiloag');
+              		}
+          		}
+				
+          	]
+      	);
+	    
+        $("#selectButton").click(function () {
+            var ids = new Array();
+            var names = new Array();
+            var data = $("#grid").getSelectedRows();
+            if (data.length == 0) {
+                alert("未选择");
+                return false;
+            } else {
+                $.each(data, function (i,p) {
+                    ids.push(p.id);
+                    names.push(p.name);
+                });
+                $("#$!{txtId}").val(ids);
+                $("#$!{txtName}").val(names);
+            	closeDialog();
+            }
+        });  
+        
+    });	
+	
+	/* zTree */
+    var setting = {
+    	data: {
+    		simpleData: {enable: true}
+          },
+          callback: {
+    			onClick: function(event, treeId, treeNode) {
+    				 $('#treeId').val(treeNode.id);
+    			 	 $('#selectBlock').show();
+    				 $('#queryBtn').click();
+    			}
+    		}
+    };
+  	var zNodes = [];  
+  	zNodes.push({id:"10001", pId:"0", name:"中控信息", open:"true"});
+    #foreach($!{treeNode} in $!{deptList})
+		zNodes.push({id:$!{treeNode.id}, pId:$!{treeNode.pid}, name:"$!{treeNode.name}"});
+  	#end    
+
+  	$(document).ready(function(){
+  		$.fn.zTree.init($("#deptTree"), setting,zNodes);
+		var treeId = $("#treeId").val();
+		if(treeId!='10001'){
+			var treeNode = $.fn.zTree.getZTreeObj("deptTree");
+    		var node = treeNode.getNodeByParam("id",treeId,null);
+    		if(node){
+    			treeNode.selectNode(node);
+    		}
+		}
+  	});
+	
+	function cancelLeftTreeSelected(){
+		$('#treeId').val('');
+		$.fn.zTree.init($("#deptTree"), setting,zNodes);
+	}
+</script>
+</body>
+</html>		

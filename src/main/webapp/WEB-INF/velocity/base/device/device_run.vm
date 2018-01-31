@@ -1,0 +1,252 @@
+<!--设备资产运行统计-->
+#parse("index/_header.vm")
+</head>
+<body>
+<script src="$!rc.contextPath/modules/esl/esl.js"></script>
+<div class="ui-layout-north" style="border-right:solid 1px #e1e5e6;" id="searchLayout">
+<form id="queryForm" class="ui-form">
+    <table width="100%">
+          <tr>
+	         <td >
+	           <table class="ui-search-table" >
+                  <tr>
+                  <td class="ui-search-name first">设备类别：</td>
+                  <td class="ui-search-c">
+                    <span class="k-textbox k-space-right" onclick="chooseDeviceCategory('categoryId','categoryName', '');">
+                    <input id="categoryId" type="hidden" name="categoryId" value="$!{device.categoryId}">
+		  			<input type="text" id="categoryName" name="categoryName" value="$!{device.categoryName}" readonly >
+                  <a href="#" class="k-icon k-i-search">&nbsp;</a>
+				  </span>
+                  </td>
+                  <td class="ui-search-name first">统计时间：</td>
+                  <td class="ui-search-c" >
+                  <input id="createDate_id" type="text" name="createDate"  />
+							      <span class="ui-form-text">至</span> 
+									<input id="updateDate_id" type="text" name="updateDate"  />
+                  </td>
+            </tr>
+	           </table>
+	         </td>
+            <td width="150" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+            <td></td>
+          </tr>
+        </table>
+</form>
+</div>
+
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<div id="divEchart" style="height:300px">
+    	</div>
+    </div>
+    <div class="ui-layout-center">
+  	  <div id="grid" ></div> 
+    </div>
+  </div>
+#parse("index/_footer.vm")  
+<script src="$!{main_static_custom_url}/js/echarts/echarts.js"></script>
+
+<script type="text/javascript">
+
+var myRateChart = null;
+
+
+var _iframe_layout, _left_layout, _inner_layout;
+$(document).ready(function(){
+_iframe_layout = $('body').layout({
+  defaults: {
+    resizable: false,
+    closable: false,
+    spacing_open: 5
+  },
+  north: {
+    size: 0.1
+  }
+});
+
+_inner_layout = $("#subMain").layout({
+    defaults: {
+      resizable: false,
+      closable: false,
+      spacing_open: 0
+    },
+    north:{
+    	size: 0.6
+    },
+    center: {
+        onresize_end: function () {
+            var grid = $("#grid").data("kendoGrid");
+            grid.resize();
+        }
+    }
+  });
+  
+$('#resetBtn').click(function(){
+    $("#queryForm :text").val('');
+    $("#locationId").val('');
+    //$("#categoryId").val('');
+  //消除时间约束
+    clearDateWithout("createDate_id", "updateDate_id");
+  });
+  
+//列表
+quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/hl/device/deviceRun/page", [{
+          field: "id",
+          hidden: true
+      }
+      , {
+          field: "deviceCode",
+          title: "设备编码",
+          headerAttributes: {"class": "k-grid-text"},
+          attributes: {"class": "k-grid-text"},
+          sortable: true,
+          template:"<a href=\"javascript:void(0)\" title=\"查看#: data.deviceCode #的详细信息\" onclick=\"window.location.href='$!{rc.contextPath}/device/device/edit?showFlag=1&id=#: data.id #'\">#: data.deviceCode #</a>",
+          width: 150
+      }, {
+          field: "deviceName",
+          title: "设备名称",
+          headerAttributes: {"class": "k-grid-text"},
+		  #*attributes: {"class": "k-grid-text"},*#
+          attributes: {     
+  		  	 title:"#: data.deviceName==null? '':data.deviceName #",
+  			 "class": "k-grid-text k-grid-nowrap"
+		  },
+          sortable: true,
+          width: 150
+      }, {
+          field: "deviceSpec",
+          title: "规格型号",
+          headerAttributes: {"class": "k-grid-text"},
+          attributes: {"class": "k-grid-text"},
+          width: 150
+      }, {
+          field: "locationName",
+          sortable: false,
+          headerAttributes: {"class": "k-grid-text"},
+          attributes: {"class": "k-grid-text"},
+          title: "安装位置"
+      }, {
+          field: "categoryName",
+          sortable: false,
+          headerAttributes: {"class": "k-grid-text"},
+          attributes: {"class": "k-grid-text"},
+          title: "设备类别"
+      }, {
+          field: "useYears",
+          sortable: false,
+          headerAttributes: {"class": "k-grid-num"},
+          attributes: {"class": "k-grid-num"},
+          title: "设备役龄(年)"
+      }, {
+          field: "runningTime",
+          sortable: false,
+          headerAttributes: {"class": "k-grid-num"},
+          attributes: {"class": "k-grid-num"},
+          template:function(dataItem){
+        	  if(dataItem.runningTime != null)
+        		  return fNum2(dataItem.runningTime);
+        	  else return '';
+          },
+          title: "运行时间(小时)"
+      }, {
+          field: "managePersonName",
+          sortable: false,
+          headerAttributes: {"class": "k-grid-equilong"},
+          attributes: {"class": "k-grid-equilong"},
+          title: "管理负责人"
+      }
+      ], 
+  {
+      sortable: {
+          mode: "multiple",
+          allowUnsort: true
+      },
+      pageable:false, 
+      showNumber:false,resizable:true
+      
+  },{
+	  change:generateRateChart
+  }, {
+      serverSorting: true
+  });
+	
+//加载时间控件
+commonDateWithout("createDate_id", "updateDate_id", "yyyy-MM-dd", "zh-CN");
+});
+
+//加载时间控件
+/* $("#createDate_id").hcDateTimePicker({
+	format: "yyyy-MM-dd HH:mm:ss", 
+	culture: "zh-CN"
+});
+$("#updateDate_id").hcDateTimePicker({
+	format: "yyyy-MM-dd HH:mm:ss", 
+	culture: "zh-CN"
+}); */
+
+//加载chart
+function loadEchart(option){
+        require.config({
+            packages: [
+                {
+                    name: 'echarts',
+                    location: '$!{main_static_custom_url}/js/echarts',
+                    main: 'echarts'
+                }
+            ]
+        });
+        require(
+                [
+                    'echarts',
+                    'echarts/chart/line',
+                    'echarts/chart/bar'
+                ],
+                function(ec) {
+                    myRateChart = ec.init(document.getElementById('divEchart'));
+                    myRateChart.setOption(option);
+                }
+        )
+    }
+
+    function generateRateChart(grid,g) {
+
+    	var x = new Array();
+        var y = new Array();
+
+        var data = grid.items;
+        //console.log(data);
+        //var rows = data.length;
+
+        for(var i = 0; i < data.length; i++){
+            x.push(data[i].deviceCode);  
+			y.push(data[i].runningTime);   
+        }   
+        var legends = "";
+		var xAxis = "xAxis:[type:'category',data:[" + x + "]}]";
+		var yAxis = "yAxis:[{type : 'value',name : '次数',axisLabel : {    formatter: '{value} 次'},splitArea : {show : true}}]";
+        var series= "series:[{name:'累计运行时间',type:'bar',data:["+ y +"]}]";
+        var option = {title : {text: '设备运行时长统计',x:'center'},
+        		tooltip:{trigger: 'axis'},
+                toolbox:{show:false,feature:{mark : true,dataView : {readOnly: false},magicType:['line', 'bar'],restore : true,saveAsImage : true}},
+                calculable : false,//设置拖拽重新计算
+                legend: {data:['累计运行时间'],x:'right',y:'top'},
+                xAxis:[{axisLabel:{interval:0,rotate:20},type:'category',data:x}],
+                yAxis:[{type : 'value',name : '小时',axisLabel : {formatter: '{value}'},splitArea : {show : true}}],
+               series:[{name:'累计运行时间',type:'bar',data:y}]};
+        if(myRateChart==null){
+        	if(data.length!=0)
+        		loadEchart(option);//datagrid查询结果为空
+	    }else{
+	        if(data.length!=0){
+	        	myRateChart.setOption(option);
+	        }else{
+	        	myRateChart.clear();
+	        }
+	    }
+     }
+</script>
+</body>
+</html>

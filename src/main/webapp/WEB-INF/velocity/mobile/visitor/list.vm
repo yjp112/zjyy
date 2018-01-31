@@ -1,0 +1,114 @@
+#parse("mobile/_header.vm")
+<body>
+<!-- Status bar overlay for fullscreen mode-->
+<div class="statusbar-overlay"></div>
+
+<!-- Views, and they are tabs-->
+<!-- We need to set "toolbar-through" class on it to keep space for our tab bar-->
+<div class="views">
+    <div id="view" class="view view-main">
+        <!-- Pages-->
+        <div class="pages navbar-fixed">
+            <div data-page="visitor" class="page page-visitor">
+                <div class="navbar">
+                    <div class="navbar-inner">
+                        <div class="navbar-inner">
+                            <div class="navbar-left">
+                                <a href="#" data-panel="left" class="open-panel">
+                                    <i class="icon icon-c-leftmenu only-icon"></i>
+                                </a>
+                            </div>
+                            <div class="navbar-center">
+                                <div id="visitorSelect">
+                                    <span class="selected" id="visitSelectStatus">未访信息</span>
+                                    <span class="icon icon-arrow close">&nbsp;</span>
+                                </div>
+                            </div>
+                            <div class="navbar-right">
+                                <a href="/jcds/mobile/visitor/add" class="link" id="visitor_add">
+                                    <i class="icon icon-c-add only-icon"></i>
+                                </a>
+                            </div>
+
+                            <div class="select-area" id="visitorSelectOption" style="display: none;">
+                                <ul>
+                                    <li value="0" class="selected" onclick="visitSelect('0','未访信息')" id="visitIcon0"><i class="icon">&nbsp;</i>未访信息</li>
+                                    <li value="1" onclick="visitSelect('1','在访信息')" id="visitIcon1"><i class="icon">&nbsp;</i>在访信息</li>
+                                    <li value="2" onclick="visitSelect('2','已访信息')" id="visitIcon2"><i class="icon">&nbsp;</i>已访信息</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panels overlay-->
+                <div class="panel-overlay"></div>
+
+                <!-- left panel with cover effect-->
+                <div class="panel panel-left panel-cover panel-visitor">
+                    <div class="content-block" id="selectVisitorDataContent">
+                        <ul>
+                            <li onclick="selectVisitorDate('week')" id="week">
+                                <a href="#">近一星期</a>
+                            </li>
+                            <li onclick="selectVisitorDate('month')" id="month" class="selected">
+                                <a href="#">近一个月</a>
+                            </li>
+                            <li onclick="selectVisitorDate('month3')" id="month3">
+                                <a href="#">近三个月</a>
+                            </li>
+                            <li onclick="selectVisitorDate('year')" id="year">
+                                <a href="#">近一年</a>
+                            </li>
+                            <li onclick="selectVisitorDate('all')" id="all">
+                                <a href="#">全部</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="page-content todo" id="visitorRefresh">
+                    <!-- Search bar overlay-->
+                    <form class="searchbar"  id="visitor_form">
+                        <input type="hidden" id="visitorId" name="condition.visitorId">
+                        <input type="hidden" id="visitorTotal" name="condition.visitorTotal">
+                        <input type="hidden" id="startNum" name="condition.startNum">
+                        <input type="hidden" id="visitStatus" name="condition.visitStatus">
+                        <input type="hidden" id="visitorDate" name="condition.visitorDate">
+                        <div class="searchbar-input">
+                            <input type="search" placeholder="主要来访客人搜索" name="condition.visitorSearch" id="visitorSearch" autocomplete="off">
+                            <a href="#" class="searchbar-clear"></a>
+                        </div>
+                        <a href="#" class="searchbar-cancel">取消</a>
+                    </form>
+
+                    <div class="searchbar-overlay"></div>
+
+                    <div class="content-block content-refresh infinite-scroll searchbar-found pull-to-refresh-content" id="visitorContent">
+                        <div class="pull-to-refresh-layer">
+                            <div class="preloader"></div>
+                            <div class="pull-to-refresh-arrow"></div>
+                        </div>
+                        <div class="list-block" id="visitor_div">
+                            <ul>
+                            </ul>
+                        </div>
+                        <div class="infinite-scroll-preloader" id="visitorPreloader">
+                            <div class="preloader"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> <!-- view-1 end-->
+
+</div><!-- views end -->
+</body>
+</html>
+<!-- Path to your app js-->
+#parse("mobile/_footer.vm")
+<!-- Path to your app js-->
+<script type="text/javascript" src="$!{rc.contextPath}/mobile/js/visitor-app.js"></script>
+<!-- Path to your app js-->
+<script type="text/javascript" src="$!{rc.contextPath}/mobile/js/util.js"></script>

@@ -1,0 +1,568 @@
+<div data-page="bpm_history" class="page">
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="navbar-inner">
+                <div class="navbar-left">
+                    <a href="#" class="link back">
+                        <i class="icon icon-c-back only-icon"></i>
+                    </a>
+                </div>
+                <div class="navbar-center">已办流程-信息</div>
+                <div class="navbar-right">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-content accordion-content">
+        <input type="hidden" id="status" name="status" value="$!{history.status}">
+        <div class="list-block">
+            <input type="hidden" id="_process_instance_id" value="$!_PROCESS_INSTANCE_ID">
+            <ul class="accordion-list" id="accordion-ul">
+                <li id="li-0">
+                    <div class="handle">
+                        <span>基本信息</span>
+                        <i class="icon icon-button"></i>
+                    </div>
+                    <!-- 不可编辑panel-->
+                    <ul class="panel list-block">
+                        <li>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title">诉求单号</div>
+                                    <div class="item-input">
+                                        <input type="text"  value="$!{history.taskCode}" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title">事件分类</div>
+                                    <div class="item-input">
+                                        <div class="textarea">#html_escape($!{history.categoryName})</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title">地理区域</div>
+                                    <div class="item-input">
+                                        <input type="text" value="$!{history.areaName}" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title">报修部门</div>
+                                    <div class="item-input">
+                                        <div class="textarea">#html_escape($!{history.repairDeptName})</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title">报修人</div>
+                                    <div class="item-input">
+                                        <input type="text" name="contact" value="$!{history.contact}"  readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title">报修人电话</div>
+                                    <div class="item-input">
+                                        <input type="text" value="$!{history.contactTel}" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title">诉求来源</div>
+                                    <div class="item-input">
+                                        #foreach($enumDetail in $!taskSourceList)
+                                            #if($!enumDetail.enumValue ==$!{history.taskSource})
+                                                <input type="text" value="$!{enumDetail.enumText}" readonly>
+                                            #end
+                                        #end
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title">报修时间</div>
+                                    <div class="item-input">
+                                        <input type="text" value="#date_format($!{history.repairDate})" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title">要求完成时间</div>
+                                    <div class="item-input">
+                                        <input type="text" value="#date_format($!{history.expectFinishTime})" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title">紧急程度</div>
+                                    <div class="item-input important">
+                                        #foreach($enumDetail in $!urgencyList)
+                                            #if($!enumDetail.enumValue ==$!{history.urgency})
+                                                <input type="text" value="$!{enumDetail.enumText}" readonly>
+                                            #end
+                                        #end
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title">诉求详情</div>
+                                    <div class="item-input">
+                                        <div class="textarea">#html_escape($!{history.descripton})</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title">登记人</div>
+                                    <div class="item-input">
+                                        <input type="text" value="$!{history.creator}" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title">登记时间</div>
+                                    <div class="item-input">
+                                        <input type="text" value="#date_format($!{history.createDate})" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </li>
+                #if($!{history.status}>1)
+                    <li id="li-1">
+                        <div class="handle">
+                            <span>派班信息</span>
+                            <i class="icon icon-button"></i>
+                        </div>
+                            <ul class="panel list-block">
+                                <li>
+                                    <div class="item-content">
+                                        <div class="item-inner">
+                                            <div class="item-title">维修单号</div>
+                                            <div class="item-input">
+                                                <input type="text" value="$!{history.repairCode}" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="item-content">
+                                        <div class="item-inner">
+                                            <div class="item-title">维修班组</div>
+                                            <div class="item-input">
+                                                <input type="text" value="$!{history.repairGroupName}" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="item-content">
+                                        <div class="item-inner">
+                                            <div class="item-title">维修班组长</div>
+                                            <div class="item-input">
+                                                <input type="text" value="$!{history.groupEmpName}" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="item-content">
+                                        <div class="item-inner">
+                                            <div class="item-title">现场负责人</div>
+                                            <div class="item-input">
+                                                <input type="text" id="repairPersonName" value="$!{history.repairPersonName}" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                    </li>
+                #end
+                #if($!{history.status}>2)
+                    <li  id="li-2">
+                        <div class="handle">
+                            <span>维修信息</span>
+                            <i class="icon icon-button"></i>
+                        </div>
+                        <ul class="panel panel-repair">
+                            <li>
+                                <div class="item-content">
+                                    <div class="item-inner">
+                                        <div class="item-title">维修模式</div>
+                                        <div class="item-input">
+                                            #foreach($rMode in $!repairModeList)
+                                                #if($!rMode.enumValue ==$!{history.repairMode})
+                                                    <input type="text" value="$!{rMode.enumText}" readonly>
+                                                #end
+                                            #end
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="item-content">
+                                    <div class="item-inner">
+                                        <div class="item-title">故障设备</div>
+                                        <div class="item-input">
+                                            <div class="textarea">#html_escape($!{history.deviceName})</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="item-content">
+                                    <div class="item-inner">
+                                        <div class="item-title">实际完成时间</div>
+                                        <div class="item-input">
+                                            <input type="text" value="#date_format($!{history.actualFinishTime})" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+
+
+                            #if($!workerList && $!workerList.size()>0 )
+                            <li class="manpower">
+                                <div id="worker">
+                                #set($index=0)
+                                #foreach($!worker in $!workerList)
+                                    #set($num = $!index +1)
+                                    <div class="item-block">
+                                        <div class="repair-title">人工信息（<span class="num">$num</span>）</div>
+                                        <div class="repair-content">
+                                            <ul>
+                                                 <li>
+                                                     <div class="item-content">
+                                                         <div class="item-inner">
+                                                             <div class="item-title">人员类别</div>
+                                                             <div class="item-input">
+                                                                 #foreach($enumDetail in $!repairModeList)
+                                                                     #if($!enumDetail.enumValue ==$!worker.workerMode)
+                                                                         <input type="text" value="$!{enumDetail.enumText}" readonly>
+                                                                     #end
+                                                                 #end
+                                                             </div>
+                                                         </div>
+                                                     </div>
+                                                 </li>
+                                                 <li>
+                                                     <div class="item-content">
+                                                         <div class="item-inner">
+                                                             <div class="item-title">维修人员</div>
+                                                             <div class="item-input">
+                                                                 <input type="text" value="$!worker.workerName" readonly>
+                                                             </div>
+                                                         </div>
+                                                     </div>
+                                                 </li>
+                                                 <li>
+                                                     <div class="item-content">
+                                                         <div class="item-inner">
+                                                             <div class="item-title">工种</div>
+                                                             <div class="item-input">
+                                                                 #foreach($enumDetail in $!repairWorkList)
+                                                                     #if($!enumDetail.enumValue ==$!worker.workerType)
+                                                                         <input type="text" value="$!{enumDetail.enumText}" readonly>
+                                                                     #end
+                                                                 #end
+                                                             </div>
+                                                         </div>
+                                                     </div>
+                                                 </li>
+                                                 <li>
+                                                     <div class="item-content">
+                                                         <div class="item-inner">
+                                                             <div class="item-title">项目描述</div>
+                                                             <div class="item-input">
+                                                                 <div class="textarea">#html_escape($!worker.descripton)</div>
+                                                             </div>
+                                                         </div>
+                                                     </div>
+                                                 </li>
+                                                 <li>
+                                                     <div class="item-content">
+                                                         <div class="item-inner">
+                                                             <div class="item-title">工时(小时)</div>
+                                                             <div class="item-input">
+                                                                 <input type="number" value="$!worker.workHours" readonly />
+                                                             </div>
+                                                         </div>
+                                                     </div>
+                                                 </li>
+                                                 <li>
+                                                     <div class="item-content">
+                                                         <div class="item-inner">
+                                                             <div class="item-title">费用(元)</div>
+                                                             <div class="item-input">
+                                                                 <input type="number" value="$!worker.money" id="workerMoney$index" readonly/>
+                                                             </div>
+                                                         </div>
+                                                     </div>
+                                                 </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    #set($index = $!index +1)
+                                #end
+                                </div>
+                                <div class="item-action">
+                                    <div class="repair-total">
+                                    总费用：<span id="workerMoneyTotal">0</span>元
+                                    </div>
+                                </div>
+                            </li>
+                            #end
+
+                            #if($!spareList && $!spareList.size()>0 )
+                                <li class="manpower">
+                                    <div id="spare">
+                                        #set($index=0)
+                                        #foreach($!spare in $!spareList)
+                                            #set($num = $!index +1)
+                                            <div class="item-block">
+                                                <div class="repair-title">耗材信息（<span class="num">$num</span>）</div>
+                                                <div class="repair-content">
+                                                    <ul>
+                                                        <li>
+                                                            <div class="item-content">
+                                                                <div class="item-inner">
+                                                                    <div class="item-title">配件类型</div>
+                                                                    <div class="item-input">
+                                                                        <input type="text" value="耗材" readonly>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                        <li>
+                                                            <div class="item-content">
+                                                                <div class="item-inner">
+                                                                    <div class="item-title">配件编号</div>
+                                                                    <div class="item-input">
+                                                                        <input type="text" value="$!spare.spareCode" readonly>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                        <li>
+                                                            <div class="item-content">
+                                                                <div class="item-inner">
+                                                                    <div class="item-title">配件名称</div>
+                                                                    <div class="item-input">
+                                                                        <div class="textarea">#html_escape($!spare.spareName)</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                        <li>
+                                                            <div class="item-content">
+                                                                <div class="item-inner">
+                                                                    <div class="item-title">规格型号</div>
+                                                                    <div class="item-input">
+                                                                        <input type="text" value="$!spare.spareSpec" readonly>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                        <li>
+                                                            <div class="item-content">
+                                                                <div class="item-inner">
+                                                                    <div class="item-title">数量(个)</div>
+                                                                    <div class="item-input">
+                                                                        <input type="text" value="$!spare.qty" readonly>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                        <li>
+                                                            <div class="item-content">
+                                                                <div class="item-inner">
+                                                                    <div class="item-title">金额(元)</div>
+                                                                    <div class="item-input">
+                                                                        <input type="text" value="$!spare.money" id="spareMoney$index" readonly>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            #set($index = $!index +1)
+                                        #end
+                                    </div>
+                                    <div class="item-action">
+                                        <div class="repair-total">
+                                            总费用：<span id="spareMoneyTotal">0</span>元
+                                        </div>
+                                    </div>
+                                </li>
+                            #end
+
+                            <li>
+                                <div class="item-content">
+                                    <div class="item-inner">
+                                        <div class="item-title">处理结果</div>
+                                        <div class="item-input">
+                                            <div class="textarea">#html_escape($!{history.result})</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                #end
+                #if($!{history.status}>3)
+                    <li id="li-3">
+                        <div class="handle">
+                            <span>评价信息</span>
+                            <i class="icon icon-button"></i>
+                        </div>
+                        <input type="hidden" id="grade1" value="$!{history.grade1}">
+                        <input type="hidden" id="grade2" value="$!{history.grade2}">
+                        <input type="hidden" id="grade3" value="$!{history.grade3}">
+                        <ul class="panel panel-opinion">
+                            <li>
+                                <div class="item-title">维修效率评价</div>
+                                <div class="item-content">
+
+                                    <ul class="star-ul" id="searchGrade1">
+                                        <li id="grade1-li1"></li>
+                                        <li id="grade1-li2"></li>
+                                        <li id="grade1-li3"></li>
+                                        <li id="grade1-li4"></li>
+                                        <li id="grade1-li5"></li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="item-title">维修质量评价</div>
+                                <div class="item-content">
+                                    <ul class="star-ul" id="searchGrade2">
+                                        <li id="grade2-li1"></li>
+                                        <li id="grade2-li2"></li>
+                                        <li id="grade2-li3"></li>
+                                        <li id="grade2-li4"></li>
+                                        <li id="grade2-li5"></li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="item-title">满意度评价</div>
+                                <div class="item-content">
+                                    <ul class="star-ul" id="searchGrade3">
+                                        <li id="grade3-li1"></li>
+                                        <li id="grade3-li2"></li>
+                                        <li id="grade3-li3"></li>
+                                        <li id="grade3-li4"></li>
+                                        <li id="grade3-li5"></li>
+                                    </ul>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                #end
+                <li>
+                    <div class="handle">
+                        <span>流转信息</span>
+                        <i class="icon icon-button"></i>
+                    </div>
+                    <ul class="panel panel-process" id="handleUl">
+                        <li class="status-undo" id="wipe-1">
+                            <div class="left-status">
+                                <i class="icon">.</i>
+                                <span class="line"></span>
+                                <span class="arrow"></span>
+                            </div>
+                            <div class="right-content">
+                                <div class="title-img">
+                                    <i class="icon icon-dj">登记</i>
+                                </div>
+                                <div class="content">
+                                </div>
+                            </div>
+                        </li>
+                        <li class="status-undo" id="wipe-2">
+                            <div class="left-status">
+                                <i class="icon">.</i>
+                                <span class="line"></span>
+                                <span class="arrow"></span>
+                            </div>
+                            <div class="right-content">
+                                <div class="title-img">
+                                    <i class="icon icon-pd">派单</i>
+                                </div>
+                                <div class="content">
+                                </div>
+                            </div>
+                        </li>
+                        <li class="status-undo" id="wipe-3">
+                            <div class="left-status">
+                                <i class="icon">.</i>
+                                <span class="line"></span>
+                                <span class="arrow"></span>
+                            </div>
+                            <div class="right-content">
+                                <div class="title-img">
+                                    <i class="icon icon-wx">维修</i>
+                                </div>
+                                <div class="content">
+                                </div>
+                            </div>
+                        </li>
+                        <li class="status-undo" id="wipe-4">
+                            <div class="left-status">
+                                <i class="icon">.</i>
+                                <span class="line"></span>
+                                <span class="arrow"></span>
+                            </div>
+                            <div class="right-content">
+                                <div class="title-img">
+                                    <i class="icon icon-pj">评价</i>
+                                </div>
+                                <div class="content">
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

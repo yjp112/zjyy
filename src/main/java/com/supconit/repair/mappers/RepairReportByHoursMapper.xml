@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.repair.entities.RepairReportByHours">
+    <resultMap id="repairReportByHoursResultMap" type="com.supconit.repair.entities.RepairReportByHours">
+        <result column="repair_times" property="repairTimes"/>
+        <result column="repair_month" property="repairMonth"/>
+        <result column="work_hours" property="workHours"/>
+        <result column="avg_hours" property="avgHours"/>
+        <result column="repair_mode" property="repairMode"/>
+    </resultMap>
+    <select id="queryRepairByHours" resultMap="repairReportByHoursResultMap" parameterType="com.supconit.repair.entities.RepairReportByHours">
+		select sum(r.work_hours) work_hours,count(r.repair_code) repair_times,
+		(sum(r.work_hours)/count(r.repair_code)) avg_hours,to_char(a.ACTUAL_FINISH_TIME,'yyyy-mm') repair_month 
+		from repair_worker r
+		left join repair a on r.repair_code=a.repair_code 
+		WHERE A.ACTUAL_FINISH_TIME IS NOT NULL 
+        <if test="null != repairMonth and ''!=repairMonth">
+            and to_char(a.ACTUAL_FINISH_TIME,'yyyy') = #{repairMonth}
+        </if>
+        <if test="null != repairMode">
+            and a.repair_mode = #{repairMode}
+        </if>
+        group by to_char(a.ACTUAL_FINISH_TIME,'yyyy-mm')
+        order by to_char(a.ACTUAL_FINISH_TIME,'yyyy-mm')
+    </select>
+</mapper>

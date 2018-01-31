@@ -1,0 +1,780 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.query.collect.water.entities.WaterMeterMonth">
+
+	<resultMap type="com.supconit.nhgl.query.collect.water.entities.WaterMeterMonth" id="WaterMeterMonthResultMap">
+		<result property="id" column="ID" />
+		<result property="deviceId" column="DEVICE_ID" />
+		<result property="monthKey" column="MONTH_KEY" />
+		<result property="monthDayTimeValue" column="MONTH_DAYTIME_VALUE" />
+		<result property="monthNightValue" column="MONTH_NIGHT_VALUE" />
+		<result property="monthWeekenValue" column="MONTH_WEEKEN_VALUE" />
+		<result property="totalMonthValue" column="TOTAL_MONTH_VALUE" />
+		<result property="totalYoy" column="TOTAL_YOY" />
+		<result property="start" column="start"/>
+		<result property="elecTotal" column="elecTotal"/>
+		
+		<result property="fullLevelName" column="FULL_LEVEL_NAME"/>
+		<result property="lastMonth" column="LAST_MONTH"/>
+		<result property="lastYear" column="LAST_YEAR"/>
+		<result property="deptName" column="DEPT_NAME"/>
+		<result property="locationId" column="locationId"/>
+        <result property="subCode" column="subCode"/>
+        <result property="deptId" column="deptId"/>
+	</resultMap>
+	<sql id="select_sub" lang="velocity">
+	<![CDATA[
+		select A.MONTH_KEY,G.AREA_CODE,G.FULL_LEVEL_NAME,G.PARENT_ID,SUM(A.TOTAL_MONTH_VALUE) TOTAL_MONTH_VALUE,
+		SUM(A2.TOTAL_MONTH_VALUE) LAST_MONTH,SUM(A.TOTAL_YOY) LAST_YEAR
+		FROM 
+		NH_WATER_METER_MONTH A
+		LEFT JOIN NH_WATER_METER_DEVICE B ON A.device_id = B.device_id
+		LEFT JOIN DEVICE D
+		ON D.ID=B.DEVICE_ID
+		left JOIN GEO_AREA G
+		ON G.ID=D.LOCATION_ID
+		LEFT JOIN NH_WATER_METER_MONTH A2 
+		ON A2.MONTH_KEY = 
+		#if($_databaseId=='oracle')
+			to_char(add_months(to_date(a.month_key,'yyyy-mm'),-1),'yyyy-mm')
+		#else
+			LEFT(CONVERT(VARCHAR(10),dateadd(mm,-1,CONVERT(date,A.MONTH_KEY+'-01'))),7)
+		#end
+		AND A.DEVICE_ID = A2.DEVICE_ID
+		LEFT JOIN NH_WATER_SUB_SYSTEM_INFO sub
+        ON D.DISCIPINES_CODE = sub.STANDARD_CODE
+		]]>
+	</sql>
+	<sql id="condition_sub" lang="velocity">
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			B.DEPT_ID IS NOT NULL
+			#if($_p.maxTime && $_p.maxTime!='')
+				#set($_maxTime=$_p.maxTime)
+				and A.MONTH_KEY <=@{_maxTime,jdbcType=VARCHAR}
+			#end
+			#if($_p.start && $_p.start!='')
+				#set($_start=$_p.start)
+				and A.MONTH_KEY >=@{_start,jdbcType=VARCHAR}
+			#end
+			#if($_p.end && $_p.end!='')
+				#set($_end=$_p.end)
+				and A.MONTH_KEY <=@{_end,jdbcType=VARCHAR}
+			#end
+			#if($_p.lstLocationId && $_p.lstLocationId.size()>0)	
+				#set($_lstLocationId =$_p.lstLocationId)
+				and 
+				#repeat( $_lstLocationId $ids "," " D.LOCATION_ID IN (" ")" )
+				    @{ids,jdbcType=BIGINT}
+				#end	
+			#end
+			#if($_p.subCode && $_p.subCode!='')
+				#set($_subCode='%' +$_p.subCode+ '%')
+				and sub.STANDARD_CODE LIKE @{_subCode,jdbcType=VARCHAR}
+			#end	
+		#end	
+		]]>	
+	</sql>
+	<select id="findByCondition" resultMap="WaterMeterMonthResultMap" parameterType="com.supconit.nhgl.query.collect.water.entities.WaterMeterMonth" lang="velocity" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_sub" /> 
+		<include refid="condition_sub"/>
+		GROUP BY A.MONTH_KEY,G.AREA_CODE,G.PARENT_ID,G.FULL_LEVEL_NAME
+		#order($_parameter.condition,"A.MONTH_KEY DESC")
+ 		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="findByCondition" resultMap="WaterMeterMonthResultMap" parameterType="com.supconit.nhgl.query.collect.water.entities.WaterMeterMonth" lang="velocity" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>	
+		select A.MONTH_KEY,G.AREA_CODE,G.FULL_LEVEL_NAME,G.PARENT_ID,SUM(A.TOTAL_MONTH_VALUE) TOTAL_MONTH_VALUE,
+		SUM(A2.TOTAL_MONTH_VALUE) LAST_MONTH,SUM(A.TOTAL_YOY) LAST_YEAR
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+ 		#order($_parameter.condition,"A.MONTH_KEY DESC")
+ 		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM 
+		NH_WATER_METER_MONTH A
+		LEFT JOIN NH_WATER_METER_DEVICE B ON A.device_id = B.device_id
+		LEFT JOIN DEVICE D
+		ON D.ID=B.DEVICE_ID
+		left JOIN GEO_AREA G
+		ON G.ID=D.LOCATION_ID
+		LEFT JOIN NH_WATER_METER_MONTH A2 
+		ON A2.MONTH_KEY = LEFT(CONVERT(VARCHAR(10),dateadd(mm,-1,CONVERT(date,A.MONTH_KEY+'-01'))),7)
+		AND A.DEVICE_ID = A2.DEVICE_ID
+		LEFT JOIN NH_WATER_SUB_SYSTEM_INFO sub
+        ON D.DISCIPINES_CODE = sub.STANDARD_CODE 
+		<include refid="condition_deptsub" /> 
+		GROUP BY A.MONTH_KEY,G.AREA_CODE,G.PARENT_ID,G.FULL_LEVEL_NAME
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="countByCondition" resultType="Long" parameterType="com.supconit.nhgl.query.collect.water.entities.WaterMeterMonth" >
+		SELECT COUNT(1) FROM(
+			<include refid="select_sub" /> 
+		) T
+	</select>
+	<sql id="select_deptsub" lang="velocity">
+	<![CDATA[
+		select A.MONTH_KEY,DP.ID deptId,DP.NAME DEPT_NAME,DP.PID, SUM(A.TOTAL_MONTH_VALUE * B.FTXS) TOTAL_MONTH_VALUE,
+		SUM(A2.TOTAL_MONTH_VALUE * B.FTXS) LAST_MONTH,SUM(A.TOTAL_YOY * B.FTXS) LAST_YEAR
+		FROM 
+		NH_WATER_METER_MONTH A
+		LEFT JOIN NH_WATER_METER_DEVICE B ON A.device_id = B.device_id
+		LEFT JOIN DEVICE D
+		ON D.ID=B.DEVICE_ID
+		LEFT JOIN HO_DEPARTMENT DP
+		ON DP.ID=B.DEPT_ID
+		LEFT JOIN NH_WATER_METER_MONTH A2 
+		ON A2.MONTH_KEY = 
+		#if($_databaseId=='oracle')
+			to_char(add_months(to_date(a.month_key,'yyyy-mm'),-1),'yyyy-mm')
+		#else
+			LEFT(CONVERT(VARCHAR(10),dateadd(mm,-1,CONVERT(date,A.MONTH_KEY+'-01'))),7)
+		#end
+		AND A.DEVICE_ID = A2.DEVICE_ID
+		LEFT JOIN NH_WATER_SUB_SYSTEM_INFO sub
+        ON D.DISCIPINES_CODE = sub.STANDARD_CODE
+		]]>
+	</sql>
+	<sql id="condition_deptsub" lang="velocity">
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			B.DEPT_ID IS NOT NULL
+			#if($_p.maxTime && $_p.maxTime!='')
+				#set($_maxTime=$_p.maxTime)
+				and A.MONTH_KEY <=@{_maxTime,jdbcType=VARCHAR}
+			#end
+			#if($_p.start && $_p.start!='')
+				#set($_start=$_p.start)
+				and A.MONTH_KEY >=@{_start,jdbcType=VARCHAR}
+			#end
+			#if($_p.end && $_p.end!='')
+				#set($_end=$_p.end)
+				and A.MONTH_KEY <=@{_end,jdbcType=VARCHAR}
+			#end
+			#if($_p.lstDpId && $_p.lstDpId.size()>0)	
+				#set($_lstDpId =$_p.lstDpId)
+				and 
+				#repeat( $_lstDpId $ids "," " DP.ID IN (" ")" )
+				    @{ids,jdbcType=BIGINT}
+				#end	
+			#end
+			#if($_p.subCode && $_p.subCode!='')
+				#set($_subCode='%' +$_p.subCode+ '%')
+				and sub.STANDARD_CODE LIKE @{_subCode,jdbcType=VARCHAR}
+			#end	
+		#end
+		]]>			
+	</sql>
+	<select id="findByDeptCondition" resultMap="WaterMeterMonthResultMap" parameterType="com.supconit.nhgl.query.collect.water.entities.WaterMeterMonth" lang="velocity" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_deptsub" /> 
+		<include refid="condition_deptsub" /> 
+		GROUP BY A.MONTH_KEY,DP.ID,DP.NAME,DP.PID
+		#order($_parameter.condition,"A.MONTH_KEY DESC")
+ 		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="findByDeptCondition" resultMap="WaterMeterMonthResultMap" parameterType="com.supconit.nhgl.query.collect.water.entities.WaterMeterMonth" lang="velocity" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>	
+		select A.MONTH_KEY,DP.ID deptId,DP.NAME DEPT_NAME,DP.PID, SUM(A.TOTAL_MONTH_VALUE * B.FTXS) TOTAL_MONTH_VALUE,
+		SUM(A2.TOTAL_MONTH_VALUE * B.FTXS) LAST_MONTH,SUM(A.TOTAL_YOY * B.FTXS) LAST_YEAR
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+ 		#order($_parameter.condition,"A.MONTH_KEY DESC")
+ 		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM 
+		NH_WATER_METER_MONTH A
+		LEFT JOIN NH_WATER_METER_DEVICE B ON A.device_id = B.device_id
+		LEFT JOIN DEVICE D
+		ON D.ID=B.DEVICE_ID
+		LEFT JOIN HO_DEPARTMENT DP
+		ON DP.ID=B.DEPT_ID
+		LEFT JOIN NH_WATER_METER_MONTH A2 
+		ON A2.MONTH_KEY = LEFT(CONVERT(VARCHAR(10),dateadd(mm,-1,CONVERT(date,A.MONTH_KEY+'-01'))),7)
+		AND A.DEVICE_ID = A2.DEVICE_ID
+		LEFT JOIN NH_WATER_SUB_SYSTEM_INFO sub
+        ON D.DISCIPINES_CODE = sub.STANDARD_CODE
+		<include refid="condition_deptsub" /> 
+		GROUP BY A.MONTH_KEY,DP.ID,DP.NAME,DP.PID
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="countByDeptCondition" resultType="Long" parameterType="com.supconit.nhgl.query.collect.water.entities.WaterMeterMonth" lang="velocity">
+		SELECT COUNT(1) FROM(
+			<include refid="select_deptsub" /> 
+			<include refid="condition_deptsub" /> 
+			GROUP BY A.MONTH_KEY,DP.ID,DP.NAME,DP.PID 
+		) T
+	</select>
+	<select id="getMonthTotal" resultMap="WaterMeterMonthResultMap"
+		parameterType="com.supconit.nhgl.query.collect.water.entities.WaterMeterMonth"  >
+		<include refid="select_month"/>
+	</select>
+	<sql id="select_conc" lang="velocity">
+	<![CDATA[
+		SELECT 
+			#if($_parameter.isDept)
+				#if($_databaseId=='oracle')
+					nvl(SUM(A.TOTAL_MONTH_VALUE * C.FTXS), 0) as TOTAL_MONTH_VALUE,
+					nvl(SUM(TOTAL_YOY * C.FTXS),0) AS TOTAL_YOY,
+					nvl(SUM(MONTH_DAYTIME_VALUE * C.FTXS),0) AS MONTH_DAYTIME_VALUE,
+					nvl(SUM(MONTH_NIGHT_VALUE * C.FTXS),0) AS MONTH_NIGHT_VALUE
+				#else
+					ISNULL(SUM(A.TOTAL_MONTH_VALUE * C.FTXS), 0) as TOTAL_MONTH_VALUE,
+					ISNULL(SUM(TOTAL_YOY * C.FTXS),0) AS TOTAL_YOY,
+					ISNULL(SUM(MONTH_DAYTIME_VALUE * C.FTXS),0) AS MONTH_DAYTIME_VALUE,
+					ISNULL(SUM(MONTH_NIGHT_VALUE * C.FTXS),0) AS MONTH_NIGHT_VALUE 
+				#end
+			#else
+				SUM(A.TOTAL_MONTH_VALUE) as TOTAL_MONTH_VALUE,
+				SUM(TOTAL_YOY) AS TOTAL_YOY,
+				SUM(MONTH_DAYTIME_VALUE) AS MONTH_DAYTIME_VALUE,
+				SUM(MONTH_NIGHT_VALUE) AS MONTH_NIGHT_VALUE 
+			#end
+		from NH_WATER_METER_MONTH A
+				LEFT JOIN DEVICE B ON A.DEVICE_ID=B.ID 
+				LEFT JOIN NH_WATER_METER_DEVICE C ON C.DEVICE_ID = A.DEVICE_ID
+		WHERE
+				1=1
+				#if($_parameter.maxTime)
+					and A.MONTH_KEY<=@{_parameter.maxTime,jdbcType=VARCHAR}
+				#end
+				#if($_parameter.deptId)
+					AND C.DEPT_ID = @{_parameter.deptId,jdbcType=NUMERIC} 
+				#end
+				#if($_parameter.deptId && $_parameter.deptIdlst && $_parameter.deptIdlst.size()>0)
+					AND
+					#repeat($_parameter.deptIdlst $id "," " C.DEPT_ID IN (" ")")
+						@{id,jdbcType=NUMERIC}
+					#end
+				#end
+				#if($_parameter.subCode && $_parameter.subCode!='')
+					#set($_code = $_parameter.subCode + '%')
+					and B.DISCIPINES_CODE LIKE  @{_code,jdbcType=VARCHAR} 
+				#end
+				#if($_parameter.start)
+					and A.MONTH_KEY>=@{_parameter.start,jdbcType=VARCHAR}
+				#end
+				#if($_parameter.end)
+			   		and A.MONTH_KEY<=@{_parameter.end,jdbcType=VARCHAR}
+				#end
+			]]>
+	</sql>
+	
+	<sql id="select_month" lang="velocity">
+		SELECT 
+			ISNULL(SUM(TOTAL_MONTH_VALUE),0) TOTAL_MONTH_VALUE,
+			MONTH_KEY 
+		FROM NH_WATER_METER_MONTH
+		<where>
+			<if test="start != null and start != ''">MONTH_KEY >= #{start} and</if>
+			<if test="end != null and end != ''">MONTH_KEY &lt;= #{end}</if>
+		</where>
+		GROUP BY MONTH_KEY
+		
+	</sql>
+	
+	<sql id="select_conp" lang="velocity">
+	<![CDATA[
+		SELECT SUM(TOTAL_MONTH_VALUE) as TOTAL_MONTH_VALUE,SUM(TOTAL_YOY) AS TOTAL_YOY 
+		,SUM(MONTH_DAYTIME_VALUE) AS MONTH_DAYTIME_VALUE,SUM(MONTH_NIGHT_VALUE) AS MONTH_NIGHT_VALUE 
+		from NH_WATER_METER_MONTH A
+		LEFT JOIN DEVICE B ON A.DEVICE_ID=B.ID 
+		left join device_category s on s.id=b.category_id
+		AND s.CATEGORY_CODE = @{_parameter.categoryCode,jdbcType=VARCHAR}
+		RIGHT JOIN GEO_AREA C ON B.LOCATION_ID =C.ID
+		left join NH_WATER_SUB_SYSTEM_INFO sub on B.DISCIPINES_CODE = sub.STANDARD_CODE
+		WHERE
+			#if($_parameter.maxTime)
+				A.MONTH_KEY<=@{_parameter.maxTime,jdbcType=VARCHAR} and
+			#end
+			#if($_parameter.isp && $_parameter.isp!='' && $_parameter.areaId)
+				C.PARENT_ID = @{_parameter.areaId,jdbcType=NUMERIC} and
+			#else
+				#if($_parameter.areaId)
+				 C.ID = @{_parameter.areaId,jdbcType=NUMERIC} AND
+				#end
+			#end
+			#if($_parameter.subCode && $_parameter.subCode!='')
+			#set($_code = $_parameter.subCode + '%')
+			    sub.STANDARD_CODE LIKE  @{_code,jdbcType=VARCHAR} and
+			#end
+			#if($_parameter.start)
+				 A.MONTH_KEY>=@{_parameter.start,jdbcType=VARCHAR} AND
+			#end
+			#if($_parameter.end)
+		   		 A.MONTH_KEY<=@{_parameter.end,jdbcType=VARCHAR} AND
+			#end
+			1=1
+			]]>
+	</sql>
+	
+	<!-- 获取所有的区域年用电量数据 -->
+	<sql id="selectByDept" lang="velocity">
+	<![CDATA[
+		SELECT
+		#if($_databaseId=='oracle')
+			nvl(SUM (a.TOTAL_MONTH_VALUE * b.FTXS),0) AS TOTAL_MONTH_VALUE,
+			nvl(SUM(a.TOTAL_YOY * b.FTXS), 0) AS TOTAL_YOY,
+		#else
+			ISNULL(SUM (a.TOTAL_MONTH_VALUE * b.FTXS),0) AS TOTAL_MONTH_VALUE,
+			ISNULL(SUM(a.TOTAL_YOY * b.FTXS), 0) AS TOTAL_YOY,
+		#end
+			MONTH_KEY
+		FROM
+			NH_WATER_METER_MONTH a
+		LEFT JOIN NH_WATER_METER_DEVICE b ON a.DEVICE_ID = b.DEVICE_ID
+		LEFT JOIN DEVICE d ON d.ID = a.DEVICE_ID
+		#where()
+			#if($_parameter.deptId && $_parameter.deptIdlst && $_parameter.deptIdlst.size()>0)
+				#repeat($_parameter.deptIdlst $id "," " b.DEPT_ID IN (" ")")
+					@{id,jdbcType=NUMERIC}
+				#end
+				AND
+			#end
+			#if($_parameter.subCode && $_parameter.subCode!='')
+				#set($_code = $_parameter.subCode+'%')
+				d.DISCIPINES_CODE LIKE @{_code,jdbcType=VARCHAR} and
+			#end
+			#if($_parameter.start)
+				a.MONTH_KEY>=@{_parameter.start,jdbcType=VARCHAR} and
+			#end
+			#if($_parameter.end)
+		   		a.MONTH_KEY<=@{_parameter.end,jdbcType=VARCHAR} and
+			#end
+			1=1
+		#end
+		GROUP BY
+			a.MONTH_KEY
+		ORDER BY
+			a.MONTH_KEY ASC
+	]]>
+	</sql>
+	
+	<sql id="select_findByArea" lang="velocity">
+	<![CDATA[
+		SELECT SUM(TOTAL_MONTH_VALUE) as TOTAL_MONTH_VALUE,MONTH_KEY from NH_WATER_METER_MONTH WHERE DEVICE_ID IN( 
+			SELECT ID FROM DEVICE 
+				#where()
+					#if($_parameter.categoryCode)
+						CATEGORY_ID = (SELECT ID FROM DEVICE_CATEGORY WHERE CATEGORY_CODE = @{_parameter.categoryCode,jdbcType=VARCHAR}) and
+					#end
+					#if($_parameter.isp && $_parameter.isp!='' && $_parameter.areaId)
+						LOCATION_ID IN (SELECT ID FROM GEO_AREA WHERE PARENT_ID = $_parameter.areaId) and
+					#else
+						#if($_parameter.areaId)
+							LOCATION_ID = @{_parameter.areaId,jdbcType=NUMERIC} AND
+						#end
+					#end
+					1=1
+				#end
+			)
+			#if($_parameter.start)
+				and MONTH_KEY>=@{_parameter.start,jdbcType=VARCHAR}
+			#end
+			#if($_parameter.end)
+		   		and MONTH_KEY<=@{_parameter.end,jdbcType=VARCHAR}
+			#end
+			group by MONTH_KEY
+			ORDER BY MONTH_KEY ASC
+	]]>
+	</sql>
+	<sql id="selectByDeptAndFx" lang="velocity">
+	<![CDATA[
+		SELECT SUM(TOTAL_MONTH_VALUE) as TOTAL_MONTH_VALUE,MONTH_KEY,SUM(TOTAL_YOY) TOTAL_YOY from NH_WATER_METER_MONTH WHERE DEVICE_ID IN( 
+			SELECT ID FROM DEVICE 
+				#where()
+					#if($_parameter.categoryCode)
+						CATEGORY_ID = (SELECT ID FROM DEVICE_CATEGORY WHERE CATEGORY_CODE = @{_parameter.categoryCode,jdbcType=VARCHAR}) and
+					#end
+					#if($_parameter.isp && $_parameter.isp!='' && $_parameter.areaId)
+						LOCATION_ID IN (SELECT ID FROM GEO_AREA WHERE PARENT_ID = @{_parameter.areaId,jdbcType=NUMERIC}) and
+					#else
+						#if($_parameter.areaId)
+							LOCATION_ID = @{_parameter.areaId,jdbcType=NUMERIC} AND
+						#end
+					#end
+					#if($_parameter.subCode && $_parameter.subCode != '')
+						#set($_code = $_parameter.subCode + '%')
+						DISCIPINES_CODE LIKE  @{_code,jdbcType=VARCHAR} AND
+					#end
+					1=1
+				#end
+			)
+			#if($_parameter.start)
+				and MONTH_KEY>=@{_parameter.start,jdbcType=VARCHAR}
+			#end
+			#if($_parameter.end)
+		   		and MONTH_KEY<=@{_parameter.end,jdbcType=VARCHAR}
+			#end
+			group by MONTH_KEY
+			ORDER BY MONTH_KEY ASC
+	]]>
+	</sql>
+	<!-- 部门 -->
+	<sql id="select_condept" lang="velocity">
+	<!-- sql中对应的从内到外的是，部门/分项 -->
+	<![CDATA[
+		SELECT
+			#if($_databaseId=='oracle')
+				nvl(SUM (a.TOTAL_MONTH_VALUE * b.FTXS),0) AS TOTAL_MONTH_VALUE,
+				nvl(SUM(a.TOTAL_YOY * b.FTXS), 0) AS TOTAL_YOY,
+			#else
+				ISNULL(SUM (a.TOTAL_MONTH_VALUE * b.FTXS),0) AS TOTAL_MONTH_VALUE,
+				ISNULL(SUM(a.TOTAL_YOY * b.FTXS), 0) AS TOTAL_YOY,
+			#end
+			sub.PARENT_ID AS subCode
+		FROM
+			NH_WATER_METER_MONTH a
+		LEFT JOIN NH_WATER_METER_DEVICE b ON a.DEVICE_ID = b.DEVICE_ID
+		LEFT JOIN DEVICE d ON a.DEVICE_ID = d.ID
+		LEFT JOIN NH_WATER_SUB_SYSTEM_INFO sub ON d.DISCIPINES_CODE = sub.STANDARD_CODE
+		WHERE
+			MONTH_KEY= @{_parameter.start,jdbcType=VARCHAR}
+			AND d.DISCIPINES_CODE is not null
+			#if($_parameter.deptId)
+				 AND b.DEPT_ID = @{_parameter.deptId,jdbcType=NUMERIC}
+			#end
+		GROUP BY
+			sub.PARENT_ID
+			
+			]]>
+	</sql>
+	<!-- 区域, -->
+	<sql id="select_conarea" lang="velocity">
+	<!-- sql中对应的从内到外的是，区域/部门/分项 ,通用的-->
+	<![CDATA[
+	SELECT
+		SUM (m.TOTAL_MONTH_VALUE) as TOTAL_MONTH_VALUE,SUM(TOTAL_YOY) as TOTAL_YOY,
+		sub.PARENT_ID as subCode
+	FROM
+		NH_WATER_METER_MONTH m
+	LEFT JOIN DEVICE d ON m.DEVICE_ID = d.ID
+	left join device_Category c on c.id=d.category_id
+	AND c.CATEGORY_CODE = @{_parameter.categoryCode,jdbcType=VARCHAR}
+	LEFT JOIN NH_WATER_SUB_SYSTEM_INFO sub ON d.DISCIPINES_CODE = sub.STANDARD_CODE
+	WHERE
+		MONTH_KEY= @{_parameter.start,jdbcType=VARCHAR}
+		AND d.DISCIPINES_CODE is not null
+		#if($_parameter.isp && $_parameter.isp!='' && $_parameter.areaId)
+			and LOCATION_ID IN (SELECT ID FROM GEO_AREA WHERE PARENT_ID = @{_parameter.areaId,jdbcType=NUMERIC}) 
+		#else
+			#if($_parameter.areaId)
+				and LOCATION_ID = @{_parameter.areaId,jdbcType=NUMERIC}
+			#end
+		#end
+	GROUP BY
+		sub.PARENT_ID
+	
+		]]>
+	</sql>
+	
+	<!-- 数据归档 -->
+	<sql id="maxMonth">
+		select max(TOTAL_MONTH_VALUE) as TOTAL_MONTH_VALUE,DEVICE_ID from NH_WATER_METER_MONTH where MONTH_KEY=#{monthKey} group by DEVICE_ID
+	</sql>
+	
+	
+	<!-- 能耗分析，获取一级区域月耗电量 -->
+	<select id="getParentAreaMonthWater" resultMap="WaterMeterMonthResultMap"
+		parameterType="com.supconit.nhgl.query.collect.water.entities.WaterMeterMonth" lang="velocity">
+		<![CDATA[
+		SELECT
+			SUM (m.TOTAL_MONTH_VALUE) AS TOTAL_MONTH_VALUE,
+			SUM (m.TOTAL_YOY) TOTAL_YOY,
+			g.PARENT_ID as areaId
+		FROM
+			NH_WATER_METER_MONTH m
+		LEFT JOIN Device d ON m.DEVICE_ID = d.id
+		left join device_category c on c.id=d.category_id
+		AND c.CATEGORY_CODE = @{_parameter.categoryCode,jdbcType=VARCHAR}
+		RIGHT JOIN GEO_AREA g ON g.ID = d.LOCATION_ID
+		#where()
+			#if($_parameter.start)
+				MONTH_KEY>=@{_parameter.start,jdbcType=VARCHAR}
+			#end
+			#if($_parameter.end)
+				and MONTH_KEY<=@{_parameter.end,jdbcType=VARCHAR}
+			#end
+			#if($_parameter.subCode && $_parameter.subCode != '')
+				#set($_code = $_parameter.subCode+'%')
+				AND	DISCIPINES_CODE LIKE @{_code,jdbcType=VARCHAR}
+			#end
+			AND d.LOCATION_ID IS NOT NULL
+		#end
+		GROUP BY
+			g.PARENT_ID
+		ORDER BY
+			g.PARENT_ID
+			]]>
+	</select>
+	
+	
+	<!-- 能耗分析，获取子级区域月耗电量 -->
+	<select id="getChildrenAreaMonthWater" resultMap="WaterMeterMonthResultMap"
+		parameterType="com.supconit.nhgl.query.collect.water.entities.WaterMeterMonth" lang="velocity">
+		<![CDATA[
+			select sum(m.TOTAL_MONTH_VALUE) as TOTAL_MONTH_VALUE,SUM(m.TOTAL_YOY) TOTAL_YOY,d.LOCATION_ID as areaId
+				from NH_WATER_METER_MONTH m left join Device d on m.DEVICE_ID = d.id 
+				left join device_Category c on c.id=d.category_id
+				and c.CATEGORY_CODE = @{_parameter.categoryCode,jdbcType=VARCHAR}
+				RIGHT JOIN GEO_AREA g ON g.ID = d.LOCATION_ID
+				#where()
+					#if($_parameter.start)
+						MONTH_KEY>=@{_parameter.start,jdbcType=VARCHAR}
+					#end
+					#if($_parameter.end)
+						and MONTH_KEY<=@{_parameter.end,jdbcType=VARCHAR}
+					#end
+					#if($_parameter.subCode && $_parameter.subCode != '')
+						#set($_code = $_parameter.subCode+'%')
+						AND	DISCIPINES_CODE LIKE @{_code,jdbcType=VARCHAR}
+					#end
+					AND d.LOCATION_ID IS NOT NULL
+				#end
+				group by d.LOCATION_ID
+				order by d.LOCATION_ID
+		]]>
+	</select>
+	
+	<!-- 能耗分析，获取一级部门月耗电量 -->
+	<select id="getChildrenDeptMonthWater" resultMap="WaterMeterMonthResultMap"
+		parameterType="com.supconit.nhgl.query.collect.water.entities.WaterMeterMonth" lang="velocity">
+		<![CDATA[
+		SELECT
+		#if($_databaseId=='oracle')
+			nvl(SUM (a.TOTAL_MONTH_VALUE * b.FTXS),0) as TOTAL_MONTH_VALUE,
+			nvl(SUM(a.TOTAL_YOY * b.FTXS), 0) AS TOTAL_YOY,
+		#else
+			ISNULL(SUM (a.TOTAL_MONTH_VALUE * b.FTXS),0) as TOTAL_MONTH_VALUE,
+			ISNULL(SUM(a.TOTAL_YOY * b.FTXS), 0) AS TOTAL_YOY,
+		#end
+			b.DEPT_ID AS areaId
+		FROM
+			NH_WATER_METER_MONTH a
+		LEFT JOIN NH_WATER_METER_DEVICE b ON a.device_id = b.device_id
+		LEFT JOIN device d on d.id = b.device_id
+		#where()
+			#if($_parameter.start)
+				a.MONTH_KEY>=@{_parameter.start,jdbcType=VARCHAR} and
+			#end
+			#if($_parameter.end)
+				a.MONTH_KEY<=@{_parameter.end,jdbcType=VARCHAR} and
+			#end
+			#if($_parameter.subCode && $_parameter.subCode!='')
+				#set($_code = $_parameter.subCode+'%')
+				d.DISCIPINES_CODE LIKE @{_code,jdbcType=VARCHAR} and
+			#end
+			b.DEPT_ID IS NOT NULL
+		#end
+		GROUP BY
+			b.DEPT_ID
+		order by
+			b.DEPT_ID
+			]]>
+	</select>
+	<select id="getParentDeptMonthWater" resultMap="WaterMeterMonthResultMap"
+		parameterType="com.supconit.nhgl.query.collect.water.entities.WaterMeterMonth" lang="velocity">
+		<![CDATA[
+		SELECT
+		#if($_databaseId=='oracle')
+			nvl(SUM (a.TOTAL_MONTH_VALUE * b.FTXS),0) as TOTAL_MONTH_VALUE,
+			nvl(SUM(a.TOTAL_YOY * b.FTXS), 0) AS TOTAL_YOY,
+		#else
+			ISNULL(SUM (a.TOTAL_MONTH_VALUE * b.FTXS),0) as TOTAL_MONTH_VALUE,
+			ISNULL(SUM(a.TOTAL_YOY * b.FTXS), 0) AS TOTAL_YOY,
+		#end
+			b.DEPT_ID AS areaId
+		FROM
+			NH_WATER_METER_MONTH a
+		LEFT JOIN NH_WATER_METER_DEVICE b ON a.device_id = b.device_id
+			LEFT JOIN ho_department hd ON b.dept_id=hd.id
+		LEFT JOIN device d on d.id = b.device_id
+		#where()
+			#if($_parameter.start)
+				a.MONTH_KEY>=@{_parameter.start,jdbcType=VARCHAR} and
+			#end
+			#if($_parameter.end)
+				a.MONTH_KEY<=@{_parameter.end,jdbcType=VARCHAR} and
+			#end
+			#if($_parameter.subCode && $_parameter.subCode!='')
+				#set($_code = $_parameter.subCode+'%')
+				d.DISCIPINES_CODE LIKE @{_code,jdbcType=VARCHAR} and
+			#end
+			b.DEPT_ID IS NOT NULL
+			and HD.PID=@{_parameter.deptId,jdbcType=NUMERIC}
+		#end
+		GROUP BY
+			b.DEPT_ID
+			]]>
+	</select>
+	<select id="getChildDeptMonthWater" resultMap="WaterMeterMonthResultMap"
+		parameterType="com.supconit.nhgl.query.collect.water.entities.WaterMeterMonth" lang="velocity">
+		<![CDATA[
+		SELECT
+		#if($_databaseId=='oracle')
+			nvl(SUM (a.TOTAL_MONTH_VALUE * b.FTXS),0) as TOTAL_MONTH_VALUE,
+			nvl(SUM(a.TOTAL_YOY * b.FTXS), 0) AS TOTAL_YOY,
+		#else
+			ISNULL(SUM (a.TOTAL_MONTH_VALUE * b.FTXS),0) as TOTAL_MONTH_VALUE,
+			ISNULL(SUM(a.TOTAL_YOY * b.FTXS), 0) AS TOTAL_YOY,
+		#end
+			hd.pid AS areaId
+		FROM
+			NH_WATER_METER_MONTH a
+		LEFT JOIN NH_WATER_METER_DEVICE b ON a.device_id = b.device_id
+			LEFT JOIN ho_department hd ON b.dept_id=hd.id
+		LEFT JOIN device d on d.id = b.device_id
+		#where()
+			#if($_parameter.start)
+				a.MONTH_KEY>=@{_parameter.start,jdbcType=VARCHAR} and
+			#end
+			#if($_parameter.end)
+				a.MONTH_KEY<=@{_parameter.end,jdbcType=VARCHAR} and
+			#end
+			#if($_parameter.subCode && $_parameter.subCode!='')
+				#set($_code = $_parameter.subCode+'%')
+				d.DISCIPINES_CODE LIKE @{_code,jdbcType=VARCHAR} and
+			#end
+			b.DEPT_ID IS NOT NULL
+			and HD.PID<>@{_parameter.deptId,jdbcType=NUMERIC}
+		#end
+		GROUP BY
+			hd.pid
+			]]>
+	</select>
+	
+	<!-- 各一级分项，当前月的月耗水总量 -->
+	<select id="getSubWaterMonthParent" resultMap="WaterMeterMonthResultMap"
+		parameterType="com.supconit.nhgl.query.collect.water.entities.WaterMeterMonth" lang="velocity">
+		<![CDATA[
+			SELECT
+				SUM (w.TOTAL_MONTH_VALUE) AS TOTAL_MONTH_VALUE,
+				SUM (TOTAL_YOY ) AS TOTAL_YOY,
+				s.PARENT_ID AS subCode
+			FROM
+				NH_WATER_SUB_SYSTEM_INFO s
+			LEFT JOIN DEVICE d ON d.DISCIPINES_CODE = s.STANDARD_CODE
+			LEFT JOIN NH_WATER_METER_MONTH w ON w.DEVICE_ID = d.ID
+			LEFT JOIN NH_WATER_METER_DEVICE a ON a.DEVICE_ID = d.ID
+			#where() 
+				#if($_parameter.start)
+					w.MONTH_KEY=@{_parameter.start,jdbcType=VARCHAR} 
+				#end
+			#end
+			GROUP BY
+				s.PARENT_ID
+		
+		]]>
+	</select>
+	
+	<!-- 各二级分项，当前月的月耗水总量 -->
+	<select id="getSubWaterMonthChildren" resultMap="WaterMeterMonthResultMap"
+		parameterType="com.supconit.nhgl.query.collect.water.entities.WaterMeterMonth" lang="velocity">
+		<![CDATA[
+			SELECT
+				SUM (w.TOTAL_MONTH_VALUE) AS TOTAL_MONTH_VALUE,
+				SUM (TOTAL_YOY) AS TOTAL_YOY,
+				s.STANDARD_CODE AS subCode
+			FROM
+				NH_WATER_SUB_SYSTEM_INFO s
+			LEFT JOIN DEVICE d ON d.DISCIPINES_CODE = s.STANDARD_CODE
+			LEFT JOIN NH_WATER_METER_MONTH w ON w.DEVICE_ID = d.ID
+			LEFT JOIN NH_WATER_METER_DEVICE a ON a.DEVICE_ID = d.ID
+			WHERE
+				w.MONTH_KEY = @{_parameter.start,jdbcType=VARCHAR} 
+			GROUP BY
+				s.STANDARD_CODE
+		
+		]]>
+	</select>
+	
+	<select id="findMaxTime" resultMap="WaterMeterMonthResultMap"
+		parameterType="com.supconit.nhgl.query.collect.water.entities.WaterMeterMonth" >
+		<include refid="maxMonth" />
+	</select>
+	
+	<select id="findByConc" resultMap="WaterMeterMonthResultMap"
+		parameterType="com.supconit.nhgl.query.collect.water.entities.WaterMeterMonth" lang="velocity">
+		<include refid="select_conc" />
+	</select>
+	<select id="findByConp" resultMap="WaterMeterMonthResultMap"
+		parameterType="com.supconit.nhgl.query.collect.water.entities.WaterMeterMonth" lang="velocity">
+		<include refid="select_conp" />
+	</select>
+	<select id="findByArea" resultMap="WaterMeterMonthResultMap"
+		parameterType="com.supconit.nhgl.query.collect.water.entities.WaterMeterMonth" lang="velocity">
+		<include refid="select_findByArea" />
+	</select>
+	<select id="findByDept" resultMap="WaterMeterMonthResultMap"
+		parameterType="com.supconit.nhgl.query.collect.water.entities.WaterMeterMonth" lang="velocity">
+		<include refid="selectByDept" />
+	</select>
+	<select id="findByDeptAndFx" resultMap="WaterMeterMonthResultMap"
+		parameterType="com.supconit.nhgl.query.collect.water.entities.WaterMeterMonth" lang="velocity">
+		<include refid="selectByDeptAndFx" />
+	</select>
+	<!-- 部门 -->
+	<select id="findDept" resultMap="WaterMeterMonthResultMap"
+		parameterType="com.supconit.nhgl.query.collect.water.entities.WaterMeterMonth" lang="velocity">
+		<include refid="select_condept" />
+	</select>
+	<select id="findArea" resultMap="WaterMeterMonthResultMap"
+		parameterType="com.supconit.nhgl.query.collect.water.entities.WaterMeterMonth" lang="velocity">
+		<include refid="select_conarea" />
+	</select>
+	<!-- 计算时间范围内的耗电量的耗电量（月的耗电量） 王海波 -->
+	<select id="getMonthWater" resultMap="WaterMeterMonthResultMap" parameterType="com.supconit.nhgl.query.collect.water.entities.WaterMeterMonth" lang="velocity">
+		<![CDATA[
+		SELECT SUM(TOTAL_MONTH_VALUE) AS elecTotal,MONTH_KEY 
+			FROM NH_WATER_METER_MONTH WHERE DEVICE_ID IN(
+				SELECT ID FROM DEVICE WHERE
+					#if($_parameter.categoryCode)
+						CATEGORY_ID IN (SELECT ID FROM DEVICE_CATEGORY WHERE CATEGORY_CODE = @{_parameter.categoryCode,jdbcType=VARCHAR}) 
+					#end
+			) 
+			#if($_parameter.start)
+				and MONTH_KEY>=@{_parameter.start,jdbcType=VARCHAR} 
+			#end
+			#if($_parameter.end)
+		   		and MONTH_KEY<=@{_parameter.end,jdbcType=VARCHAR}
+			#end 
+			GROUP BY MONTH_KEY ORDER BY MONTH_KEY
+		]]>
+	</select>
+	<delete id="deleteByMonthKey" parameterType="com.supconit.nhgl.query.collect.water.entities.WaterMeterMonth">
+		delete NH_WATER_METER_MONTH where MONTH_KEY >= #{start}
+	</delete>
+	
+	<!-- 数据插入 -->
+	<insert id="insert" parameterType="java.util.List" >
+		<include refid="insert_sql" />
+        <!-- 获取记录主键 microsoft sql server -->
+	</insert>
+    
+    <!-- 插入记录-->
+	<sql id="insert_sql">
+		INSERT INTO dbo.NH_WATER_METER_MONTH(        
+        DEVICE_ID,
+        MONTH_KEY,
+        MONTH_DAYTIME_VALUE,
+        MONTH_NIGHT_VALUE,
+        MONTH_WEEKEN_VALUE,
+        TOTAL_MONTH_VALUE,
+        TOTAL_YOY
+		) VALUES
+		<foreach collection="list" item="item" index="index" separator="," >  
+       	  (        
+	        #{item.deviceId},
+	        #{item.monthKey},
+	        #{item.monthDayTimeValue},
+	        #{item.monthNightValue},
+	        #{item.monthWeekenValue},
+	        #{item.totalMonthValue},
+	        #{item.totalYoy}
+		  ) 
+   		 </foreach> 
+	</sql>
+	
+</mapper>

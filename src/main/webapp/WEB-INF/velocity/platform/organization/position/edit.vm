@@ -1,0 +1,39 @@
+#if($_type)#else#set($_type="edit")#end
+<form class="ui-form" id="platform_org_position_$!{_type}_form" action="$!{rc.contextPath}/platform/organization/position/$!{_type}" method="post">
+	<input type="hidden" name="position.id" value="$!{position.id}" />
+	<fieldset>
+		<div class="ui-form-item ">
+			<label class="ui-label"><span class="ui-form-required">*</span>岗位编码：</label>
+			<input class="ui-input" type="text" name="position.code" value="$!{position.code}" data-rule="岗位编码:required;" />
+		</div>
+		<div class="ui-form-item ">
+			<label class="ui-label"><span class="ui-form-required">*</span>岗位名称：</label>
+			<input class="ui-input" type="text" name="position.name" value="$!{position.name}" data-rule="岗位名称:required;" />
+		</div>
+		
+		<div class="ui-form-item ">
+			<label class="ui-label"><span class="ui-form-required">*</span>所属部门：</label>
+			<input type="hidden" name="position.departmentId" value="$!{position.departmentId}" />
+			<input class="ui-input ui-readonly" type="text" name="position.department.name" value="$!{position.department.name}" data-rule="所属部门:required;" />
+			<a href="javascript:void(0)" class="ui-input-icon"
+				onclick="$.selectDepartment(this,{muilt:false,fill:{id:'#platform_org_position_$!{_type}_form input[name=\'position.departmentId\']',name:'#platform_org_position_$!{_type}_form input[name=\'position.department.name\']'}})"><i class="iconfont icon-folder-open-alt"></i></a>
+		</div>
+		
+		<div class="ui-form-item ui-form-item-textarea colspan2">
+      		<label class="ui-label">备注:</label>
+      		<textarea class="ui-textarea" name="position.description">$!{position.description}</textarea>
+		</div>
+	</fieldset>
+</form>
+<script type="text/javascript">
+	$(function(){
+		$("#platform_org_position_$!{_type}_form input[name='position.department.name']").suggests({
+			serviceUrl : "$!{rc.contextPath}/platform/organization/department/auto",
+			returnKey : "name",
+			valueKey : "id",
+			onSelect: function (suggestion) {
+				$("#platform_org_position_$!{_type}_form input[name='position.departmentId']").val(suggestion.data);
+		    }
+		});
+	});
+</script>

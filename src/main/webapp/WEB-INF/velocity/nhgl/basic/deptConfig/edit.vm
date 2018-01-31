@@ -1,0 +1,287 @@
+<style>
+<!--
+#devicelst{clear: both; padding-top: 20px; display:none}
+.ui-table input{width:100%;}
+-->
+.ui-form fieldset {padding: 0px;}
+
+</style>
+<form id="deptConfig_edit_form" method="post" action="$!{rc.contextPath}/nhgl/basic/deptConfig/save" class="ui-form">
+	<fieldset>
+	<input type="hidden"  name="id"  id="id" value="$!{deptConfig.id}"/>
+	<input type="hidden"  name="nhType"  id="nhType" value="$!{deptConfig.nhType}"/>
+	<div class="form-top">
+		<div class="ui-form-item">
+            <label class="ui-label">#if(!$!{deptConfig.id})<span class="ui-form-required">*</span>#end部门名称:</label>
+            <input type="hidden" id="deptId" name="deptId" value="$!{deptConfig.deptId}"/>
+			<input class="ui-input ui-input-choose" data-rule="部门名称:required" id="deptName" name="deptName" readonly='readonly'  value="$!{deptConfig.deptName}"/>
+        </div>
+        
+		<div class="ui-form-item">
+			<input type="checkbox" class="ui-checkbox" id="isSum" #if($!{deptConfig.isSum} != 0)  checked  value="1" #else value="0" #end />
+            <label class="ui-label">是否通过下级部门汇总生成:</label>
+            <input type="hidden" id="isSum2" name="isSum" #if($!{deptConfig.isSum} != 0) value="1" #else value="0" #end />
+        </div>
+	</div>
+    <div id="devicelst" class="form-left">
+    	<div class="ui-block-top">
+    		<div class="block-title">
+    			<div class="name">能耗配置</div>
+    			<div class="button"><span onclick="chooseDevices('LeftDevice','$!{deptConfig.nhType}','1')" class="iconsearch"></span></div>
+    		</div>
+    		<div class="block-table">
+		     		<table class="ui-table">
+		     			<colgroup>
+					            <col style="width:130px"></col>
+					            <col style="width:180px"></col>
+					            <col style="width:120px"></col>
+					            <col style="width:100px"></col>
+					            <col style="width:*px"></col>
+				            </colgroup>
+				            <thead>
+				    			<tr>
+						          <th>$!devName编码</th>
+						          <th>$!devName名称</th>
+						          <th>服务区域</th>
+						          <th style="text-align:right"><span class="ui-form-required">*</span>分摊系数</th>
+						          <th class="operate" style="text-align:center">操作</th>
+								</tr>
+							</thead>
+						</table>
+						<div class="ui-table-scoll">
+						<table class="ui-table">
+						<colgroup>
+				            <col style="width:130px"></col>
+				            <col style="width:180px"></col>
+				            <col style="width:120px"></col>
+				            <col style="width:100px"></col>
+				            <col style="width:*px"></col>
+			            </colgroup>
+				    	<tbody id="LeftDevice"> 
+				    		#set($index=0) #foreach($!config in $!deptConfig.subLeftConfigList) 
+							<tr>
+					          <td >
+						          <input type='hidden'  name="subLeftConfigList[$index].deviceCode" value="$!config.deviceCode">
+						          <input type='hidden' name="subLeftConfigList[$index].extended1" value="$!config.extended1">
+						          <input type='hidden'  name="subLeftConfigList[$index].id" value="$!config.deviceId">
+						          <input type='hidden'  name="subLeftConfigList[$index].ruleFlag" value="1">
+						          <span title='$!config.deviceCode' style='width:112px'>$!config.deviceCode</span></td>
+					 		  <td >
+					 		  	<input type='hidden'  name="subLeftConfigList[$index].deviceName" value="$!config.deviceName">
+					 			<span title='$!config.deviceName' style='width:160px'>$!config.deviceName</span></td>
+							  <td ><input type='hidden'  name="subLeftConfigList[$index].locationName" value="$!config.locationName">
+							  <span title='$!config.locationName' style='width:100px'>$!config.locationName</span></td>
+							  <td ><input type="text" class="ui-input ftxs" data-rule="分摊系数:required;ftxs" data-rule-ftxs="[/^((-|\+)?\d+\.\d*)|(\d+)$/,'请输入小数或整数']" style='text-align:right' name="subLeftConfigList[$index].ftxs" value="$!config.ftxs"  onblur="finish()"></td>
+							  <td  class="operate"><a  href="#" class="removedevice"><span class="btn-del"></span></a></td>
+					     			</tr>
+							#set($index=$index+1)
+							#end
+						</tbody> 	
+		     		</table>
+		    	</div>
+    		</div>
+    	</div>
+    	
+    	<div class="mid-operator">
+    		<div class="u-d"></div>
+    		<div class="ui-reduce"><span class="reduce-sign">减去</span></div>
+    		<div class="ui-equal"><span class="equal-sign">等于</span></div>
+    	</div>
+    	<div class="ui-block-top">
+    		<div class="block-title">
+    			<div class="name">能耗配置</div>
+    			<div class="button"><span onclick="chooseDevices('RightDevice','$!{deptConfig.nhType}','0')" class="iconsearch"></span></div>
+    		</div>
+    		<div class="block-table">
+		    		<table class="ui-table">
+		    			<colgroup>
+					            <col style="width:130px"></col>
+					            <col style="width:180px"></col>
+					            <col style="width:120px"></col>
+					            <col style="width:100px"></col>
+					            <col style="width:*px"></col>
+				            </colgroup>
+				            <thead>
+				    			<tr>
+						          <th>$!devName编码</th>
+						          <th>$!devName名称</th>
+						          <th>服务区域</th>
+						          <th style="text-align:right"><span class="ui-form-required">*</span>分摊系数</th>
+						          <th class="operate" style="text-align:center">操作</th>
+								</tr>
+							</thead>
+						</table>
+						<div class="ui-table-scoll">
+						<table class="ui-table">
+						<colgroup>
+				            <col style="width:130px"></col>
+				            <col style="width:180px"></col>
+				            <col style="width:120px"></col>
+				            <col style="width:100px"></col>
+				            <col style="width:*px"></col>
+			            </colgroup>
+					    <tbody id="RightDevice"> 
+					    	#set($index=0) 
+					    	#foreach($!config in $!deptConfig.subRightConfigList) 
+							<tr>
+					          <td >
+						          <input type='hidden' name="subRightConfigList[$index].deviceCode" value="$!config.deviceCode">
+						          <input type='hidden' name="subRightConfigList[$index].extended1" value="$!config.extended1">
+						          <input type='hidden' name="subRightConfigList[$index].id" value="$!config.deviceId">
+						          <input type='hidden'  name="subRightConfigList[$index].ruleFlag" value="0">
+						          <span title='$!config.deviceCode' style='width:112px'>$!config.deviceCode</span>
+					          </td>
+			 				  <td >
+				 				  <input type='hidden' name="subRightConfigList[$index].deviceName" value="$!config.deviceName">
+				 				  <span title='$!config.deviceName' style='width:160px'>$!config.deviceName</span>
+			 				  </td>
+							  <td >
+								  <input type='hidden' name="subRightConfigList[$index].locationName" value="$!config.locationName">
+								  <span title='$!config.locationName' style='width:100px'>$!config.locationName</span>
+							  </td>
+							  <td ><input type="text" style='text-align:right' data-rule="分摊系数:required;ftxs" data-rule-ftxs="[/^((-|\+)?\d+\.\d*)|(\d+)$/,'请输入小数或整数']" class="ui-input ftxs" name="subRightConfigList[$index].ftxs" value="$!config.ftxs" onblur="finish()"></td>
+							  <td class="operate"><a href="#" class="removedevice"><span class="btn-del"><span></a></td>
+					     	</tr>
+							#set($index=$index+1)
+							#end
+						</tbody>
+					</table>
+				</div>
+    		</div>
+    	</div>
+    </div>
+    <div class="form-right">
+	    <div class="ui-form-item-textarea">
+	    	 <div class="form-right-title">能耗配置描述:</div>
+		     <textarea class="ui-textarea"  readonly id="description" >$!{deptConfig.description}</textarea>
+	    </div>
+   	</div>
+   	<div class="form-bottom">
+   		<div class="form-bottom-title"><span>备注</span></div>
+	    <div class="ui-form-item-textarea">
+	        <textarea data-rule="length[~300]"  name="memo">$!{deptConfig.memo}</textarea>
+	    </div>
+	</div>
+	</fieldset>
+	<div class="actions-config">
+    	<button class="btn" onclick="save()" type="button"><i class="iconfont" data-value="ok" style="color:#FFF;"></i>确定</button>
+    	<a class="btn" href="#" onclick="reply()" ><i class="iconfont icon-reply"></i>返回</a>
+	</div>
+</form>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	 	isSumCheck();
+    });
+$(function(){
+	$("#isSum").change(function(){
+ 		if($("#isSum").is(':checked')){
+ 			$("#isSum2").val("1");
+ 			if($("#id").val()!=null){
+ 				$("#description").text("");
+ 			}
+	 		$("#devicelst").hide();
+ 		}else{
+ 			$("#isSum2").val("0");
+ 			$("#devicelst").show();
+ 			finish();
+ 		}
+ 		isSumCheck();
+ 	});
+ 	
+ 	$("#deptName").bind("click",function(){
+		chooseDept('deptId','deptName','deptConfig',function(){
+			var deptId=$('#deptId').val();
+			$.post('$!{rc.contextPath}/nhgl/basic/deptConfig/check?deptId='+deptId+'&nhType=$!{deptConfig.nhType}',function(msg){
+				if(msg){
+					 $.message('该部门的配置已经存在！', $.message.TYPE_ERROR, 4, false, true);
+					 $('#deptId').val('');
+					 $('#deptName').val('')
+				} })       		
+		},null,$!deptConfig.nhType)
+	});
+	//删除行
+	$(".ui-table").on("click",".removedevice",function(){
+		var dev=$(this).parents("tbody").attr("id");
+		var len1=$("#"+dev+" tr").length;	
+		var tr=$(this).parents("tr");
+		var index=$("#"+dev+" tr").index(tr);
+		$(tr).remove();//删除当前行
+		finish()
+	})
+})
+//根据状态改变页面
+function isSumCheck(){
+	var status = $("#isSum2").val();
+	if(status == '1'){
+		$(".form-right").css({
+			width: "690px",
+			height: "230px",
+			marginLeft: "28px",
+			paddingLeft: "0",
+		});
+		$(".form-right .ui-textarea").css({
+			width: "594px",
+			height: "180px",
+		});
+		$("#devicelst").hide();
+	}
+	if(status == '0'){
+		$(".form-right").attr('style','');
+		$(".form-right .ui-textarea").attr('style','');
+		$("#devicelst").show();
+	}
+}
+function reply(){
+	$("#chart_content_id").load("$!{rc.contextPath}/nhgl/basic/deptConfig/list?nhType=$!{deptConfig.nhType}&menuCode=BMNNSZ");
+	return false;
+}
+function save(){
+	$.forms.submits("#deptConfig_edit_form", function(msg){
+		if(msg.status=="success"){
+			$("#chart_content_id").load("$!{rc.contextPath}/"+msg.data.next+"&menuCode=BMNNSZ");
+		}
+	    return true;
+    });
+}
+
+//刷新配置描述信息
+function finish(){
+	$("#description").text("");
+	if($("#RightDevice tr").length==0){
+		$("#description").text(calculate("Left"))
+	}else{
+		$("#description").text(calculate("Left")+" - "+calculate("Right"))
+	}
+}
+//动态合成配置信息并写入 输入框
+function calculate(value){
+	if($("#"+value+"Device tr").length>0){
+		var description="";
+		var device="#"+value+"Device";
+		var temp=$(device+" tr").length;
+		for(var i=0;i<temp;i++){
+			if(i==temp-1){
+				description=description+$(device+" tr").eq(i).children("td").eq(0).children("input").eq(1).val()+"*"+$(device+" tr").eq(i).children("td").eq(3).children("input").eq(0).val();
+			}else{
+				if(value=="Left")
+					description=description+$(device+" tr").eq(i).children("td").eq(0).children("input").eq(1).val()+"*"+$(device+" tr").eq(i).children("td").eq(3).children("input").eq(0).val()+" + ";
+				else
+					description=description+$(device+" tr").eq(i).children("td").eq(0).children("input").eq(1).val()+"*"+$(device+" tr").eq(i).children("td").eq(3).children("input").eq(0).val()+" - ";
+			}
+		}
+		description=description+""
+		return description;
+	}
+	return "";
+}
+	if($("#id").val()!=""){
+		$("#deptName").unbind("click").removeAttr("onclick").removeClass("ui-input-choose");
+	}
+	#if($!viewOnly)
+	        setAllReadonly("ui-form"); 
+	        $(".operate").hide();
+	        $(".ui-form-required").hide();
+	        $(".iconsearch").removeAttr("onclick").removeClass("iconsearch");
+	#end
+</script>

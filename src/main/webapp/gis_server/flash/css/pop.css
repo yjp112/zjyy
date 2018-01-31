@@ -1,0 +1,93 @@
+.titleDisplayClass{
+	color: #00ffff;
+}
+.ui-table{
+	border:none;
+}
+.ui-table thead tr{
+	background:none;
+	filter:none;
+	border:none;
+	border-top: 1px solid #15c4cc;
+	border-bottom: 1px solid #15c4cc;
+}
+.ui-table thead th{
+	border:none;
+	color:#00fffd;
+	font-size:12px;
+}
+.ui-table tbody tr{
+	background:none;
+}
+.ui-table td{
+	border:none;
+	color:#fff;
+	font-size:12px;
+}
+.dStatus{
+	display: inline-block;
+	*display: block;
+	*display: inline;
+	*zoom:1;
+	vertical-align: middle;
+	width: 16px;
+	height: 16px;
+	background-image:url(../images/status_legend.png); 
+}
+.dStatus-n{
+	background-position: 0 -144px;
+}
+.dStatus-s{
+	background-position: -16px -144px;
+}
+.dStatus-t{
+	background-position: -32px -144px;
+}
+.deviceStatus{
+	display: inline-block;
+	*display: block;
+	*display: inline;
+	*zoom:1;
+	vertical-align: middle;
+	width: 70px;
+	height: 16px;
+	background-image:url(../images/status_legend.png); 
+}
+.deviceStatus-nn{
+	background-position: 0 -64px;
+}
+.deviceStatus-ns{
+	background-position: 0 -80px;
+}
+.deviceStatus-nt{
+	background-position: 0 -48px;
+}
+.deviceStatus-sn{
+	background-position: 0 -112px;
+}
+.deviceStatus-ss{
+	background-position: 0 -128px;
+}
+.deviceStatus-st{
+	background-position: 0 -96px;
+}
+.deviceStatus-tn{
+	background-position: 0 -16px;
+}
+.deviceStatus-ts{
+	background-position: 0 -32px;
+}
+.deviceStatus-tt{
+	background-position: 0 0;
+}
+.info-item{
+	padding-bottom: 5px;
+}
+.info-item p{
+	font-size: 12px;
+	color: #fff;
+	padding: 2px 9px;
+}
+.hl{
+	color: #2efe15;
+}

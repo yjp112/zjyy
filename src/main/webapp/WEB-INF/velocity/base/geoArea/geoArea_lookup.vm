@@ -1,0 +1,93 @@
+#parse("index/_header.vm")
+</head>
+<body style="padding-bottom:40px;">
+#parse("index/_footer.vm")  
+<script type="text/javascript">
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+	        defaults: {
+	          resizable: true,
+	          closable: false,
+	          spacing_open: 5
+	        }
+	      });
+	});
+
+    var setting = {
+	data: {
+		simpleData: {enable: true}
+      },
+      callback: {
+			onClick: function(event, treeId, treeNode) {
+			if("$!{dialogId}"!=""){
+	        	get_el_in_dialog("$!{dialogId}","#$!{txtId}").val(treeNode.id);
+	        	get_el_in_dialog("$!{dialogId}","#$!{txtName}").val(treeNode.name);
+	        	resetfocus(get_el_in_dialog("$!{dialogId}","#$!{txtName}"));
+	        } else{
+				var id_v = $("#"+"$!{txtId}",window.parent["_main_frame"].document);
+				id_v.val(treeNode.id);
+				var id_t = $("#"+"$!{txtName}",window.parent["_main_frame"].document);
+				id_t.val(treeNode.name);
+				resetfocus($("#"+"$!{txtName}",window.parent["_main_frame"].document));
+			}
+    			//$("#"+"$!{txtId}").val(treeNode.id);
+    			//$("#"+"$!{txtName}").val(treeNode.name); 
+    			//closeDialog();
+    			close_dialog('selectDiloag');
+			}
+		}
+    };
+var zNodes = [];  
+    #foreach($!{treeNode} in $!{treeList})
+        zNodes.push({id:$!{treeNode.id}, pId:$!{treeNode.parentId}, name:"$!{treeNode.areaName}",fullLevelName:"$!{treeNode.fullLevelName}",url:"",target:""});     
+    #end
+
+	function okClick(){
+    	var zTree = $.fn.zTree.getZTreeObj("geoAreaTree");
+    	var nodes=zTree.getCheckedNodes(true);
+    	if (nodes.length == 0) {
+    	   alert("未选择");
+		   return false;
+    	}else{
+    		if (parent){
+    			$("#"+"$!{txtId}").val(nodes[0].id);
+    			$("#"+"$!{txtName}").val(nodes[0].name); 
+    		}
+    		
+    	}
+		return true;
+	}
+   $(document).ready(function(){
+		$.fn.zTree.init($("#geoAreaTree"), setting,zNodes);
+    });
+    
+    function clearChoose(){
+    	if("$!{dialogId}"!=""){
+    		get_el_in_dialog("$!{dialogId}","#$!{txtId}").val("");
+    		get_el_in_dialog("$!{dialogId}","#$!{txtName}").val(""); 
+    		resetfocus(get_el_in_dialog("$!{dialogId}","#$!{txtName}"));
+    	}else{
+			var id_v = $("#"+"$!{txtId}",window.parent["_main_frame"].document);
+			id_v.val("");
+			var id_t = $("#"+"$!{txtName}",window.parent["_main_frame"].document);
+			id_t.val("");
+			resetfocus($("#"+"$!{txtName}",window.parent["_main_frame"].document));
+		}
+		//关闭iframe
+		close_dialog('selectDiloag');
+		return true;
+    }
+</script>
+  
+  
+<div class="ui-layout-center ui-dialog-form">
+	<div class="tree">
+		<ul id="geoAreaTree" class="ztree"></ul>   
+	</div>
+	
+	<div class="actions">
+	<button class="hc_btn cancel" onclick="clearChoose()" type="button"><i class="fa fa-close"></i>清空</button>
+	</div>
+</div>
+   </body>
+</html>

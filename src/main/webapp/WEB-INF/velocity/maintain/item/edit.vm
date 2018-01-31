@@ -1,0 +1,84 @@
+#parse("index/_header.vm")
+<style>
+	.k-webkit .k-combobox .k-dropdown-wrap:before, .k-webkit .k-picker-wrap:before, .k-webkit .k-numeric-wrap:before {
+  		padding-bottom: .2em;
+	}
+	.n-bottom .msg-wrap {
+      margin-top: -15px;
+    }
+</style>
+</head>
+<body style="padding-bottom:40px;">
+<form id="myform_id" method="post" action="$!{rc.contextPath}/maintain/item/edit" class="ui-layout-center ui-dialog-form">
+	<input type="hidden" name="deviceId" value="$!{maintainItem.deviceId}"/>
+	<input type="hidden" id="menuCode" value="$!{menu.code}"/>
+    <table width="100%">
+        
+		<tr>
+			<td class="label ftitle">
+			<i class="seticon">&nbsp;</i>
+			保养设备
+			</td>
+        </tr>
+		<tr>
+            <td colspan="6">
+    			<div class="ui-co-cont ui-co-nob">
+					#parse("maintain/item/device_grid.vm")
+    			</div>
+			</td>
+		</tr>
+		
+		<tr>
+			<td class="label ftitle">
+			<i class="seticon">&nbsp;</i>
+			保养项目</td>
+        </tr>
+		<tr>
+            <td colspan="6">
+    			<div class="ui-co-cont ui-co-nob">
+					#parse("maintain/item/item_grid.vm")
+    			</div>
+			</td>
+        
+		</tr>
+		
+    </table>
+    <div class="actions">
+		#if(!$!viewOnly)
+        <button class="k-primary hc_btn" id="save_button_id" type="submit"><i class="fa fa-save"></i>保 存</button>
+		#end
+		<button class="lf-btn lf-btn-save hc_btn button_show" type="button" onclick="history.go(-1);"><i class="fa fa-reply"></i>返回</button>
+    </div>
+	
+</form>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+	      defaults: {
+	        resizable: true,
+	        closable: false,
+	        spacing_open: 5
+	      }
+	    });
+	});
+
+	$(document).ready(function () {
+        $("#myform_id").validator({
+            valid: function (form) {
+                form_btn_submit($("#save_button_id"), form, function (res) {
+                    //console.log(res);
+                    validateCallback(res, "grid", "");
+                });
+            }
+        });
+    });
+	
+        #if($!viewOnly)
+        	$("input").attr('readonly', true);
+			$('select').attr('disabled', true);
+			$("a.k-i-search").hide().parent("span").attr("readonly",true).css("padding-right","0");
+        #end
+</script>
+</body>
+</html>

@@ -1,0 +1,203 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<div class="ui-layout-center" id="subMain">
+	<div class="ui-layout-north">
+		 <form class="ui-form" id='queryForm'>
+	     <table width="100%">
+	       <tr>
+	         <td>
+	           <table class="ui-search-table">
+	             <tr>
+	               <td class="ui-search-name first" style="width: 100px;">统计时间：</td>
+                   <td class="ui-search-c" >
+					 <input id="startTime"  type="text" name="startTime" value=""/>
+                   </td>
+	             </tr>
+	           </table>
+	         </td>
+	         <td width="150" valign="top" style="padding-top:4px;">
+	           <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+	           <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+	         </td>
+	         <td></td>
+	       </tr>
+	     </table>
+	 	</form>
+	</div>
+	<div class="ui-layout-center">
+	  <div id="grid" style="display:none;"></div> 
+	  <div id="mode_id" style="height:300px"></div> 
+     </div>
+</div>
+#parse("index/_footer.vm")  
+<script src="$!{main_static_custom_url}/js/echarts/echarts.js"></script>
+<script type="text/javascript">
+var myRateChart = null;
+     var _iframe_layout,_inner_layout;
+	$(document).ready(function(){
+		_iframe_layout = $('body').layout({
+		      defaults: {
+		        resizable: false,
+		        closable: false,
+		        spacing_open: 5
+		      }
+		    });
+		 _inner_layout = $("#subMain").layout({
+		      defaults: {
+		        resizable: false,
+		        closable: false,
+		        spacing_open: 0
+		      },
+		      center: {
+		          onresize_end: function () {
+##		              var grid = $("#grid").data("kendoGrid");
+##		              grid.resize();
+		          }
+		      }
+     })
+	//列表
+	quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/repair/repair/gradeByMonth", [
+	      {
+	          field: "id",
+	          hidden: true
+	      }
+		  ], 
+	  {
+	      sortable: {
+	          mode: "multiple",
+	          allowUnsort: true
+	      },
+	      pageable:false, 
+	      showNumber:false,
+	      resizable:true
+	      
+	  },{
+		  change:generateRateChart
+	  }, {
+	      serverSorting: true
+	  });     
+//加载时间控件
+    $("#startTime").hcDatePicker({
+    	 		start: "decade",
+    	 		depth: "decade",
+    	        format: "yyyy",
+    	        culture: "zh-CN"
+    	     });
+});
+//加载chart
+function loadEchart(option){
+        require.config({
+            packages: [
+                {
+                    name: 'echarts',
+                    location: '$!{main_static_custom_url}/js/echarts',
+                    main: 'echarts'
+                }
+            ]
+        });
+        require(
+                [
+                    'echarts',
+                    'echarts/chart/bar'
+                ],
+                function(ec) {
+                    myRateChart = ec.init(document.getElementById('mode_id'));
+                    myRateChart.setOption(option);
+                }
+        )
+    }
+function generateRateChart(grid,g) {
+	var datas = new Array();
+    var shortcut = new Array();
+    var data = grid.items;
+    var j=0;
+    for(var i=0;i<=11;i++){
+    	j=0;
+    	 $.each(data,function(index,o){	
+    	 	var time=new Date(o.repairMonth);
+    	 	if(i!=time.getMonth()){
+    	 		j++;
+    	 	}else{
+    	 		datas.push(formatNumber2(o.avgGrade));
+    	 	}
+    	 	if(j==data.length){
+    	 		datas.push(0);
+    	 	}
+	      });
+	      shortcut.push((i+1)+"月");
+    }
+    option = {
+	    title : {
+	        text: '维修满意度分析',
+	        x:'center'
+	    },
+	    tooltip : {
+	        trigger: 'axis'
+	    },
+	    legend: {
+	    	x:'right',
+	    	y:'top',
+	        data:['满意度']
+	    },
+	    xAxis : [
+	        {
+	            type : 'category',
+	            data : shortcut
+	        }
+	    ],
+	    yAxis : [
+	        {
+	            type : 'value',
+	            axisLabel : {    
+                	 formatter: function(v){
+						 switch (v) {
+						 	case 1:
+						 		return '非常不满';
+						 		break;
+						 	case 2:
+						 		return '不满意';
+						 		break;
+						 	case 3:
+						 		return '一般';
+						 		break;
+						 	case 4:
+						 		return '满意';
+						 		break;
+						 	case 5:
+						 		return '非常满意';
+						 		break;
+						 	default :
+                				break;
+						 }               	
+                	} 
+	        }}
+	    ],
+	    series : [
+	        {
+	            name:'满意度',
+	            type:'bar',
+	            data:datas,
+	            markLine : {
+	                data : [
+	                    {type : 'average', name: '平均值'}
+	                ]
+	            }
+	        }
+	    ]
+	};
+ 	if(myRateChart==null){
+        loadEchart(option);
+    }else{
+        if(data.length!=0){
+			loadEchart(option);
+            myRateChart.setOption(option);
+        }else{
+            myRateChart.clear();
+			myRateChart.setOption(option);
+        }
+    }
+}    
+</script>
+</body>
+</html>

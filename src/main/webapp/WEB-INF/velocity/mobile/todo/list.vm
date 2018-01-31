@@ -1,0 +1,152 @@
+#parse("mobile/_header.vm")
+<!-- Path to your app js-->
+<body>
+<!-- Status bar overlay for fullscreen mode-->
+<div class="statusbar-overlay"></div>
+
+<!-- Views, and they are tabs-->
+<!-- We need to set "toolbar-through" class on it to keep space for our tab bar-->
+<div class="views">
+    <div id="view" class="view view-main">
+        <!-- Pages-->
+        <div class="pages navbar-fixed">
+            <!-- Page, data-page contains page name-->
+            <div data-page="todo" class="page">
+                <div class="navbar">
+                    <div class="navbar-inner">
+                        <div class="navbar-inner">
+                            <div class="navbar-center">流程信息</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="page-content todo">
+                    <div class="content-block todo">
+                        <div class="buttons-row row">
+                            <a href="#tab1"  onclick="bpmClick('tab1')" class="tab-link col-50 active">
+                                <span class="text">待办流程</span>
+                                <i class="icon"></i>
+                            </a>
+                            <a href="#tab2"  onclick="bpmClick('tab2')" class="tab-link col-50">
+                                <span class="text">已办流程</span>
+                                <i class="icon"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="tabs tabs-content">
+                        <div id="tab1" class="tab active">
+##                            <div class="top-search">
+                                <form class="searchbar"  id="task_form">
+                                    <input type="hidden" id="bpmTaskId" name="condition.bpmTaskId">
+                                    <input type="hidden" id="task_total">
+                                    <div class="searchbar-input">
+                                        <input type="search" placeholder="待办流程单号、节点搜索" name="condition.taskSearch" id="taskSearch" autocomplete="off">
+                                        <a href="#" class="searchbar-clear"></a>
+                                    </div>
+                                    <a href="#" class="searchbar-cancel">取消</a>
+                                </form>
+##                            </div>
+
+                            <!-- Search bar overlay-->
+                            <div class="searchbar-overlay"></div>
+                            <div class="content-block content-refresh infinite-scroll pull-to-refresh-content" id="taskContent">
+                                <div class="pull-to-refresh-layer">
+                                    <div class="preloader"></div>
+                                    <div class="pull-to-refresh-arrow"></div>
+                                </div>
+                                <div class="list-block"  id="task_div">
+                                    <ul>
+                                    </ul>
+##                                    <div class="more" id="moreTaskDiv"><a href="#"  id="moreTask">加载更多</a></div>
+                                </div>
+                                <div class="infinite-scroll-preloader" id="taskPreloader">
+                                    <div class="preloader"></div>
+                                </div>
+                            </div>
+                        </div><!-- tab1 end-->
+
+
+                        <div id="tab2" class="tab">
+
+##                            <div class="top-search">
+                                <form class="searchbar"  id="history_form">
+                                    <input type="hidden" id="bpmHistoryId" name="condition.bpmHistoryId">
+                                    <input type="hidden" id="history_total">
+                                    <div class="searchbar-input">
+                                        <input type="search" placeholder="已办流程单号、节点搜索" id="historySearch" name="condition.historySearch" autocomplete="off">
+                                        <a href="#" class="searchbar-clear"></a>
+                                    </div>
+                                    <a href="#" class="searchbar-cancel">取消</a>
+                                </form>
+##                            </div>
+
+                            <!-- Search bar overlay-->
+                            <div class="searchbar-overlay"></div>
+
+                            <div class="content-block content-refresh infinite-scroll pull-to-refresh-content" id="historyContent">
+                                <div class="pull-to-refresh-layer">
+                                    <div class="preloader"></div>
+                                    <div class="pull-to-refresh-arrow"></div>
+                                </div>
+                                <div class="list-block list-block-search-tab2 searchbar-found" id="history_div">
+                                    <ul>
+                                    </ul>
+##                                    <div class="more" id="moreHistoryDiv"><a href="#"  id="moreHistory">加载更多</a></div>
+                                </div>
+                                <div class="infinite-scroll-preloader" id="historyPreloader">
+                                    <div class="preloader"></div>
+                                </div>
+                            </div>
+                        </div><!-- tab2 end-->
+                    </div>
+                </div>
+            </div>
+##            <div class="toolbar">
+##                <div class="toolbar-inner">
+##                    <a href="$!{rc.contextPath}/mobile/todo/list" id="tool-1">
+##                        流程
+##                    </a>
+##                    <a href="/zjyy/mobile/tool/tool-2" id="tool-2">
+##                        考勤
+##                    </a>
+##                    <a href="$!{rc.contextPath}/mobile/tool/tool-3" id="tool-3">
+##                        访客
+##                    </a>
+##                    <a href="$!{rc.contextPath}/mobile/tool/tool-4"  id="tool-4">
+##                        关于
+##                    </a>
+##                </div>
+##            </div>
+##            <div class="toolbar tabbar-bottom">
+##                <div class="toolbar-inner" >
+##                    <a href="$!{rc.contextPath}/mobile/todo/list" onclick="toolClick('tool-1')" class="tabbar-link active" id="tool-1">
+##                        <i class="icon tabbar-demo-icon-1"></i>
+##                        <span class="tabbar-label">我的流程</span>
+##                    </a>
+##                    <a href="$!{rc.contextPath}/mobile/attendance/view" onclick="toolClick('tool-2')" class="tabbar-link" id="tool-2">
+##                        <i class="icon tabbar-demo-icon-2">
+##                            <!-- <span class="badge bg-red">4</span> --></i>
+##                        <span class="tabbar-label">考勤管理</span>
+##                    </a>
+##                    <a href="$!{rc.contextPath}/mobile/visitor/list" onclick="toolClick('tool-3')" class="tabbar-link" id="tool-3">
+##                        <i class="icon tabbar-demo-icon-3"></i>
+##                        <span class="tabbar-label">访客管理</span>
+##                    </a>
+##                    <a href="$!{rc.contextPath}/mobile/about/view" onclick="toolClick('tool-4')" class="tabbar-link" id="tool-4">
+##                        <i class="icon tabbar-demo-icon-4"></i>
+##                        <span class="tabbar-label">关于</span>
+##                    </a>
+##                </div>
+##            </div>
+        </div>
+    </div> <!-- view-1 end-->
+
+</div><!-- views end -->
+</body>
+</html>
+#parse("mobile/_footer.vm")
+<!-- Path to your app js-->
+<script type="text/javascript" src="$!{rc.contextPath}/mobile/js/todo-app.js"></script>
+<!-- Path to your app js-->
+<script type="text/javascript" src="$!{rc.contextPath}/mobile/js/util.js"></script>

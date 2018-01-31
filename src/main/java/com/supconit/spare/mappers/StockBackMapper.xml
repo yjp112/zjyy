@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.spare.entities.StockBack">
+	<resultMap type="com.supconit.spare.entities.StockBack" id="StockBackResultMap">      
+        <result property="id" column="ID" />
+        <result property="stockBackCode" column="STOCK_BACK_CODE" />
+        <result property="bpmKey" column="BPM_KEY" />
+        <result property="processId" column="PROCESS_ID" />
+        <result property="backTime" column="BACK_TIME" />
+        <result property="warehouseId" column="WAREHOUSE_ID" />
+        <result property="backPersonId" column="BACK_PERSON_ID" />
+        <result property="backPersonName" column="BACK_PERSON_NAME" />
+        <result property="backType" column="BACK_TYPE" />
+        <result property="descripton" column="DESCRIPTON" />
+        <result property="status" column="STATUS" />
+        <result property="createId" column="CREATE_ID" />
+        <result property="creator" column="CREATOR" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="updateId" column="UPDATE_ID" />
+        <result property="updator" column="UPDATOR" />
+        <result property="updateDate" column="UPDATE_DATE" />
+        <result property="statusName" column="statusName" />
+        
+        <collection  property="stockBackDetailList" javaType="com.supconit.spare.entities.StockBackDetail">
+	        <result property="id" column="d_ID" />
+	        <result property="stockBackId" column="d_STOCK_BACK_ID" />
+	        <result property="stockOutDetailId" column="d_STOCK_OUT_DETAIL_ID" />
+	        <result property="spareId" column="d_SPARE_ID" />
+	        <result property="qty" column="d_QTY" />
+	        <result property="remark" column="d_REMARK" />
+	        <result property="spareName" column="d_SPARE_NAME" />
+        </collection>
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">STOCK_BACK</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	<sql id="select_pre" lang="velocity">
+		 select 
+	        t.ID,
+			t.STOCK_BACK_CODE,
+			t.BPM_KEY,
+			t.PROCESS_ID,
+			t.BACK_TIME,
+			t.WAREHOUSE_ID,
+			t.BACK_PERSON_ID,
+			t.BACK_PERSON_NAME,
+			t.BACK_TYPE,
+			t.DESCRIPTON,
+			t.STATUS,
+			t.CREATE_ID,
+			t.CREATOR,
+			t.CREATE_DATE,
+			t.UPDATE_ID,
+			t.UPDATOR,
+			t.UPDATE_DATE,
+			t2.ENUM_TEXT statusName
+		FROM <include refid="TABLE_NAME"/> t
+		left join ENUM_DETAIL t2 on t.STATUS=t2.ENUM_VALUE and t2.TYPE_ID = 1
+	</sql>
+	
+	<sql id="count_pre" lang="velocity">SELECT COUNT(*) FROM <include refid="TABLE_NAME"/> </sql>
+	
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			#if($_p.stockBackCode && $_p.stockBackCode != '')
+				#set($_stockBackCode = '%' + $_p.stockBackCode + '%')
+				AND STOCK_BACK_CODE LIKE @{_stockBackCode}
+			#end
+			#if($_p.bpmKey && $_p.bpmKey != '')
+				#set($_bpmKey = '%' + $_p.bpmKey + '%')
+				AND BPM_KEY LIKE @{_bpmKey}
+			#end
+			#if($_p.processId && $_p.processId != '')
+				#set($_processId = $_p.processId)
+				AND PROCESS_ID = @{_processId}
+			#end
+			#if($_p.warehouseId && $_p.warehouseId != '')
+				#set($_warehouseId = $_p.warehouseId)
+				AND WAREHOUSE_ID = @{_warehouseId}
+			#end
+			#if($_p.backType && $_p.backType != '')
+				#set($_backType = $_p.backType)
+				AND BACK_TYPE = @{_backType}
+			#end
+			#if($_p.startBackTime && $_p.startBackTime != '')
+				#set($_startBackTime = $_p.startBackTime)
+				AND BACK_TIME >= @{_startBackTime}
+			#end
+			#if($_p.endBackTime && $_p.endBackTime != '')
+				#set($_endBackTime = $_p.endBackTime)
+				AND BACK_TIME <= @{_endBackTime}
+			#end
+		#end
+		]]>	
+    </sql>
+	
+    <!-- 插入记录-->
+    <sql id="insert_sql" lang="velocity">
+        INSERT INTO <include refid="TABLE_NAME"/>(
+	        #if($_databaseId == 'oracle') ID, #end
+		    STOCK_BACK_CODE,
+			BPM_KEY,
+			PROCESS_ID,
+			BACK_TIME,
+			WAREHOUSE_ID,
+			BACK_PERSON_ID,
+			BACK_PERSON_NAME,
+			BACK_TYPE,
+			DESCRIPTON,
+			STATUS,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE
+        ) VALUES (
+        	#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end
+	        @{_parameter.stockBackCode,jdbcType=VARCHAR},
+	        @{_parameter.bpmKey,jdbcType=VARCHAR},
+	        @{_parameter.processId,jdbcType=NUMERIC},
+	        @{_parameter.backTime,jdbcType=TIMESTAMP},
+	        @{_parameter.warehouseId,jdbcType=NUMERIC},
+	        @{_parameter.backPersonId,jdbcType=NUMERIC},
+	        @{_parameter.backPersonName,jdbcType=VARCHAR},
+	        @{_parameter.backType,jdbcType=NUMERIC},
+	        @{_parameter.descripton,jdbcType=VARCHAR},
+	        @{_parameter.status,jdbcType=NUMERIC},
+	        @{_parameter.createId,jdbcType=NUMERIC},
+	        @{_parameter.creator,jdbcType=VARCHAR},
+	        @{_parameter.createDate,jdbcType=TIMESTAMP}
+        )
+    </sql>
+    
+    <insert id="insert" parameterType="com.supconit.spare.entities.StockBack" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="insert_sql" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.spare.entities.StockBack" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    
+	<!-- 更新记录-->
+	<update id="update"  parameterType="com.supconit.spare.entities.StockBack" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+			#mset()
+				<![CDATA[
+			        #if($_parameter.stockBackCode && $_parameter.stockBackCode !='')STOCK_BACK_CODE = @{_parameter.stockBackCode,jdbcType=VARCHAR},#end
+			        #if($_parameter.bpmKey && $_parameter.bpmKey !='')BPM_KEY = @{_parameter.bpmKey,jdbcType=VARCHAR},#end
+			        #if($_parameter.processId)PROCESS_ID = @{_parameter.processId,jdbcType=NUMERIC},#end
+			        #if($_parameter.backTime )BACK_TIME = @{_parameter.backTime,jdbcType=TIMESTAMP},#end
+			        #if($_parameter.warehouseId )WAREHOUSE_ID = @{_parameter.warehouseId,jdbcType=NUMERIC},#end
+			        #if($_parameter.backPersonId)BACK_PERSON_ID = @{_parameter.backPersonId,jdbcType=NUMERIC},#end
+			        #if($_parameter.backPersonName)BACK_PERSON_NAME = @{_parameter.backPersonName,jdbcType=VARCHAR},#end
+			        #if($_parameter.backType)BACK_TYPE = @{_parameter.backType,jdbcType=NUMERIC},#end
+			        #if($_parameter.descripton)DESCRIPTON = @{_parameter.descripton,jdbcType=VARCHAR},#end
+			        #if($_parameter.status)STATUS = @{_parameter.status,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateId)UPDATE_ID = @{_parameter.updateId,jdbcType=NUMERIC},#end
+			        #if($_parameter.updator)UPDATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateDate)UPDATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+			       
+			    ]]>
+			#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+	
+	<!-- 按条件查询记录-->
+    <select id="findByConditions"  resultMap="StockBackResultMap" lang="velocity" databaseId="oracle">
+         <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre"/>
+		<include refid="condition_sql"/>
+		#order($_parameter.condition,"t.ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.spare.entities.StockBack" resultMap="StockBackResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		#set($_p = $_parameter.condition)
+		select 
+        	t.ID,
+			t.STOCK_BACK_CODE,
+			t.BPM_KEY,
+			t.PROCESS_ID,
+			t.BACK_TIME,
+			t.WAREHOUSE_ID,
+			t.BACK_PERSON_ID,
+			t.BACK_PERSON_NAME,
+			t.BACK_TYPE,
+			t.DESCRIPTON,
+			t.STATUS,
+			t.CREATE_ID,
+			t.CREATOR,
+			t.CREATE_DATE,
+			t.UPDATE_ID,
+			t.UPDATOR,
+			t.UPDATE_DATE,
+			t2.ENUM_TEXT statusName
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"t.ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/> t
+		left join ENUM_DETAIL t2 on t.STATUS=t2.ENUM_VALUE and t2.TYPE_ID = 1
+		<include refid="condition_sql"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countByConditions" resultType="long" lang="velocity">
+        <include refid="count_pre"/>
+        <include refid="condition_sql"/>
+    </select>
+    
+    <select id="getById" resultMap="StockBackResultMap" parameterType="long" lang="velocity">
+		select
+			a.ID,
+			a.STOCK_BACK_CODE,
+			a.BPM_KEY,
+			a.PROCESS_ID,
+			a.BACK_TIME,
+			a.WAREHOUSE_ID,
+			a.BACK_PERSON_ID,
+			a.BACK_PERSON_NAME,
+			a.BACK_TYPE,
+			a.DESCRIPTON,
+			a.STATUS,
+			a.CREATE_ID,
+			a.CREATOR,
+			a.CREATE_DATE,
+			a.UPDATE_ID,
+			a.UPDATOR,
+			a.UPDATE_DATE,
+			b.ID d_ID,
+	        b.STOCK_BACK_ID d_STOCK_BACK_ID,
+	        b.STOCK_OUT_DETAIL_ID d_STOCK_OUT_DETAIL_ID,
+	        b.SPARE_ID d_SPARE_ID,
+	        b.QTY d_QTY,
+	        b.REMARK  d_REMARK,
+	        c.SPARE_NAME d_SPARE_NAME
+		from <include refid="TABLE_NAME"/> a
+		left join STOCK_BACK_DETAIL b on a.ID = b.STOCK_BACK_ID LEFT JOIN SPARE c on c.id=b.SPARE_ID
+		WHERE a.ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+	
+	<delete id="deleteById" parameterType="long" lang="velocity"> 
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</delete>
+	
+</mapper>

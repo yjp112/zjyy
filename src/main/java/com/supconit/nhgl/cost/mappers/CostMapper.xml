@@ -1,0 +1,716 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.cost.entities.Cost">
+
+	<resultMap type="com.supconit.nhgl.cost.entities.Cost" id="CostResultMap">
+		<result property="deptId" column="deptId" />
+		<result property="ppId" column="PID" />
+		<result property="deptName" column="deptName" />
+		<result property="bitNo" column="BIT_NO"/>
+		<result property="deviceSpec" column="DEVICE_SPEC"/>
+		<result property="deviceName" column="DEVICE_NAME"/>
+		<result property="extended2" column="EXTENDED2"/>
+		<result property="lastData" column="LAST_DATA"/>
+		<result property="currentData" column="CURRENT_DATA"/>
+		<result property="incremental" column="INCREMENTAL"/>
+		<result property="electric" column="electric" />
+		<result property="electricCost" column="ELECTRIC_COST" />
+		<result property="sumElectric" column="sum_electric" />
+		<result property="sumElectricCost" column="SUM_ELECTRIC_COST" />
+		<result property="water" column="water" />
+		<result property="waterCost" column="WATER_COST" />
+		<result property="sumWater" column="SUM_water" />
+		<result property="sumWaterCost" column="SUM_WATER_COST" />
+		<result property="gas" column="gas" />
+		<result property="gasCost" column="GAS_COST" />
+		<result property="sumGas" column="SUM_gas" />
+		<result property="sumGasCost" column="SUM_GAS_COST" />
+		<result property="energy" column="energy" />
+		<result property="energyCost" column="ENERGY_COST" />
+		<result property="sumEnergy" column="SUM_energy" />
+		<result property="sumEnergyCost" column="SUM_ENERGY_COST" />
+		<result property="start" column="start" />
+		<result property="end" column="end" />
+		<result property="lft" column="LFT" /> 
+		<result property="rgt" column="RGT" /> 
+		
+	</resultMap>
+	
+	<resultMap type="com.supconit.nhgl.cost.entities.RealTimeCost" id="RealTimeCostResultMap">
+		<result property="bitNo" column="BIT_NO" />
+        <result property="lastTotal" column="LAST_TOTAL" />
+        <result property="lastCollectTime" column="LAST_COLLECTTIME" />
+        <result property="currentTotal" column="CURRENT_TOTAL" />
+        <result property="currentCollectTime" column="CURRENT_COLLECTTIME" />
+        <result property="usedKwh" column="USED_KWH" />
+	</resultMap>
+	
+	<sql id="CURRENT_DATE_TIME">
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+	<!-- 获取记录列表 -->
+	<sql id="sequence">SELECT SEQ_HO_USER.NEXTVAL FROM DUAL</sql>
+
+
+	<!-- 按条件查询记录 -->
+	<select id="findByCondition" parameterType="com.supconit.nhgl.cost.entities.Cost"
+		resultMap="CostResultMap" lang="velocity">
+		<![CDATA[
+		 WITH 
+		 PR AS (
+			SELECT
+				YEAR,
+				MONTH,
+				ELECTRIC,
+				WATER,
+				GAS,
+				ENERGY
+			FROM
+				NH_PRICE
+		),
+		 SC AS (
+			SELECT DISTINCT
+				HD.NAME deptName,
+				HD.PID,
+				HD.LFT,
+				HD.ID,
+				isnull(
+					(
+						SELECT
+							floor(SUM (P.TOTAL_DAY_VALUE))
+						FROM
+							NH_D_DEPT_DAY P
+						WHERE
+							P.DEPT_ID = HD.ID
+							#if($_parameter.start)
+								AND P.DAY_OF_MONTH_KEY >= @{_parameter.start,jdbcType=VARCHAR}
+						    #end
+					        #if($_parameter.end)
+								AND P.DAY_OF_MONTH_KEY <=@{_parameter.end,jdbcType=VARCHAR}
+							#end
+					),
+					0
+				) AS ELECTRIC,
+				isnull(
+					(
+						SELECT
+							ROUND((floor(SUM (P.TOTAL_DAY_VALUE*PR.ELECTRIC))),2)
+						FROM
+							NH_D_DEPT_DAY P,
+							PR
+						WHERE
+							PR. YEAR = datepart(YEAR, P.DAY_OF_MONTH_KEY)
+							AND PR. MONTH = datepart(MONTH, P.DAY_OF_MONTH_KEY)
+							AND P.DEPT_ID = HD.ID
+							#if($_parameter.start)
+								AND P.DAY_OF_MONTH_KEY >= @{_parameter.start,jdbcType=VARCHAR}
+						    #end
+					        #if($_parameter.end)
+								AND P.DAY_OF_MONTH_KEY <=@{_parameter.end,jdbcType=VARCHAR}
+							#end
+					),
+					0
+				) AS ELECTRIC_COST,
+				isnull(
+					(
+						SELECT
+							floor(SUM (B.TOTAL_DAY_VALUE))
+						FROM
+							NH_S_DEPT_DAY B
+						WHERE
+							B.DEPT_ID = HD.ID
+							#if($_parameter.start)
+								AND B.DAY_OF_MONTH_KEY >= @{_parameter.start,jdbcType=VARCHAR}
+						    #end
+					        #if($_parameter.end)
+								AND B.DAY_OF_MONTH_KEY <=@{_parameter.end,jdbcType=VARCHAR}
+							#end
+					),
+					0
+				) AS WATER,
+				isnull(
+					(
+						SELECT
+							ROUND((floor(SUM (B.TOTAL_DAY_VALUE * PR.WATER))),2)
+						FROM
+							NH_S_DEPT_DAY B,
+							PR
+						WHERE
+							PR. YEAR = datepart(YEAR, B.DAY_OF_MONTH_KEY)
+							AND PR. MONTH = datepart(MONTH, B.DAY_OF_MONTH_KEY)
+							AND B.DEPT_ID = HD.ID
+							#if($_parameter.start)
+								AND B.DAY_OF_MONTH_KEY >= @{_parameter.start,jdbcType=VARCHAR}
+						    #end
+					        #if($_parameter.end)
+								AND B.DAY_OF_MONTH_KEY <=@{_parameter.end,jdbcType=VARCHAR}
+							#end
+					),
+					0
+				) AS WATER_COST,
+			   isnull(
+					(
+						SELECT
+							floor(SUM (E.TOTAL_DAY_VALUE))
+						FROM
+							NH_EN_DEPT_DAY E
+						WHERE
+							E.DEPT_ID = HD.ID
+							#if($_parameter.start)
+								AND E.DAY_OF_MONTH_KEY >= @{_parameter.start,jdbcType=VARCHAR}
+						    #end
+					        #if($_parameter.end)
+								AND E.DAY_OF_MONTH_KEY <=@{_parameter.end,jdbcType=VARCHAR}
+							#end
+					),
+					0
+				) AS ENERGY,
+				isnull(
+					(
+						SELECT
+							ROUND((floor(SUM (E.TOTAL_DAY_VALUE * PR.ENERGY))),2)
+						FROM
+							NH_EN_DEPT_DAY E,
+							PR
+						WHERE
+							PR. YEAR = datepart(YEAR, E.DAY_OF_MONTH_KEY)
+							AND PR. MONTH = datepart(MONTH, E.DAY_OF_MONTH_KEY)
+							AND E.DEPT_ID = HD.ID
+							#if($_parameter.start)
+								AND E.DAY_OF_MONTH_KEY >= @{_parameter.start,jdbcType=VARCHAR}
+						    #end
+					        #if($_parameter.end)
+								AND E.DAY_OF_MONTH_KEY <=@{_parameter.end,jdbcType=VARCHAR}
+							#end
+					),
+					0
+				) AS ENERGY_COST,
+				isnull(
+					(
+						SELECT
+							floor(SUM (F.TOTAL_DAY_VALUE))
+						FROM
+							NH_Q_DEPT_DAY F
+						WHERE
+							F.DEPT_ID = HD.ID
+							#if($_parameter.start)
+								AND F.DAY_OF_MONTH_KEY >= @{_parameter.start,jdbcType=VARCHAR}
+						    #end
+					        #if($_parameter.end)
+								AND F.DAY_OF_MONTH_KEY <=@{_parameter.end,jdbcType=VARCHAR}
+							#end
+					),
+					0
+				) AS GAS,
+				isnull(
+					(
+						SELECT
+							ROUND((floor(SUM (F.TOTAL_DAY_VALUE* PR.GAS)) ),2)
+						FROM
+							NH_Q_DEPT_DAY F,
+							PR
+						WHERE
+							PR. YEAR = datepart(YEAR, F.DAY_OF_MONTH_KEY)
+							AND PR. MONTH = datepart(MONTH, F.DAY_OF_MONTH_KEY)
+							AND F.DEPT_ID = HD.ID
+							#if($_parameter.start)
+								AND F.DAY_OF_MONTH_KEY >= @{_parameter.start,jdbcType=VARCHAR}
+						    #end
+					        #if($_parameter.end)
+								AND F.DAY_OF_MONTH_KEY <=@{_parameter.end,jdbcType=VARCHAR}
+							#end
+					),
+					0
+				) AS GAS_COST
+			FROM
+				NH_DEPT HD
+			#where()
+				#if($_parameter.deptId)
+					HD.lft >=@{_parameter.lft,jdbcType=NUMERIC} and HD.rgt<=@{_parameter.rgt,jdbcType=NUMERIC}
+				#end
+			#end
+			
+		),
+		 PC AS (
+			SELECT
+				SUM (SC.ELECTRIC) SUM_ELECTRIC,
+				SUM (ELECTRIC_COST) SUM_ELECTRIC_COST,
+				SUM (WATER) SUM_WATER,
+				SUM (WATER_COST) SUM_WATER_COST,
+				SUM (GAS) SUM_GAS,
+				SUM (GAS_COST) SUM_GAS_COST,
+				SUM (ENERGY) SUM_ENERGY,
+				SUM (ENERGY_COST) SUM_ENERGY_COST 
+			FROM
+				SC
+				)
+		SELECT
+			SC.*,PC.*
+		FROM
+			SC,PC  order by SC.LFT,SC.id			]]>	    
+	</select>
+	<select id="findByCondition" parameterType="com.supconit.nhgl.cost.entities.Cost"
+		resultMap="CostResultMap" lang="velocity" databaseId="oracle">
+		<![CDATA[
+		 WITH 
+		  PR AS (
+	      SELECT
+	        YEAR,
+	        MONTH,
+	        electric,
+	        WATER,
+	        GAS,
+	        ENERGY
+	      FROM
+	        NH_PRICE
+	    ),
+     SC AS (
+      SELECT DISTINCT
+        HD.NAME deptName,
+        HD.pid,
+        HD.LFT,
+        HD.ID,
+        nvl(
+          (
+            SELECT
+              floor(SUM (P.TOTAL_DAY_VALUE))
+            FROM
+              NH_D_DEPT_DAY P
+            WHERE
+              P.DEPT_ID = HD.ID
+              #if($_parameter.start)
+				AND P.DAY_OF_MONTH_KEY >= to_date(@{_parameter.start,jdbcType=VARCHAR},'yyyy-mm-dd')
+		      #end
+	          #if($_parameter.end)
+				AND P.DAY_OF_MONTH_KEY <=to_date(@{_parameter.end,jdbcType=VARCHAR},'yyyy-mm-dd')
+			  #end
+          ),
+          0
+        ) AS ELECTRIC,
+        nvl(
+          (
+            SELECT
+              ROUND((floor(SUM (P.TOTAL_DAY_VALUE* PR.electric)) ),2)
+            FROM
+              NH_D_DEPT_DAY P,
+              PR
+            WHERE
+              PR. YEAR = to_char(P.DAY_OF_MONTH_KEY,'yyyy')
+              AND PR. MONTH = to_char(P.DAY_OF_MONTH_KEY,'mm')
+              AND P.DEPT_ID = HD.ID
+              #if($_parameter.start)
+				AND P.DAY_OF_MONTH_KEY >= to_date(@{_parameter.start,jdbcType=VARCHAR},'yyyy-mm-dd')
+		      #end
+	          #if($_parameter.end)
+				AND P.DAY_OF_MONTH_KEY <=to_date(@{_parameter.end,jdbcType=VARCHAR},'yyyy-mm-dd')
+			  #end
+          ),
+          0
+        ) AS ELECTRIC_COST,
+        nvl(
+          (
+            SELECT
+              floor(SUM (B.TOTAL_DAY_VALUE))
+            FROM
+              NH_S_DEPT_DAY B
+            WHERE
+              B.DEPT_ID = HD.ID
+              #if($_parameter.start)
+				AND B.DAY_OF_MONTH_KEY >= to_date(@{_parameter.start,jdbcType=VARCHAR},'yyyy-mm-dd')
+		      #end
+	          #if($_parameter.end)
+				AND B.DAY_OF_MONTH_KEY <=to_date(@{_parameter.end,jdbcType=VARCHAR},'yyyy-mm-dd')
+			  #end
+          ),
+          0
+        ) AS WATER,
+        nvl(
+          (
+            SELECT
+              ROUND((floor(SUM (B.TOTAL_DAY_VALUE* PR.WATER))  ),2)
+            FROM
+              NH_S_DEPT_DAY B,
+              PR
+            WHERE
+              PR. YEAR = to_char(B.DAY_OF_MONTH_KEY,'yyyy')
+              AND PR. MONTH = to_char(B.DAY_OF_MONTH_KEY,'mm')
+              AND B.DEPT_ID = HD.ID
+              #if($_parameter.start)
+				AND B.DAY_OF_MONTH_KEY >= to_date(@{_parameter.start,jdbcType=VARCHAR},'yyyy-mm-dd')
+		      #end
+	          #if($_parameter.end)
+				AND B.DAY_OF_MONTH_KEY <=to_date(@{_parameter.end,jdbcType=VARCHAR},'yyyy-mm-dd')
+			  #end
+          ),
+          0
+        ) AS WATER_COST,
+         nvl(
+          (
+            SELECT
+              floor(SUM (E.TOTAL_DAY_VALUE))
+            FROM
+              NH_EN_DEPT_DAY E
+            WHERE
+              E.DEPT_ID = HD.ID
+              #if($_parameter.start)
+				AND E.DAY_OF_MONTH_KEY >= to_date(@{_parameter.start,jdbcType=VARCHAR},'yyyy-mm-dd')
+		      #end
+	          #if($_parameter.end)
+				AND E.DAY_OF_MONTH_KEY <=to_date(@{_parameter.end,jdbcType=VARCHAR},'yyyy-mm-dd')
+			  #end
+          ),
+          0
+        ) AS ENERGY,
+        nvl(
+          (
+            SELECT
+              ROUND((floor(SUM (E.TOTAL_DAY_VALUE* PR.ENERGY)) ),2)
+            FROM
+              NH_EN_DEPT_DAY E,
+              PR
+            WHERE
+              PR. YEAR = to_char(E.DAY_OF_MONTH_KEY,'yyyy')
+              AND PR. MONTH = to_char(E.DAY_OF_MONTH_KEY,'mm')
+              AND E.DEPT_ID = HD.ID
+              #if($_parameter.start)
+				AND E.DAY_OF_MONTH_KEY >= to_date(@{_parameter.start,jdbcType=VARCHAR},'yyyy-mm-dd')
+		      #end
+	          #if($_parameter.end)
+				AND E.DAY_OF_MONTH_KEY <=to_date(@{_parameter.end,jdbcType=VARCHAR},'yyyy-mm-dd')
+			  #end
+          ),
+          0
+        ) AS ENERGY_COST,
+        nvl(
+          (
+            SELECT
+              floor(SUM (F.TOTAL_DAY_VALUE))
+            FROM
+              NH_Q_DEPT_DAY F
+            WHERE
+              F.DEPT_ID = HD.ID
+              #if($_parameter.start)
+				AND F.DAY_OF_MONTH_KEY >= to_date(@{_parameter.start,jdbcType=VARCHAR},'yyyy-mm-dd')
+		      #end
+	          #if($_parameter.end)
+				AND F.DAY_OF_MONTH_KEY <=to_date(@{_parameter.end,jdbcType=VARCHAR},'yyyy-mm-dd')
+			  #end
+          ),
+          0
+        ) AS GAS,
+        nvl(
+          (
+            SELECT
+              ROUND((floor(SUM (F.TOTAL_DAY_VALUE* PR.GAS)) ),2)
+            FROM
+              NH_Q_DEPT_DAY F,
+              PR
+            WHERE
+              PR. YEAR = to_char(F.DAY_OF_MONTH_KEY,'yyyy')
+              AND PR. MONTH = to_char(F.DAY_OF_MONTH_KEY,'mm')
+              AND F.DEPT_ID = HD.ID
+              #if($_parameter.start)
+				AND F.DAY_OF_MONTH_KEY >= to_date(@{_parameter.start,jdbcType=VARCHAR},'yyyy-mm-dd')
+		      #end
+	          #if($_parameter.end)
+				AND F.DAY_OF_MONTH_KEY <=to_date(@{_parameter.end,jdbcType=VARCHAR},'yyyy-mm-dd')
+			  #end
+          ),
+          0
+        ) AS GAS_COST
+      FROM
+				NH_DEPT HD 
+			#where()
+				#if($_parameter.deptId)
+					HD.lft >=@{_parameter.lft,jdbcType=NUMERIC} and HD.rgt<=@{_parameter.rgt,jdbcType=NUMERIC}
+				#end
+			#end
+		),
+		 PC AS (
+			SELECT
+				SUM (SC.ELECTRIC) SUM_ELECTRIC,
+				SUM (ELECTRIC_COST) SUM_ELECTRIC_COST,
+				SUM (WATER) SUM_WATER,
+				SUM (WATER_COST) SUM_WATER_COST,
+				SUM (GAS) SUM_GAS,
+				SUM (GAS_COST) SUM_GAS_COST,
+				SUM (ENERGY) SUM_ENERGY,
+				SUM (ENERGY_COST) SUM_ENERGY_COST 
+			FROM
+				SC
+				)
+		SELECT
+			SC.*,PC.*
+		FROM
+			SC,PC order by SC.LFT,SC.id			]]>	    
+	</select>
+	
+	<select id="findZkCost" resultMap="RealTimeCostResultMap" lang="velocity">
+		<![CDATA[
+       	SELECT 
+       		A.BIT_NO,NVL(A.TOTAL,0) LAST_TOTAL,A.COLLECT_TIME LAST_COLLECTTIME,
+       		NVL(B.TOTAL,0) CURRENT_TOTAL,B.COLLECT_TIME CURRENT_COLLECTTIME,
+       		B.TOTAL-A.TOTAL USED_KWH
+       	FROM
+			(SELECT T.BIT_NO,T.TOTAL,T.COLLECT_TIME FROM NH_D_METER_REALTIME T
+			WHERE T.COLLECT_TIME >= TO_DATE(@{_parameter.startTime,jdbcType=VARCHAR},'yyyy-mm-dd hh24-mi-ss') AND T.COLLECT_TIME <= TO_DATE(@{_parameter.startTime1,jdbcType=VARCHAR},'yyyy-mm-dd hh24-mi-ss')
+			) A
+			LEFT JOIN (
+			SELECT T1.BIT_NO,T1.TOTAL,T1.COLLECT_TIME FROM NH_D_METER_REALTIME T1
+			WHERE T1.COLLECT_TIME >= TO_DATE(@{_parameter.endTime,jdbcType=VARCHAR},'yyyy-mm-dd hh24-mi-ss') AND T1.COLLECT_TIME <= TO_DATE(@{_parameter.endTime1,jdbcType=VARCHAR},'yyyy-mm-dd hh24-mi-ss')
+			) B
+		ON A.BIT_NO=B.BIT_NO
+		ORDER BY A.BIT_NO
+		]]>
+    </select>
+    
+    <!-- 按条件查询记录 -->
+    
+    <select id="findByConditionEletricity" parameterType="com.supconit.nhgl.cost.entities.Cost"
+		resultMap="CostResultMap" lang="velocity" databaseId="oracle">
+		<![CDATA[
+		 WITH 
+		 PR AS (
+			SELECT
+				YEAR,
+				MONTH,
+				ELECTRIC,
+				WATER,
+				GAS,
+				ENERGY
+			FROM
+				NH_PRICE
+		),
+		 SC AS (
+			SELECT DISTINCT
+				HD.NAME deptName,
+				HD.PID,
+				HD.LFT,
+				HD.ID,
+				nvl(
+					(
+						SELECT
+							ROUND(SUM (P.TOTAL_DAY_VALUE),0)
+						FROM
+							NH_D_DEPT_DAY P
+						WHERE
+							P.DEPT_ID = HD.ID
+							#if($_parameter.start)
+								AND P.DAY_OF_MONTH_KEY >= to_date(@{_parameter.start,jdbcType=VARCHAR},'yyyy-mm-dd')
+						    #end
+					        #if($_parameter.end)
+								AND P.DAY_OF_MONTH_KEY <= to_date(@{_parameter.end,jdbcType=VARCHAR},'yyyy-mm-dd')
+							#end
+					),
+					0
+				) AS ELECTRIC,
+				nvl(
+					(
+						SELECT
+							ROUND(SUM (P.TOTAL_DAY_VALUE* PR.ELECTRIC),2)
+						FROM
+							NH_D_DEPT_DAY P,
+							PR
+						WHERE
+							PR.YEAR = to_char(P.DAY_OF_MONTH_KEY, 'yyyy')
+                         	AND PR.MONTH = to_char(P.DAY_OF_MONTH_KEY, 'mm')
+							AND P.DEPT_ID = HD.ID
+							#if($_parameter.start)
+								AND P.DAY_OF_MONTH_KEY >= to_date(@{_parameter.start,jdbcType=VARCHAR},'yyyy-mm-dd')
+						    #end
+					        #if($_parameter.end)
+								AND P.DAY_OF_MONTH_KEY <= to_date(@{_parameter.end,jdbcType=VARCHAR},'yyyy-mm-dd')
+							#end
+					),
+					0
+				) AS ELECTRIC_COST
+			FROM
+				NH_DEPT HD
+			#where()
+				#if($_parameter.deptId)
+					HD.lft >=@{_parameter.lft,jdbcType=NUMERIC} and HD.rgt<=@{_parameter.rgt,jdbcType=NUMERIC}
+				#end
+			#end
+		),
+		em as (
+			SELECT
+				rd.DEVICE_ID,
+				dc.BIT_NO,
+				d.DEVICE_NAME,
+				d.DEVICE_SPEC,
+				d.EXTENDED2,
+				dc.DEPT_ID,
+				MIN(rd.CUR_READ_DATA) LAST_DATA,
+         		MAX(rd.CUR_READ_DATA) CURRENT_DATA,
+         		SUM (rd.INCREMENTAL) AS INCREMENTAL
+			FROM
+				NH_D_READ_DATA rd
+			LEFT JOIN NH_DEPT_CONFIG dc ON rd.DEVICE_ID=dc.DEVICE_ID and dc.BIT_NO LIKE '%AM%'
+			LEFT JOIN DEVICE d on rd.DEVICE_ID = d.ID
+			WHERE
+				1=1
+				#if($_parameter.start)
+					AND rd.COLLECT_TIME >= to_date(@{_parameter.start,jdbcType=VARCHAR},'yyyy-mm-dd')
+		      	#end
+	          	#if($_parameter.end)
+					AND rd.COLLECT_TIME <= to_date(@{_parameter.end,jdbcType=VARCHAR},'yyyy-mm-dd')
+			  	#end
+			GROUP BY dc.BIT_NO,dc.DEPT_ID,rd.DEVICE_ID,d.DEVICE_NAME,d.DEVICE_SPEC,d.EXTENDED2
+		),
+		PC AS (
+			SELECT
+				#if($_parameter.deptId)
+					SUM (SC.ELECTRIC) SUM_ELECTRIC,
+				SUM (SC.ELECTRIC_COST) SUM_ELECTRIC_COST
+				#else
+					SUM (SC.ELECTRIC)/2 SUM_ELECTRIC,
+					SUM (SC.ELECTRIC_COST)/2 SUM_ELECTRIC_COST
+				#end
+			FROM
+				SC
+				),
+		 tm AS (
+			SELECT
+				SC.deptName,
+				SC.PID,
+				sc.LFT,
+				SC.ID,
+				em.BIT_NO,
+				em.DEVICE_NAME,
+				em.DEVICE_SPEC,
+				em.EXTENDED2,
+				em.LAST_DATA,
+         		em.CURRENT_DATA,
+				em.INCREMENTAL,
+				SC.ELECTRIC,
+				SC.ELECTRIC_COST
+			FROM
+				em
+			LEFT JOIN sc ON dept_id = id
+			where SC.deptName is not null
+		) SELECT
+			tm.*,PC.*
+		FROM
+			tm,pc
+		ORDER BY
+			tm.id					]]>	    
+	</select>
+	
+	<select id="findByConditionWater" parameterType="com.supconit.nhgl.cost.entities.Cost"
+		resultMap="CostResultMap" lang="velocity" databaseId="oracle">
+		<![CDATA[
+		 WITH 
+		 PR AS (
+			SELECT
+				YEAR,
+				MONTH,
+				ELECTRIC,
+				WATER,
+				GAS,
+				ENERGY
+			FROM
+				NH_PRICE
+		),
+		 SC AS (
+			SELECT DISTINCT
+				HD.NAME deptName,
+				HD.PID,
+				HD.LFT,
+				HD.ID,
+				nvl(
+					(
+						SELECT
+							ROUND(SUM (P.TOTAL_DAY_VALUE),0)
+						FROM
+							NH_s_DEPT_DAY P
+						WHERE
+							P.DEPT_ID = HD.ID
+							#if($_parameter.start)
+								AND P.DAY_OF_MONTH_KEY >= to_date(@{_parameter.start,jdbcType=VARCHAR},'yyyy-mm-dd')
+						    #end
+					        #if($_parameter.end)
+								AND P.DAY_OF_MONTH_KEY <= to_date(@{_parameter.end,jdbcType=VARCHAR},'yyyy-mm-dd')
+							#end
+					),
+					0
+				) AS WATER,
+				nvl(
+					(
+						SELECT
+							ROUND(SUM (P.TOTAL_DAY_VALUE* PR.WATER),2)
+						FROM
+							NH_S_DEPT_DAY P,
+							PR
+						WHERE
+							PR.YEAR = to_char(P.DAY_OF_MONTH_KEY, 'yyyy')
+                         	AND PR.MONTH = to_char(P.DAY_OF_MONTH_KEY, 'mm')
+							AND P.DEPT_ID = HD.ID
+							#if($_parameter.start)
+								AND P.DAY_OF_MONTH_KEY >= to_date(@{_parameter.start,jdbcType=VARCHAR},'yyyy-mm-dd')
+						    #end
+					        #if($_parameter.end)
+								AND P.DAY_OF_MONTH_KEY <= to_date(@{_parameter.end,jdbcType=VARCHAR},'yyyy-mm-dd')
+							#end
+					),
+					0
+				) AS WATER_COST
+			FROM
+				NH_DEPT HD
+			#where()
+				#if($_parameter.deptId)
+					HD.lft >=@{_parameter.lft,jdbcType=NUMERIC} and HD.rgt<=@{_parameter.rgt,jdbcType=NUMERIC}
+				#end
+			#end
+		),
+		em as (
+			SELECT
+				rd.DEVICE_ID,
+				dc.BIT_NO,
+				d.DEVICE_NAME,
+				d.DEVICE_SPEC,
+				d.EXTENDED2,
+				dc.DEPT_ID,
+				MIN(rd.CUR_READ_DATA) LAST_DATA,
+				MAX(rd.CUR_READ_DATA) CURRENT_DATA,
+				SUM (rd.INCREMENTAL) AS INCREMENTAL
+			FROM
+				NH_S_READ_DATA rd
+			LEFT JOIN NH_DEPT_CONFIG dc ON rd.DEVICE_ID=dc.DEVICE_ID and dc.BIT_NO LIKE '%WM%'
+			LEFT JOIN DEVICE d on rd.DEVICE_ID = d.ID
+			WHERE
+				1=1
+				#if($_parameter.start)
+					AND rd.COLLECT_TIME >= to_date(@{_parameter.start,jdbcType=VARCHAR},'yyyy-mm-dd')
+		      	#end
+	          	#if($_parameter.end)
+					AND rd.COLLECT_TIME <= to_date(@{_parameter.end,jdbcType=VARCHAR},'yyyy-mm-dd')
+			  	#end
+			GROUP BY dc.BIT_NO,
+				dc.DEPT_ID,rd.DEVICE_ID,d.DEVICE_NAME,d.DEVICE_SPEC,d.EXTENDED2
+		),
+		PC AS(SELECT
+				#if($_parameter.deptId)
+					SUM (SC.WATER) SUM_WATER,
+					SUM (SC.WATER_COST) SUM_WATER_COST
+				#else
+					SUM (SC.WATER)/2 SUM_WATER,
+					SUM (SC.WATER_COST)/2 SUM_WATER_COST
+				#end
+			FROM
+				SC),
+		tm as (
+			SELECT SC.deptName,SC.PID,sc.LFT,SC.ID,em.BIT_NO,em.DEVICE_NAME,em.DEVICE_SPEC,
+				em.EXTENDED2,em.LAST_DATA,em.CURRENT_DATA,em.INCREMENTAL,SC.WATER,SC.WATER_COST
+			FROM em LEFT JOIN sc on dept_id=id
+			where SC.deptName is not null
+		)
+		SELECT
+			tm.*,PC.*
+		FROM
+			tm,PC order by tm.id			]]>	    
+	</select>
+	
+</mapper>

@@ -1,0 +1,102 @@
+#parse("index/_header.vm")
+</head>
+<body style="padding-bottom:40px;">
+	<form id="myform_id" method="post" action="$!{rc.contextPath}/device/deviceProperty/save"  class="ui-layout-center ui-dialog-form">
+		<input type="hidden" name="id" value="$!{deviceProperty.id}"> 
+    <table width="100%">
+        <tr>
+            <td width="20%" class="label"><span class="ui-form-required">*</span><label>属性编码：</label></td>
+            <td width="60%">
+				
+	            <input class="k-textbox" #if($!{deviceProperty.id}) readonly="true" #end type="text"   name="propertyCode" value="$!{deviceProperty.propertyCode}"  />
+            </td>
+			<td width="10%"></td>
+        </tr>
+        <tr>
+            <td class="label"><span class="ui-form-required">*</span>属性名称：</td>
+            <td>
+				 <input class="k-textbox"  type="text"  name="propertyName" value="$!{deviceProperty.propertyName}"  />
+			</td>
+            <td></td>
+        </tr>
+        <tr>
+	        <td class="label">数据输入方式：</td>
+	        <td>
+		        <select name="inputType" #if($!{showFlag})disabled="true"#end class="k-textbox" >
+			        #foreach($!{e} in $!{lstInputType})
+			     	<option value="$!{e.enumValue}"  #if($!{deviceProperty.inputType}==$!{e.enumValue}) selected="selected" #end>$!{e.enumText}</option>
+				    #end
+		    </select>
+			</td>
+            <td></td>
+        </tr>
+        <tr>
+	        <td class="label">是否启用：</td>
+	        <td>
+	        
+	        <select name="status"  #if($!{showFlag})disabled="true"#end class="k-textbox" >
+		        #foreach($!{e} in $!{lstStatus})
+		     	<option value="$!{e.enumValue}"   #if($!{deviceProperty.status}==$!{e.enumValue}) selected="selected" #end>$!{e.enumText}</option>
+			    #end
+		    </select>
+			    
+			    </td> 
+	        <td></td>
+	    </tr>
+        <tr>
+            <td valign="top" class="label">备注：</td>
+            <td>
+				<textarea  id="textAreaId" style="height:80px" class="k-textbox"  name="remark">#html_escape($!{deviceProperty.remark})</textarea>
+			</td>
+            <td></td>
+        </tr>
+    </table>
+    <div class="actions">
+		
+       
+        <button class="k-primary hc_btn" id="deviceP_bt" type="submit"><i class="fa fa-save"></i>保 存</button>
+		
+		
+        <button class="hc_btn cancel" onclick="close_dialog('deviceProperty_add_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+    </div>
+
+	</form>
+</body>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			 _iframe_layout = $('body').layout({
+		          defaults: {
+		            resizable: true,
+		            closable: false,
+		            spacing_open: 5
+		          }
+		        });
+			 #if($!{showFlag})
+					setAllReadonly("dialog");
+				 #end
+		});
+		</script>
+	<script type="text/javascript">
+
+	$(document).ready(function(){
+
+        $("#myform_id").validator({
+            fields:{
+        	propertyCode: "属性编码:required; length[~32]",
+        	propertyName: "属性名称:required; length[~50]",
+                remark  : "length[~500]"
+            },
+            valid:function(form){
+                form_btn_submit($("#deviceP_bt"),form,function(res){
+                    //console.info(res);
+                    validateCallback(res,"grid","deviceProperty_add_dlg");
+                });
+            }
+        });
+       
+  });
+	  
+
+	</script>
+
+</html>

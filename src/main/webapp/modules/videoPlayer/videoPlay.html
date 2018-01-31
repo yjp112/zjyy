@@ -1,0 +1,505 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link type="text/css" rel="stylesheet" href="css/common.css" />
+<link type="text/css" rel="stylesheet" href="css/videoPlay.css" />
+<link type="text/css" rel="stylesheet" href="css/zTreeStyle.css" />
+<script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="js/jquery.ztree.core-3.2.js"></script>
+<script type="text/javascript" src="js/jquery.select-1.3.6.js"></script>
+<script type="text/javascript" src="js/videoPlay.js"></script>
+<title>视频播放器</title>
+</head>
+
+<body style="overflow:hidden;">
+<div class="vedioPlay">
+	<div class="vp_header pd10">
+    	<h6 class="FL">视频播放器</h6>
+        <a href="javascript:void(0);" class="vp_btn vp_config" onclick="changeDiv(3);">配置信息</a>
+    </div>
+    <div class="vp_cont vp_border">
+    	<div class="vp_left">
+        	<!------------------------- ztree ------------------------->
+            <div id="tree_info" class="tree_info">
+                <div class="title1">监控通道<span>（请选择监控设备）</span></div>
+                <div class="tree_search vp_border">
+                    <input type="text" class="inputText FL" value="请输入要查找的内容"/>
+                    <a href="javascript:clear();" class="FL btn_clear" title="清除"></a>
+                    <a href="javascript:void(0);" class="FL btn_search" title="查询"></a>
+                </div>
+                <div class="tree">          	
+                	<div class="tree_tit1 icon_sp">视频监控点</div>
+                    <ul id="treeDemo" class="ztree"></ul>
+                </div>
+            </div>
+        </div>
+        <div class="vp_centre"><img src="images/video.gif" width="498" height="348" /></div>
+        <div class="vp_right" id="rightDiv1">
+        	<div class="title1 vp_border">云台控制</div>
+            <div class="PTZControl vp_border">
+				<div class="ptz-bg">
+                	<div class="ptz">
+                    	<a href="javascript:void(0);" class="ptz-btn-1"></a>
+                        <a href="javascript:void(0);" class="ptz-btn-2"></a>
+                        <a href="javascript:void(0);" class="ptz-btn-3"></a>
+                        <a href="javascript:void(0);" class="ptz-btn-4"></a>
+                        <a href="javascript:void(0);" class="ptz-btn-5"></a>
+                        <a href="javascript:void(0);" class="ptz-btn-6"></a>
+                        <a href="javascript:void(0);" class="ptz-btn-7"></a>
+                        <a href="javascript:void(0);" class="ptz-btn-8"></a>
+                        <a href="javascript:void(0);" class="ptz-btn-9"></a>
+                    </div>
+                </div>                
+    	    </div>
+            <div class="title1 vp_border">视频参数</div>
+            <div class="videoPara">
+            	<div class="videoPara1">
+                	<span class="FL">变倍</span>                  	 
+                    	<div class="axisBox paraBox">
+                        	<a href="javascript:void(0);" class="btn_para parareduce" onclick="reduce('zoomDrag','zoomAxis','zoomAxisNow');"></a>
+                            <div id="zoomContainer" class="paraContainer">              
+                                <div id="zoomAxis" class="paraAxis"><div id="zoomAxisNow" class="paraAxisNow"></div></div>
+                                <div id="zoomDrag" class="paraDrag"><div id="zoomHandle" class="paraHandle"></div></div>                
+                            </div>                          
+                            <a href="javascript:void(0);" class="btn_para paraplus" onclick="plus('zoomDrag','zoomAxis','zoomAxisNow');"></a>
+                        </div>                      
+                </div>
+                <div class="videoPara1">
+                	<span class="FL">聚焦</span>
+                    <div class="axisBox paraBox">
+                        	<a href="javascript:void(0);" class="btn_para parareduce" onclick="reduce('focusDrag','focusAxis','focusAxisNow');"></a>
+                            <div id="focusContainer" class="paraContainer">              
+                                <div id="focusAxis" class="paraAxis"><div id="focusAxisNow" class="paraAxisNow"></div></div>
+                                <div id="focusDrag" class="paraDrag"><div id="focusHandle" class="paraHandle"></div></div>                
+                            </div>                          
+                            <a href="javascript:void(0);" class="btn_para paraplus" onclick="plus('focusDrag','focusAxis','focusAxisNow');"></a>
+                        </div>  
+                </div>
+                <div class="videoPara1">
+                	<span class="FL">光圈</span>
+                    <div class="axisBox paraBox">
+                        	<a href="javascript:void(0);" class="btn_para parareduce" onclick="reduce('apeDrag','apeAxis','apeAxisNow');"></a>
+                            <div id="apeContainer" class="paraContainer">              
+                                <div id="apeAxis" class="paraAxis"><div id="apeAxisNow" class="paraAxisNow"></div></div>
+                                <div id="apeDrag" class="paraDrag"><div id="apeHandle" class="paraHandle"></div></div>                
+                            </div>                          
+                            <a href="javascript:void(0);" class="btn_para paraplus" onclick="plus('apeDrag','apeAxis','apeAxisNow');"></a>
+                        </div>         
+                </div>
+            </div>
+        </div>
+        <div class="vp_right" id="rightDiv2" style="display:none;">
+        	<div class="title1 vp_border">录像回放列表</div>
+            <div class="vp_backList">
+            	<ul>
+                	<li><a href="javascript:void(0);" class="vp_bl">March 04,2012</a></li>
+                    <li><a href="javascript:void(0);" class="vp_bl">March 04,2012</a></li>
+                    <li><a href="javascript:void(0);" class="vp_bl">March 04,2012</a></li>
+                    <li><a href="javascript:void(0);" class="vp_bl">March 04,2012</a></li>
+                    <li><a href="javascript:void(0);" class="vp_bl">March 04,2012</a></li>
+                    <li><a href="javascript:void(0);" class="vp_bl">March 04,2012</a></li>
+                    <li><a href="javascript:void(0);" class="vp_bl">March 04,2012</a></li>
+                    <li><a href="javascript:void(0);" class="vp_bl">March 04,2012</a></li>
+                    <li><a href="javascript:void(0);" class="vp_bl">March 04,2012</a></li>
+                    <li><a href="javascript:void(0);" class="vp_bl">March 04,2012</a></li>
+                    <li><a href="javascript:void(0);" class="vp_bl">March 04,2012</a></li>
+                </ul>
+            </div>
+   	    </div>
+        <div class="vp_right" id="rightDiv3" style="display:none;">
+        	<div class="title1 vp_border bg-w">请根据需要配置以下信息</div>
+            <div class="vp_configBox">
+            	<ul>
+                	<li class="NoBorder">抓拍图片默认  <a href="javascript:void(0);" class="vp_btn2">存储目录</a> ：</li>
+                    <li>目录：<input type="text" class="inputText1" /></li>
+                    <li><span class="FL">抓拍捕获单张图片</span>
+                        <div class="DIY_Label vp_select FR">
+                            <label for="radio_01" class="label_radio">
+                                <input id="radio_01" class="Radio" type="radio" name="radios"/>
+                                <span class="color_1">&nbsp;</span>
+                            </label>
+                        </div>
+                    </li>
+                    <li><span class="FL">抓拍连续捕获多张图片</span>
+                    	<div class="DIY_Label vp_select FR">
+                            <label for="radio_02" class="label_radio">
+                                <input id="radio_02" class="Radio" type="radio" name="radios" />
+                                <span class="color_1">&nbsp;</span>
+                            </label>
+                        </div>
+                    </li>
+                    <li class="NoBorder"><span class="span_1">每次抓拍  </span>
+                    					<div class="cnum cnum1">
+                                            <input type="text" id="eachPhoto" class="inputText2 FL ep" value="4" />
+                                            <div class="cbtn">
+                                                <a href="javascript:void(0);" class="nump" onclick="vPlus('eachPhoto');"></a>
+                                                <a href="javascript:void(0);" class="numr" onclick="vReduce('eachPhoto');"></a>
+                                            </div>
+                                    	</div> <span class="span_1">张，每隔</span>
+                    </li>
+                    <li> <div class="cnum cnum2">
+                                            <input type="text" id="eachMsec" class="inputText2 FL em" value="1000" />
+                                            <div class="cbtn">
+                                                <a href="javascript:void(0);" class="nump" onclick="vPlus('eachMsec');"></a>
+                                                <a href="javascript:void(0);" class="numr" onclick="vReduce('eachMsec');"></a>
+                                            </div>
+                                    	</div> 毫秒抓拍1张。
+                    </li>
+                    <li>抓拍文件前缀：<input type="text" class="inputText2" /></li>
+                    <li><span class="span_1">抓拍起始编号：</span><div class="cnum">
+                            <input type="text" id="startNumh" class="inputText2 FL en" value="1" />
+                            <div class="cbtn">
+                                <a href="javascript:void(0);" class="nump" onclick="vPlus('startNumh');"></a>
+                                <a href="javascript:void(0);" class="numr" onclick="vReduce('startNumh');"></a>
+                            </div>
+                        </div>                  
+                    </li>
+                    <li><span class="span_1">抓拍编号位数：</span><div class="cnum">
+                            <input type="text" id="totalNumh" class="inputText2 FL en" value="3" />
+                            <div class="cbtn">
+                                <a href="javascript:void(0);" class="nump" onclick="vPlus('totalNumh');"></a>
+                                <a href="javascript:void(0);" class="numr" onclick="vReduce('totalNumh');"></a>
+                            </div>
+                        </div> 
+                    </li>
+                    <li></li>
+                    <li class="NoBorder">录像默认  <a href="javascript:void(0);" class="vp_btn2">存储目录</a> ：</li>
+                    <li>目录：<input type="text" class="inputText1" /></li>
+                    <li><span class="FL">录像默认命名：当前日期</span>
+                    	<div class="DIY_Label vp_select FR">
+                            <label for="checkbox_10" class="label_check">
+                                <input id="checkbox_10" class="checkBox" type="checkbox" name="checkbox_10" />
+                                <span class="color_1">&nbsp;</span>
+                            </label>
+  			 		   </div>
+                    </li>
+                    <li>录像文件前缀：<input type="text" class="inputText2"/></li>
+                    <li><span class="span_1">录像起始编号：</span><div class="cnum">
+                                <input type="text" id="startNumv" class="inputText2 FL en" value="1" />
+                                <div class="cbtn">
+                                    <a href="javascript:void(0);" class="nump" onclick="vPlus('startNumv');"></a>
+                                    <a href="javascript:void(0);" class="numr" onclick="vReduce('startNumv');"></a>
+                                </div>
+                        </div> 
+                    </li>
+                    <li class="NoBorder"><span class="span_1">录像编号位数：</span><div class="cnum">
+                            <input type="text" id="totalNumv" class="inputText2 FL en" value="3" />
+                            <div class="cbtn">
+                                <a href="javascript:void(0);" class="nump" onclick="vPlus('totalNumv');"></a>
+                                <a href="javascript:void(0);" class="numr" onclick="vReduce('totalNumv');"></a>
+                            </div>
+                        </div> 
+                    </li>
+                </ul>
+            </div>
+             <div class="normal_btn">
+            	<a href="javascript:void(0);" class="vp_btn1 btn_upload">保  存</a>
+                <a href="javascript:void(0);" class="vp_btn1 btn_cancel" onclick="changeDiv(1);">取  消</a>
+            </div>
+        </div>
+        <div class="vp_right" id="rightDiv4" style="display:none;">
+        	<div class="title1 vp_border bg-w">  
+            	<div class="DIY_Label FL">
+                    <label for="checkbox_all" class="label_check">
+                        <input id="checkbox_all" class="checkBox" type="checkbox" name="checkbox_all"/>
+                        <span class="color_1">&nbsp;&nbsp;&nbsp;</span>
+                    </label>
+  			    </div><span>全选</span> &nbsp;&nbsp;&nbsp;请选择要上传的图片</div>
+            <div class="picList">
+            	<div class="vp_pic">
+                	<div class="pic_l FL">
+                    	<div class="DIY_Label FL">
+                            <label for="checkbox_02" class="label_check">
+                                <input id="checkbox_02" class="picCheckBox" type="checkbox" name="checkbox_02" />
+                                <span class="color_1">&nbsp;&nbsp;&nbsp;</span>
+                            </label>
+  			 		   </div>
+                    	<div class="picName">图片名1</div>
+                    </div>
+                    <div class="pic_r FL"><img src="../modules/videoPlayer/images/pic.gif" /></div>
+                </div>
+                <div class="vp_pic">
+                	<div class="pic_l FL">
+                    	<div class="DIY_Label FL">
+                            <label for="checkbox_03" class="label_check">
+                                <input id="checkbox_03" class="picCheckBox" type="checkbox" name="checkbox_03" />
+                                <span class="color_1">&nbsp;&nbsp;&nbsp;</span>
+                            </label>
+  			 		   </div>
+                        <div class="picName">图片名2</div>
+                    </div>
+                    <div class="pic_r FL"><img src="../modules/videoPlayer/images/pic.gif" /></div>
+                </div>
+                <div class="vp_pic">
+                	<div class="pic_l FL">
+                    	<div class="DIY_Label FL">
+                            <label for="checkbox_04" class="label_check">
+                                <input id="checkbox_04" class="picCheckBox" type="checkbox" name="checkbox_04" />
+                                <span class="color_1">&nbsp;&nbsp;&nbsp;</span>
+                            </label>
+  			 		   </div>
+                        <div class="picName">图片名3</div>
+                    </div>
+                    <div class="pic_r FL"><img src="../modules/videoPlayer/images/pic.gif" /></div>
+                </div>
+                <div class="vp_pic">
+                	<div class="pic_l FL">
+                    	<div class="DIY_Label FL">
+                            <label for="checkbox_05" class="label_check">
+                                <input id="checkbox_05" class="picCheckBox" type="checkbox" name="checkbox_05" />
+                                <span class="color_1">&nbsp;&nbsp;&nbsp;</span>
+                            </label>
+  			 		   </div>
+                        <div class="picName">图片名4</div>
+                    </div>
+                    <div class="pic_r FL"><img src="../modules/videoPlayer/images/pic.gif" /></div>
+                </div>
+            </div>
+            <div class="normal_btn">
+            	<a href="javascript:void(0);" class="vp_btn1 btn_upload">上  传</a>
+                <a href="javascript:void(0);" class="vp_btn1 btn_cancel" onclick="changeDiv(1);">取  消</a>
+            </div>
+        </div>
+    </div>
+    <div class="vp_foot">
+            	<div class="FL next">下一个播放：video2（录像名称）</div>
+                <div class="FL current t_c">当前播放：video1（录像名称）</div>
+                <div class="FL playbackBox"><a href="javascript:void(0);" class="vp_btn playback FR" onclick="changeDiv(2);">录像回放列表</a></div>
+    </div>
+    <div class="vp_control">
+    	<div class="vp_item">
+        	<a href="javascript:void(0);" class="btn_bt btn_t1"></a>
+            <a href="javascript:void(0);" class="btn_ct btn_c1"></a>
+            <a href="javascript:void(0);" class="btn_ct btn_c2"></a>
+            <a href="javascript:void(0);" class="btn_ct btn_c3" onclick="vpStop();"></a>
+            <a href="javascript:void(0);" class="btn_ct btn_c4"></a>
+        </div>
+        <div class="vp_item" style="width:354px;_width:346px;">
+        	<a href="javascript:void(0);" class="btn_ct btn_c5"></a>
+            <a href="javascript:void(0);" class="btn_ct btn_c6"></a>
+            <div class="axisBox timeBox">
+                <div id="timeContainer" class="timeContainer">              
+                    <div id="timeAxis" class="timeAxis"><div id="timeAxisNow" class="timeAxisNow"></div></div>
+                    <div id="timeDrag" class="timeDrag"></div>                
+           	    </div>
+          </div>
+          <span class="timePlay">01:50:10/02:56:33</span>
+        </div>
+        <div class="vp_item"><a href="javascript:void(0);" class="btn_bt btn_t2" onclick="changeDiv(4);" title="截图"></a></div>
+        <div class="vp_item">
+        	<a href="javascript:void(0);" class="btn_bt btn_t3"></a>
+        	<a href="javascript:void(0);" class="btn_bt btn_t4"></a>
+            <a href="javascript:void(0);" class="btn_bt btn_t5"></a>
+            <a href="javascript:void(0);" class="btn_bt btn_t6"></a>
+        </div>
+        <div class="vp_item">
+        	<a href="javascript:void(0);" class="btn_bt btn_t7"></a>
+        	<a href="javascript:void(0);" class="btn_bt "></a>
+        </div>
+        <div class="vp_item vp_itemV">
+        	<a href="javascript:void(0);" class="btn_ct btn_voice"></a>
+   	    <div class="axisBox voiceBox">
+                <div id="voiceContainer" class="voiceContainer">              
+                    <div id="voiceAxis" class="voiceAxis"><div id="voiceAxisNow" class="voiceAxisNow"></div></div>
+                    <div id="voiceDrag" class="voiceDrag"></div>                
+           	    </div>
+          </div>
+        </div>
+    </div>
+</div>
+<div id="aa"></div>
+<script type="text/javascript">
+	/*  树菜单节点配置  */		
+	var zNodes =[
+		{ id:1, pId:0, name:"楼控设备"},
+			{ id:11, pId:1, name:"新风机组1111111111111111111111111"},
+			{ id:12, pId:1, name:"空调机组"},
+			{ id:121, pId:12, name:"叶子节点1"},
+			{ id:122, pId:12, name:"叶子节点1"},
+			{ id:123, pId:12, name:"叶子节点1"},
+			{ id:124, pId:12, name:"叶子节点1"},
+			{ id:125, pId:12, name:"叶子节点1"},
+			{ id:126, pId:12, name:"叶子节点1"},
+			{ id:127, pId:12, name:"叶子节点1"},
+			{ id:128, pId:12, name:"叶子节点1"},
+			{ id:129, pId:12, name:"叶子节点1"},
+			{ id:1210, pId:12, name:"叶子节点1"},
+			{ id:1211, pId:12, name:"叶子节点1"},
+			{ id:1212, pId:12, name:"叶子节点1"},
+			{ id:1213, pId:12, name:"叶子节点1"},
+			{ id:1214, pId:12, name:"叶子节点1"},
+			{ id:1215, pId:12, name:"叶子节点1"},
+			{ id:1216, pId:12, name:"叶子节点1"},
+			{ id:1217, pId:12, name:"叶子节点1"},
+			{ id:1218, pId:12, name:"叶子节点1"},
+			{ id:1219, pId:12, name:"叶子节点1"},
+			{ id:1220, pId:12, name:"叶子节点1"},
+			{ id:13, pId:1, name:"冷冻机组"},
+			{ id:2, pId:0, name:"消防设备"},
+				{ id:21, pId:2, name:"叶子节点1"},
+				{ id:22, pId:2, name:"叶子节点2"},
+				{ id:23, pId:2, name:"叶子节点3"},
+			{ id:3, pId:0, name:"消防设备"},
+				{ id:31, pId:3, name:"叶子节点1"},
+				{ id:32, pId:3, name:"叶子节点2"},
+				{ id:33, pId:3, name:"叶子节点3"},
+			{ id:4, pId:0, name:"消防设备"},
+				{ id:41, pId:4, name:"叶子节点1"},
+				{ id:42, pId:4, name:"叶子节点2"},
+			{ id:5, pId:0, name:"消防设备"},
+				{ id:51, pId:5, name:"叶子节点1"},
+				{ id:52, pId:5, name:"叶子节点2"},
+			{ id:6, pId:0, name:"消防设备"},
+				{ id:61, pId:6, name:"叶子节点1"},
+				{ id:62, pId:6, name:"叶子节点2"}
+];
+        /*注意：添加节点时，最后一个节点后面不能加逗号*/
+
+		/*  初始化树菜单  */
+		$.fn.zTree.init($("#treeDemo"), setting, zNodes);
+		/*  初始化控制条  */
+		var timeDrag = new Drag("timeDrag",{
+				mxContainer: "timeContainer",
+				Handle:"", 
+				axisNow:"timeAxisNow",
+				Limit: true,
+				onStart: function(){},
+				onMove: function(){
+					var a = getNow("timeDrag","timeAxis","timeAxisNow");
+					$("#aa").html(a);
+					},
+				onStop: function(){}
+				});
+		var voiceDrag = new Drag("voiceDrag",{
+				mxContainer: "voiceContainer",
+				Handle:"", 
+				axisNow:"voiceAxisNow",
+				Limit: true,
+				onStart: function(){},
+				onMove: function(){
+					var a = getNow("voiceDrag","voiceAxis","voiceAxisNow");
+					$("#aa").html(a);
+					},
+				onStop: function(){}
+				});
+		var zoomDrag = new Drag("zoomDrag",{
+				mxContainer: "zoomContainer",
+				Handle:"", 
+				axisNow:"zoomAxisNow",
+				Limit: true,
+				onStart: function(){},
+				onMove: function(){
+					var a = getNow("zoomDrag","zoomAxis","zoomAxisNow");
+					$("#aa").html(a);
+					},
+				onStop: function(){}
+				});
+		var focusDrag = new Drag("focusDrag",{
+				mxContainer: "focusContainer",
+				Handle:"", 
+				axisNow:"focusAxisNow",
+				Limit: true,
+				onStart: function(){},
+				onMove: function(){
+					var a = getNow("focusDrag","focusAxis","focusAxisNow");
+					$("#aa").html(a);
+					},
+				onStop: function(){}
+				});
+		var apeDrag = new Drag("apeDrag",{
+				mxContainer: "apeContainer",
+				Handle:"", 
+				axisNow:"apeAxisNow",
+				Limit: true,
+				onStart: function(){},
+				onMove: function(){
+					var a = getNow("apeDrag","apeAxis","apeAxisNow");
+					$("#aa").html(a);
+					},
+				onStop: function(){}
+				});		
+		/*  给播放器时间轴控制条加上点击定位功能  */
+		locate("timeDrag","timeAxis","timeAxisNow");
+		/*  给云台加上悬浮效果  */
+		$(".ptz a").each(function(){
+			$(this).hover(function(){
+				var index = parseInt($(this).index())+1;
+				var w = -(110*index)+"px";
+				var bpos = w+" 0px";
+				$(this).parent().css("background-position",bpos);
+				},function(){
+					$(this).parent().css("background-position","");
+					})
+			})
+		/*  录像/停止录像按钮样式切换  */
+		$(".btn_c1").toggle(function(){
+			$(this).addClass("btn_c1_on");
+			},function(){
+			$(this).removeClass("btn_c1_on");
+			})
+		/*  播放/暂停按钮样式切换 liyingling add  */
+		$(".btn_t1").click(function(){
+			//btn_t1_on
+			if($(this).hasClass("btn_t1_on")){
+				$(this).removeClass("btn_t1_on");
+				}else{
+					$(this).addClass("btn_t1_on");
+					}
+			})
+		/*  静音/取消静音像按钮样式切换  */
+		$(".btn_voice").toggle(function(){
+			$(this).addClass("btn_silence");
+			},function(){
+			$(this).removeClass("btn_silence");
+			})
+		/*  录像回放列表选中/不选中样式切换*/
+		$(".vp_bl").click(function(){
+			$(this).addClass("vp_bl_on");
+			$(this).parent().siblings().find(".vp_bl").removeClass("vp_bl_on");
+			})
+		/*  全选/取消全选按钮函数*/
+		$("#checkbox_all").click(function(){
+			if($(this).attr("checked")=="checked"){
+				$(".picCheckBox").attr("checked","checked");
+				}else{
+					$(".picCheckBox").removeAttr("checked");
+					};
+			})	
+		$(".btn_search").hover(function(){
+				$(this).addClass("btn_search_on");
+				},function(){
+					$(this).removeClass("btn_search_on");
+			})
+		/*  搜索框 焦点/失去焦点函数*/
+		$(".tree_search input").bind({
+			  focus:function(){
+				  if($(this).attr("value")=="请输入要查找的内容"){
+					  $(this).attr("value","");					 
+				  	}
+				   $(this).parent().find(".btn_clear").hide();
+				   $(this).parent().find(".btn_search").show();
+				  },
+			  blur:function(){
+				  if($(this).attr("value")==""){
+					   $(this).attr("value","请输入要查找的内容");
+					  }else{
+						  $(this).parent().find(".btn_search").hide();
+						  $(this).parent().find(".btn_clear").show();
+						  }
+				  }
+			});
+		$(".btn_clear").hide();	
+		//搜索框内容清除函数
+		function clear(){
+			$(".tree_search input").attr("value","");
+			 $(".tree_search .btn_clear").hide();
+			 $(".tree_search .btn_search").show();
+			}
+		//播放停止函数
+		function vpStop(){
+			$(".btn_t1").removeClass("btn_t1_on");
+			}
+</script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+
+<link href="$!{main_static_custom_url}/js/uploadify/uploadify.css" rel="stylesheet">
+<script src="$!{main_static_custom_url}/js/uploadify/jquery.uploadify-3.1.min.js"></script>
+<style>
+<!--
+.file_ui_list{background: #CCC;}
+.file_ui_item{height:40px;width:80px; background: #c1c1d1}
+body{font-family: "微软雅黑",tahoma,verdana,sans-serif;}
+.file_ui_item a{
+	height: 40px;
+	line-height: 40px;
+	padding: 0 20px 0 14px;
+	color: white;
+	font-size: 13px;
+	
+}
+.k-primary{
+	height: 40px!important;
+	line-height: 40px!important;
+	color: #0C0B0B!important;
+	border-width: 1px;
+	border-style: solid;
+	border-color: #D1CECE;
+	background-color: #FFF9F9!important;
+
+}
+.head{
+	height: 40px;
+	margin: 0px 10px;
+	padding-top: 10px;
+
+	
+}
+#context{
+	background: #F3EEEE;
+	height: 250px;
+	overflow: auto;
+	margin: 5px 10px;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	border-color: #D5CCCC;
+	border-width: 1px;
+	border-style: solid;
+}
+.footer{
+	background:#E6E1E1;
+	height: 40px;
+	position: absolute;
+	right: 2%;
+	bottom: 2%;
+}
+.tip{
+	position: relative;
+	top: -30px;
+	padding-left: 150px;
+}
+.save {
+	float: right;
+	padding: 5px 20px;
+	margin: 5px 10px;
+}
+.listbox{
+	background: #F0EAEA;
+	padding: 20px;
+	border-color: #C7C4C4;
+	border-bottom-width:1px;
+	border-bottom-style: solid;
+	height: 40px;
+	
+}
+.ztGrop .zt{
+	padding: 0px 180px 0px 0px;
+}
+.bt{
+	float: right;
+	padding: 10px;
+}
+.bc_btn {
+	padding: 0px 30px;
+	
+}
+.ztGrop{float: left;line-height:40px}
+.file_ui_item:HOVER{background: #c0c0c0}
+-->
+</style>
+
+</head>
+<body>
+
+
+
+<div class=head>
+	<form id="platform_workflow_model_create_form" action="${rc.contextPath}/bpm/model/importModel" method="post">	
+		<input type="hidden" name='filePaths' id="filepath">
+	</form>	
+	<input type="file" name="file"  id="file_upload"/>
+	<div class="tip"><span>请不要上传超过100MB的文件</span></div> 
+</div>
+<div id="context">
+	<!-- <div class="listbox">
+		<span class="ztGrop">
+			<span class="zt">jAVA面向对象</span><br>
+			<span class="zt">500mb</span>
+		</span>
+		<span class="bt">
+			
+			<a href="#" onclick="removealreadyfile('$!{index}','$!{attach.id}')">移除</a>
+		</span>
+	</div>	 -->
+</div>	
+<!-- <div class="footer">
+	<button class="save" value="">确定</button>
+</div>  -->  	
+
+
+
+<script type="text/javascript"> 
+var filePaths=new Array();
+$(function(){
+	
+	$('#file_upload').uploadify({
+	    'buttonText' : '浏览',                
+		'buttonClass' : 'k-primary fileUploadBtn',
+		'queueID': 'context',
+		'multi' : true,                        
+		'fileSizeLimit':'100MB',               
+		'fileObjName' : 'file', 
+		'fileTypeExts' : '*.xml',
+		'cancelImg' : '$!{main_static_custom_url}/js/uploadify/cancel.png',
+        'swf'       : '$!{main_static_custom_url}/js/uploadify/uploadify.swf',
+        'uploader'  : '${rc.contextPath}/bpm/model/import',
+        'removeCompleted': true,
+        'removeTimeout':'1',
+       
+		 onUploadSuccess:function(file,data,response){
+              if(response){  
+            		
+					var obj = eval('(' + data + ')');
+					var temSize="";
+					
+					filePaths.push(obj.filePath);
+					if(obj.filesize>1024){
+						temSize=formatNumber2(obj.filesize/1024)+"MB"
+					}else{
+						temSize=obj.filesize+"KB"
+					}
+					var filedisplay ="<div class='listbox'><span class='ztGrop'><span class='zt'>"+obj.orignalname+"</span><span class='zt'>"+temSize+"</span></span><span class='bt'><span class='filePath' style='display: none;'>"+obj.filePath+"</span><a href='#'  onclick=removefile(this)>移除</a></span></div>";
+					$(filedisplay).appendTo($("#context"));
+					//将需要提交的以hidden的方式写入表单并提交
+					  //alert(obj.filePath)
+				
+              }else{
+    		  	 alert("文件上传失败！");
+              }
+  		},
+  		onUploadComplete:function(file){
+			$("#filepath").val(filePaths);
+		} 
+	});
+})
+
+//移除界面文件，并去掉数组文件路径
+function removefile(dd){
+	$(dd).parent().parent().remove();
+	var val=$(dd).siblings(".filePath").text();
+//	alert(val);
+	var index = indexOf(val);
+	if (index > -1) {
+		filePaths.splice(index, 1);
+    }
+	$("#filepath").val(filePaths);
+}
+//查找删除元素的下标
+function indexOf(val){
+	for (var i = 0; i < filePaths.length; i++) {
+        if (filePaths[i] == val) return i;
+    }
+    return -1;
+}
+//上传数组到后台
+ /* function filePath(fPath){
+	var fPath= fPath.join(",");
+	 $.ajax({ 
+		 type : 'post', 
+		 url: "${rc.contextPath}/bpm/model/filePath", 
+		 dataType:'json', 
+		 data : { 
+			 'filePaths':fPath
+		 }, 
+		 success: function(data){ 
+		 	//alert(data); 
+		 } 
+	});
+ } */
+</script>
+
+</body>
+</html>

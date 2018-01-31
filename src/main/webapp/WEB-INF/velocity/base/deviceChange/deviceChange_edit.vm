@@ -1,0 +1,383 @@
+#parse("index/_header.vm")
+<style>
+.container-inner { border: 1px solid #C0DFEE; }
+.k-grid-toolbar{display:none}
+</style>
+</head>
+<body style="padding-bottom:40px;">
+<form id="queryForm" class="ui-dialog-form" method="post" action="$!{rc.contextPath}/device/deviceChange/save" >
+<div class="ui-layout-center ui-largeform">
+	<div class="ui-composer">
+		<div class="ui-co-seg" data-role="anchor" id="index1" style="margin-bottom: 20px;">
+            <div id="tab-container">
+			<div class="container" id="index1">
+				<div class="container-title title1">
+					<span class="seg-num">1</span> 设备变更基本信息
+				</div>
+	   			<div style="height:200px">
+	    
+			     <table class="ui-co-table" width="100%" >  
+			        <tr>
+			            <td   class="label"><span class="ui-form-required">*</span>设备编码：</td>
+			            <td  >
+			            	#if(!($!showFlag))<span class="k-textbox k-space-right"  onclick="chooseDevices1('deviceCode','deviceName','deviceChange','')">#end
+				            	<input readonly class="k-textbox #if(!$!{viewOnly}) ui-input-choose #end"" type="text" id="deviceCode" name="deviceCode" value="$!device.deviceCode" />
+				            #if(!($!showFlag))<a href="#" class="k-icon k-i-search">&nbsp;</a></span>#end	
+				             <input type="hidden" name="id" id="id" value="$!device.deviceId"  />
+						
+			            </td>
+			            
+			            <td  class="label"><span class="ui-form-required">*</span>设备名称：</td>
+			            <td  >
+			              <input readonly type="text" class="k-textbox" id="deviceName" name="deviceName" value="$!device.deviceName"/>
+			    		
+						</td>
+			       
+			            <td  class="label">使用状态：</td>
+						<td >
+							<select name="status" id="status" class="k-textbox" #if($!{showFlag})disabled="true"#end >  
+							#foreach($!{e} in $!{lstStatus})
+								<option value="$!{e.enumValue}" #if($!{device.status}==$!{e.enumValue}) selected="selected" #end>$!{e.enumText}</option>
+							#end
+				            </select>  
+						</td>
+			             <td style="width:30px;"></td>
+			        </tr>
+			        <tr>
+				        <td  class="label">规格：</td>
+							<td >
+							 <input readonly type="text" id="deviceSpec" name="deviceSpec"  class="k-textbox"   value="$!device.deviceSpec"  />						  
+						</td> 
+				        <td   class="label"><span class="ui-form-required">*</span>使用部门：</td>
+				        <td >
+					        #if(!($!showFlag))<span class="k-textbox k-space-right" onclick="chooseDept('useDepartmentId','useDepartmentName')">#end
+						        <input readonly class="k-textbox #if(!$!{viewOnly}) ui-input-choose #end"" type="text" id="useDepartmentName" name="useDepartmentName" value="$!device.useDepartmentName"  />
+						    #if(!($!showFlag))<a href="#" class="k-icon k-i-search">&nbsp;</a></span>#end
+					        <input type="hidden" id="useDepartmentId" name="useDepartmentId" value="$!device.useDepartmentId"  />
+					 
+				        </td>
+				        <td   class="label"><span class="ui-form-required">*</span>管理负责人：</td>
+			            <td>
+				             #if(!($!showFlag))<span class="k-textbox k-space-right" onclick="choosePersons(1, 'managePersonIds', 'managePersonName','', '','manageDepartmentId', 'manageDepartmentName', '')">#end
+					            <input readonly type="text"" onmouseover="this.title=this.value" emptyFunc="clearManagePerson" class="k-textbox  #if(!$!{viewOnly}) ui-input-choose #end" name="managePersonName" id="managePersonName" value="$!device.managePersonName" />	 
+					         #if(!($!showFlag))<a href="#" class="k-icon k-i-search">&nbsp;</a></span>#end
+				            <input type="hidden" class="k-textbox" name="managePersonIds" id="managePersonIds" value="$!device.managePersonIds"/>	 
+			            </td>
+			           
+			        </tr>
+			        <tr> 
+			          <td class="label">管理部门：</td>
+						<td >
+							<input readonly type="text" class="k-textbox" id="manageDepartmentName" name="manageDepartmentName" value="$!device.manageDepartmentName"/>	 
+						    <input type="hidden" class="k-textbox" id="manageDepartmentId" name="manageDepartmentId" value="$!device.manageDepartmentId"/>	 
+					   </td>
+					   <td  class="label"><span class="ui-form-required">*</span>安装位置：</td>
+			            <td >
+				            #if(!($!showFlag))<span class="k-textbox k-space-right" onclick="chooseGeoarea('locationId','locationName')">#end
+					            <input readonly type="text" class="k-textbox #if(!$!{viewOnly}) ui-input-choose #end"" name="locationName" id="locationName" value="$!device.locationName" />
+					            #if(!($!showFlag))<a href="#" class="k-icon k-i-search">&nbsp;</a>
+				            </span>#end
+				            <input type="hidden" class="k-textbox" name="locationId" id="locationId" value="$!device.locationId"/>
+					 
+			            </td>
+				        <td  class="label">检修周期：</td>
+				        <td>
+				          <input  class="k-textbox"  type="text" id="maitainCycle" name="maitainCycle" value="$!{device.maitainCycle}"  />
+				          <span class="ui-form-unit">天</span>
+				        </td>
+			        </tr>
+			        <tr>   
+				        <td  class="label">设备条码：</td>
+				        <td >
+				        	<input  class="k-textbox" type="text"  id="barcode" name="barcode" value="$!{device.barcode}"  />
+						</td>
+						 <td  class="label" style="text-align:right;">资产原值：</td>
+				        <td >
+					        <input class="k-textbox"  type="text"  id="assetsCost" name="assetsCost" value="$!{device.assetsCost}"  />
+					        <span class="ui-form-unit">元</span>
+						</td>
+				        <td class="label"><label>资产编码：</label></td>
+			            <td >
+			                <input class="k-textbox" type="text" id="assetsCode" name="assetsCode" value="$!{device.assetsCode}"/>
+			            </td>
+			        </tr>
+			        
+			    </table>
+		    
+		   
+	    </div>
+	    <div class="container-inner" id="index2-1">
+				<div class="container-inner-title">
+					<span class="seg-num">1.1</span>
+					设备变更记录
+				</div>
+				<div class="container-inner-content">
+	    		<div id="tab-container">
+			         <div class="ui-co-seg">
+				     <div id="grid"></div> 
+			 	</div>
+		 
+			 
+	    </div> 
+	    </div>
+	    </div>
+	    </div>
+	    </div>
+	    </div>
+	    </div>
+	    
+	    <div class="actions">
+				 
+				 #if(!($!showFlag))<button class="k-primary hc_btn" id="device_chang" type="submit"><i class="fa fa-save"></i>保 存</button>#end
+				    <a class="k-primary hc_btn" onclick="window.location.href='$!{rc.contextPath}/device/deviceChange/list';"><i class="fa fa-reply"></i>返回</a>
+				
+	  </div>
+	</div> 	 
+  </form>         
+ #parse("index/_footer.vm") 
+ <script type="text/javascript">
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+              defaults: {
+                resizable: true,
+                closable: false,
+                spacing_open: 5
+              }
+            });
+	});
+</script>
+	<script>
+     
+	   $(document).ready(function(){
+		   var device_id = "$!{device.id}"==""?"-1":"$!{device.id}";
+			
+	   		//表格
+		   quick_datagrids("#grid", "#queryForm1", "$!{rc.contextPath}/device/deviceChange/page?deviceId="+device_id, [{
+	              field: "id",
+	              hidden: true
+	          }, {
+	              field: "changeProperty",
+	              title: "变更属性",
+	              sortable: true,
+	                       
+	          }, {
+	              field: "oldValue",
+	              title: "原值",
+	              sortable: true
+	          }, {
+	              field: "newValue",
+	              sortable: true,
+	              title: "新值"
+	          }, {
+	              field: "createDate",
+	              title: "变更时间",
+	              sortable: true
+	          }
+	          
+	          ],{
+			      height:360,
+	   			   pageSize:10,
+	   			  
+	   		   }                
+	      		
+		   );
+			
+		      /**
+	        *
+	        * DataGrid 快捷方法
+	        * 参数(el)：指定装载tree的容器
+	        * 参数(formId)：表单的id，自动将指定表单中的数据传送到服务器，可选
+	        * 参数(readUrl)：获取数据的 URL 地址
+	        * 参数(columns)：TODO
+	        * 参数(options)：tree 配置，可选
+	        * 参数(dsOptions)：DataSource 配置，可选
+	        * 参数(operates)：生成操作按钮，可选
+	        * 参数(toolbarId)：工具条的id，可选
+	        **/
+	        function quick_datagrids(el,formId,readUrl,columns,options,dsOptions,operates,toolbarId){
+	        	options = options || {};
+	        	toolbarId  = toolbarId || "#grid_toolbar_template";
+	        	var _dbopt = {
+	        		transport: {
+	        			read: {
+	        				url : readUrl,
+	        				type : "GET",
+	        				dataType: "json",
+	        				cache: false,
+	        				data : function(p){
+	        					if(formId){
+	        						var arr = $(formId).serializeArray();
+	        						if(arr && arr.length > 0){
+	        							var d = {};
+	        							$.each(arr,function(idx,it){
+	        								if(it.value) {
+	        									d[it.name] = it.value;
+	        								}
+	        							});
+	        							return d;
+	        						}
+	        					}
+	        					return {};
+	        				}
+	        			},
+	        			parameterMap: function(data, type) {
+	        				if (type == "read") {
+	        					data.pageNo = data.page;
+	        					data.page = undefined;
+	        					data.take = undefined;
+	        					data.skip = undefined;
+	        					delete data.page;
+	        					delete data.take;
+	        					delete data.skip;
+	        					return data;
+	        				}
+	        			}
+	        		},
+	        		schema  :{
+	        			type : "json",
+	        			data  : "rows",
+	        			total : "total"
+	        		},
+	        		serverPaging: true,
+	        		pageSize: options.pageSize || 20
+	        	};
+	        	if(dsOptions){
+	        		_dbopt = $.extend(_dbopt,dsOptions);
+	        	}
+	        	var _opt = {
+	        		dataSource: new kendo.data.DataSource(_dbopt),
+	        		toolbar: hc.template($(toolbarId).html().replace(/&lt;/g, '<').replace(/&gt;/g, '>')),
+	        		height: "100%",
+	        		groupable: false,
+	        		selectable : true,
+	        		pageable: {
+	        			refresh: false,
+	        			pageSizes: [5,10,20,50],
+	        			input : false,
+	        			buttonCount: 5,
+						messages: {
+                            empty: "没有数据",
+                            display: "共{2}条数据，本页显示{0}-{1}条",
+                            page: "",
+                            of: "/ {0}",
+                            itemsPerPage: "",
+                            first: "首页",
+                            last: "末页",
+                            next: "下一页",
+                            previous: "上一页",
+                            refresh: "刷新",
+                            morePages: "更多页"
+                        }
+	        		},
+	        		columns : columns
+	        	};
+	        	if(options){
+	        		_opt = $.extend(_opt,options);
+	        	}
+	        	$(el).hcGrid(_opt);
+				debugger
+	        	var $toolbar = $(".k-grid-toolbar .toolbar .grid_operates",el);
+	        	if(operates && operates.length > 0){
+	        		$.each(operates,function(idx,it){
+	        			var $oper = $('<li><a href="javascript:void(0)">' + (it.icon ? '<i class="' + it.icon + '"></i>' : '') + it.name + '</a></li>');
+	        			if(it.onclick && $.isFunction(it.onclick)){
+	        				$("a",$oper).bind("click.toolbar",function(e){
+	        					it.onclick(this,$(el).data("kendoGrid"));
+	        				});
+	        			}
+	        			$toolbar.append($oper);
+	        		});
+	        	}
+
+	        	if(formId){
+	        		$(formId).submit(function(event){
+	          			var _this = this;
+	          			var grid = $(el).data("kendoGrid");
+	          			btn_running($("*[type='submit']",_this));
+
+	          			grid.dataSource.xquery({
+	          				page:1,
+	          				pageSize : grid.dataSource.pageSize()
+	          			},function(){
+	          				btn_enabled($("button[type='submit']",_this));
+	          			});
+	          			event.preventDefault();
+	          			return false;
+	          		});
+	        	}
+
+	        }  
+		   
+		 //commonDate("planStartTime", "planEndTime", "yyyy-MM-dd HH:mm:ss", "zh-CN");
+       
+			$("#queryForm").validator({
+	             fields:{
+	            	 #if(!$!{showFlag})
+	        	  deviceCode: "required;",
+	        	  deviceName:"required;length[~50]",
+	     		   useDepartmentName: "required;",
+	     		  managePersonName: "required;",
+	     		 locationName: "required;",
+	     		maitainCycle: "'digits';length[~5]",
+	     		barcode: "length[~60]",
+	     		assetsCost: "'digits';length[~13]",
+	     		#end
+	             },
+	             valid:function(form){
+	                 form_btn_submit($("#device_chang"),form,function(res){
+	                     //console.log(res);
+	                     validateCallback(res,"grid","");
+	                 });
+	             }
+	         });
+			
+	    });
+		function setChooseResult(d){
+			$("input[name='id']").val(d.id);
+			$("input[name='deviceCode']").val(d.deviceCode);
+			$("input[name='deviceName']").val(d.deviceName);
+	        if(d.enableDate!=null && d.enableDate!=""){
+	       		$("input[name='enableDate']").val(d.enableDate.substr(0,10));
+	        }
+			$("input[name='deviceSpec']").val(d.deviceSpec);
+			$("input[name='useDepartmentId']").val(d.useDepartmentId);
+			$("input[name='useDepartmentName']").val(d.useDepartmentName);
+			$("input[name='managePersonIds']").val(d.managePersonIds);
+			$("input[name='managePersonName']").val(d.managePersonName);
+			$("input[name='manageDepartmentId']").val(d.manageDepartmentId);
+			$("input[name='manageDepartmentName']").val(d.manageDepartmentName);
+			$("input[name='locationId']").val(d.locationId);
+			$("input[name='locationName']").val(d.locationName);
+			$("input[name='maitainCycle']").val(d.maitainCycle);
+			$("input[name='barcode']").val(d.barcode);
+			$("input[name='assetsCode']").val(d.assetsCode);
+			$("select[name='status']").val(d.status);
+			//添加删除图标
+			if($("#managePersonName").val()!=""){
+				inputChooseClear();
+			}
+			//刷新变更历史表格
+//			$("#datagrid").flexOptions({params : [{"name":"deviceId","value":d.id}], newp : 1}); 
+//			$("#datagrid").flexReload();
+			
+			var grid = $("#grid").data("kendoGrid");
+			grid.refresh();
+		}
+		
+	  //清空管理负责人
+	  function clearManagePerson(){
+	  	$("#managePersonIds").val("");	
+		$("#managePersonName").val("");
+	  }
+	  
+	    //查看模式
+	    #if($!{showFlag})
+	    	setAllReadonly("dialog");
+	        #set($readonly='')
+            #set($readonly='readonly')
+	        $(':radio').attr('disabled', true);
+	    #end
+	</script>
+	</body>
+	</html>
+ 

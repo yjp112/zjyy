@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconicom/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.duty.entities.DutyLogDetail">
+    
+   <resultMap type="DutyLogDetail" id="dutyLogDetailResultMap">
+       <result property="id" column="ID"/>
+       <result property="dutyLogId" column="DUTY_LOG_ID"/>
+       <result property="eventTime" column="EVENT_TIME"/>
+       <result property="place" column="PLACE"/>
+       <result property="deviceCode" column="DEVICE_CODE"/>
+       <result property="aralmType" column="ARALM_TYPE"/>
+       <result property="result" column="RESULT"/>
+   </resultMap>
+   <sql id="TABLE_NAME" lang="velocity">DUTY_LOG_DETAIL_NEW</sql>
+   <sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+   <sql id="select_pre" lang="velocity">
+     select
+      A.ID,
+      A.DUTY_LOG_ID,
+      A.EVENT_TIME,
+      A.PLACE,
+      A.DEVICE_CODE,
+      A.ARALM_TYPE,
+      A.RESULT
+      FROM  <include refid="TABLE_NAME" /> A        
+   </sql>
+   
+ 	<select id="findAllById"  resultMap="dutyLogDetailResultMap" lang="velocity">
+		<include refid="select_pre"/>
+		where A.DUTY_LOG_ID=@{_parameter, jdbcType=NUMERIC}
+	</select>
+	
+	 <insert id="insert" parameterType="DutyLogDetail" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="insert_sql" />
+	</insert>
+	 <insert id="insert" parameterType="DutyLogDetail" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+  		<include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+     </insert>
+	 <!-- 插入记录-->
+    <sql id="insert_sql" lang="velocity">
+        INSERT INTO <include refid="TABLE_NAME"/>(
+        	#if($_databaseId == 'oracle') ID, #end
+        	DUTY_LOG_ID,
+		    EVENT_TIME,
+		    PLACE,
+		    DEVICE_CODE,
+		    ARALM_TYPE,
+		    RESULT
+        ) VALUES (
+        	#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end
+	        @{_parameter.dutyLogId,jdbcType=NUMERIC},
+	        @{_parameter.eventTime,jdbcType=TIMESTAMP},
+	        @{_parameter.place,jdbcType=VARCHAR},
+	        @{_parameter.deviceCode,jdbcType=VARCHAR},
+	        @{_parameter.aralmType,jdbcType=NUMERIC},
+	        @{_parameter.result,jdbcType=VARCHAR}
+        )
+    </sql>
+     <!-- 更新记录-->
+	<update id="update" parameterType="DutyLogDetail" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+		#mset()
+		<![CDATA[
+	        #if($_parameter.dutyLogId && $_parameter.dutyLogId !='')DUTY_LOG_ID = @{_parameter.dutyLogId,jdbcType=NUMERIC},#end
+	        
+	        #if($_parameter.eventTime && $_parameter.eventTime !='')EVENT_TIME = @{_parameter.eventTime,jdbcType=TIMESTAMP},#end
+	        
+	        #if($_parameter.place && $_parameter.place !='')PLACE = @{_parameter.place,jdbcType=VARCHAR},#end
+	        
+	        #if($_parameter.deviceCode && $_parameter.deviceCode !='')DEVICE_CODE = @{_parameter.deviceCode,jdbcType=VARCHAR},#end
+	        
+	        #if($_parameter.aralmType && $_parameter.aralmType !='')ARALM_TYPE = @{_parameter.aralmType,jdbcType=NUMERIC},#end
+	        
+	        #if($_parameter.result && $_parameter.result !='')RESULT = @{_parameter.result,jdbcType=VARCHAR},#end
+		]]>
+		#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+     <!-- 通过 ID 获取对象-->
+	<delete id="deleteById" parameterType="Long" lang="velocity">
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</delete>
+	<!-- 删除多条记录-->
+	<delete id="deleteByIds">
+       DELETE FROM
+		<include refid="TABLE_NAME" />
+	    WHERE ID IN    
+	        <foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+				#{id,jdbcType=NUMERIC}
+			</foreach>
+
+	</delete>
+</mapper>

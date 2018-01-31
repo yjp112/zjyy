@@ -1,0 +1,331 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<form id="task_edit_form_id" method="post" action="" class="ui-layout-center ui-dialog-form">
+    <input type="hidden"  name="id" value="$!{task.id}">
+    <input type="hidden"  name="menuCode" value="$!{menu.code}">
+    <input type="hidden"  name="status" value="$!{task.status}">
+    <input type="hidden"  name="repairMode" value="$!{task.repairMode}">
+    <input type="hidden"  name="repairWorry" value="$!{task.repairWorry}">
+    
+    <!--BPM -->
+    <input type="hidden" name="_bpm_param" value="$!{_bpm_param}"/>
+    <input type="hidden" name="_bpm_ts_id" value=""/>
+	<input type="hidden" name="bpm_ts_id" value=""/>
+    <input type="hidden" name="_bpm_enabled" value="true"/>
+	    <div class="actions">
+           #if(!$!viewOnly)
+                <button class="k-primary hc_btn" id="form_save_id"  type="submit"><i class="fa fa-save"></i>保存</button>
+				#foreach($ts in $!_bpm_transitions)
+                  <button type="submit" class="k-primary hc_btn" id="$!ts.id" onclick="doSubmit('$!ts.id')"><i class="fa fa-database"></i>$!ts.name</button>
+                #end
+                #if($!task.id)
+					<button class="k-primary hc_btn" id="form_delete_id"  type="submit"><i class="fa fa-close"></i>删除</button>
+                #end
+           #else
+           #end
+           <button class="k-primary hc_btn" type="button"  onclick="history.go(-1);"><i class="fa fa-reply"></i>返回</button>
+	    </div> 	
+	    <!-- 内容 -->
+	     <div class="ui-composer">
+			  <div class="ui-co-seg">
+			  	<div id="tab-container">
+			  	<ul>
+			       <li class="k-state-active">
+				                     登记诉求单
+			       </li>
+			     </ul>
+			     <div style="height:500px">
+        <table width="100%" id='repair_tableId'>
+        <tr>
+            
+            <td  width="13%" class="label" ><span class="ui-form-required">*</span><label>诉求单号：</label></td>
+            <td width="35%">
+                <input type="text" class="k-textbox" name="taskCode" value="$!{task.taskCode}" readonly="readonly">
+            </td>
+            <td width="13%"  class="label"><span class="ui-form-required">*</span><label>紧急程度：</label></td>
+            <td width="35%">
+                <select id="emergency_id" name="urgency" class="k-textbox" style="height:26px;">
+                    #foreach($enumDetail in $!urgencyList)
+                        <option value="$!enumDetail.enumValue" #if($!enumDetail.enumValue ==$!{task.urgency})selected="selected" #end>$!enumDetail.enumText</option>
+                    #end
+                </select>
+            </td>   
+            <td></td>
+        </tr>
+        <tr>
+            <td class="label"><span class="ui-form-required">*</span><label>事件分类：</label></td>
+            <td>
+                   <span class="k-textbox k-space-right"   onclick="chooseEvt()" >
+	               	<input readonly type="text" class="k-textbox #if(!$!{viewOnly}) ui-input-choose #end"  id="categoryName" name="categoryName" value="$!{task.categoryName}" />
+	               	<a href="#" class="k-icon k-i-search">&nbsp;</a>
+	            	</span>
+	               <input class="k-textbox" type="hidden" id="categoryId" name="categoryId" value="$!{task.categoryId}"/>
+                
+            </td>
+            <td class="label" ><span class="ui-form-required">*</span><label>地理区域：</label></td>
+            <td >
+	               <span class="k-textbox k-space-right"   onclick="chooseArea()" >
+	               	<input readonly type="text" class="k-textbox #if(!$!{viewOnly}) ui-input-choose #end"  id="areaName" name="areaName" value="$!{task.areaName}" />
+	               	<a href="#" class="k-icon k-i-search">&nbsp;</a>
+	            	</span>
+	               <input class="k-textbox" type="hidden" id="areaId" name="areaId" value="$!{task.areaId}"/>
+            </td>
+            
+            <td></td>
+        </tr>
+        <tr>
+            <td  class="label"><span class="ui-form-required">*</span><label>报修人：</label></td>
+            <td ><input type="text" class="k-textbox" id="contact" name="contact" value="$!{task.contact}" ></td>
+            <td  class="label"><span class="ui-form-required">*</span><label>报修部门：</label></td>
+            <td >
+					<span id="dept_choose_id" class="k-textbox k-space-right" onclick="chooseDept('deptId_id','deptName_id','','')" >
+						<input type="hidden" id="deptId_id" name="repairDeptId" value="$!{task.repairDeptId}">
+						<input type="text" class="k-textbox"  id="deptName_id" name="repairDeptName" value="$!{task.repairDeptName}" readonly title="$!{task.repairDeptName}">
+						<a href="#" class="k-icon k-i-search">&nbsp;</a>
+					</span>
+            </td> 
+            <td></td>
+        </tr>
+        <tr>
+            <td  class="label"><span class="ui-form-required">*</span><label>报修人电话：</label></td>
+            <td >
+                <input type="text" class="k-textbox" name="contactTel" id="contactTel" value="$!{task.contactTel}">
+            </td>  
+            <td class="label" ><span class="ui-form-required">*</span><label>诉求来源：</label></td>
+            <td >
+                <select id="taskSource_id" name="taskSource" class="k-textbox" style="height:26px;">
+                    #foreach($enumDetail in $!taskSourceList)
+                        <option value="$!enumDetail.enumValue" #if($!enumDetail.enumValue ==$!{task.taskSource}) selected="selected" #end>$!enumDetail.enumText</option>
+                    #end
+                </select>
+            </td>
+            
+			<td></td>
+        </tr>
+        <tr> 
+            <td  class="label"><span class="ui-form-required">*</span><label>报修时间：</label></td>
+            <td ><input type="text" class="k-textbox" id="repairDate" name="repairDate" value="#date_format($!{task.repairDate})"></td>
+        	
+            <td  class="label"><span class="ui-form-required">*</span><label>要求完成时间：</label></td>
+            <td >
+                <input type="text" name="expectFinishTime"   id="expectFinishTime" #if($!viewOnly) class="k-textbox" #end 
+                         value="#date_format($!{task.expectFinishTime},'yyyy-MM-dd HH:mm:ss')" onkeyup="empty_date(this);" >
+            </td>
+            <td></td>
+        </tr>
+
+        <tr>
+            <td class="label"><span class="ui-form-required">*</span><label>诉求详情：</label></td>
+            <td colspan="3"><textarea style="height:100px;" wrap="physical" id="descripton" name="descripton" class="k-textbox" >#html_escape($!{task.descripton})</textarea></td>
+        	<td></td>
+        </tr>
+        <tr>
+            <td class="label"><span class="ui-form-required">*</span><label>维修负责人：</label></td>
+            <td>
+                   <span class="k-textbox k-space-right"   onclick="chooseRepairEvtPerson()" >
+	               	<input readonly type="text" class="k-textbox #if(!$!{viewOnly}) ui-input-choose #end"  id="engineerName" name="engineerName" value="$!{task.engineerName}" />
+	               	<a href="#" class="k-icon k-i-search">&nbsp;</a>
+	            	</span>
+	               <input class="k-textbox" type="hidden" id="engineerId" name="engineerId" value="$!{task.engineerId}"/>    
+            </td>
+            <td class="label" ><span class="ui-form-required">*</span><label>维修班组：</label></td>
+            <td >
+	               <input readonly type="text" class="k-textbox"  id="repairGroupName" name="repairGroupName" value="$!{task.repairGroupName}" />
+	               <input class="k-textbox" type="hidden" id="repairGroupId" name="repairGroupId" value="$!{task.repairGroupId}"/>
+            </td>
+            
+            <td></td>
+        </tr>
+        <tr>
+            <td  class="label"><label>登记人：</label></td>
+            <td >
+                <input type="hidden" name="createId" value="$!{task.createId}"/>
+                <input type="text" class="k-textbox" name="creator" value="$!{task.creator}" readonly="readonly">
+            </td>
+            <td  class="label"><label>登记时间：</label></td>
+            <td ><input type="text" class="k-textbox" id="createDate" name="createDate" value="#date_format($!{task.createDate})" readonly="readonly"></td>
+        	<td></td>
+        </tr>
+    </table>
+   </div>
+    </div>
+   </div>
+</div>
+
+</form>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		 $("#tab-container").hcTabStrip({
+	            animation: {
+	                // fade-out current tab over 1000 milliseconds
+	                close: {
+	                    duration: 200,
+	                    effects: "fadeOut"
+	                },
+	               // fade-in new tab over 500 milliseconds
+	               open: {
+	                   duration: 200,
+	                   effects: "fadeIn"
+	               }
+	           }
+	        });
+		 _iframe_layout = $('body').layout({
+		      defaults: {
+		        resizable: true,
+		        closable: false,
+		        spacing_open: 5
+		      }
+	    });
+		$("#contact").hcAutoComplete({
+        	height: 100,
+        	template: function(data){
+		        $("#deptId_id").val(data.deptId);
+				$("#deptName_id").val(data.deptName);
+				$("#contactTel").val(data.personTelephone);        		
+        		var str='<span class="k-state-default">'+data.name+'</span>';
+        		return str;
+        	},
+        	dataTextField: "name",
+            dataSource: 
+            {
+                transport: {
+                    read: {
+                    	dataType: "json",
+                        url: "$!{rc.contextPath}/repair/task/contact"
+                    }
+                }
+            },
+            close:function(){
+            	$("#contact").focus();
+            }
+        });
+        var menuTypeAutoComplete = $("#contact").data("kendoAutoComplete");
+		 // 再次focus 时显示所有匹配提示信息
+        $("#contact").focus(function(){
+            menuTypeAutoComplete.search($("#contact").val());
+        })
+		$("#form_save_id").click(function () {
+			#if(!$!task.id)
+	    	  existTaskCode();
+	    	#end
+	        $("input[name='_bpm_enabled']", $("#task_edit_form_id")).val(true);
+	        $("#task_edit_form_id").attr("action", "$!rc.contextPath/repair/task/save");
+	        currentBt = "form_save_id";
+	        $("input[name='_bpm_ts_id']").val("");
+	        $("input[name='bpm_ts_id']").val("");
+	    });
+
+		$("#form_delete_id").click(function () {
+	        $("input[name='_bpm_enabled']", $("#task_edit_form_id")).val(true);
+	        $("#task_edit_form_id").attr("action", "$!rc.contextPath/repair/task/deleteProcessInstance");
+	        currentBt = "form_delete_id";
+	    });
+		
+		
+        $("#task_edit_form_id").validator({
+    		rules: {
+				mobile: [/^1\d{10}$/, "请输入11位手机号码"]
+    		},
+	            fields: {
+	            	  categoryName:"事件分类:required",
+	            	  areaName:"地理区域:required",
+	            	  contactTel:"报修人电话:required",
+	            	  engineerName:"维修负责人:required",
+	            	  repairGroupName:"维修班组:required",
+	                  descripton: "诉求详情:required",
+	                  contactTel: "报修人电话: required;mobile;",
+	                  actualFinishTime:"要求完成时间:required;checkIsValidDate;"
+	            },
+            valid: function (form) {
+            	form_btn_submit($("#"+currentBt),form,function(res){
+            		validateCallback(res,"grid","");
+                });
+            }
+        });
+    });
+
+	commonDate("repairDate","expectFinishTime","yyyy-MM-dd HH:mm:ss","zh-CN");
+
+		
+    #if($!viewOnly)
+    setAllReadonly();
+    #end
+	
+	var currentBt = "form_save_id";
+    function doSubmit(bpmId) {
+    	#if(!$!task.id)
+    	  existTaskCode();
+    	#end
+        currentBt = bpmId;
+        $("input[name='_bpm_ts_id']").val(bpmId);
+        $("input[name='bpm_ts_id']").val(bpmId);
+        $("input[name='_bpm_enabled']", $("#task_edit_form_id")).val(true);
+        $("#task_edit_form_id").attr("action", "$!rc.contextPath/repair/task/submit");
+        return true;
+    }
+    
+    function chooseEvt() {
+    	$("#engineerId").val("");
+    	$("#engineerName").val("");
+    	$("#repairGroupId").val("");
+    	$("#repairGroupName").val("");
+        chooseRepairEvtCategory2('categoryId','categoryName','','expectFinishTime','emergency_id');
+    }
+    
+    function chooseArea() {
+    	$("#engineerId").val("");
+    	$("#engineerName").val("");
+    	$("#repairGroupId").val("");
+    	$("#repairGroupName").val("");
+    	chooseGeoarea1('areaId','areaName','');
+    }
+    
+    function chooseRepairEvtPerson() {
+    	var categoryId = $("#categoryId").val();
+    	var areaId = $("#areaId").val();
+    	if(isEmpty(categoryId)){
+    		alert("请先选择事件分类!");
+    		return;
+    	}
+    	if(isEmpty(areaId)){
+    		alert("请先选择地理区域!");
+    		return;
+    	}
+    	chooseRepairPerson(1,categoryId,areaId,'engineerId','engineerName','','repairGroupId','repairGroupName');
+    }
+    
+    function existTaskCode(){
+    	var taskCode = $("input[name='taskCode']").val();
+    	$.ajax({
+            url :"$!{rc.contextPath}/choose/serialNumber?tableName=TASK",
+            type:"get",
+            async:false,
+            success : function(data) {
+            	if(taskCode != data){
+            		alert("诉求单号："+taskCode+"已被占用,替换为："+data)
+            		$("input[name='taskCode']").val(data);
+            	}        
+            }
+        });
+    }
+    
+    function existRepairCode(){
+    	var repairCode = $("input[name='repairCode']").val();
+    	$.ajax({
+            url :"$!{rc.contextPath}/choose/serialNumber?tableName=REPAIR",
+            type:"get",
+            async:false,
+            success : function(data) {
+            	if(repairCode != data){
+            		alert("维修单号："+repairCode+"已被占用,替换为："+data)
+            		$("input[name='repairCode']").val(data);
+            	}        
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

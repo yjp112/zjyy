@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.basic.GasDept.entities.GasDept">
+
+	<resultMap type="com.supconit.nhgl.basic.GasDept.entities.GasDept" id="GasDeptResultMap">      
+       <result property="id" column="ID" jdbcType="NUMERIC"/>
+       <result property="deviceId" column="DEVICE_ID" jdbcType="NUMERIC" />
+       <result property="deptId" column="DEPT_ID" jdbcType="NUMERIC" />
+       <result property="ftxs" column="FTXS" jdbcType="NUMERIC" />
+       <result property="categoryId" column="categoryId" jdbcType="NUMERIC" />
+	</resultMap>
+	
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+   <sql id="select_pre" lang="velocity">
+		select
+	        t1.ID,
+	        t1.DEVICE_ID,
+	        t1.DEPT_ID,
+	        t1.FTXS,
+	        t2.DEVICE_NAME as deviceName,
+	        t3.NAME as deptName
+        FROM NH_GAS_METER_DEVICE t1
+        LEFT JOIN HO_DEPARTMENT t3 ON t1.DEPT_ID = t3.ID
+        LEFT JOIN DEVICE t2 ON t2.ID = t1.DEVICE_ID
+	</sql>
+	<sql id="count_pre" lang="velocity">
+		SELECT
+		COUNT(*)
+		FROM
+		NH_GAS_METER_DEVICE t1
+		LEFT JOIN HO_DEPARTMENT t3 ON t1.DEPT_ID = t3.ID
+        LEFT JOIN DEVICE t2 ON t2.ID = t1.DEVICE_ID
+	</sql>
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			1=1 		
+			#if($_p.id)
+				#set($_id = $_p.id)
+				AND t1.ID = @{_id,jdbcType=BIGINT}
+			#end
+			#if($_p.deviceName && $_p.deviceName != '')
+				#set($_deviceName = '%' + $_p.deviceName + '%')
+				AND t2.DEVICE_NAME LIKE @{_deviceName,jdbcType=VARCHAR}
+			#end
+			#if($_p.deptName && $_p.deptName != '')
+				#set($_deptName = '%' + $_p.deptName + '%')
+				AND t3.NAME LIKE @{_deptName,jdbcType=VARCHAR}
+			#end
+			#if($_p.categoryId)
+				#set($_categoryId = $_p.categoryId)
+				AND t2.CATEGORY_ID = @{_categoryId,jdbcType=BIGINT}
+			#end
+		#end
+		]]>
+	</sql>
+	
+	<!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.nhgl.basic.GasDept.entities.GasDept" resultMap="GasDeptResultMap" lang="velocity" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre"/>
+		<include refid="condition_sql"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="findByCondition" parameterType="com.supconit.nhgl.basic.GasDept.entities.GasDept" resultMap="GasDeptResultMap" lang="velocity" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		select
+	        t1.ID,
+	        t1.DEVICE_ID,
+	        t1.DEPT_ID,
+	        t1.FTXS,
+	        t2.DEVICE_NAME as deviceName,
+	        t3.NAME as deptName
+	        <include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+ 		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+        FROM NH_GAS_METER_DEVICE t1
+        LEFT JOIN HO_DEPARTMENT t3 ON t1.DEPT_ID = t3.ID
+        LEFT JOIN DEVICE t2 ON t2.ID = t1.DEVICE_ID
+		<include refid="condition_sql"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="countByCondition" parameterType="com.supconit.nhgl.basic.GasDept.entities.GasDept" resultType="long" lang="velocity">
+		<include refid="count_pre"/>
+		<include refid="condition_sql"/>
+	</select>
+	<select id="getById" parameterType="long" resultMap="GasDeptResultMap">
+     select
+	        t1.ID,
+	        t1.DEVICE_ID,
+	        t1.DEPT_ID,
+	        t1.FTXS,
+	        t2.DEVICE_NAME as deviceName,
+	        t3.NAME as deptName
+        FROM NH_GAS_METER_DEVICE t1
+        LEFT JOIN HO_DEPARTMENT t3 ON t1.DEPT_ID = t3.ID
+        LEFT JOIN DEVICE t2 ON t2.ID = t1.DEVICE_ID
+        where t1.ID = #{id}
+    </select>
+    
+    <!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.nhgl.basic.GasDept.entities.GasDept">
+		UPDATE	NH_GAS_METER_DEVICE
+		<set>
+        <if test="deviceId != null">DEVICE_ID = #{deviceId,jdbcType=NUMERIC},</if>
+        <if test="deptId !=null">DEPT_ID=#{deptId,jdbcType=NUMERIC},</if>
+        <if test="ftxs !=null">FTXS=#{ftxs,jdbcType=NUMERIC}</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+ 
+  	<sql id="TABLE_NAME" lang="velocity">NH_GAS_METER_DEVICE</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>	
+	<insert id="insert" parameterType="com.supconit.nhgl.basic.GasDept.entities.GasDept" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    <insert id="insert" parameterType="com.supconit.nhgl.basic.GasDept.entities.GasDept" 
+		keyProperty="id" keyColumn="ID" 		lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>        
+		<include refid="INSERT_SQL" />
+	</insert>    
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>
+		(#if($_databaseId=='oracle') ID,#end   
+		DEVICE_ID,
+        DEPT_ID,
+        FTXS
+        ) VALUES (        
+		 #if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end
+		(
+			@{_parameter.deviceId,jdbcType=NUMERIC},
+			@{_parameter.deptId,jdbcType=NUMERIC},
+			@{_parameter.ftxs,jdbcType=NUMERIC}
+		)
+	</sql>
+    <sql id="insert_sql">
+    	INSERT INTO NH_GAS_METER_DEVICE( 
+        DEVICE_ID,
+        DEPT_ID,
+        FTXS
+		) VALUES 
+		(
+			#{deviceId,jdbcType=NUMERIC},
+			#{deptId,jdbcType=NUMERIC},
+			#{ftxs,jdbcType=NUMERIC}
+		)
+    </sql>
+    
+    <!-- 插入记录-->
+	<delete id="deleteById" parameterType="Long">
+		DELETE FROM NH_GAS_METER_DEVICE WHERE ID = #{id}
+	</delete>
+	
+	<!-- 删除多条记录-->
+	<!-- delete id="deleteByIds">
+        DELETE FROM NH_DEVICE_METER WHERE ID in 
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete-->
+</mapper>

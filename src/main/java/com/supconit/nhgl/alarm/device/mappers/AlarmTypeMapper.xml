@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 学习可参看：http://www.mybatis.org/core/zh/index.html -->
+
+<mapper namespace="com.supconit.nhgl.alarm.device.entities.IAlarmType">
+
+	<resultMap type="com.supconit.nhgl.alarm.device.entities.IAlarmType" id="alarmTypeResultMap">
+		<id property="id" column="ID" />
+		<result property="alarmType" column="ALARMTYPE" />
+		<result property="parentType" column="PARENTTYPE" />
+		<result property="remark" column="TYPEREMARK" />
+		<result property="lowMessage" column="LOWMESSAGE" />
+		<result property="collectAlarm" column="COLLECTALARM" />
+		<result property="areaId" column="AREAID" />
+	</resultMap>
+
+
+<!--  
+	<sql id="sequence">
+		SELECT SEQ_GKPT_ALARM_TYPE.NEXTVAL FROM DUAL
+	</sql>
+	-->
+	<sql id="TABLE_NAME" lang="velocity">M_ALARMTYPE</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+
+	
+	<select id="findAllTypes" resultMap="alarmTypeResultMap" lang="velocity">
+		select * from <include refid="TABLE_NAME"/>
+	</select>
+	
+	<select id="findTypeById" resultMap="alarmTypeResultMap" lang="velocity" parameterType="long">
+		 select * from <include refid="TABLE_NAME"/> where ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+	
+	<select id="findTypeByArea" resultMap="alarmTypeResultMap" lang="velocity" parameterType="long">
+		 select * from <include refid="TABLE_NAME"/> where AREAID =  @{_parameter, jdbcType=NUMERIC} ORDER BY ID ASC
+	</select>
+	
+	<select id="findTypeByName" resultMap="alarmTypeResultMap" lang="velocity" parameterType="java.lang.String">
+		select * from <include refid="TABLE_NAME"/> where ALARMTYPE =  @{_parameter, jdbcType=VARCHAR}
+	</select>
+	
+	<select id="findTypeByNameAndArea" resultMap="alarmTypeResultMap" lang="velocity" parameterType="java.util.Map">
+		 select * from <include refid="TABLE_NAME"/> where ALARMTYPE = #{name} and AREAID = ${areaId}
+	</select>
+	
+	<select id="findChildrenByType" resultMap="alarmTypeResultMap" lang="velocity" parameterType="long">
+		 select * from <include refid="TABLE_NAME"/> where PARENTTYPE =  @{_parameter, jdbcType=NUMERIC}
+	</select>
+	
+	<!-- INSERT -->
+	<insert id="insert" lang="velocity" parameterType="com.supconit.nhgl.alarm.device.entities.IAlarmType" keyProperty="id" keyColumn="id"  databaseId="oracle">
+		insert into M_ALARMTYPE(ID,ALARMTYPE,PARENTTYPE,TYPEREMARK,LOWMESSAGE,COLLECTALARM,AREAID) 
+		values (
+				#{id,jdbcType=NUMERIC},
+				#{alarmType,jdbcType=VARCHAR},
+				#{parentType,jdbcType=NUMERIC},
+				#{remark,jdbcType=VARCHAR},
+				#{lowMessage,jdbcType=VARCHAR},
+				#{collectAlarm,jdbcType=NUMERIC},
+				#{areaId,jdbcType=NUMERIC}
+				)
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<![CDATA[  SELECT SEQ_M_ALARMTYPE.NEXTVAL FROM DUAL   ]]> 
+		</selectKey> 
+	</insert>
+	
+	<!-- INSERT -->
+	<insert id="insert" lang="velocity" parameterType="com.supconit.nhgl.alarm.device.entities.IAlarmType" keyProperty="id" keyColumn="id">
+
+		insert into M_ALARMTYPE(ALARMTYPE,PARENTTYPE,TYPEREMARK,LOWMESSAGE,COLLECTALARM,AREAID) 
+		values (
+				#{alarmType,jdbcType=VARCHAR},
+				#{parentType,jdbcType=NUMERIC},
+				#{remark,jdbcType=VARCHAR},
+				#{lowMessage,jdbcType=VARCHAR},
+				#{collectAlarm,jdbcType=NUMERIC},
+				#{areaId,jdbcType=NUMERIC}
+				)
+		<selectKey keyProperty="id" resultType="long" order="AFTER">
+			<![CDATA[ SELECT IDENT_CURRENT('M_ALARMTYPE')   ]]> 
+		</selectKey> 
+	</insert>
+	
+	<update id="update" lang="velocity" parameterType="com.supconit.nhgl.alarm.device.entities.IAlarmType">
+		update M_ALARMTYPE set 
+		ALARMTYPE = #{alarmType,jdbcType=VARCHAR},
+		PARENTTYPE = #{parentType,jdbcType=NUMERIC},
+		TYPEREMARK = #{remark,jdbcType=VARCHAR},
+		LOWMESSAGE = #{lowMessage,jdbcType=VARCHAR},
+		COLLECTALARM = #{collectAlarm,jdbcType=NUMERIC}
+		where ID = #{id,jdbcType=NUMERIC}
+	</update>
+	
+	<delete id="deleteById"  parameterType="long" lang="velocity">
+		delete from M_ALARMTYPE where ID =  @{_parameter, jdbcType=NUMERIC}
+	</delete>
+	
+	
+</mapper>

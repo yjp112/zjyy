@@ -1,0 +1,275 @@
+#parse("index/_header.vm")
+<link href="$!{main_static_custom_url}/js/uploadify/uploadify.css" rel="stylesheet">
+<script src="$!{main_static_custom_url}/js/uploadify/jquery.uploadify-3.1.min.js"></script>
+
+</head>
+
+<body >
+	<form id="myform_id" method="post" action="$!{rc.contextPath}/document/save"  class="ui-layout-center ui-dialog-form">
+	<input type="hidden" name="id" id="id" value="$!{document.id}">
+   	<input type="hidden" name="fileType" id="fileType" value="$!{document.fileType}">
+	<input type="hidden" name="fileName" id="fileName"  value="$!{document.fileName}">
+	<input type="hidden" name="fileSize" id="fileSize" value="$!{document.fileSize}">
+	<input type="hidden" name="storePath" id="storePath"  value="$!{document.storePath}">
+	<div style="width:100%;height:550px;overflow:auto">
+    	<table width="100%">
+			    #set($readonly='')
+    	         #if($!{showFlag})
+    	         #set($readonly='readonly')
+    	         #end
+            <tr>
+                <td width="20%" class="label"><span class="ui-form-required">*</span><label>文档分类：</label></td>
+                <td width="30%">
+                   <select name="docType"  class="k-textbox" >
+    			        #foreach($!{e} in $!{lstStatus})
+    			     	<option value="$!{e.enumValue}" #if($!{document.docType}==$!{e.enumValue}) selected="selected" #end>$!{e.enumText}</option>
+    				  #end
+    		      </select>
+    			</td>
+         	   <td width="15%" class="label"><label>设备：</label></td>
+    			<td width="30%" >
+        			<span class="k-textbox k-space-right"   onclick="chooseDeviceCate('deviceId','deviceName','document_add_dlg','categoryId','categoryName')" >
+        			   <input readonly  class="k-textbox #if(!$!{showFlag}) ui-input-choose #end" " type="text" id="deviceName" name="deviceName" value="$!{document.deviceName}"  />
+        			   <a href="#" class="k-icon k-i-search">&nbsp;</a>
+                     </span>
+    				<input type="hidden" class="k-textbox" id="deviceId" name="deviceId" value="$!{document.deviceId}"/>
+        	   
+    			</td>
+        	    <td width="5%"></td>
+            </tr>
+            <tr>
+                <td  class="label" ><span class="ui-form-required">*</span>文档编号：</td>
+                <td colspan="3">
+    				 <input class="k-textbox"   type="text"   name="docNo" value="$!{document.docNo}"  />
+    			</td>
+    		 </tr>
+            <tr>	
+    			<td  class="label" ><span class="ui-form-required">*</span>文档名称：</td>
+                <td colspan="3">
+    				 <input class="k-textbox"   type="text"   name="docTitle" value="$!{document.docTitle}"  />
+    			</td>
+            </tr>
+    		<tr>	
+    			 
+    			<td  class="label" ><span class="ui-form-required">*</span>关键字：</td>
+                <td colspan="3">
+    				 <input class="k-textbox"   type="text"   name="docKey" value="$!{document.docKey}"  />
+    			</td>
+    			
+            </tr>
+    		 <tr>
+                <td valign="top" class="label"><span class="ui-form-required">*</span>摘要：</td>
+                <td colspan="3" >
+    				<textarea  id="textAreaId" class="k-textbox k-textarea" style="height:50px"   name="abstracr">#html_escape($!{document.abstracr})</textarea>
+    			</td>
+                
+            </tr>
+    		<tr>	
+    			<td  class="label" ><span class="ui-form-required">*</span> 区域：</td>
+    			 <td class="inputText">
+                   <span class="k-textbox k-space-right"   onclick="chooseGeoarea1('areaId','areaName','document_add_dlg')" >
+                    <input readonly type="text" class="k-textbox #if(!$!{viewOnly}) ui-input-choose #end""  id="areaName" name="areaName" value="$!{document.areaName}" />
+                    <a href="#" class="k-icon k-i-search">&nbsp;</a>
+    	           </span>
+    
+    	            <input class="k-textbox" type="hidden" id="areaId" name="areaId" value="$!{document.areaId}"/>
+    
+                </td>
+				<td width="15%" class="label"><span class="ui-form-required">*</span><label>设备分类：</label></td>
+    			<td width="30%" >
+        			<span class="k-textbox k-space-right"   onclick="chooseDeviceCategory('categoryId','categoryName','document_add_dlg',1)" >
+        			   <input readonly  class="k-textbox #if(!$!{showFlag}) ui-input-choose #end" " type="text" id="categoryName" name="categoryName" value="$!{document.categoryName}"  />
+        			   <a href="#" class="k-icon k-i-search">&nbsp;</a>
+                     </span>
+    				<input type="hidden" class="k-textbox" id="categoryId" name="categoryId" value="$!{document.categoryId}"/>
+        	   
+    			</td>
+        	    <td width="5%"></td>
+            </tr>
+    		<tr>	
+    			<td  class="label" >作者：</td>
+                <td >
+    				 <input class="k-textbox" readonly="true"  type="text"   name="creator" value="$!{document.creator}"  />
+    			</td>
+            </tr>
+    		
+            <tr>
+    	       
+    			<td  class="label"><span class="ui-form-required">*</span>创建时间：</td>
+                <td >
+                    <input  id="startTime"  class="k-textbox"  name="createDate" value="#date_format($!{document.createDate},"yyyy-MM-dd HH:mm:ss")"  />
+                </td>
+            </tr>
+           <tr>	
+    			<td  class="label"><span class="ui-form-required">*</span>存放位置：</td>
+                <td >
+    				 <input class="k-textbox"   type="text"   name="location" value="$!{document.location}"  />
+    			</td>
+            </tr>
+           
+            <tr>
+    			       
+            			<td valign="top" class="label"><span class="ui-form-required">*</span>上传文档：</td>
+    			        <td colspan="3" >
+    				        <table  class="ui-table"  width="100%" cellpadding="0" cellspacing="0" border="1" id="images_table_id">
+    					        <div id="filehidden"></div>
+    							  <thead>
+    						        <tr>
+    						          <th align="left" width="40%">附件名称</th>
+    						          <th align="left" width="20%" >附件类型</th>
+    						          <th align="left" width="20%" >附件大小</th>
+    						          <th  width="20%" >操作</th>
+    						        </tr>
+    							  </thead>
+    							   <tbody>
+    					        #set($index=1)
+    					       ## #foreach($!{attach} in $!{listAttachments}) 
+    					        <!--<tr id='alreadyfile$!{index}'><td>1</td>	<td>2</td><td></td><td></td>	</tr>
+    										-->
+        							 #if($!{document.fileName})
+            					        <tr id='alreadyfile$!{index}'>
+            					          <td ><a id="showImageId_$velocityCount" 	href="${rc.contextPath}/fileupload/download?fileName=$!{document.fileName}&path=$!{document.storePath}"> $!{document.fileName}</a></td>
+            					          <td > $!{document.fileType}&nbsp; </td>
+            					          <td > $!{document.fileSize}KB</td>
+            					          <td  name="tdControl"><a href="#" onclick="removealreadyfile('$!{index}','')">移除</a></td>
+            					        </tr>
+    									
+        							#end
+    					       ## #set($index=$index+1)
+    							
+    								
+    							   </tbody>
+    				      </table>
+    
+                    </td>
+            
+        </tr>
+        <tr>
+           <td></td>
+           <td><input type="file" name="file"  id="file_upload" style="height:30px;width:150px;"/>	</td>
+          ## <td><button class="k-primary " type="button" name="file"  id="file_upload" style="height:50px;width:200px;"/>	</td>
+         ## <td> <button class="k-primary hc_btn" id="file_upload" type="file" name="file"></button><td>
+          
+          </tr>
+        </table>
+	</div>
+     <div class="actions">
+		   #if( $!{readonly} != 'readonly')
+	        <button class="k-primary hc_btn" id="document_tb" type="submit"><i class="fa fa-save"></i>保 存</button>
+			<button class="hc_btn cancel" onclick="close_dialog('document_add_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+			#end   
+	</div>
+</form>
+  
+	
+</body>
+	<script type="text/javascript">
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+	          defaults: {
+	            resizable: true,
+	            closable: false,
+	            spacing_open: 5
+	          }
+	        });
+			
+		   $("#myform_id").validator({
+	            fields:{
+	    	 docType: "required",
+			 categoryName: "required",
+	    	 docNo: "required; length[~32]",
+	    	 docTitle: "required; length[~100]",
+	    	 areaName: "required",
+	    	 docKey: "required; length[~100]",
+	    	 abstracr: "required;length[~100]",
+	    	 location: "required;length[~100]",
+	    	 createDate: "required;"
+	            },
+	            valid:function(form){
+	                form_btn_submit($("#document_tb"),form,function(res){
+	                    //console.log(res);
+	                    validateCallback(res,"grid","document_add_dlg");
+	                });
+	            }
+	        })	
+	});
+	</script>
+<script type="text/javascript">
+//文件上传
+var index = 1000;
+function initUpload(){    
+	
+	/*if ($('#file_upload').length > 0) { 
+		$('#file_upload').uploadify('destroy');
+	}*/
+	
+	$('#file_upload').uploadify({
+	    'buttonText' : '浏览',
+		buttonClass : 'k-primary fileUploadBtn',
+		'multi' : true,
+		'fileSizeLimit':'20MB',
+		'fileObjName' : 'file',
+		'cancelImg' : '${rc.contextPath}/main_static/custom/js/uploadify/cancel.png',
+        'swf'      : '${rc.contextPath}/main_static/custom/js/uploadify/uploadify.swf',
+        'uploader' : '${rc.contextPath}/fileupload/fileup',
+        'removeCompleted': true,
+		 onUploadSuccess:function(file,data,response){
+              if(response){ 
+			    if(index == 1000 && ($('#fileName').val() == "" || $('#fileName').val() == null)){
+    				var obj = eval('(' + data + ')');
+    				var filedisplay ="<tr id='alreadyfile"+index+"'><td>"+obj.orignalname+"</td><td>"+obj.postfix+"</td><td>"+obj.filesize+"KB</td><td ><a href='#' onclick=removefile('"+index+"')>移除</a></td></tr>";
+    				var filehidden ="<input type='hidden' name='fileorignal' value='"+obj.orignalname+"' id='fileorignal"+index+"'/><input type='hidden' name='filename' value='"+obj.filename+"' id='filename"+index+"'/>";
+    				$("#images_table_id").append(filedisplay);
+    				$("#filehidden").append(filehidden);
+    				index++;
+				}else{
+				 	alert("只能上传一个文档！");
+				}
+              }else{
+    		  	 alert("文件上传失败！");
+              }
+  		}
+	})
+	
+	
+}
+
+function removefile(ind){
+	$("#attachment"+ind).remove();
+	$("#file_upload").show();
+	$("#fileorignal"+ind).remove();
+	$("#filename"+ind).remove();
+	$("#alreadyfile"+ind).remove();
+	$('#fileType').val('');
+	$('#fileName').val('');
+	$('#fileSize').val('');
+	$('#storePath').val('');
+	index = 1000
+}
+
+function removealreadyfile(index,fileid){
+		$('#fileType').val('');
+		$('#fileName').val('');
+		$('#fileSize').val('');
+		$('#storePath').val('');
+		$("#alreadyfile"+index).remove();
+		$("#file_upload").show();
+		index = 1000
+		var delfile ="<input type='hidden' name='delfiles' value='"+fileid+"'/>";
+	$("#filehidden").append(delfile);
+	}
+	
+	//查看模式
+	#if($!{showFlag})
+		setAllReadonly("dialog");
+		$("#file_upload").hide();
+		$("td[name='tdControl']").html("移除");
+	#else
+		initUpload();
+		commonSingleDate("startTime","yyyy-MM-dd HH:mm:ss","zh-CN");
+	#end
+</script>
+
+
+
+</html>

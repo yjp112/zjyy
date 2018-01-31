@@ -1,0 +1,53 @@
+ <script type="text/javascript" src="$!{nhgl_static_custom_url}/echarts_2/esl.js"> </script>
+ <script type="text/javascript" src="$!{nhgl_static_custom_url}/echarts_2/echartsUtil.js"></script>
+ <style>
+	.nh-content{
+		margin-left:0px;
+	}
+	.nh-content .nh-ct .nh-chart{
+		border:1px;
+	}
+ </style>
+ <SCRIPT type="text/javascript">
+	$(document).ready(function(){
+		if(T.innerLayout&&!T.innerLayout.destroyed){
+			T.innerLayout.destroy();
+		}
+		T.innerLayout = $("#centerMain").layout({
+			defaults : {
+				resizable : false,
+				closable : false,
+				spacing_open : 5
+			}
+		});
+		$("#year").val(new Date().getFullYear());
+		var year = $("#year").val();
+		$("#tabBlock").load('$!{rc.contextPath}/basic/basicInfoXin/view?year='+year);
+	 });
+	 function search(){
+	 	var year = $("#year").val();
+	 	$("#tabBlock").load('$!{rc.contextPath}/basic/basicInfoXin/view?year='+year);
+	 }
+</SCRIPT>
+<div class="ui-layout-north">
+	<div class="ui-module-name">
+		<label id="menuName">#crumbs("NHGL_NHFX_X",1)</label>
+	</div>
+	<form id="medical_list_search" class="ui-form ui-form-search fn-clear">
+		<div class="ui-form-search-left">
+			<div class="ui-form-item">
+	            <label class="ui-label">年份：</label>
+				<input id="start" type="hidden"/>
+	            <input id="year" type="text" name="year"  class="ui-input ui-input-small  Wdate"  onclick="WdatePicker({dateFmt:'yyyy',maxDate:'%y'})" value="$!year"/>
+			</div>
+		</div>	
+		<div class="ui-form-search-right">
+				<button type="button" id="subButton" onclick="search()" class="btn btn-primary"><i class="iconfont icon-search"></i> 查&nbsp;询</button>
+		</div>
+	</form>
+</div>
+<div class="ui-layout-center nh-content" id="subMain" style="overflow:auto;">
+    <div id="tabBlock" class="nh-ct">
+    </div>
+</div>
+   

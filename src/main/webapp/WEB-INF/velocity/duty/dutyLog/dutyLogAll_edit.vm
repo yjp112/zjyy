@@ -1,0 +1,223 @@
+#parse("index/_header.vm")
+<style>
+.ui-composer .ui-co-table .k-textbox {width: 100%;}
+.ui-composer .ui-co-table .k-textbox.k-textarea { width: 85%; }
+</style>
+</head>
+<body style="padding-bottom: 40px;">
+	<form id="queryForm" class="ui-dialog-form" method="post" action="$!{rc.contextPath}/duty/dutylog/save">
+		<input type="hidden" name="id" value="$!{dutyLog.id}" /> 
+		<input type="hidden" name="status" value="$!{dutyLog.status}" />
+		<input type="hidden" name="dutyType" value="$!{dutyLog.dutyType}" />
+
+		<div class="ui-layout-center ui-largeform">
+		<div class="ui-co-seg" data-role="anchor" id="index1" style="margin-bottom: 20px;">
+			<div class=" ui-composer">
+				<div id="tab-container">
+			    <div class="container" id="index1">
+				<div class="container-title title1">
+					<span class="seg-num">1</span> 值班日志基本信息
+				</div>
+	   			<div style="height:500px">
+				<table class="ui-co-table" width="100%">
+					<tr>
+						<td width="10%" class="label"><span class="ui-form-required">*</span>值班日期：</td>
+						<td width="20%"><input type="text"
+							class="k-textbox" id="dutyDate" name="dutyDate"
+							value="#date_format($!dutyLog.dutyDate,'yyyy-MM-dd')" /></td>
+
+						<td width="10%" class="label"><span class="ui-form-required">*</span>班次：</td>
+						<td width="20%"><select name="orderType" id="orderType"
+							class="k-textbox" style="height:26px;">
+								<option value="">请选择班次</option> #foreach($!list in
+								$!listOrderType)
+								<option value="$!{list.enumValue}"
+									#if($!{dutyLog.orderType}==$!{list.enumValue})
+									selected="selected" #end>$!{list.enumText}</option> #end
+						</select></td>
+						<td width="20%"></td>
+					</tr>
+					<tr>
+						<td class="label"><span class="ui-form-required">*</span>班组名称：</td>
+						<td><select name="groupType" id="groupTypeName"
+							class="k-textbox" style="height:26px;">
+								<option value="">请选择班组</option> #foreach($!list in
+								$!listGroupType)
+								<option value="$!{list.enumValue}"
+									#if($!{dutyLog.groupType}==$!{list.enumValue})
+									selected="selected" #end>$!{list.enumText}</option> #end </td>
+									
+						<td class="label"><span class="ui-form-required">*</span>值班人：</td>
+						#if($!viewOnly)
+							<td ><input class="k-textbox" type="text" id="personName" name="personName" value="$!{dutyLog.personName}" />
+							<input class="k-textbox" type="hidden"  id="personId"  name="personId" value="323"  />
+						#else
+						<td><input class="k-textbox" type="text" id="personName" name="personName" value="$!dutyLog.creator" />
+							<input class="k-textbox" type="hidden"  id="personId"  name="personId" value="323"  />
+						#end	
+						 <!-- <span class="k-textbox k-space-right k-text-log" id="personNames">
+			            	<input class="k-textbox" type="hidden"  id="personId"  name="personId" value="$!{dutyLog.personId}"  />
+			        		<input readonly class="k-textbox"  type="text"  id="personName" name="personName" value="$!{dutyLog.personName}" />
+			        		<a href="#" class="k-icon k-i-search">&nbsp;</a>
+		        		</span> --></td>
+		        	<td></td>
+					</tr>
+					<tr>
+						<td class="label"><span class="ui-form-required">*</span>开始时间：</td>
+						<td><input type="text" class="k-textbox"
+							id="startTime" name="startTime"
+							value="#date_format($!dutyLog.startTime'yyyy-MM-dd HH:mm:ss')" />
+
+						</td>
+
+						<td class="label"><span class="ui-form-required">*</span>结束时间：</td>
+						<td><input type="text" class="k-textbox"
+							id="endTime" name="endTime"
+							value="#date_format($!dutyLog.endTime'yyyy-MM-dd HH:mm:ss')" />
+
+						</td>
+						<td ></td>
+					</tr>
+					<tr>
+						<td class="label">交班时间：</td>
+						<td><input type="text" class="k-textbox"
+							id="replaceTime" name="replaceTime"
+							value="#date_format($!dutyLog.replaceTime,'yyyy-MM-dd HH:mm:ss')" />
+						</td>
+
+						<td class="label">交班人：</td>
+						<td><input type="text"
+							class="k-textbox" id="replacePersonName"
+							name="replacePersonName" value="$!{dutyLog.replacePersonName}" />
+							<input  type="hidden" class="k-textbox" id="replacePersonId" name="replacePersonId" value="43434"/>
+							<!-- <span class="k-textbox k-space-right k-text-log" id="replacePersonNames">
+			        	   <input  type="hidden" class="k-textbox" id="replacePersonId" name="replacePersonId" value="$!dutyLog.replacePersonId"/>
+			        	  <input readonly   type="text"  class="k-textbox" id="replacePersonName"  name="replacePersonName" value="$!{dutyLog.replacePersonName}" />
+			        	  <a href="#" class="k-icon k-i-search">&nbsp;</a></span> -->
+						</td>
+						<td></td>
+					</tr>
+					<tr>
+			            <td class="label">消防信息：</td>
+			            <td  colspan="3"><textarea   class="k-textbox k-textarea"   name="dutyDesc1">$!{dutyLog.dutyDesc1}</textarea></td>
+	        		<td></td>
+	        		</tr>
+	        		<tr>
+			            <td class="label">安防信息：</td>
+			            <td  colspan="3"><textarea  class="k-textbox k-textarea"   name="dutyDesc2">$!{dutyLog.dutyDesc2}</textarea></td>
+	        			<td></td>
+	        		</tr>
+	        		<tr>
+			            <td class="label">更夫信息：</td>
+			            <td  colspan="3"><textarea   class="k-textbox k-textarea "   name="dutyDesc3">$!{dutyLog.dutyDesc3}</textarea></td>
+	        			<td ></td>
+	        		</tr>
+	        		<tr>
+			            <td class="label">其他信息：</td>
+			            <td  colspan="3"><textarea   class="k-textbox k-textarea "   name="dutyDesc4">$!{dutyLog.dutyDesc4}</textarea></td>
+	        		<td></td>
+	        		</tr>
+	        		<tr>
+			            <td class="label">交班遗留问题：</td>
+			            <td  colspan="3"><textarea   class="k-textbox k-textarea "   name="replaceDesc">$!{dutyLog.replaceDesc}</textarea></td>
+	        			<td></td>
+	        		</tr>
+				</table>
+			</div>
+			</div>
+			</div>
+			</div>
+			</div>
+			<div class="actions">
+                <span class="lf-tool print">
+					<span class="lf-btns"><a href="javascript:showReport('$!dutyLog.id','dutyLogAll');" class="lf-btn lf-btn-print" title="打印"></a>
+				</span></span>
+				<button class="k-primary hc_btn" type="submit" id="save">
+					<i class="fa fa-save"></i>保 存
+				</button>
+				<button class="k-primary hc_btn" id="duty_log_edit" type="submit">
+					<i class="fa fa-submit"></i>提交
+				</button>
+				<a class="k-primary hc_btn"
+					onclick="window.location.href='$!{rc.contextPath}/duty/dutylog/go?dutyType=$!dutyLog.dutyType&menuCode=$!menu.code';"><i
+					class="fa fa-reply"></i>返回</a>
+			</div>
+		</div>
+		<input type="hidden" value="$!dutyLog.dutyLogDetailList.size()"
+			id="number" />
+	</form>
+	#parse("index/_footer.vm")
+	<script type="text/javascript">
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+              defaults: {
+                resizable: true,
+                closable: false,
+                spacing_open: 5
+              }
+            });
+		 #if(!$!viewOnly)
+			 commonSingleDateWithout("dutyDate","yyyy-MM-dd HH:mm:ss","zh-CN")
+			 	commonSingleDate("replaceTime","yyyy-MM-dd HH:mm:ss","zh-CN")
+			 	commonDate("startTime","endTime","yyyy-MM-dd HH:mm:ss","zh-CN");
+		#end
+		$("#replacePersonNames").click(function(){
+			quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/choose/person/page/1/replacePersonId/replacePersonName?dialogId=dutyLog_add_dlg", 600, 500);
+		})
+		$("#personNames").click(function(){
+			quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/choose/person/page/1/personId/personName?dialogId=dutyLog_add_dlg", 600, 500);
+		})
+		
+ 		
+	});
+       
+</script>
+	<script> 
+	   $(document).ready(function(){
+		   if($("input[name='status']").val()==""){
+		   		$(".print").hide();
+		   	}
+		   $("#save").bind("click",function(){
+			   $("input[name='status']").val(0);
+		   });
+		   $("#duty_log_edit").bind("click",function(){  
+			   $("input[name='status']").val(1);
+		   });
+		  $("#queryForm").validator({
+	             fields:{
+	                dutyDate: "值班日期:required,length[~20]",
+                orderType: "班次:required,length[~10]",
+                groupType:"班组名称:required,length[~10]",
+                startTime: "开始时间:required",
+                endTime: "开始时间:required",
+                personName:"值班人:required,length[~32]"
+	             },
+	             valid:function(form){
+	             	var status=$("input[name='status']").val()
+	              
+	                 var submitBtnId="#duty_log_submit";
+	                 if(status==0){
+	                   submitBtnId="#save";
+	                 }
+	         
+	                 form_btn_submit($(submitBtnId),form,function(res){
+	                     //console.log(res);
+	                     validateCallback(res,"grid","");
+	                 });
+	             }
+	             
+	           //  commonDateWithout("startTime","endTime","yyyy-MM-dd","zh-CN");
+	         });
+	   });
+			
+	  //清空管理负责人
+	  
+	  #if($!viewOnly)
+	        setAllReadonly();
+	  #end
+	  #if($!{dutyLog.status}==1)
+	        setAllReadonly();
+	  #end
+	</script>
+</body>
+</html>

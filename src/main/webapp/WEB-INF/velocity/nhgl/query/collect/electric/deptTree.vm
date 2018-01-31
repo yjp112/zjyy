@@ -1,0 +1,55 @@
+#foreach($me in $list)
+	#if($me.parentId == $!{technicId})
+		<li>
+			#if($me.tb==1)
+				<h3 class="handle handle-rise" onclick="toTab('$!me.deptId','1')">
+			#elseif($me.tb==0)
+				<h3 class="handle handle-unchanged" onclick="toTab('$!me.deptId','1')">
+			#else
+				<h3 class="handle handle-decline" onclick="toTab('$!me.deptId','1')">
+			#end
+					<span class="handle-name" name="deptName" title="$!me.deptName">$!me.deptName</span>
+					<span class="handle-num fInt" >$!me.total</span>
+					<span class="handle-bar" name="span_dept" num="$!me.total" style="margin-left:-30px;"></span>
+				</h3>
+				<ul class="panel">
+					#foreach($cm in $list)
+						#if($!me.deptId == $!cm.parentId)
+							#if($cm.tb==1)
+								<li onclick="toTab('$!cm.deptId','1')" class="pitem-rise">
+							#elseif($cm.tb==0)
+								<li onclick="toTab('$!cm.deptId','1')" class="pitem-unchanged">
+							#else
+								<li onclick="toTab('$!cm.deptId','1')" class="pitem-decline">
+							#end
+									<a class="pitem-link" href="javascript:;">
+										<span class="pitem-name" name="deptName" title="$!cm.deptName">$!cm.deptName</span>
+										<span class="pitem-num fInt" style="width: 60px;">
+											$!cm.total
+										</span>
+										<span class="pitem-bar" name="span_dept_list" num="$!cm.total"></span>
+									</a>
+								</li>
+						#end
+					#end
+				</ul>
+			</li>
+		#end
+	#end			
+	<script>
+	$(function(){
+		fNumPage();
+		$('#qy_accordion').accordion({
+            "handle": ".handle",
+            "panel": ".panel"
+       });
+	    showProgress("span_dept");
+		showProgress("span_dept_list",10);
+		
+		
+		$("ul.panel li").click(function(){
+			$(".panel li").removeClass("current");
+			$(this).addClass("current");
+		});
+	});
+	</script>

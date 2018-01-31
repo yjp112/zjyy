@@ -1,0 +1,266 @@
+#parse("mobile/_header.vm")
+<body>
+<!-- Statusbar overlay-->
+<div class="statusbar-overlay"></div>
+<!-- Panels Overlay -->
+<div class="panel-overlay"></div>
+
+<!-- Views-->
+<div class="views">
+    <div class="view view-main">
+        <div class="pages navbar-fixed">
+            <div data-page="index" class="page page-index">
+                <div class="navbar">
+                    <div class="navbar-inner">
+                        <div class="navbar-left">
+                            <a href="#" class="link back">
+                                <i class="icon icon-c-back only-icon"></i>
+                            </a>
+                        </div>
+                        <div class="navbar-center">我的流程</div>
+                        <div class="navbar-right">
+                            <a href="#" class="link">
+                                <i class="icon icon-c-menu only-icon"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="page-content">
+                    <div class="content-block top-block-fixed">
+                        <div class="buttons-row">
+                            <a href="#tab1" class="tab-link">全部</a>
+                            <a href="#tab2" class="tab-link active">待办事宜</a>
+                            <a href="#tab3" class="tab-link">未结束流程</a>
+                            <a href="#tab4" class="tab-link">已结束流程</a>
+                        </div>
+                        <div class="top-search">
+                            <form class="searchbar">
+                                <div class="searchbar-input">
+                                    <input type="search" placeholder="Search">
+                                    <a href="#" class="searchbar-clear"></a>
+                                </div>
+                                <a href="#" class="searchbar-cancel">Cancel</a>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- Tabs, 标签内容区容器 -->
+                    <div class="tabs">
+                        <div id="tab1" class="tab">
+                            <div class="content-block">
+                                <div class="list-block">
+                                    <ul>
+                                        <li>
+                                            <a href="#" class="item-link article-modal" id="1">
+                                                <div class="item-content">
+                                                    <i class="icon icon-c-status"></i>
+                                                    <div class="item-inner">
+                                                        A项电压空开状态报警信息11111111
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#" class="item-link article-modal" id="2">
+                                                <div class="item-content">
+                                                    <i class="icon icon-c-status"></i>
+                                                    <div class="item-inner">
+                                                        A项电压空开状态报警信息
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#" class="item-link article-modal">
+                                                <div class="item-content">
+                                                    <i class="icon icon-c-status"></i>
+                                                    <div class="item-inner">
+                                                        开状态报警A项电压空信息
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#" class="item-link article-modal">
+                                                <div class="item-content">
+                                                    <i class="icon icon-c-status"></i>
+                                                    <div class="item-inner">
+                                                        开状态报警A项电压空信息
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#" class="item-link article-modal">
+                                                <div class="item-content">
+                                                    <i class="icon icon-c-status"></i>
+                                                    <div class="item-inner">
+                                                        开状态报警A项电压空信息
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#" class="item-link article-modal">
+                                                <div class="item-content">
+                                                    <i class="icon icon-c-status"></i>
+                                                    <div class="item-inner">
+                                                        开状态报警A项电压空信息
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#" class="item-link article-modal">
+                                                <div class="item-content">
+                                                    <i class="icon icon-c-status"></i>
+                                                    <div class="item-inner">
+                                                        开状态报警A项电压空信息
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#" class="item-link article-modal">
+                                                <div class="item-content">
+                                                    <i class="icon icon-c-status"></i>
+                                                    <div class="item-inner">
+                                                        开状态报警A项电压空信息
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#" class="item-link article-modal">
+                                                <div class="item-content">
+                                                    <i class="icon icon-c-status"></i>
+                                                    <div class="item-inner">
+                                                        开状态报警A项电压空信息
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#" class="item-link article-modal">
+                                                <div class="item-content">
+                                                    <i class="icon icon-c-status"></i>
+                                                    <div class="item-inner">
+                                                        开状态报警A项电压空信息
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#" class="item-link article-modal">
+                                                <div class="item-content">
+                                                    <i class="icon icon-c-status"></i>
+                                                    <div class="item-inner">
+                                                        开状态报警A项电压空信息
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#" class="item-link article-modal">
+                                                <div class="item-content">
+                                                    <i class="icon icon-c-status"></i>
+                                                    <div class="item-inner">
+                                                        开状态报警A项电压空信息
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#" class="item-link article-modal">
+                                                <div class="item-content">
+                                                    <i class="icon icon-c-status"></i>
+                                                    <div class="item-inner">
+                                                        开状态报警A项电压空信息
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#" class="item-link article-modal">
+                                                <div class="item-content">
+                                                    <i class="icon icon-c-status"></i>
+                                                    <div class="item-inner">
+                                                        开状态报警A项电压空信息
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#" class="item-link article-modal">
+                                                <div class="item-content">
+                                                    <i class="icon icon-c-status"></i>
+                                                    <div class="item-inner">
+                                                        开状态报警A项电压空信息
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#" class="item-link article-modal">
+                                                <div class="item-content">
+                                                    <i class="icon icon-c-status"></i>
+                                                    <div class="item-inner">
+                                                        开状态报警A项电压空信息
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="#" class="item-link article-modal">
+                                                <div class="item-content">
+                                                    <i class="icon icon-c-status"></i>
+                                                    <div class="item-inner">
+                                                        开状态报警A项电压空信息
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#" class="item-link article-modal">
+                                                <div class="item-content">
+                                                    <i class="icon icon-c-status"></i>
+                                                    <div class="item-inner">
+                                                        开状态报警A项电压空信息
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="tab2" class="tab active">
+                            <div class="content-block">
+                                <p>This is tab 2 content</p>
+                                ...
+                            </div>
+                        </div>
+
+                        <div id="tab3" class="tab">
+                            <div class="content-block">
+                                <p>This is tab 3 content</p>
+                                ...
+                            </div>
+                        </div>
+
+                        <div id="tab4" class="tab">
+                            <div class="content-block">
+                                <p>This is tab 444444444444 content</p>
+                                ...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+#parse("mobile/_footer.vm")

@@ -1,0 +1,241 @@
+function calAngle(x1,y1,x2,y2){
+	return angle = parseInt(Math.atan2(y2-y1,x2-x1)/Math.PI*180);
+}
+function calArrow(x1,y1,x2,y2){
+	var len = 15;
+	var c = 30;
+	var angle = calAngle(x1,y1,x2,y2);
+	return [
+		[x2,y2],
+		[x2 - parseInt(len * Math.cos(Math.PI/180*(angle - c))),y2 - parseInt(len * Math.sin(Math.PI/180*(angle - c)))],
+		[x2 - parseInt(len * Math.cos(Math.PI/180*(angle + c))),y2 - parseInt(len * Math.sin(Math.PI/180*(angle + c)))]
+	];
+}
+require.config( {
+    baseUrl: '$!{platform_static_url}'
+} );
+require(
+   	['zrender/zrender'],
+    function(zrender) {
+        var zr = zrender.init(document.getElementById('_bpm_monitor_pic'));
+        zr.clear();
+		var color = require('zrender/tool/color');
+		var colorIdx = 0;
+		var width = Math.ceil(zr.getWidth());
+		var height = Math.ceil(zr.getHeight());
+		
+		#foreach($activity in $roundActivities)
+			zr.addShape({
+			    shape : 'circle',
+			    id : zr.newShapeId('circle'),
+			    style : {
+			    	#set($x = $activity.x + 15)
+			    	#set($y = $activity.y + 13)
+			        x : $!{x},
+			        y : $!{y},
+			        r : 15,
+			        brushType : 'both',
+			        color : '#FFFFFF',          // rgba supported
+			        #if($executionMap.containsKey($activity.id))
+			        strokeColor : '#F00',
+			        textColor : '#F00',
+			        #elseif($hisExecutionMap.get($activity.id))
+			        strokeColor : 'blue',
+			        textColor : 'blue',
+			        #else
+			        strokeColor : '#000000',
+			        textColor : '#000',
+			        #end
+			        lineWidth : 5,
+			        text :'$!{activity.properties.get("name")}',
+			        textPosition :'inside'
+				}
+			});
+		#end
+		#foreach($activity in $serviceActivities)
+			zr.addShape({
+			    shape : 'rectangle',
+			    id : zr.newShapeId('rectangle'),
+			    style : {
+			        x : $!{activity.x},
+			        y : $!{activity.y},
+			        width : $!{activity.width},
+			        height: $!{activity.height},
+			        radius: [5],
+			        brushType : 'both',
+			        color : '#FFFFFF',
+			        #if($executionMap.containsKey($activity.id))
+			        strokeColor : '#F00',
+			        textColor : '#F00',
+			        #elseif($hisExecutionMap.get($activity.id))
+			        strokeColor : 'blue',
+			        textColor : 'blue',
+			        #else
+			        strokeColor : '#000000',
+			        textColor : '#000',
+			        #end
+			        lineWidth : 5,
+			        lineJoin : 'round',
+			        text : '$!{activity.properties.get("name")}',
+			        textPosition :'inside'
+			    }
+			});
+		#end
+		#foreach($activity in $rectangleActivities)
+			zr.addShape({
+			    shape : 'rectangle',
+			    id : zr.newShapeId('rectangle'),
+			    style : {
+			        x : $!{activity.x},
+			        y : $!{activity.y},
+			        width : $!{activity.width},
+			        height: $!{activity.height},
+			        radius: [5],
+			        brushType : 'both',
+			        color : '#FFFFFF',
+			        #if($executionMap.containsKey($activity.id))
+			        strokeColor : '#F00',
+			        textColor : '#F00',
+			        #elseif($hisExecutionMap.get($activity.id))
+			        strokeColor : 'blue',
+			        textColor : 'blue',
+			        #else
+			        strokeColor : '#000000',
+			        textColor : '#000',
+			        #end
+			        lineWidth : 5,
+			        lineJoin : 'round',
+			        text : '$!{activity.properties.get("name")}',
+			        textPosition :'inside'
+			    }
+			    #if($executionMap.containsKey($activity.id))
+			    ,onmouseover: function(params) {
+		        	var div = $("#bpm_approval_$!{activity.id}");
+		        	if(div.length == 0){
+		        		#set($sx = $activity.x + $activity.width + 15)
+		        		#set($sy = $activity.y)
+			        	div = $('<div class="bpm_hover_approval" id="bpm_approval_$!{activity.id}" style="line-height:18px;display:none;top:$!{sy}px;left:$!{sx}px;font-size:12px;padding:10px;width:190px;color:#FFF;background:#333;position:absolute;">'
+			        		#foreach($task in $tasks)
+							+ '<span style="color:#CCC">待办人员：</span> $!{task.description}<br/>'
+							+ '<span style="color:#CCC">产生时间：</span> #date_format($task.createTime)<br/>'
+							+ '<span style="color:#CCC">待办停留：</span> $!{task.residence}'
+							#if($tasks.size() > 1 && $velocityCount < $tasks.size())
+							+ '<hr/>'
+							#end
+							#end
+			        		+'</div>');
+			        	$('body').append(div);
+		        	}
+		        	div.show();
+			    },onmouseout: function(params) {$("#bpm_approval_$!{activity.id}").hide();}
+		        #elseif($approvalMap.get($activity.id))
+		        #set($approvals = $approvalMap.get($activity.id))
+		        ,onmouseover: function(params) {
+		        	var div = $("#bpm_approval_$!{activity.id}");
+		        	if(div.length == 0){
+		        		#set($sx = $activity.x + $activity.width + 15)
+		        		#set($sy = $activity.y)
+			        	div = $('<div class="bpm_hover_approval" id="bpm_approval_$!{activity.id}" style="line-height:18px;display:none;top:$!{sy}px;left:$!{sx}px;font-size:12px;padding:10px;width:190px;color:#FFF;background:#333;position:absolute;">'
+							#foreach($approval in $approvals)
+							+ '<span style="color:#CCC">处理人员：</span> $!{approval.description}<br/>'
+							+ '<span style="color:#CCC">产生时间：</span> #date_format($approval.generateTime)<br/>'
+							+ '<span style="color:#CCC">办结时间：</span> #date_format($approval.handleTime)<br/>'
+							+ '<span style="color:#CCC">待办停留：</span> $!{approval.residence}'
+							#if($approvals.size() > 1 && $velocityCount < $approvals.size())
+							+ '<hr/>'
+							#end
+							#end			        		
+			        		+'</div>');
+			        	$('body').append(div);
+		        	}
+		        	div.show();
+			    },onmouseout: function(params) {$("#bpm_approval_$!{activity.id}").hide();}
+		        #else
+		        #end
+			});
+		#end
+		
+		#foreach($activity in $exclusiveGatewayActivities)
+			zr.addShape({
+			    shape : 'isogon',
+			    id : zr.newShapeId('star'),
+			    style : {
+			        #set($x = $activity.x + 20)
+			    	#set($y = $activity.y + 20)
+			        x : $!{x},
+			        y : $!{y},
+			        r : 20,
+			        n : 4,
+			        brushType : 'both',
+			        color : "#FFFFFF",          // rgba supported
+			        #if($hisExecutionMap.get($activity.id))
+			        strokeColor : "blue",
+			        textColor : "blue",
+			        #else
+			        strokeColor : "#000",
+			        textColor : '#000',
+			        #end
+			        lineWidth : 5,
+			        text :'X',
+			        textFont : 'bold 25px verdana',
+			        textPosition :'inside'
+			    }
+			});
+		#end
+		
+		#foreach($activity in $activities)
+			#foreach($t in $activity.outgoingTransitions)
+						#set($idx1 = $t.waypoints.size() - 4)
+				    	#set($idx2 = $t.waypoints.size() - 3)
+				    	#set($idx3 = $t.waypoints.size() - 2)
+				    	#set($idx4 = $t.waypoints.size() - 1)
+				    	#set($p1 = $t.waypoints.get($idx1))
+				    	#set($p2 = $t.waypoints.get($idx2))
+				    	#set($p3 = $t.waypoints.get($idx3))
+				    	#set($p4 = $t.waypoints.get($idx4))
+				    	#if($t.properties.get("name")=='驳回')
+				    	  #set($tx = $p1 - 35)
+				    	#else
+				    	  #set($tx = $p1 + 10)
+				    	#end
+				    	#set($ty = $p2 + 10)
+				zr.addShape({
+				    shape : 'brokenLine',
+				    id : zr.newShapeId('brokenLine'),
+				    style : {
+				        pointList : [
+				        	#foreach($p in $t.waypoints)#if($velocityCount % 2 == 1)[#{end}$p#if($velocityCount % 2 == 1),#{else}]#if($velocityCount < $t.waypoints.size()),#end#end#end
+				        ],
+				        #if($highFlows.contains($t.id))
+				        strokeColor : "blue",
+				        #else
+				        strokeColor : "#000",
+				        #end
+				        lineWidth : 2,
+				        text : '$!{t.properties.get("name")}',
+				        textPosition : 'specific',
+				        //textAlign : 'left',
+				        //textBaseline : 'bottom',
+				        textX : $tx,
+				        textY : $ty
+				    }
+				});
+				zr.addShape({
+				    shape : 'polygon',
+				    style : {
+				        pointList : calArrow($p1,$p2,$p3,$p4),
+				        #if($highFlows.contains($t.id))
+				        color : "blue",
+				        #else
+				        color : "#000",
+				        #end
+				        text:''
+				    }
+				});
+			#end
+		#end
+		
+		// 绘画
+		zr.render();
+    }
+);

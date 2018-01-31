@@ -1,0 +1,212 @@
+#set($_title = $!{index_title})
+#parse("index/_header.vm")
+<link rel="stylesheet" href="$!{platform_static_url}/css/hcstyle.css" />
+<link rel="stylesheet" href="$!{platform_static_url}/css/font.css" />
+<link rel="stylesheet" href="$!{platform_static_url}/css/custom.css" />
+<!------------报警--------------->
+<script type="text/javascript" src="${rc.contextPath}/alarmjs/js/dialog.js"></script>
+<script type="text/javascript" src="${rc.contextPath}/alarmjs/js/alarm.js"></script>
+	<style>
+	.ui-action .fa {
+		color: #fff;
+	}
+	.ui-menu-item a {
+		padding: 0px 20px 0px 14px;
+    }
+    .ui-header-middle {
+        background: url("$!{platform_static_url}/images/IMG_$!{rootMenuCode}.png") no-repeat 0 50%;
+    }
+    .menu-name{
+        position: absolute;
+        left:456px;
+        top:0;
+        height: 61px;
+        line-height: 61px;
+        font-size: 16px;
+        color: #add5eb;
+        font-weight: 600;
+    }
+    .goBack{
+        display: inline-block;
+        height:45px;
+        width: 45px;
+        position: absolute;
+        left:30px;
+        top:10px;
+        cursor: pointer;
+        z-index: 9999;
+    }
+	</style>
+</head>
+<body>
+<iframe class="ui-layout-center" id="_main_frame" name="_main_frame" scrolling="auto" src="about:blank"
+        frameborder="no"></iframe>
+<!-- header start -->
+<div class="ui-layout-north">
+    <div class="ui-header">
+##    	<div class="ui-header-middle">#*<img src="$!{platform_static_url}/images/IMG_$!{rootMenuCode}.png">*#</div>
+        <a class="goBack" title="浙江医院设备信息采集管理平台" href="/zjyy"></a>
+        <div class="menu-name">${menuName}</div>
+        <div class="ui-header-right">
+          <div class='ui-header-info'>
+          	<i class="usericon"></i>
+          	<span class="userwlc">
+          		欢迎您：尊敬的
+          		<a href="javascript:void(0)" onclick="modUser('$!{userId}')">#if($_user.name)$!{_user.name}#{else}$!name#{end}</a>
+            	！
+            </span>
+            <a class="setting"  href="javascript:window.open('$!rc.contextPath/index/platform')" title="系统设置">
+            	<i class="settingicon"></i>
+            </a> 
+            <a class="reset-pwd" href="javascript:updatePass()" title="更改密码">
+            	<i class="reseticon"></i>
+            </a>
+            <a class="logout" href="$!{rc.contextPath}/index/logout/$!rootMenuCode" title="退出">
+            	<i class="logouticon"></i>
+            </a>
+            ##<p style="margin:0;line-height:24px;" id="weather"></p>
+          </div>
+        </div>
+    </div>
+    <div class="ui-menu-warp">
+      <ul id="menu" class="ui-menu fn-hide ">
+        #_menu("menu","$!rootMenuCode")#end
+           #if($!menu.children && !$!menu.children.isEmpty())
+             #foreach($!fmenu in $!menu.children)
+               #if($!fmenu.display)
+                <li> 
+                    <a #if($!fmenu.linkUrl && ""!=$!fmenu.linkUrl) menuid="$!fmenu.id" menucode="$!fmenu.code" href="$!rc.contextPath/$!fmenu.linkUrl" #end>$!fmenu.name</a>
+                    #if($!fmenu.children && !$!fmenu.children.isEmpty())
+                    <ul>
+                      #foreach($!smenu in $!fmenu.children)
+                       #if($!smenu.display)
+                        <li>
+                         <a #if($!smenu.linkUrl && ""!=$!smenu.linkUrl) menuid="$!smenu.id" menucode="$!smenu.code" href="$!rc.contextPath/$!smenu.linkUrl" #end>$!smenu.name</a>
+                           #if($!smenu.children && !$!smenu.children.isEmpty())
+                           <ul>
+                            #foreach($!tmenu in $!smenu.children)
+                               #if($!tmenu.display)
+                                <li><a #if($!tmenu.linkUrl && ""!=$!tmenu.linkUrl) menuid="$!tmenu.id" menucode="$!tmenu.code" href="$!rc.contextPath/$!tmenu.linkUrl" #end>$!tmenu.name</a></li>
+                                #end  
+                              #end
+                            </ul>
+                          #end
+                        </li>
+                       #end  
+                     #end
+                    </ul>
+                  #end
+              </li>
+            #end
+          #end
+        #end
+      </ul>
+    </div>
+ <div id="menu-crumbs" style="display:none"></div>
+</div>
+<!-- header end -->
+
+<!-- footer -->
+<div class="ui-layout-south">
+    <div style="text-align:center;border-top: 1px solid #e1e5e6;line-height: 24px;">
+     Copyright &copy; 2003-$date.yyyy 浙江浙大中控信息技术有限公司
+    </div>
+</div>
+
+<!-- loading -->
+<div id="platform_loading"></div>
+
+<!-- 全文检索 -->
+<div id="fulltext_retrieval">
+    <input placeholder="快捷菜单"/>
+    <a class="search-btn"></a>
+</div>
+<script type="text/javascript" src="$!{main_static_custom_url}/js/menu.js"></script>
+<script type="text/javascript">
+    $.CONTEXT_PATH = "$!{rc.contextPath}";
+    var _layout, _header_layout, _center_layout, _inner_layout;
+    var skin_url_cookie = readCookie("skin_url")? readCookie("skin_url") : "";//读取缓存skin
+    //alert("$!rootMenuCode")
+    $(document).ready(function () {
+        _layout = $('body').layout({
+            defaults: {
+                resizable: false,
+                closable: true,
+                spacing_open: 0
+            },
+            north: {
+                size: 115
+            },
+            south: {
+                size: 25
+            }
+        });
+      //菜单
+        $('#menu').menu({
+            width: 120,
+            zIndex: 2000
+        });
+        iframe_loaded($("#_main_frame")[0], loadComplete);
+        loadIndex();
+        undoAlarm();
+    });
+
+	function loadIndex(){
+        var firstMenu=$('#menu a:eq(0)');
+        var tryMenu=firstMenu.next().find('a:eq(0)');
+        if(tryMenu.size()==1){
+        	firstMenu=tryMenu;
+        }	
+        firstMenu.click();
+	}
+    function loadFrame(url) {
+        $("#platform_loading").show();
+        var _hash = window.location.hash;
+        if(url=="" && _hash && _hash != "#"){
+          $("#_main_frame").attr("src", $.base64.decode(window.location.hash.substring(1)));
+        }else{
+          $("#_main_frame").attr("src", url);
+        }     
+    }
+    function loadComplete() {
+        $("#platform_loading").hide();
+    }
+
+    function updatePass(){
+        var url = "$!{rc.contextPath}/updatePass";
+        quick_dialog("USER_PASS", "修改密码", url,400, 230);
+    }
+
+	function menuCrumbs(menuCode){
+	    if(!menuCode){
+	    	$('#menu-crumbs').hide();
+	     	return;
+	    }
+	  	$('#menu-crumbs').load("$!{rc.contextPath}/base/menuCrumbs", {startLevel: 2,menuCode:menuCode}, function(){
+   			$('#menu-crumbs').show();
+ 		});
+	}
+	function undoAlarm(){
+		$('ul li a').each(function(i,n){
+		  var childer=$(this).next().find('li a');
+		  if(childer.size()==0){
+			if(!$(this).attr('href')){
+				$(this).attr('style','color:red;');
+				var p=$(this).parent('li').parent('ul').prev('a');
+				while($(p).size()>0){
+					$(p).attr('style','color:red;');
+					p=$(p).parent('li').parent('ul').prev('a');
+				}
+			}
+		  }
+		});
+	}
+    $(function(){
+//    	 #if($!rootMenuCode=="ROOT_NBGL" || $!rootMenuCode=="ROOT_ABGL" || $!rootMenuCode=="ROOT_SBWX")
+//    		 m_alarmWarm('$!{rc.contextPath}','$!{rc.contextPath}/download/alarm_music.wav',$!{alarmTime});
+//         #end
+//	     m_alarmWarm('$!{rc.contextPath}','$!{rc.contextPath}/download/alarm_music.wav',$!{alarmTime});
+	});
+</script>
+</body>
+</html>

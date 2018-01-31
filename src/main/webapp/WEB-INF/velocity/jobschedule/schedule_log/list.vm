@@ -1,0 +1,176 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<div class="ui-layout-center" id="subMain">
+	<div class="ui-layout-north">
+		 <form class="ui-form" id='queryForm'>
+	     <table width="100%">
+	       <tr>
+	         <td>
+	           <table class="ui-search-table">
+	             <tr>
+	               <td class="ui-search-name first">JOB 名称：</td>
+	               <td class="ui-search-c">
+	                 <input name="condition.jobName"  class="k-textbox" type="text"  maxlength="32">
+	               </td>
+	               <td class="ui-search-name">执行状态:</td>
+	               <td class="ui-search-c">
+	                 	<select class="k-textbox" name="condition.success">
+							$!{success}
+		                </select>
+		                </select>
+	               </td>
+	               <td class="ui-search-name">执行时间起：</td>
+	               <td class="ui-search-c">
+	                 <input name="condition.startTime" id="startTime" class="k-textbox" type="text"  maxlength="32">
+	               </td>
+	               <td class="ui-search-name">执行时间止：</td>
+	               <td class="ui-search-c">
+	                 <input name="condition.endTime"  id="endTime" class="k-textbox" type="text"  maxlength="32">
+	               </td>
+	           </table>
+	         </td>
+	         <td width="150" valign="top" style="padding-top:4px;">
+	           <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+	           <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+	         </td>
+	         <td></td>
+	       </tr>
+	     </table>
+	 	</form>
+	</div>
+	<div class="ui-layout-center">
+	  <div id="grid"></div> 
+     </div>
+</div>
+#parse("index/_footer.vm") 
+<script type="text/javascript">
+     var _iframe_layout,_inner_layout;
+	$(document).ready(function(){
+		_iframe_layout = $('body').layout({
+		      defaults: {
+		        resizable: false,
+		        closable: false,
+		        spacing_open: 5
+		      }
+		    });
+		 _inner_layout = $("#subMain").layout({
+		      defaults: {
+		        resizable: false,
+		        closable: false,
+		        spacing_open: 0
+		      },
+		      center: {
+		          onresize_end: function () {
+		              var grid = $("#grid").data("kendoGrid");
+		              grid.resize();
+		          }
+		      }
+     })
+ commonDate("startTime","endTime","yyyy-MM-dd HH:mm:ss","zh-CN");
+ 
+    $('#resetBtn').click(function(){
+		clearDate("startTime", "endTime");
+		$("#queryForm :text").val('');  
+    });
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/jobschedule/schedule-log/list", [{
+              field: "id",
+              hidden: true
+          }, {
+		      width: 50,
+	          headerTemplate: '<input type="checkbox" id="check-all"/>',
+	          template: '<div style="text-align:center;"><input type="checkbox" name="check" onclick="uncheck()" /></div>'           
+		 }, {
+			  width: 150,
+              field: "jobName",
+              title: "名称",
+              sortable: false,
+              template:"<a href=\"javascript:void(0)\" title=\"查看#: data.jobName #的详细信息\" onclick=\"quick_dialog('jobschedule_schedule_job_add_dlg','查看#:data.jobName #的信息','$!{rc.contextPath}/jobschedule/schedule-job/edit?flag=2&id=#: data.scheduleId #',650,550)\">#: data.jobName #</a>",
+              headerAttributes: {"class": "k-grid-text"},
+          	  attributes: {"class": "k-grid-text"}
+              
+          },{
+        	  width: 300,
+              field: "targetArguments",
+              sortable: false,
+              title: "执行参数",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+        	  width: 150,
+              field: "startTime",
+              sortable: false,
+              title: "执行开始时间",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+        	  width: 150,
+              field: "endTime",
+              sortable: false,
+              title: "执行结束时间",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+        	  width: 200,
+              field: "excuteTime",
+              sortable: false,
+              title: "消耗时间",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+        	  width: 80,
+              field: "successText",
+              title: "成功/失败",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "errorMsg",
+              sortable: false,
+              title: "错误消息",
+              template:function(data){
+              	if(data.errorMsg!=null){
+		            var s=data.errorMsg;
+		            var msg=s.substring(0,100)+'...';
+              		return "<a href='javascript:void(0)' title='查看详细信息' onclick='showMsg("+data.id+")'>"+ msg+"</a>";
+              		}
+              	else
+              		return "";
+              },
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+          }
+          ], 
+      {
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          },resizable:true,
+          pageable:{
+          	pageSizes: [20,100,1000,10000]
+          }
+      },
+		{
+          serverSorting: true
+      }, [
+      	#kendo_datagrid_btns("JOBSCHEDULE_SCHEDULE_LOG")#end
+      ]);
+		checkALL("#check-all","input[name='check']");	
+    }); 
+    function showMsg(id){
+    	quick_dialog('jobschedule_schedule_log_view_dlg','查看错误信息','$!{rc.contextPath}/jobschedule/schedule-log/view?id='+id,680,450);
+    } 
+  	function uncheck(){
+  		var flag = 0;
+      if(document.getElementById("check-all").checked){
+    	  document.getElementById("check-all").checked=false;
+    	}
+      $.each($("input[name='check']"),function(i,v){
+			if(v.checked == false)
+				flag = 1;
+		});
+      if(flag != 1)
+    	  document.getElementById("check-all").checked=true;
+    }    
+</script>

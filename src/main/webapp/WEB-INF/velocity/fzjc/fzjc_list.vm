@@ -1,0 +1,203 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<div class="ui-layout-center" id="subMain">
+	
+	 <div class="ui-layout-center" style="background: #dcedf5;">
+		<div align="center" class="center-list">
+    	  <table border="0">
+    		   <tr>
+    				<td align="center">
+						<div class="list list-01">
+							<div class="list-title">主要工艺设备故障</div>	
+                    		 <table class="ui-table">
+                    				   <tr>
+                    						<th align="center">设备名称</th>
+                    						<th align="center">故障台数</th>
+                    						<th align="center">同比上月</th>
+                                       </tr>	
+                    	                <tr>
+                    	                    <td align="center">底盘试验室</td>
+                    	    				<td align="center">12</td>
+                    	    				<td align="center"><span class="fc">+</span>10%</td>
+                    	    			</tr>
+                    					<tr>
+                    					    <td align="center">风洞试验室</td>
+                    	    				<td align="center">11</td>
+                    	    				<td align="center"><span class="fc">+</span>10%</td>
+                    					</tr>
+                    					<tr>
+                    					    <td align="center">整车试验室</td>
+                    	    				<td align="center">8</td>
+                    	    				<td align="center"><span class="fc">+</span>10%</td>
+                    					</tr>
+                    					<tr>
+                    					    <td align="center">噪声试验室</td>
+                    	    				<td align="center">9</td>
+                    	    				<td align="center"><span class="fc">+</span>10%</td>
+                    					</tr>
+                    					<tr class="last">
+                    					    <td align="center">合计</td>
+                    	    				<td align="center">40</td>
+                    	    				<td align="center">10%</td>
+                    					</tr>
+                    		  </table>
+                          </div>
+
+					
+					</td>
+    				<td align="center">
+					   <div class="list list-02">
+					   		<div class="list-title">主要工艺设备故障</div>	
+                    		 <table class="ui-table" >
+                    				   <tr>
+                    						<th align="center">设备名称</th>
+                    						<th align="center">故障台数</th>
+                    						<th align="center">同比上月</th>
+                                       </tr>	
+                    	                <tr>
+                    	                    <td align="center">底盘试验室</td>
+                    	    				<td align="center">12</td>
+                    	    				<td align="center"><span class="fc">+</span>10%</td>
+                    	    			</tr>
+                    					<tr>
+                    					    <td align="center">风洞试验室</td>
+                    	    				<td align="center">11</td>
+                    	    				<td align="center"><span class="fc">+</span>10%</td>
+                    					</tr>
+                    					<tr>
+                    					    <td align="center">整车试验室</td>
+                    	    				<td align="center">8</td>
+                    	    				<td align="center"><span class="fc">+</span>10%</td>
+                    					</tr>
+                    					<tr>
+                    					    <td align="center">噪声试验室</td>
+                    	    				<td align="center">9</td>
+                    	    				<td align="center"><span class="fc">+</span>10%</td>
+                    					</tr>
+                    					<tr class="last">
+                    					    <td align="center">合计</td>
+                    	    				<td align="center">40</td>
+                    	    				<td align="center">10%</td>
+                    					</tr>
+                    		  </table>
+                          </div>
+
+					</td>
+    				
+               </tr>	
+    		  <tr>
+    				<td align="center">
+					   <div class="list list-03">
+					   		<div class="list-title">主要工艺设备故障</div>	
+                    		 <table class="ui-table" >
+                    				   <tr>
+                    						<th align="center">设备名称</th>
+                    						<th align="center">故障台数</th>
+                    						<th align="center">同比上月</th>
+                                       </tr>	
+                    	                <tr>
+                    	                    <td align="center">底盘试验室</td>
+                    	    				<td align="center">12</td>
+                    	    				<td align="center"><span class="fc">+</span>10%</td>
+                    	    			</tr>
+                    					<tr>
+                    					    <td align="center">风洞试验室</td>
+                    	    				<td align="center">11</td>
+                    	    				<td align="center"><span class="fc">+</span>10%</td>
+                    					</tr>
+                    					<tr>
+                    					    <td align="center">整车试验室</td>
+                    	    				<td align="center">8</td>
+                    	    				<td align="center"><span class="fc">+</span>10%</td>
+                    					</tr>
+                    					<tr>
+                    					    <td align="center">噪声试验室</td>
+                    	    				<td align="center">9</td>
+                    	    				<td align="center"><span class="fc">+</span>10%</td>
+                    					</tr>
+                    					<tr class="last">
+                    					    <td align="center">合计</td>
+                    	    				<td align="center">40</td>
+                    	    				<td align="center">10%</td>
+                    					</tr>
+                    		  </table>
+                          </div>
+
+					
+					</td>
+    				<td align="center">
+						<div class="list list-04">
+							<div class="list-title">主要工艺设备故障</div>	
+                    		 <table class="ui-table" >
+                    				   <tr>
+                    						<th align="center">设备名称</th>
+                    						<th align="center">故障台数</th>
+                    						<th align="center">同比上月</th>
+                                       </tr>	
+                    	                <tr>
+                    	                    <td align="center">底盘试验室</td>
+                    	    				<td align="center">12</td>
+                    	    				<td align="center"><span class="fc">+</span>10%</td>
+                    	    			</tr>
+                    					<tr>
+                    					    <td align="center">风洞试验室</td>
+                    	    				<td align="center">11</td>
+                    	    				<td align="center"><span class="fc">+</span>10%</td>
+                    					</tr>
+                    					<tr>
+                    					    <td align="center">整车试验室</td>
+                    	    				<td align="center">8</td>
+                    	    				<td align="center"><span class="fc">+</span>10%</td>
+                    					</tr>
+                    					<tr>
+                    					    <td align="center">噪声试验室</td>
+                    	    				<td align="center">9</td>
+                    	    				<td align="center"><span class="fc">+</span>10%</td>
+                    					</tr>
+                    					<tr class="last">
+                    					    <td align="center">合计</td>
+                    	    				<td align="center">40</td>
+                    	    				<td align="center">10%</td>
+                    					</tr>
+                    		  </table>
+                          </div>
+
+					</td>
+               </tr>
+          </table>	
+     </div>
+	</div>
+</div>
+#parse("index/_footer.vm") 
+
+<script type="text/javascript">
+     var _iframe_layout,_inner_layout;
+	$(document).ready(function(){
+		_iframe_layout = $('body').layout({
+		      defaults: {
+		        resizable: false,
+		        closable: false,
+		        spacing_open: 5
+		      }
+		    });
+		 _inner_layout = $("#subMain").layout({
+		      defaults: {
+		        resizable: false,
+		        closable: false,
+		        spacing_open: 0
+		      },
+		     
+     })
+
+   
+
+		
+	
+		
+    });
+	  
+	 
+</script>
+</body>
+</html>

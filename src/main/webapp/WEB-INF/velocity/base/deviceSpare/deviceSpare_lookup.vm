@@ -1,0 +1,145 @@
+#parse("index/_header.vm")
+</head>
+<body>
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<form class="ui-form" id='queryForm'>
+		  <input id="deviceSpareInId" type="hidden" name="deviceSpareInId" value="$!deviceSpareInId" />
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+                <tr>
+                  <td class="ui-search-name">备件名称：</td>
+                  <td class="ui-search-c">
+					 <input class="k-textbox" type="text" id="spareName" name="spareName" >
+                  </td>
+                </tr>
+              </table>
+            </td>
+            <td width="150" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+            <td></td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+ #parse("index/_footer.vm")  
+<script type="text/javascript">
+  var _iframe_layout, _left_layout, _inner_layout;
+	$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      },
+      west: {
+        size: 0.25
+      }
+    });
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+
+    $('#resetBtn').click(function(){
+      $("#queryForm :text").val('');  
+    });
+
+	$('.iconfont','.ui-form-pick').each(function(){
+      $(this).click(function(){
+      	$('#treeId').val('');
+      	$('#selectBlock').hide();
+        //$(this).parent().remove();
+      })
+    })
+	
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/base/deviceSpareIn/detailPage?_t="+new Date().getTime(),
+		[{
+              field: "id",
+              hidden: true
+          }, {
+              field: "spareName",
+              title: "备件名称",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              sortable: false
+              
+          }, {
+              field: "spareSpac",
+              title: "备件规格/型号",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              sortable: false
+              
+          }, {
+              field: "price",
+              title: "价格(元)",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              sortable: false
+              
+          }],
+		  
+      	{
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          }
+      }, {
+          serverSorting: true
+      }, [
+          {
+              name: "选择",
+              icon: "fa fa-plus",
+              onclick: function (obj, grid) {
+                  var row = grid.select();
+                  if (null == row || row.length == 0) {
+                      notify("你还没有选择备件", "warn");
+                      return;
+                  }
+                 var data = grid.dataItem(row);             
+				 if(top.frames[0].window.deviceSpareCheckedCallback){
+                         top.frames[0].window.deviceSpareCheckedCallback(data);
+                    
+                  }
+				  grid.destroy();
+				  $("#grid").remove();
+				  close_dialog('selectDiloag');
+              }
+          },
+          {
+              name: "清空",
+              icon: "fa fa-remove",
+              onclick: function (obj, grid) {
+            	  top.frames[0].window.deviceSpareCheckedClearCallback();
+   			
+				  grid.destroy();
+				  $("#grid").remove();
+				  close_dialog('selectDiloag');
+              }
+          }
+      ]);
+		
+    });
+
+
+</script>

@@ -1,0 +1,179 @@
+<style>
+ .ui-tab ul{
+	overflow:visible;
+}
+</style>
+<div class="row-fluid">
+	<div class="span2 first">
+        <div id="tab-container" class='ui-tab fn-mr-0'>
+         <ul class='ui-tab-items'>
+           <li class='ui-tab-item'><a href="#tabs1"><span class="ui-tab-area"></span>服务区域</a></li>
+           <li class='ui-tab-item'><a href="#tabs2"><span class="ui-tab-type"></span>部门</a></li>
+         </ul>
+         <div class='ui-tab-panels'>
+            <div id="tabs1" class='ui-tab-panel'>
+              <div class="ui-box-1">
+                <div class="ui-box-container" style="height:375px;overflow-y:scroll;overflow-x:auto;">
+                    <div class="ui-box-content">
+                      <ul id="treeDemo1" class="ztree" ></ul>
+                    </div>
+                </div>
+              </div>
+            </div>
+            <div id="tabs2" class='ui-tab-panel'>
+              <div class="ui-box-1">
+                <div class="ui-box-container" style="height:375px;overflow-y:scroll;overflow-x:auto;">
+                    <div class="ui-box-content">
+                      <ul id="treeDemo2" class="ztree" ></ul>
+                    </div>
+                </div>
+              </div>
+            </div>
+         </div>
+        </div>
+      </div>
+     <div class="span10">
+        <div id="job_device_list_search" class="ui-form-search-right" style="width:740px;">
+        	<input id="departmentId" type="hidden" name="departmentId"  class="ui-input"/>
+	        <input id="locationId" type="hidden" name="locationId"  class="ui-input" />
+            <div class="ui-form-item">
+                <label class="ui-label">设备编码:</label>
+				<input class="ui-input" type="text" name="deviceCode" />
+            </div>
+			<div class="ui-form-item">
+                <label class="ui-label">设备名称:</label>
+				<input class="ui-input" type="text" name="deviceName" />
+            </div>
+			<div >
+			  <button id="searchBtn" type="button" class="btn btn-primary"><i class="iconfont icon-search"></i> 查&nbsp;询</button>			
+			</div>		
+        </div>	
+	<div id="choosebox" style="width:680px;overflow:hidden;padding-top:20px;padding-left:50px">
+					<table  cellpadding="0" cellspacing="0" width="auto" >
+					      <tr>
+                            <td width="228">
+                                <label class="ui-title-center"><strong style="color: #fff;">可选择设备</strong></label>
+                        		<div class="chooseBox subclass">
+                            	 <ul class="chooseUl" id="device_selecting" >
+                                 </ul>
+                                </div>
+                            </td>
+                            <td width="100" class="t_c" style="vertical-align:middle;">
+                                <input class="btn btn-success" type="button" value=">>" onclick="selectBotn('subclass','subclassPick');"/>
+                                <input class="btn btn-success" type="button" value="<<" onclick="selectBotn('subclassPick','subclass');"/> 
+                            </td>
+                            <td width="228">
+                                <label class="ui-title-center"><strong style="color: #fff;">已选择设备</strong></label>
+                        		<div class="chooseBox subclassPick" style="overflow-x:auto;">
+                            	 <ul class="chooseUl" id="device_selected">
+								 </ul>
+								</div>
+                            </td>
+						  </tr>
+					</table>
+	</div>
+	</div>
+</div>
+<script type="text/javascript">
+   var setting = {
+		data: {
+			simpleData: {
+				enable: true
+			}
+		},
+		callback: {
+			onClick: onClick
+		}
+
+	};
+	function onClick(event, treeId, treeNode, clickFlag) {
+		if(treeId=="treeDemo1"){
+			$("#locationId").val(treeNode.id);
+		}else{
+			$("#departmentId").val(treeNode.id);
+		}
+		$("#searchBtn").click();
+		$("#locationId").val("");
+		$("#departmentId").val("");
+	}
+    var zNodes1 = [];  
+    zNodes1.push({id:"0", pId:"-1", name:"服务区域簇",open:true});     
+    
+    #foreach($!{treeNode1} in $!{treeListLou})
+        zNodes1.push({id:$!{treeNode1.id}, pId:$!{treeNode1.parentId}, name:"$!{treeNode1.areaName}"});     
+    #end
+    var zNodes2 = [];  
+    zNodes2.push({id:"10001", pId:"-1", name:"部门簇",open:true});     
+    
+    #foreach($!{treeNode2} in $!{treeListType})
+        zNodes2.push({id:$!{treeNode2.id}, pId:$!{treeNode2.pId}, name:"$!{treeNode2.name}"});     
+    #end
+</script>
+<script type="text/javascript">
+  function addSelectClass($obj){
+	if($obj.hasClass("choosePick")){
+		$obj.removeClass("choosePick");
+	}else{
+		$obj.addClass("choosePick");
+	}	
+ }
+
+function selectBotn(from,to){
+	$("."+from+" li").each(function(){
+		if($(this).hasClass("choosePick")){//已选中
+			var subId = $(this).attr("subId");
+			$(this).removeClass("choosePick");
+			if($("."+to+" li[subId="+subId+"]").size()>0){
+    			$(this).remove();
+    			 return;
+			}else{
+    			$("."+to+" ul").append($(this)[0].outerHTML);
+    			$(this).remove();
+			}
+		}
+	})
+	
+}	
+
+function generateDeviceList(target,dataArray){
+ var str='';
+ $.each(dataArray,function(idx,item){
+    str+='<li subId="'+item.deviceId+'" onclick="addSelectClass($(this));" >'+'<font color="white">'+item.deviceName+
+    '</font></li>'
+ })
+  $('.'+target+' ul').html(str);
+}
+
+function getSelectedDevice(){
+  var ids=[];
+  $('#device_selected li').each(function(idx,item){
+     ids.push($(this).attr('subId'));
+  });
+  return ids.join(';');
+}
+$(document).ready(function(){
+		$('#tab-container').easytabs();
+	 //ztree
+		$.fn.zTree.init($("#treeDemo1"), setting,zNodes1);
+		$.fn.zTree.init($("#treeDemo2"), setting,zNodes2);
+   $('#searchBtn').click(function(){
+	   var params={
+	    "monitorObject.deviceName":$.trim($('#job_device_list_search [name=deviceName]').val())
+	    ,"monitorObject.deviceCode":$.trim($('#job_device_list_search [name=deviceCode]').val())
+	    ,"monitorObject.locationId":$.trim($('#job_device_list_search [name=locationId]').val())
+	    ,"monitorObject.departmentId":$.trim($('#job_device_list_search [name=departmentId]').val())
+	   };
+	   $.post('$!{rc.contextPath}/nhgl/basic/taskSet/base/loadMonitorObject?t='+new Date().getTime(),params,function(datas){
+			 generateDeviceList('subclass',datas);
+		 });
+   });//click
+   var taskCode='$!task.taskCode';
+   if(taskCode!=''){
+	   $.post('$!{rc.contextPath}/nhgl/basic/taskSet/base/loadMonitorObjectByTaskCode?t='+new Date().getTime(),{taskCode:taskCode},function(datas){
+			 generateDeviceList('subclassPick',datas);
+		 });
+   }else{
+     $('#searchBtn').click();
+   }
+});//ready
+</script> 

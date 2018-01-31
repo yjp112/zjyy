@@ -1,0 +1,29 @@
+
+
+
+ 
+    <script language="javascript"  type="text/JavaScript">   //预览监控点时触发事件          
+   
+        function BSTRReadCard()
+
+        {
+            document.getElementById("cr").value=TestOCX.BSTRReadCard();
+             alter(document.getElementById("TestOCX"))
+            //TestOCX.BSTRReadCard();
+        }
+    </script>
+
+        
+         <OBJECT ID="TestOCX" class="http://127.0.0.1:8080/jcds/download/dc_card/hundureD8eActive.ocx"
+                CLASSID="CLSID:FBDA651F-2228-41D7-8C63-98BD44D85D91">
+            </OBJECT>
+        <div id='RdObj' style="visibility:hidden; width: 0px; height: 0px;">
+        </div>
+
+        <br></br>
+
+        <input id='cr' name='cr' type='input'/>
+
+        <br></br>
+
+        <a href="javascript:BSTRReadCard()" >读取卡号</a>  

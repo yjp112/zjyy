@@ -1,0 +1,87 @@
+#parse("index/_header.vm")
+<style>
+	.n-bottom .msg-wrap {
+      margin-top: 0px;
+	  margin-left: 5px;
+    }
+</style>
+</head>
+<body>
+<form id="myform_id" method="post" action="$!{rc.contextPath}/updatePass" class="ui-dialog-form">
+    <table width="100%">
+        <tr>
+            <td class="label">用户名：</label></td>
+            <td >$!users.username</td>
+            <td ></td>
+        </tr>
+        <tr>
+            <td class="label"><span class="ui-form-required">*</span>原始密码：</td>
+            <td>
+                <input type="password" class="k-textbox" name="oldPass" value="" maxlength="20">
+            </td>
+        </tr>
+        <tr>
+            <td class="label"><span class="ui-form-required">*</span>新密码：</td>
+            <td>
+                <input type="password" class="k-textbox" name="newPass" value="" maxlength="20">
+            </td>
+        </tr>
+        <tr>
+            <td class="label"><span class="ui-form-required">*</span>确认新密码：</td>
+            <td>
+                <input type="password" class="k-textbox" name="repeatPass" value="" maxlength="20">
+            </td>
+        </tr>
+
+    </table>
+    <div class="actions">
+        <button class="k-primary hc_btn" id="save_button_id" type="submit">保 存</button>
+        <button class="hc_btn cancel" onclick="close_dialog('USER_PASS')" type="button">取 消</button>
+    </div>
+
+</form>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#myform_id").validator({
+            fields: {
+                oldPass: "原始密码:required;length[~30];",
+                newPass: "新密码:required;length[~30];",
+                repeatPass: "确认新密码:match[eq, newPass];length[~30];"
+            },
+            valid: function (form) {
+                form_btn_submit($("#save_button_id"), form, function (res) {
+
+                   if(res.status =="success"){
+                       notify(res.data.message,"success");
+                   }
+                    if(res.status =="fail"){
+                        notify(res.data.message,"error");
+                    }
+                    if(res.status =="error"){
+                        notify(res.data.message,"error");
+                    }
+                    close_dialog("USER_PASS")
+                });
+            }
+        });
+
+        $("form .k-textbox").bind({
+            mouseover: function(e) {
+                if ($(this).hasClass("n-invalid")) {
+                    var msg_box = $(this).siblings(".msg-box").get(0);
+                    $(msg_box).find(".n-error").show();
+                }
+            },
+            mouseout: function(e){
+                if ($(this).hasClass("n-invalid")) {
+                    $(this).siblings(".msg-box").find(".n-error").hide();
+                }
+            }
+        });
+
+    });
+</script>
+</body>
+</html>

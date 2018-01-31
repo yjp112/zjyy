@@ -1,0 +1,198 @@
+#parse("index/_header.vm")
+</head>
+<body>
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<form class="ui-form" id='queryForm'>
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+				<tr>
+					<td class="ui-search-name first">设备编码：</td>
+					<td class="ui-search-c">
+						<input name="deviceCode" class="k-textbox" type="text" value="$!{deviceCode}">
+					</td>
+					
+					<td class="ui-search-name first">设备名称：</td>
+					<td class="ui-search-c">
+						<input name="deviceName" class="k-textbox" type="text">
+					</td>
+					
+					<td class="ui-search-name first">报修人：</td>
+					<td class="ui-search-c">
+						<input name="contact" class="k-textbox" type="text">
+					</td>
+                    <td class="ui-search-name">报修时间：</td>
+					<td class="ui-search-c" colspan="3">
+						<input  id="startTime"  class="k-textbox"  name="startTimes" />
+						至
+						<input id="endTime"  class="k-textbox"  name="endTimes" />
+					</td>
+                </tr>
+                <tr>
+					<td class="ui-search-name first">维修单号：</td>
+					<td class="ui-search-c">
+						<input name="repairCode" class="k-textbox" type="text">
+					</td>
+					
+					<td class="ui-search-name first">维修班组：</td>
+					<td class="ui-search-c">
+						<input name="repairGroupName" class="k-textbox" type="text">
+					</td>
+					<td class="ui-search-name first">主管工程师：</td>
+					<td class="ui-search-c">
+						<input name="engineerName" class="k-textbox" type="text">
+					</td>
+                    <td class="ui-search-name">完成时间：</td>
+					<td class="ui-search-c" colspan="3">
+						<input  id="startTime1"  class="k-textbox"  name="startTimes1" />
+						至
+						<input id="endTime1"  class="k-textbox"  name="endTimes1" />
+					</td>
+                </tr>
+              </table>
+            </td>
+            <td width="180" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+            <td></td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+  #parse("index/_footer.vm") 
+<script type="text/javascript">
+    var menuCode = '$!{menu.code}';
+    var _iframe_layout, _left_layout, _inner_layout,containerHeight;
+	$(document).ready(function(){
+	    _iframe_layout = $('body').layout({
+	      defaults: {
+	        resizable: false,
+	        closable: false,
+	        spacing_open: 5
+	      },
+	      west: {
+	        size: 0.18
+	      }
+        });
+
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+	
+	$('#resetBtn').click(function(){
+		clearDate("startTime", "endTime");
+		clearDate("startTime1", "endTime1");
+		$("#queryForm :text").val('');  
+    });
+	
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/repair/process/list?r=" + new Date(), [
+		  {
+		  	field: "id",
+			hidden: true,
+			sortable:false
+		  },{
+		  	field: "repairCode",
+			title: "维修单号",
+			sortable: false,
+			width:150,
+			headerAttributes: {"class": "k-grid-equilong"},
+		  	attributes: {"class": "k-grid-equilong"},
+            template:"<a href=\"javascript:view('#:data.id #')\" title=\"查看#: data.repairCode #的详细信息\" >#: data.repairCode #</a>"
+		  },{
+              field: "contact",
+              title: "报修人",
+			  sortable: false,
+			  width:100,
+              headerAttributes: {"class": "k-grid-text"},
+		  	  attributes: {"class": "k-grid-text"}
+          },{
+		  	field: "repairDate",
+			title: "报修时间",
+			sortable: false,
+			headerAttributes: {"class": "k-grid-equilong"},
+		  	attributes: {"class": "k-grid-equilong"}
+		  },{
+              field: "deviceName",
+              title: "报修设备",
+			  sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+		  	  attributes: {"class": "k-grid-text"}
+          },{
+              field: "engineerName",
+              title: "主管工程师",
+			  sortable: false,
+			  width:100,
+              headerAttributes: {"class": "k-grid-text"},
+		  	  attributes: {"class": "k-grid-text"}
+          },{
+              field: "repairGroupName",
+              title: "维修班组",
+			  sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+		  	  attributes: {"class": "k-grid-text"}
+          },{
+              field: "actualFinishTime",
+              title: "维修完成时间",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+  		  	  attributes: {"class": "k-grid-equilong"}
+          }, {
+              field: "stopHours",
+              title: "故障时长(小时)",
+			  sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+		  	  attributes: {"class": "k-grid-text"}
+          }, {
+              field: "causeTypeName",
+              title: "故障原因分类",
+			  sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+		  	  attributes: {"class": "k-grid-text"}
+          }, {
+              field: "costSaving",
+              title: "节约成本(元)",
+			  sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+		  	  attributes: {"class": "k-grid-text"}
+          }
+          
+          ], 
+      {
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          },resizable:true
+      }, {
+          serverSorting: true
+      }, [
+          #kendo_datagrid_btns("NBGL_SBWX_GYSB")#end
+      ]);
+	
+    }); 
+	
+	commonDate("startTime","endTime","yyyy-MM-dd HH:mm:ss","zh-CN");
+	commonDate("startTime1","endTime1","yyyy-MM-dd HH:mm:ss","zh-CN");
+	function view(id){
+	//	quick_dialog("repair_dlg", "查看维修单", "$!{rc.contextPath}/repair/process/edit?viewOnly=true&menuCode=$!{menu.code}&id="+id, 1024, 768);
+    	window.location.href="$!{rc.contextPath}/repair/process/edit?viewOnly=true&menuCode=$!{menu.code}&id="+id;
+    }
+</script>

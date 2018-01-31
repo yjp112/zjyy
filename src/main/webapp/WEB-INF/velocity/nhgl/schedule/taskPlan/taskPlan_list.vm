@@ -1,0 +1,221 @@
+<div class="row-fluid" id="taskPlan_div">
+	<div id="tab-container" class='ui-tab'>
+		<ul class='ui-tab-items'>
+			<li class='ui-tab-item'><a href="#tabs1" onclick="taskType()">任务日历</a></li>
+	        <li class='ui-tab-item'><a href="#tabs2" onclick="reload()">任务列表</a></li>
+	    </ul>
+        <div class='ui-tab-panels'>
+			<div id="tabs1" class='ui-tab-panel'>
+				<div style="margin-left:15%">
+					#foreach($tv in $taskV)
+						#set($num = 0)
+						<input type="checkbox" name="tv" onclick="taskType()" checked="checked" value="$tv.enumText"/>
+						<label style="color:#fff">$tv.enumText</label>
+						#set($num = $num+1)
+					#end
+				</div>
+				<iframe id="canlendar_frame"  name="canlendar_frame" frameborder="0" scrolling="yes" style="width:1000px;margin:auto;" src="${rc.contextPath}/nhgl/schedule/controller/taskPlan/goCanlendarModel?taskVesting=$!{taskVesting}"></iframe>
+			</div>
+	        <div id="tabs2" class='ui-tab-panel'>
+				<div class="row-fluid">
+					<div class="span12 first" style="float:left;width:15%">
+						<div class="ztree-header">
+                    		<div class="ztree-title">任务分类</div>
+                    	</div>
+						<div id="trees" style="float:left;width:200px;">
+							<ul id="treedc" class="ztree" style="overflow:auto"></ul>
+						</div>
+					</div>
+            		<div  style="float:left;width:85%">
+            			<form class="ui-form ui-form-search fn-clear" id='queryForm' >
+            				<div class="ui-form-search-left">
+								<div class="ui-form-item">
+									<label class="ui-label">任务名称：</label>
+									<input class="ui-input" type="text" name="condition.taskName" value="$!condition.taskName">
+            					</div>
+								<div class="ui-form-item">
+									<input name="condition.taskType" id="treeId" value="" type="hidden"/>
+									<label class="ui-label">任务归属：</label>
+									<select class="ui-select" name="condition.taskVesting">
+                                        <option value="">--请选择--</option>
+										#foreach($tc in $taskV)
+											<option value="$!{tc.enumValue}">$tc.enumText</option>
+										#end
+									</select>
+            					</div>
+        				   </div>
+						   <div class="ui-form-search-right">
+							  <button type="submit" class="btn btn-primary" id="queryBtn"><i class="iconfont icon-search"></i> 查&nbsp;询</button>
+							</div>	
+            			</form>
+            			<div>
+            			    <table id="pagerTable" style="display: none"></table> 
+            			</div>
+					</div>	
+				</div>
+	         </div>
+	      </div>
+	 </div>
+</div>
+<script type="text/javascript">
+	var setting = {
+ 		 check: {
+				enable: true
+			},
+		data: {
+			simpleData: {
+				enable: true
+			}
+		},
+		callback: {
+			onClick: onClick
+		}
+  	 };
+   	 var zNodes = $!{tree};
+	 function onClick(event, treeId, treeNode, clickFlag) {
+	 	$("#treeId").attr("value",treeNode.treeId);
+		$("#pagerTable").flexReload();
+	 }
+	$(document).ready(function(){
+			$.fn.zTree.init($("#treedc"), setting, zNodes);
+			$('#tab-container').easytabs();
+			if(T.innerLayout && !T.innerLayout.destroyed){
+    			T.innerLayout.destroy();
+    		}
+    		
+    });
+   
+	
+	function reload(){
+	  	setTimeout(grid,1);
+	  }
+	  function grid(){
+			var height = $(window).height();
+            //列表
+			var subSystemInfo_datagrid=$("#pagerTable").datagrid({
+			url:'$!{rc.contextPath}/nhgl/basic/taskSet/tasklist',
+			dataType: "json",
+			method: "POST",
+			singleSelected : true,
+			striped : false,
+			height:  height-177,
+			showOrderNumber : true,
+			useRp : true,
+			usepager: true,
+    		rpOptions: [10, 20, 40, 50],
+    		pageSize: 20,
+    		searchFormId:"queryForm",
+    		searchCallback:function(datagrid){},
+    		onSuccess:function(table,grid){
+    			if(!grid)return ;
+    		},
+    		colModel:[
+			 {display: "ID", name: "id",hide:true }, 
+			 {display: "序号"},
+    		 {display: "任务编码", name: "taskCode", width: 200},                                      
+             {display: "任务名称", name: "taskName", width: 110},                                      
+             {display: "任务分类", name: "categoryText", width: 150}, 
+             {display: "任务归属", name: "typeName", width: 150},                                      
+             {display: "任务描述", name: "taskDesc", width: 150},
+			 {display: "计划开始时间", name: "startDate", width: 150},
+			 {display: "计划结束时间", name: "endDate", width: 150}
+    		],
+    		buttons : [
+	            #data_grid_buttons('NHGL_ZXJH')#end
+	        ]
+			});
+		}
+	  function openDilog(title,url){
+	  	newDialog('addDiloag', 'load:'+url, title, true, 600, 350);
+	  }
+	  function openDilog_edit(title,url){
+	  	newDialog('addDiloag', 'load:'+url, title, true, 600, 500);
+	  }
+	  function openDilogLook(title,taskVesting,id){
+	  	var url="";
+	  	if(taskVesting == "1")
+			url='$!{rc.contextPath}/nhgl/basic/taskSet/device_runtime/edit?id='+id;
+		else if(taskVesting == "2")
+			url='$!{rc.contextPath}/nhgl/basic/taskSet/electric/edit?id='+id;
+		else if(taskVesting == "3") 
+			url = "$!{rc.contextPath}/nhgl/basic/taskSet/water/edit?id="+id;
+		else return false;
+		$.dialogs.normalDialog(
+				'addDiloag12', 
+				url,
+				function(dlg,btn){
+					if(readyForSave(btn) == false)
+							return false;
+					$.forms.submits("#deviceRuntime_edit_form", 
+						function(){ 
+							location.reload()
+							dlg.close(2); return true; 
+						}, 
+					btn);
+					return false; 
+				},
+				950, 
+				450,
+				"查看",
+				"确定",
+				false,
+				"关闭"
+				
+		);
+	  }
+	  function openDilogAdd(title,url){
+		$.dialogs.normalDialog(
+			"taskExecutionPlan_add_dlg", 
+			url, 
+			function(dlg,btn){
+				var taskVesting = $("#taskVesting").val();
+				var url="";
+				if(taskVesting == "1") 
+					url = "$!{rc.contextPath}/nhgl/basic/taskSet/device_runtime/add";
+				else if(taskVesting == "2") 
+					url = "$!{rc.contextPath}/nhgl/basic/taskSet/electric/add";	
+				else if(taskVesting == "3") 
+					url = "$!{rc.contextPath}/nhgl/basic/taskSet/water/add";	
+				else return false;
+				dlg.close(); 
+				$.dialogs.normalDialog("runtime_add_dlg", 
+					url, 
+					function(dlg,btn){ 
+						if(readyForSave(btn) == false)
+							return false;
+						$.forms.submits("#deviceRuntime_edit_form", 
+							function(){
+								location.reload()
+								dlg.close(); return true; 
+							}, 
+							btn
+						);
+						return false; 
+					},
+					950,450,"新增任务"
+				); 	
+				return false; 
+			},
+			550,
+			200,
+			title
+		);
+	  }
+	  function taskType(){
+	  	var vesting = "";
+	  	$("input[name='tv']:checked").each(function(i){
+			vesting = vesting+$(this).val()+",";
+	  		//var arr = document.getElementsByName("tv");
+			//var str = "";
+			//for(var i = 0; i<arr.length; i++){
+				//str = str+arr[i].value+",";
+			//}
+		});
+		var time=$('#time',window.frames["canlendar_frame"].document).val();
+		$("#canlendar_frame").attr("src","${rc.contextPath}/nhgl/schedule/controller/taskPlan/goCanlendarModel?taskVesting="+encodeURIComponent(vesting)+"&time="+time);
+		
+	  	//$("#canlendar_frame").contact().find().load("${rc.contextPath}/nhgl/plan/taskPlan/goCanlendarModel?taskVesting="+encodeURIComponent(vesting));
+	  }
+	  
+</script>
+

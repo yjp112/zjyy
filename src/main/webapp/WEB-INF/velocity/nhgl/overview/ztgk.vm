@@ -1,0 +1,412 @@
+ <script type="text/javascript" src="$!{nhgl_static_custom_url}/echarts_2/esl.js"> </script>
+  <script type="text/javascript" src="$!{nhgl_static_custom_url}/echarts_2/echartsUtil.js"></script>
+ <style type="text/css">
+ 	.font-decline{
+		font-size:36px;
+		color:#3fa0e4
+	}
+	.font-increase{
+		font-size:36px;
+		color:#ff8c41
+	}
+	.area-name{
+		height:40px;
+		width:19.5%; 
+		border: 1px solid #ccc;
+		float:left;
+		text-align:center
+	}
+	.area-div{
+		width:99%;
+		height:40px;
+		float:left;
+		margin:11px 0px 0px 11px
+	}
+	.electric-all{
+		margin-top:5%;
+		margin-left:10%;
+		width:190px;
+		float:left
+	}
+	.electric-area{
+		height:100px; 
+		width:19.5%; 
+		border: 1px solid #ccc;
+		float:left;
+		border-top:0px
+	}
+	.basic{
+		float:left;
+		width:99%
+	}
+ </style>
+ <div class="ui-main">
+	<div class="area-div">
+	#foreach($elec in $subTree)
+		<div class="area-name" >
+			<div style="margin-top:13px;color:#fff">$elec.name</div>
+		</div>
+	#end
+	</div>
+	<div class="basic" style="height:100px;margin-left:11px;">
+	#foreach($elec in $subTree)
+		<div class="electric-area"> 
+			<div class="basic" style="margin-top:8%;margin-left:-5%;">
+				#if($elec.percent > 0)
+					<label class="font-increase" style="font-size:22px;float:right;">$elec.percent%</label>
+					<div class="font-increase electric-all ">
+						$elec.total
+						<span style="font-size:15px">kWh</span>
+					</div>
+					<br><br>
+					<span class="c-list-row-2"><label class="c-list-row-rise" style="color:#f00">环比昨日<i class="i-trend"/></label></span>
+##					<div style="margin-left:235px;color:#fff">同比昨日增长</div>
+				#elseif($elec.percent==0)
+					<label class="font-decline" style="font-size:22px;float:right;color:#fff">$elec.percent%</label>
+					<div class="font-decline electric-all " style="color:#fff">
+						<span style="color:#fff">$elec.total</span>
+						<span style="font-size:15px;color:#fff">kWh</span>
+					</div>
+					<br><br>
+					<span class="c-list-row-2"><label class="c-list-row-unchanged" style="color:#fff">环比昨日<i class="i-trend"/></label></span>
+##					<div style="margin-left:235px;color:#fff">同比昨日持平</div>
+				#else
+					<label class="font-decline" style="font-size:22px;float:right;">$elec.percent%</label>
+					<div class="font-decline electric-all ">
+						$elec.total 
+						<span style="font-size:15px">kWh</span>
+					</div>
+					<br><br>
+					<span class="c-list-row-2"><label class="c-list-row-decline" style="color:#00ff14">环比昨日<i class="i-trend"/></label></span>
+##					<div style="margin-left:235px;color:#fff">同比昨日下降</div>
+				#end
+			</div>
+		</div>
+	#end
+	</div>
+	<div id="main" style="height:260px; width:33%; float:left;margin-top:60px;">
+    </div>
+	<div id="line" style="height:260px; width:66%; float:left;margin-top:60px">
+    </div>
+	<div id="bar3" style="height:260px;width:33%; float:left;margin-top:60px">
+    </div>
+	<div id="bar1" style="height:320px;width:33%; float:left;margin-top:60px">
+    </div>
+	<div id="bar2" style="height:260px;width:33%; float:left;margin-top:60px">
+    </div>
+ </div>
+ <script type="text/javascript">
+ 	var w=100/$subTree.size()-0.5;
+ 	
+	var myChart;
+	var option;
+	var width = $(window).width();
+	var height = $(window).height();
+	var ecDay = '$!{ecDay}';
+$(document).ready(function(){
+	//console.info($subTree);
+	$(".area-name").css("width",w+"%");
+	$(".electric-area").css("width",w+"%");
+  var contextPath = "$!{rc.contextPath}";
+  function chartFactory(option,containerId)
+  {
+  	 require.config({
+            paths: {
+                echarts: '$!{nhgl_static_custom_url}/echarts/echarts' ,
+            }
+        });
+  	require(
+        [
+            'echarts',
+            'echarts/chart/radar',
+			'echarts/chart/pie',
+		    'echarts/chart/line'
+        ],
+  		function(ec)
+		{
+			 myChart = ec.init(document.getElementById(containerId));
+             myChart.setOption(option);
+		}
+		)
+  }
+  var score =$!{map.TOTAL_RESULT_SCORE};
+  if(score<0){
+  	score=0;
+  }
+var dataStyle = {
+    normal: {
+        label: {show:false},
+        labelLine: {show:false}
+    }
+};
+var placeHolderStyle = {
+    normal : {
+        color: 'rgba(0,0,0,0)',
+        borderColor:'#0B0E15',
+        label: {show:false},
+        labelLine: {show:false}
+    },
+    emphasis : {
+        color: 'rgba(0,0,0,0)'
+    }
+};
+option = {
+    title: {
+        text: '本月总能耗',
+        x: '130',
+        y: '30',
+        itemGap: 20,
+        textStyle : {
+            color : 'rgb(132,17,19)',
+            fontFamily : '微软雅黑',
+            fontSize : 18,
+            fontWeight : 'bolder'
+        }
+    },
+    tooltip : {
+        show: true,
+        formatter: "{a} <br/>{b} : {c} ({d}%)"
+    },
+    legend: {
+        orient : 'vertical',
+        x : (document.getElementById('main').offsetWidth / 2)+25,
+        y : 60,
+        itemGap:12,
+        data:['本月用电：'+$!{thisMonth}+'kWh','去年同期：'+$!{lastMonth}+'kWh'
+]             },
+    toolbox: {
+        show : false,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    series : [
+        {
+            name:'1',
+            type:'pie',
+            center:['35%','61%'],
+            clockWise:false,
+            radius : [100, 75],
+            itemStyle : dataStyle,
+            data:[
+                {
+                    value:$!{thisMonthP},
+                    name:'本月用电：'+$!{thisMonth}+'kWh'
+                },
+                {
+					value:$!{lastMonthP},
+                    name:'invisible',
+                    itemStyle : placeHolderStyle
+                }
+            ]
+        },
+        {
+            name:'2',
+            type:'pie',
+            center:['35%','61%'],
+            clockWise:false,
+            radius : [75, 50],
+            itemStyle : dataStyle,
+            data:[
+                {
+                    value:$!{lastMonthP},
+                    name:'去年同期：'+$!{lastMonth}+'kWh'
+                },
+                {
+                    value:$!{thisMonthP},
+                    name:'invisible',
+                    itemStyle : placeHolderStyle
+                }
+            ]
+        }
+    ]
+};
+                    
+initEcharts("main",option);
+
+option1 = {
+	title : {
+		x : 'center',
+        text: '$!{nowDate}能耗数据分析'
+	},
+    tooltip : {
+        trigger: 'axis',
+        formatter: "{b} 耗电总量 : {c} kWh"
+    },
+    toolbox: {
+        show : true
+    },
+    xAxis : [
+        {
+            type : 'category',
+            boundaryGap : false,
+            data : ['00:00','01:00','02:00','03:00','04:00','05:00','06:00','07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00','23:00','24:00']
+        }
+    ],
+    yAxis : [
+        {
+			borderWidth : '0px',
+            type : 'value'
+        }
+    ],
+    series : [
+        {
+            name:'每小时段耗电总量',
+            type:'line',
+            stack: '总量',
+            itemStyle: {normal: {areaStyle: {
+                color: 'rgba(30, 144, 255, 0.6)'
+            }}},
+            data:ecDay.split(",")
+        }
+    ]
+};
+initEcharts("line",option1);
+option2 = {
+    title : {
+        text: '各区域能耗占比分析',
+        x:'center'
+    },
+    tooltip : {
+        trigger: 'item',
+        formatter: 
+        function (params) {
+            if(params[2]==0){
+            	return  params[0]+'<br/>'+params[1]+'：'+params[2]+' kwh '+'('+0+'%)'
+            }else{
+        		return  params[0]+'<br/>'+params[1]+'：'+params[2]+' kwh '+'('+params[3]+'%)'
+            }
+        }
+    },
+     legend: {
+        orient : 'vertical',
+        x : 'left',
+        data:$!{areaName}
+    },
+    itemStyle: {
+	    emphasis: {
+	        label: {
+	            show: false
+	        }
+	    }
+	},
+    series : [
+        {
+            name:'区域能耗',
+            type:'pie',
+            radius : '55%',
+			startAngle:50,
+            center: ['50%', '50%'],
+            data:$!{elecArea}
+        }
+    ]
+};
+initEcharts("bar1",option2);
+
+initEcharts('bar3', {
+
+
+title: {
+        text: '能耗健康指标',
+        x: '110',
+        textStyle : {
+            color : 'rgb(255,255,255)'
+        }
+    },
+    tooltip : {
+        formatter: "{a} <br/>{b} : {c}%"
+    },
+    toolbox: {
+        show : false,
+        feature : {
+            mark : {show: true},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    series : [
+        {
+            name:'能耗健康指标',
+            type:'gauge',
+            center:['35%','50%'],
+            detail : {formatter:'{value}'},
+            data:[{value: 50, name: ''}],
+            axisLine: {
+              show: true,
+              lineStyle: {
+                  color: [
+                      [0.2, '#ff4500'],
+                      [0.8, '#48b'],
+                      [1, '#228b22']
+                  ], 
+                  width: 20
+              	}
+          	} ,
+            splitLine:{
+                show: true,
+                length :20, 
+                lineStyle: { 
+                    color: '#eee',
+                    width: 1,
+                    type: 'solid'
+                }
+            },
+           axisTick:{
+	          show: true, 
+	          splitNumber: 5, 
+	          length :8, 
+	          lineStyle: {
+	              color: '#eee',
+	              width: 1,
+	              type: 'solid'
+	          }
+      		} 
+        }
+    ]
+    },function(myChart,option){
+			setInterval(function (){
+				option.series[0].data[0].value = score;
+    			myChart.setOption(option, true);
+			},2000)
+		}, THEME.SHINE);
+
+option3 = {
+    title : {
+        text: '各分项能耗占比分析',
+        x:'center'
+    },
+    tooltip : {
+        trigger: 'item',
+        formatter: 
+        function (params) {
+            if(params[2]==0){
+            	return  params[0]+'<br/>'+params[1]+'：'+params[2]+' kwh '+'('+0+'%)'
+            }else{
+        		return  params[0]+'<br/>'+params[1]+'：'+params[2]+' kwh '+'('+params[3]+'%)'
+            }
+        }
+    },
+    legend: {
+        x : 'right',
+		orient : 'vertical',
+		data:$!{subName}
+    },
+    series : [
+        {	
+			x : 'center',
+            name:'分项能耗',
+            type:'pie',
+			startAngle:50,
+            radius : '55%',
+            center: ['40%', '50%'],
+            data:$!{electric}
+        }
+    ]
+};
+initEcharts("bar2",option3);
+fNumPage()
+})
+ </script>

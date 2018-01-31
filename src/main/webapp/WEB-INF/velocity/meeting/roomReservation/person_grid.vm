@@ -1,0 +1,124 @@
+<div id="stock" style="margin-left:-5px;margin-right:5px">
+            <table id='tableId' style="width:100%;" class="ui-table ui-table-addRow">
+                <thead>
+                    <th class="k-header" style="text-align: center;">序号</th>
+                    <th class="k-header" align="left">姓名</th>
+                    <th class="k-header" align="left">部门</th>
+                    <th class="k-header" align="left">邮箱</th>
+					#if(!$!viewOnly)
+                    <th class="k-header" style="text-align: center">
+						<a href="javascript:void(0)" id="addRow" title="添加行"><i class="fa fa-plus-circle"></i></a>
+					</th>
+					#end
+                </thead>
+                <tbody align="center">
+                	#set($index=0)
+					#set($sy = 1)
+			#if($!reserveMeeting.personDetailList.size() > 0)
+		    		#foreach($list in $!reserveMeeting.personDetailList)
+						#set($index = $velocityCount)
+						#set($sy = $velocityCount)
+		                    <tr>
+		                        <td style="text-align:center">$velocityCount</td>
+		                        <td width="20%">
+		                        	<span class="k-textbox k-space-right" onclick="choosePersons(2,'','','reserveMeeting_add_dlg','-$index')">
+		                            <input type="hidden" id="personId-$index" name="personDetailList[$index].id" value="$!{list.id}">
+		                            <input type="text" id="personName_id-$index" value="$!{list.name}" name="personName_id_$index" class="k-textbox" />
+		                            <a href="#" class="k-icon k-i-search">&nbsp;</a>
+		                            </span>
+		                        </td>
+		                        <td width="50%"><input readonly type="text" id="personDept_id-$index" name="a[$index]" value="$!{list.deptName}" class="k-textbox"/></td>
+		                        <td width="20%"><input readonly type="text" id="personEmail_id-$index" name="a[$index]" value="$!{list.email}" class="k-textbox"/></td>
+		                        #if(!$!viewOnly)
+								<td>
+									<a onclick="delRow(this);"  class="del"  href="javascript:void(0);" title="删除"><i class="fa fa-remove spare_delRow" style="color: #000;"></i></a>
+								</td>
+								#end
+		                    </tr>
+                    #end
+              #else      
+						#foreach($j in [$sy..1])
+	                        <tr>
+	                            <td style="text-align:center">$j</td>
+	                            <td width="20%" style="position:static;">
+	                            	<span class="k-textbox k-space-right" onclick="choosePersons(2,'','','reserveMeeting_add_dlg','-$j')">
+	                                	<input class="k-textbox" type="hidden" id="personId-$j" name="personDetailList[$j].id" value=""/>
+	                                	<input readonly type="text" id="personName_id-$j" name="personName_id_$j" class="k-textbox" value=""/>
+	                                	<a href="#" class="k-icon k-i-search" >&nbsp;</a>
+	                            	</span>
+	                            </td>
+	                            <td width="50%"><input readonly type="text" id="personDept_id-$j" name="a[$j]" class="k-textbox" value=""/></td>
+	                            <td width="20%"><input readonly type="text" id="personEmail_id-$j" name="a[$j]" class="k-textbox" value=""/></td>
+	                            #if(!$!viewOnly)
+								<td>
+									
+									<a onclick="delRow(this);" class="del" href="javascript:void(0);" title="删除"><i class="fa fa-close" style="color: #000;"></i></a>
+								</td>
+								#end
+	                        </tr>
+                       #end
+		 		#end
+                </tbody>
+            </table>
+</div>
+	
+<script >
+    $(document).ready(function(){
+    	$("#addRow").click(function(){
+			var num = $("#number").val();
+			if(num==0)num=1;
+			var next = Number(num)+1;
+			var $tr = $("#stock").find("tr:last");
+			var exp = new RegExp("\\["+num+"\\]","g");
+			var exps = new RegExp("-"+num,"g");
+			var html = "<tr>"+$($tr).html().replace(exp,"["+next+"]")+"</tr>";
+			html = html.replace(">"+num+"<",">"+next+"<").replace(exps,"-"+next);
+			$("#number").val(next);
+			$($tr).after(html);
+			
+			$("#personId-" + next).val("");
+			$("#personName_id-" + next).val("");
+			$("#personPdept_id-" + next).val("");
+			$("#personDept_id-" + next).val("");
+			$("#personEmail_id-" + next).val("");
+			
+			$("#personId-" + next).removeAttr("value");
+			$("#personName_id-" + next).removeAttr("value");
+			$("#personPdept_id-" + next).removeAttr("value");
+			$("#personDept_id-" + next).removeAttr("value");
+			$("#personEmail_id-" + next).removeAttr("value");
+		});
+		
+    });
+	
+	function delRow(o){
+    		var num = $("#number").val();
+    		if(Number(num)==0 || Number(num)==1){
+    			num=1;
+    			notify("至少保留一个会议人员", "warn");
+    		}
+    		if(Number(num)!=1){	 
+            	var tr = $(o).parent("td").parent("tr");
+    			var vs = tr.nextAll();
+    			num = Number(tr.find("td:first").html());
+    			tr.remove();
+    			var next = num+1;
+    			$.each(vs,function(i,item){
+    				var str = $(item)[0].innerHTML;
+    				var exp = new RegExp("\\["+next+"\\]","g");
+        			var exps = new RegExp("-"+next,"g");
+        			var html = str.replace(exp,"["+num+"]");
+        			html = html.replace(">"+next+"<",">"+num+"<").replace(exps,"-"+num);
+    				num++;next++;
+    				$(item).html(html);
+    			})
+            	$("#number").val(num-1);
+    		}
+		}
+	setTimeout(function(){
+		$("#startTime").removeClass("k-input");
+		$("#startTime").addClass("k-textbox");
+		$("#endTime").removeClass("k-input");
+		$("#endTime").addClass("k-textbox");
+	},100);
+</script>

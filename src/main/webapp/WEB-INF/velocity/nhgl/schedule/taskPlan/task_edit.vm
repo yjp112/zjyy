@@ -1,0 +1,82 @@
+<script type="text/javascript">
+    function doSubmit(type,flowId,bpmEnabled) {
+        if(flowId){
+	        $("input[name='_bpm_ts_id']").val(flowId);
+        }
+        if(bpmEnabled){
+	        $("input[name='_bpm_enabled']").val(bpmEnabled);
+        }
+        var ctn = "$!rc.contextPath/nhgl/schedule/controller/taskPlan/"+type;
+        $("#myform_id").attr("action", ctn);
+        return true;
+    }
+
+</script>
+	<form id="task_edit_form" method="post" class="ui-form" action="$!{rc.contextPath}/nhgl/schedule/controller/taskPlan/save">
+		  <input type="hidden" name="id"  id="id" value="$!{monitorTask.id}"  />
+		  <div class="ui-form-item">
+	        <label class="ui-label" for="" ><span class="ui-form-required">*</span>任务编码：</label>
+	        <input  class="ui-input" type="text" data-rule="任务名称:required" name="monitorTask.taskCode" value="$!{monitorTask.taskCode}"  />
+		  </div>
+	      <div class="ui-form-item" style="float:left">
+	        <label class="ui-label" for="" ><span class="ui-form-required">*</span>任务名称：</label>
+	        <input  class="ui-input" type="text" data-rule="任务名称:required" name="monitorTask.taskName" value="$!{monitorTask.taskName}"  />
+		  </div>
+	      <div class="ui-form-item" style="float:left">
+	        <label class="ui-label" for="" ><span class="ui-form-required">*</span>任务分类：</label>
+			<select class="ui-select" name="monitorTask.taskType">
+				#foreach($taskType in $taskTypeList)
+					<option #if($monitorTask.taskType == $taskType.id) selected #end  value="$taskType.id">$taskType.catagoryText</option>
+				#end
+            </select>
+	      </div>
+		  <div class="ui-form-item" style="float:left">
+	        <label class="ui-label" for="" ><span class="ui-form-required">*</span>任务归属：</label>
+			<select class="ui-select" name="$monitorTask.taskVesting">
+				#foreach($tc in $edlist)
+					<option #if($monitorTask.typeName == $tc.enumText) selected #end  >$tc.enumText</option>
+				#end
+            </select>
+	      </div>
+		  <div class="ui-form-item" style="float:left">
+	        <label class="ui-label" for="" ><span class="ui-form-required">*</span>任务描述：</label>
+			<input class="ui-input" type="text" data-rule="任务分类:required" name="monitorTask.taskDesc" value="$!{monitorTask.taskDesc}" />
+	      </div>
+		  <div class="ui-form-item" style="float:left">
+	        <label class="ui-label" for="" ><span class="ui-form-required">*</span>计划开始时间：</label>
+			<input type="text" id="startTime" data-rule="开始时间:required" name="monitorTask.startTime"  class="ui-input Wdate" 
+						onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',maxDate:'#F{$dp.$D(\'endTime\')}'})"  
+						value="#date_format($!{monitorTask.startTime},'yyyy-MM-dd HH:mm:ss')"  size=22 />	
+		  </div>
+		  <div class="ui-form-item" style="float:left">
+	        <label class="ui-label" for="" ><span class="ui-form-required">*</span>计划结束时间：</label>
+			<input type="text" id="endTime" data-rule="结束时间:required" name="monitorTask.endTime"  class="ui-input Wdate" 
+						onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'#F{$dp.$D(\'startTime\')}'})"
+						value="#date_format($!{monitorTask.endTime},'yyyy-MM-dd HH:mm:ss')"  size=22 />
+		 </div>
+	</form>
+	<script type="text/javascript">
+	$(document).ready(function(){
+		
+        $('#myform_id').valid({
+          rules: {
+            planCode: ['not_empty',{max_length: 20}], 
+            subject: ['not_empty',{max_length: 20}],
+			excutorNames: ['not_empty',{max_length: 200}],
+			planStartTime: ['not_empty'],
+			planEndTime: ['not_empty'],
+            planContent:['not_empty',{max_length: 500}],
+			processDesc:[{max_length: 500}]
+          },onSuccess: function(response, validator, $form) {
+            validateCallback(response);
+			return false;
+          }
+        });	
+		
+	 	$('#backBtn').click(function(){
+	  		var api = frameElement.api, W = api.opener;
+	  		W.dialog.focus.close();
+	 	});
+	 
+	 });
+	</script>

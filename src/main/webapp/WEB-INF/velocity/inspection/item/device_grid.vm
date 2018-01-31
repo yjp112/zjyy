@@ -1,0 +1,226 @@
+<div id="deviceGrid" style="margin-left:-5px;margin-right:5px">
+	<input type="hidden" name="deviceNumber" value="$!inspectionItem.deviceList.size()" id="deviceNumber" />
+            <table id='tableId' style="width:100%;" class="ui-table ui-table-addRow">
+                <thead>
+                    <th class="k-header" align="center">序号</th>
+                    <th class="k-header" align="left">设备编码</th>
+                    <th class="k-header" align="left">设备名称</th>
+                    <th class="k-header" align="left">规格型号</th>
+                    <th class="k-header" align="left">安装位置</th>
+                    <th class="k-header" align="left">使用部门</th>
+					<th class="k-header" align="left">计划开始巡检时间</th>
+					#if(!$!viewOnly && !$!view)
+                    <th class="k-header" align="center">
+						<a href="javascript:void(0);" id="addRow_device" title="添加行"><i class="fa fa-plus-circle"></i></a>
+					</th>
+					#end
+                </thead>
+                <tbody align="center">
+                	#set($index=0)
+					#set($sy = 1)
+			#if($!inspectionItem.deviceList.size() > 0)
+		    		#foreach($list in $!inspectionItem.deviceList)
+						#set($index = $velocityCount)
+						#set($sy = $velocityCount)
+		                    <tr>
+		                        <td width="5%" style="text-align:center">$velocityCount</td>
+		                        <td width="20%">
+		                        	<span class="k-textbox k-space-right">
+		                            <input type="hidden" id="deviceId_id-$index" name="deviceList[$index].deviceId" value="$!{list.deviceId}">
+		                            <input readonly type="text" id="deviceCode_id-$index" value="$!{list.deviceCode}" name="deviceCode_id-$index" class="k-textbox" />
+		                            #if(!$!viewOnly && !$!view)
+									<a href="#" class="k-icon k-i-search">&nbsp;</a>
+									#end
+		                            </span>
+		                        </td>
+		                        <td width="15%"><input readonly type="text" id="deviceName_id-$index" name="a[$index]" value="$!{list.deviceName}" class="k-textbox"/></td>
+		                        <td width="15%"><input readonly type="text" id="deviceSpec_id-$index" name="a[$index]" value="$!{list.deviceSpec}" class="k-textbox"/></td>
+		                        <td width="15%"><input readonly type="text" id="locationName_id-$index" name="a[$index]" value="$!{list.locationName}" class="k-textbox"/></td>
+		                        <td width="15%"><input readonly type="text" id="useDepartmentName_id-$index" name="a[$index]" value="$!{list.useDepartmentName}" class="k-textbox"/></td>
+		                        <td width="15%" class="planTimeTd"><input class="planTime" type="text" id="planTime_id-$index" name="deviceList[$index].startTime" value="#date_format($!{list.startTime},'yyyy-MM-dd HH:mm:ss')" class="k-textbox"/></td>
+								#if(!$!viewOnly && !$!view)
+								<td>
+									<a onclick="delRow(this);" class="del" href="javascript:void(0);" title="删除"><i class="fa fa-remove spare_delRow" style="color: #000;"></i></a>
+								</td>
+								#end
+		                    </tr>
+                    #end
+              #else      
+						#foreach($j in [$sy..1]) 
+	                        <tr>
+	                            <td width="5%" style="text-align:center">$j</td>
+	                            <td width="20%" style="position:static;">
+	                            	<span class="k-textbox k-space-right" onclick="chooseDevices(2,'','','inspectionItem_add_dlg','-$j')">
+	                                	<input class="k-textbox" type="hidden" id="deviceId_id-$j" name="deviceList[$j].deviceId" value=""/>
+	                                	<input readonly type="text" id="deviceCode_id-$j" name="deviceCode_id-$j" class="k-textbox" value=""/>
+	                                	<a href="#" class="k-icon k-i-search" >&nbsp;</a>
+	                            	</span>
+	                            </td>
+	                            <td width="15%"><input readonly type="text" id="deviceName_id-$j" name="deviceList[$j].deviceName" class="k-textbox" value=""/></td>
+	                            <td width="15%"><input readonly type="text" id="deviceSpec_id-$j" name="deviceList[$j].deviceSpec" class="k-textbox" value=""/></td>
+	                            <td width="15%"><input readonly type="text" id="locationName_id-$j" name="deviceList[$j].locationName" class="k-textbox" value=""/></td>
+	                            <td width="15%"><input readonly type="text" id="useDepartmentName_id-$j" name="deviceList[$j].useDepartmentName" class="k-textbox" value=""/></td>
+	                            <td width="15%" class="planTimeTd"><input class="planTime" type="text" id="planTime_id-$j" name="deviceList[$j].startTime" class="k-textbox" value=""/></td>
+	                            #if(!$!viewOnly)
+								<td>
+									<a onclick="delRowDevice(this);" class="del" href="javascript:void(0);" title="删除"><i class="fa fa-close" style="color: #000;"></i></a>
+								</td>
+								#end
+	                        </tr>
+                       #end
+		 		#end
+                </tbody>
+            </table>
+</div>
+	
+<script >
+    $(document).ready(function(){
+    		commonSingleDate("planTime_id-1", "yyyy-MM-dd HH:mm:ss","zh-CN");
+        	$("#addRow_device").click(function(){
+    			var num = $("#deviceNumber").val();
+    			if(num==0)num=1;
+    			var cur = Number(num);
+    			var next = cur+1;
+    			var $tr = $("#deviceGrid").find("tr:last");
+    			var planInput="<input type='text' id='planTime_id-"+cur+"' name='deviceList["+cur+"].startTime' class='planTime'/>";
+    			var $copy = $($tr).clone();
+    			$($copy).find(".planTimeTd").empty();
+    			$($copy).find(".planTimeTd").append(planInput);
+    			var exp = new RegExp("\\["+num+"\\]","g");
+    			var exps = new RegExp("-"+num,"g");
+    			var html = "<tr>"+$($copy).html().replace(exp,"["+next+"]")+"</tr>";
+    			html = html.replace(">"+num+"<",">"+next+"<").replace(exps,"-"+next);
+    			$("#deviceNumber").val(next);
+    			$($tr).after(html);
+    			
+    			commonSingleDate("planTime_id-"+ next, "yyyy-MM-dd HH:mm:ss","zh-CN");
+    			
+    			$("#deviceId_id-" + next).removeAttr("value");
+    			$("#deviceCode_id-" + next).removeAttr("value");
+    			$("#deviceName_id-" + next).removeAttr("value");
+    			$("#deviceSpec_id-" + next).removeAttr("value");
+    			$("#locationName_id-" + next).removeAttr("value");
+    			$("#useDepartmentName_id-" + next).removeAttr("value");
+    			$("#planTime_id-" + next).removeAttr("value");
+    		});
+    });
+	
+	function delRowDevice(o){
+    		var num = $("#deviceNumber").val();
+    		if(Number(num)==0 || Number(num)==1){
+    			num=1;
+    			notify("至少保留一个设备", "warn");
+    		}
+    		if(Number(num)!=1){	 
+            	var tr = $(o).parent("td").parent("tr");
+    			var vs = tr.nextAll();
+    			num = Number(tr.find("td:first").html());
+    			tr.remove();
+    			var next = num+1;
+    			$.each(vs,function(i,item){
+					var $copy = $(item).clone();
+					var planTimeVals = new Array();
+					planTimeVals.push($($copy).find("#planTime_id-"+next).val());
+					var planInput="<input type='text' id='planTime_id-"+next+"' name='deviceList["+next+"].startTime' class='planTime'/>";
+					$(item).find(".planTimeTd").empty();
+					$(item).find(".planTimeTd").append(planInput);
+					var str = $(item).html();
+    				var exp = new RegExp("\\["+next+"\\]","g");
+        			var exps = new RegExp("-"+next,"g");
+        			var html = str.replace(exp,"["+num+"]");
+        			html = html.replace(">"+next+"<",">"+num+"<").replace(exps,"-"+num);
+    				$(item).html(html);
+					commonSingleDate("planTime_id-"+ num, "yyyy-MM-dd HH:mm:ss","zh-CN");
+					$("#planTime_id-" + num).val(planTimeVals[0]);
+					num++;next++;
+    			})
+            	$("#deviceNumber").val(num-1);
+    		}
+		}
+		
+	function setDeviceValue(grid,id){
+		var rows = grid.select();
+		var len = rows.length; 
+		var $tr_tmp = $("#deviceGrid").find("tr:gt("+(-id)+")");
+		var html_tmp = "";
+		var id_tmp = -id;
+		var final = '';
+		var planTimeIds = new Array();
+		var planTimeVals = new Array();
+		$($tr_tmp).each(function(){
+			id_tmp +=1;
+			var next = Number(id_tmp)+(len-1);
+			planTimeIds.push(next);
+			var planInput="<input type='text' id='planTime_id-"+next+"' name='deviceList["+next+"].startTime' class='planTime' value=''/>";
+			var $copy = $(this).clone();
+			planTimeVals.push($($copy).find("#planTime_id-"+id_tmp).val());
+    		$($copy).find(".planTimeTd").empty();
+    		$($copy).find(".planTimeTd").append(planInput);
+    		var exp = new RegExp("\\["+id_tmp+"\\]","g");
+            var exps = new RegExp("-"+id_tmp,"g");
+            var html = "<tr>"+$($copy).html().replace(exp,"["+next+"]")+"</tr>";
+            html = html.replace(">"+id_tmp+"<",">"+next+"<").replace(exps,"-"+next);
+			$("#deviceGrid").find("tr:gt("+(-id)+")");
+			
+            $("#deviceNumber").val(next);
+			html_tmp += html;
+			final = next;
+		});
+		$("#deviceGrid").find("tr:gt("+(-id)+")").remove();
+		$("#deviceNumber").val(-id);
+		for(var i =0;i<len;i++){
+			var data = grid.dataItem(rows[i]);
+    		var number = $("#deviceNumber").val();
+    		if(!number){
+    			$("#deviceNumber").val(1);
+    		}
+			if(i != 0){
+				id = Number(id)-1;
+        		var num = $("#deviceNumber").val();
+        		if(num==0)num=1;
+        		var next = Number(num)+1;
+        		var $tr = $("#deviceGrid").find("tr:last");
+				var planInput="<input type='text' id='planTime_id-"+next+"' name='deviceList["+next+"].startTime' class='planTime'  value=''/>";
+				var $copy = $($tr).clone();
+    			$($copy).find(".planTimeTd").empty();
+    			$($copy).find(".planTimeTd").append(planInput);
+        		var exp = new RegExp("\\["+num+"\\]","g");
+        		var exps = new RegExp("-"+num,"g");
+        		var html = "<tr>"+$($copy).html().replace(exp,"["+next+"]")+"</tr>";
+        		html = html.replace(">"+num+"<",">"+next+"<").replace(exps,"-"+next);
+        		$("#deviceNumber").val(next);
+        		$($tr).after(html);
+        		
+				commonSingleDate("planTime_id-"+next,"yyyy-MM-dd HH:mm:ss","zh-CN");
+				
+        		$("#deviceId_id"+id).val("");
+				$("#deviceCode_id"+id).val("");
+				$("#deviceName_id"+id).val("");
+				$("#deviceSpec_id"+id).val("");
+				$("#locationName_id"+id).val("");
+				$("#useDepartmentName_id"+id).val("");
+			}
+    		$("#deviceId_id"+id).val(data.id);
+			
+    		$("#deviceCode_id"+id).attr("value",data.deviceCode==null? '':data.deviceCode);
+			
+    		$("#deviceName_id"+id).attr("value",data.deviceName==null? '':data.deviceName);
+			
+    		$("#deviceSpec_id"+id).attr("value",data.deviceSpec==null? '':data.deviceSpec);
+			
+    		$("#locationName_id"+id).attr("value",data.locationName==null? '':data.locationName);
+			
+    		$("#useDepartmentName_id"+id).attr("value",data.useDepartmentName==null? '':data.useDepartmentName);
+			
+		}
+		if(html_tmp){
+			var $tr = $("#deviceGrid").find("tr:last");
+			$($tr).after(html_tmp);
+			for(var i=0;i<planTimeIds.length;i++){
+				commonSingleDate("planTime_id-"+planTimeIds[i],"yyyy-MM-dd HH:mm:ss","zh-CN");
+				$("#planTime_id-"+planTimeIds[i]).val(planTimeVals[i]);
+			}
+			$("#deviceNumber").val(final)
+		}
+	}
+</script>

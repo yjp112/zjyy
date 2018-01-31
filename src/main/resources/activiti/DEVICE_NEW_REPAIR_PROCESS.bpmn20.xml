@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
+  <process id="DEVICE_NEW_REPAIR_PROCESS" name="设备新报修流程" isExecutable="true">
+    <startEvent id="sid-186CA2D0-54AB-4214-9BED-7D61965E987E" activiti:initiator="_initiator" activiti:formUrl="/repair/newTask/edit"></startEvent>
+    <endEvent id="sid-F3182D0B-09ED-4AE2-A6CE-5CF440B49435"></endEvent>
+    <userTask id="sid-95DF114B-8DD7-4974-85F4-1597A1B3BC3B" name="诉求单登记" activiti:assignUsers="${_initiator}" activiti:formUrl="/repair/newTask/edit?id=${task.id}">
+      <documentation>${task.processInstanceName}</documentation>
+    </userTask>
+    <sequenceFlow id="sid-0EED2B74-E794-4ED4-A68A-43A5E396E392" sourceRef="sid-186CA2D0-54AB-4214-9BED-7D61965E987E" targetRef="sid-95DF114B-8DD7-4974-85F4-1597A1B3BC3B"></sequenceFlow>
+    <userTask id="sid-388B37AB-4AE6-44EF-BAF4-CAB24B2F5DED" name="组长派单" activiti:assignPersons="${task.handlePersonCode}" activiti:formUrl="/repair/newTask/repair?id=${task.id}">
+      <documentation>${task.processInstanceName}</documentation>
+    </userTask>
+    <userTask id="sid-EA0EBDFC-5449-4423-BF68-EF910D4C4AFA" name="班组维修" activiti:assignPersons="${task.handlePersonCode}" activiti:formUrl="/repair/newTask/repair?id=${task.id}">
+      <documentation>${task.processInstanceName}</documentation>
+    </userTask>
+    <userTask id="sid-93C8A142-2D6F-4457-84E1-A0376A615DDC" name="报修人评价" activiti:assignPersons="${task.handlePersonCode}" activiti:formUrl="/repair/newTask/repair?id=${task.id}">
+      <documentation>${task.processInstanceName}</documentation>
+    </userTask>
+    <sequenceFlow id="SQD_STEP1" name="提交" sourceRef="sid-95DF114B-8DD7-4974-85F4-1597A1B3BC3B" targetRef="sid-388B37AB-4AE6-44EF-BAF4-CAB24B2F5DED"></sequenceFlow>
+    <sequenceFlow id="SQD_STEP2" name="提交" sourceRef="sid-388B37AB-4AE6-44EF-BAF4-CAB24B2F5DED" targetRef="sid-EA0EBDFC-5449-4423-BF68-EF910D4C4AFA"></sequenceFlow>
+    <sequenceFlow id="SQD_STEP4" name="提交" sourceRef="sid-93C8A142-2D6F-4457-84E1-A0376A615DDC" targetRef="sid-F3182D0B-09ED-4AE2-A6CE-5CF440B49435"></sequenceFlow>
+    <sequenceFlow id="SQD_STEP3" name="提交" sourceRef="sid-EA0EBDFC-5449-4423-BF68-EF910D4C4AFA" targetRef="sid-93C8A142-2D6F-4457-84E1-A0376A615DDC"></sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_DEVICE_NEW_REPAIR_PROCESS">
+    <bpmndi:BPMNPlane bpmnElement="DEVICE_NEW_REPAIR_PROCESS" id="BPMNPlane_DEVICE_NEW_REPAIR_PROCESS">
+      <bpmndi:BPMNShape bpmnElement="sid-186CA2D0-54AB-4214-9BED-7D61965E987E" id="BPMNShape_sid-186CA2D0-54AB-4214-9BED-7D61965E987E">
+        <omgdc:Bounds height="30.0" width="30.0" x="30.0" y="240.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-F3182D0B-09ED-4AE2-A6CE-5CF440B49435" id="BPMNShape_sid-F3182D0B-09ED-4AE2-A6CE-5CF440B49435">
+        <omgdc:Bounds height="28.0" width="28.0" x="810.0" y="241.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-95DF114B-8DD7-4974-85F4-1597A1B3BC3B" id="BPMNShape_sid-95DF114B-8DD7-4974-85F4-1597A1B3BC3B">
+        <omgdc:Bounds height="80.0" width="100.0" x="120.0" y="215.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-388B37AB-4AE6-44EF-BAF4-CAB24B2F5DED" id="BPMNShape_sid-388B37AB-4AE6-44EF-BAF4-CAB24B2F5DED">
+        <omgdc:Bounds height="80.0" width="100.0" x="300.0" y="215.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-EA0EBDFC-5449-4423-BF68-EF910D4C4AFA" id="BPMNShape_sid-EA0EBDFC-5449-4423-BF68-EF910D4C4AFA">
+        <omgdc:Bounds height="80.0" width="100.0" x="465.0" y="215.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-93C8A142-2D6F-4457-84E1-A0376A615DDC" id="BPMNShape_sid-93C8A142-2D6F-4457-84E1-A0376A615DDC">
+        <omgdc:Bounds height="80.0" width="100.0" x="645.0" y="215.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="sid-0EED2B74-E794-4ED4-A68A-43A5E396E392" id="BPMNEdge_sid-0EED2B74-E794-4ED4-A68A-43A5E396E392">
+        <omgdi:waypoint x="60.0" y="255.0"></omgdi:waypoint>
+        <omgdi:waypoint x="120.0" y="255.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="SQD_STEP4" id="BPMNEdge_SQD_STEP4">
+        <omgdi:waypoint x="745.0" y="255.0"></omgdi:waypoint>
+        <omgdi:waypoint x="810.0" y="255.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="SQD_STEP3" id="BPMNEdge_SQD_STEP3">
+        <omgdi:waypoint x="565.0" y="255.0"></omgdi:waypoint>
+        <omgdi:waypoint x="645.0" y="255.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="SQD_STEP2" id="BPMNEdge_SQD_STEP2">
+        <omgdi:waypoint x="400.0" y="255.0"></omgdi:waypoint>
+        <omgdi:waypoint x="465.0" y="255.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="SQD_STEP1" id="BPMNEdge_SQD_STEP1">
+        <omgdi:waypoint x="220.0" y="255.0"></omgdi:waypoint>
+        <omgdi:waypoint x="300.0" y="255.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

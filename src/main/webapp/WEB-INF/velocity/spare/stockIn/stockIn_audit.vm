@@ -1,0 +1,291 @@
+#parse("index/_header.vm")
+<script type="text/javascript">
+    function doSubmit(type,flowId,bpmEnabled) {
+        if(flowId){
+	        $("input[name='_bpm_ts_id']").val(flowId);
+        }
+        if(bpmEnabled){
+	        $("input[name='_bpm_enabled']").val(bpmEnabled);
+        }
+        var ctn = "$!rc.contextPath/spare/stockIn/"+type;
+        $("#stockIn_form_id").attr("action", ctn);
+        //$("#stockIn_form_id").submit();
+        return true;
+    }
+</script>
+	<form id="stockIn_form_id" method="post" action="$!{rc.contextPath}/spare/stockIn/save" class="ui-form">
+		<input type="hidden" name="id" value="$!{stockIn.id}">
+        <div class="ui-box ui-box-close">
+          <div class="ui-box-container">
+              <div class="ui-box-content">
+                	<input type="hidden" name="_bpm_param" value="$!{_bpm_param}"/>
+	                <input type="hidden" name="_bpm_ts_id" value=""/>
+	                <input type="hidden" name="_bpm_enabled" value="false"/>
+	                #foreach($ts in $!_bpm_transitions)
+	                    <button type="submit" class="btn btn-small" onclick="doSubmit('processDone','$!ts.id',true)">
+	                   	#if($!ts.id.contains("reject"))
+	                   	<i class="iconfont icon-reply"></i>
+						#else
+	                    <i class="iconfont icon-submit"></i>
+						#end 
+	                    $!ts.name</button>
+	                #end
+                <button class="btn btn-small" type="submit" onclick="doSubmit('processSave');"><i class="iconfont icon-save"></i>保存</button>
+                <a class="btn btn-small" onclick="loadMain('$!{rc.contextPath}/spare/stockIn/go');"><i class="iconfont icon-reply"></i>返回</a>
+              </div>
+          </div>
+        </div>
+
+    <div class="ui-box">
+      <div class="ui-box-head">
+        <div class="ui-box-head-center">
+          <span class="ui-box-head-title">入库基本信息</span>
+          <a class="btn btn-small ui-box-toggle" href="#" data-trigger="collapse" data-target="#collapse1">
+          <i class="iconfont icon-caret-up"></i></a>
+        </div>
+      </div>
+      <div class="ui-box-container" id="collapse1">
+        <div class="ui-box-content">          
+	      <div class="ui-form-item">
+	        <label class="ui-label" for="" ><span class="ui-form-required">*</span>入库单号</label>
+	         <input readonly type="text"  name="stockInCode" value="$!{stockIn.stockInCode}" class="ui-input" />
+	      </div>
+	      <div class="ui-form-item">
+	        <label class="ui-label" for="" ><span class="ui-form-required">*</span>仓库</label>
+				<select class="ui-select" name="warehouseId">
+				  $!inWarehouseOptions
+				</select>	     
+		 </div>
+	      <div class="ui-form-item">
+	        <label class="ui-label" for="" ><span class="ui-form-required">*</span>入库来源</label>
+				<select class="ui-select" name="inType">
+				  $!inTypeSelectOptions
+				</select>   
+		 </div>
+	      <div class="ui-form-item">
+	        <label class="ui-label" for="" ><span class="ui-form-required">*</span>入库日期</label>
+				<input type="text" name="inTime"  class="ui-input Wdate"  onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" value="#date_format($!{stockIn.inTime},'yyyy-MM-dd HH:mm:ss')"  size=22 />
+		 </div>
+	      <div class="ui-form-item">
+	  		<label class="ui-label" for="" >采购人</label>
+			<input type="hidden" id="inPersonId"  name="inPersonId" value="$!{stockIn.inPersonId}" class="ui-input"/>
+			<input type="text" id="inPersonName" name="inPersonName" value="$!{stockIn.inPersonName}" class="ui-input" onclick="choosePerson('inPersonId','inPersonName')"/>
+	        <span class="ui-form-icon"><i class="iconfont icon-file-alt"></i></span>
+	      </div>
+	      <div class="ui-form-item">
+	  		<label class="ui-label" for="" ><span class="ui-form-required">*</span>验收人</label>
+			<input type="hidden" id="checkerId" name="checkerId" value="$!{stockIn.checkerId}" class="ui-input"/>
+			<input type="text" id="checkerName" name="checkerName" value="$!{stockIn.checkerName}" class="ui-input" onclick="choosePerson('checkerId','checkerName')"/>
+	        <span class="ui-form-icon"><i class="iconfont icon-file-alt"></i></span>
+	      </div>
+	      <div class="ui-form-item">
+	  		<label class="ui-label" for="" >供应商</label>
+			<input type="hidden" id="supplierId" name="supplierId" value="$!{stockIn.supplierId}" class="ui-input" />
+			<input type="text" id="supplierName" name="supplierName" value="$!{stockIn.supplierName}" class="ui-input" onclick="chooseSupplier('supplierId','supplierName')"/>
+	        <span class="ui-form-icon"><i class="iconfont icon-file-alt"></i></span>
+	      </div>
+	      <div class="ui-form-item">
+	  		<label class="ui-label" for="" >发票号</label>
+			<input type="text"  name="invoiceNo" value="$!{stockIn.invoiceNo}"  class="ui-input"/>
+	      </div>
+	      <div class="ui-form-item colspan2">
+	        <label class="ui-label" for="" >入库摘要</label>
+			<textarea  id="textAreaId" class="ui-textarea" type="text" name="descripton">$!{stockIn.descripton}</textarea>
+	      </div>
+            </div>
+          </div>
+        </div>
+
+
+
+    <div class="ui-box">
+      <div class="ui-box-head">
+        <div class="ui-box-head-center">
+          <span class="ui-box-head-title">入库明细信息</span>
+          <a class="btn btn-small ui-box-toggle" href="#" data-trigger="collapse" data-target="#collapse2">
+          <i class="iconfont icon-caret-up"></i></a>
+        </div>
+      </div>
+      <div class="ui-box-container" id="collapse2">
+		    <table id='tableId' class="ui-table">
+		        <thead>
+					<tr>
+						<th  width="30">序号</th>
+						<th>备件名称</th>
+						<th>备件编码</th>
+						<th>备件规格</th>
+						<th>备件型号</th>
+						<th>单价(元)</th>
+						<th>入库数量</th>
+						<th>金额(元)</th>
+						<th>备注</th>
+						<th  width="30" class="input-equilong"><a href="#" class="btn addRow"><i class="iconfont icon-plus"></i></a></th>
+					</tr>
+		        </thead>
+		        <tbody>
+		#set($index=0)
+		#foreach($list in $!stockIn.stockInDetailList)
+            <tr>
+                <td><span class="rowNumber">$index+1</span></td>
+				<td>
+				<input type="hidden" name="stockInDetailList[$index].spareId" value="$!{list.spareId}">
+				<input type="text" name="stockInDetailList[$index].spareName" value="$!{list.spareName}" class="ui-input ui-input-small"/>
+				<span class="ui-form-icon"><i class="iconfont icon-file-alt"></i></span>
+				</td>
+				<td><input readonly type="text" name="stockInDetailList[$index].spareCode" value="$!{list.spareCode}"  class="ui-input ui-input-small"/></td>
+				<td><input readonly type="text" name="stockInDetailList[$index].spec" value="$!{list.spec}" class="ui-input ui-input-small"/></td>
+				<td><input readonly type="text" name="stockInDetailList[$index].model" value="$!{list.model}"  class="ui-input ui-input-small"/></td>
+				<td><input type="text" name="stockInDetailList[$index].prc" value="$!{list.prc}" class="ui-input ui-input-small money"/></td>
+				<td><input type="text" name="stockInDetailList[$index].qty" value="$!{list.qty}"  class="ui-input ui-input-small number2"/></td>
+				<td><input type="text" name="stockInDetailList[$index].money" value="$!{list.money}" class="ui-input ui-input-small money"/></td>
+				<td><input type="text" name="stockInDetailList[$index].remark" value="$!{list.remark}"  class="ui-input ui-input-small"/></td>
+				<td  class="fn-text-center"><i class="iconfont icon-remove-sign delRow"></i></td>
+            </tr>
+			#set($index=$index+1)
+		#end
+		#if($index==0)
+            <tr>
+                <td><span class="rowNumber">1</span></td>
+				<td>
+				<input type="hidden" name="stockInDetailList[#index#].spareId">
+				<input type="text" name="stockInDetailList[#index#].spareName"  class="ui-input ui-input-small"/>
+				<span class="ui-form-icon"><i class="iconfont icon-file-alt"></i></span>
+				</td>
+				<td><input readonly type="text" name="stockInDetailList[#index#].spareCode"  class="ui-input ui-input-small"/></td>
+				<td><input readonly type="text" name="stockInDetailList[#index#].spec"  class="ui-input ui-input-small"/></td>
+				<td><input readonly type="text" name="stockInDetailList[#index#].model"  class="ui-input ui-input-small"/></td>
+				<td><input type="text" name="stockInDetailList[#index#].prc"   class="ui-input ui-input-small money"/></td>
+				<td><input type="text" name="stockInDetailList[#index#].qty"  class="ui-input ui-input-small number2"/></td>
+				<td><input type="text" name="stockInDetailList[#index#].money"   class="ui-input ui-input-small money"/></td>
+				<td><input type="text" name="stockInDetailList[#index#].remark"   class="ui-input ui-input-small"/></td>
+				<td  class="fn-text-center"><i class="iconfont icon-remove-sign delRow"></i></td>
+            </tr>
+		#end
+            <tr>
+				<td>合计</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td><input readonly id='sumQty' type="text" name="sumQty" value="$!{list.qty}" size="12" class="ui-input ui-input-small"/></td>
+				<td></td>
+				<td><input readonly id='sumMoney' type="text" name="sumMoney" value="$!{list.money}" size="12" class="ui-input ui-input-small"/></td>
+				<td></td>
+				<td></td>
+            </tr>
+        </tbody>
+	</table>
+          </div>
+        </div>
+        
+		#parse("spare/include/process_audit.vm")
+	</form>
+	<script type="text/javascript" src="$!{rc.contextPath}/js/ywgl.js"></script>
+	<script type="text/javascript">
+	var $tr='';
+	 $(document).ready(function(){
+	 	$("input[name='isShelfLife'][value=$!spare.isShelfLife]").attr("checked",true);  
+       caculate();
+	    $(".addRow").btnAddRow({rowNumColumn:"rowNumber"},function(){
+	    	caculate();
+	    });
+	    $(".delRow").btnDelRow(function(){
+	    	caculate();
+	    });	
+        $('#stockIn_form_id').valid({
+          rules: {
+			stockInCode: ['not_empty',{max_length: 20}],
+			warehouseId: ['not_empty',{max_length: 20}],
+			inType: ['not_empty',{max_length: 20}],
+			inTime: ['not_empty',{max_length: 20}],
+			checkerName: ['not_empty',{max_length: 20}],
+			invoiceNo: [{max_length: 20}],
+			descripton: [{max_length: 20}] 
+          },onSuccess: function(response, validator, $form) {
+		  	validateCallback(response);
+		  	return false;
+		  }
+        });		
+
+  $('.ui-box:not(#processAudit) :input[name]').each(function(){
+  		$(this).attr('readonly',true);
+  });
+});
+    function spareCheckedCallback(dataRows){
+      var dataRow=dataRows[0];
+      $("input[name$='.spareId']",$tr).val(dataRow.id);  
+      $("input[name$='.spareName']",$tr).val(dataRow.spareName);  
+      $("input[name$='.spareCode']",$tr).val(dataRow.spareCode);  
+      $("input[name$='.model']",$tr).val(dataRow.model);  
+      $("input[name$='.spec']",$tr).val(dataRow.spec);  
+      $("input[name$='.prc']",$tr).val(dataRow.price);  
+    }
+    
+    function caculate(){
+	$("input[name$='.spareName']").click(function(){
+	    $tr=$(this).parents("tr");
+	    dialog({
+	        id:'selectSpare',
+	        content: 'load:$!{rc.contextPath}/spare/spare/lookup?txtId=spareCategoryId&txtName=spareCategoryName',
+	        title: '选择',
+	        lock: true,
+	        width: 1200,
+	        height: 600/*,
+			ok : function(){
+			  return okClick($tr)
+			},
+			okVal :'确定'*/
+	    });
+	}); 
+     var $table=$('#tableId');
+     var $sumQty=$('#sumQty');
+     var $sumMoney=$('#sumMoney');
+     
+     var $allQty=$("input[name$='.qty']",$table);
+     var $allMoney=$("input[name$='.money']",$table);     
+     $('tr:gt(0):not(:last)',$table).each(function(i,tr){
+         var $qty=$("input[name$='.qty']",this);
+         var $prc=$("input[name$='.prc']",this);
+         var $money=$("input[name$='.money']",this);
+         $($qty).add($prc).change(function(){
+            var v=mutipy($qty,$prc);
+            if(v!=''){
+            	$money.val(v);
+            }
+            var v1=sum($allQty);
+            $sumQty.val(v1);
+            var v2=sum($allMoney)
+            $sumMoney.val(v2);
+
+         });                
+         $($money).change(function(){
+            var v1=sum($allQty);
+            $sumQty.val(v1);
+            var v2=sum($allMoney)
+            $sumMoney.val(v2);
+         });                
+     });
+            var v1=sum($allQty);
+            $sumQty.val(v1);
+            var v2=sum($allMoney)
+            $sumMoney.val(v2);     
+    }
+    
+    function mutipy($a,$b){
+	 var a=$.trim($a.val());
+	 var b=$.trim($b.val());
+	 if(a=='' || b==''){
+	   return '';
+	 }
+	 return formatMoney(a*b*1.0);
+    }
+    function sum(arr){
+      var s=0;
+      $(arr).each(function(i,item){
+           var val=$.trim($(item).val());
+	       s=s+val*1.0
+      })
+      return formatMoney(s);   
+    }
+	</script>
+	</form>	

@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.alarm.entities.AlarmAnalyse">
+	<resultMap type="com.supconit.alarm.entities.AlarmAnalyse" id="AlarmAnalyseResultMap">
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">A_HISTORYALARM</sql>
+	
+	<select id="yearReport" parameterType="map" resultMap="AlarmAnalyseResultMap" lang="velocity">
+	<![CDATA[
+		SELECT
+			@{_parameter.jan} alarmMonth,
+			COUNT (r.ID) alarmNum
+		from A_HISTORYALARM r 
+		WHERE r.ALARMTIME>=@{_parameter.jan,jdbcType=DATE} AND r.ALARMTIME<@{_parameter.feb,jdbcType=DATE}
+		UNION ALL
+		SELECT
+			@{_parameter.feb} alarmMonth,
+			COUNT (r.ID) alarmNum
+		from A_HISTORYALARM r 
+		WHERE r.ALARMTIME>=@{_parameter.feb,jdbcType=DATE} AND r.ALARMTIME<@{_parameter.mar,jdbcType=DATE}
+		UNION ALL
+		SELECT
+			@{_parameter.mar} alarmMonth,
+			COUNT (r.ID) alarmNum
+		from A_HISTORYALARM r 
+		WHERE r.ALARMTIME>=@{_parameter.mar,jdbcType=DATE} AND r.ALARMTIME<@{_parameter.apr,jdbcType=DATE}
+		UNION ALL
+		SELECT
+			@{_parameter.apr} alarmMonth,
+			COUNT (r.ID) alarmNum
+		from A_HISTORYALARM r 
+		WHERE r.ALARMTIME>=@{_parameter.apr,jdbcType=DATE} AND r.ALARMTIME<@{_parameter.may,jdbcType=DATE}
+		UNION ALL
+		SELECT
+			@{_parameter.may} alarmMonth,
+			COUNT (r.ID) alarmNum
+		from A_HISTORYALARM r 
+		WHERE r.ALARMTIME>=@{_parameter.may,jdbcType=DATE} AND r.ALARMTIME<@{_parameter.jun,jdbcType=DATE}
+		UNION ALL
+		SELECT
+			@{_parameter.jun} alarmMonth,
+			COUNT (r.ID) alarmNum
+		from A_HISTORYALARM r 
+		WHERE r.ALARMTIME>=@{_parameter.jun,jdbcType=DATE} AND r.ALARMTIME<@{_parameter.jul,jdbcType=DATE}
+		UNION ALL
+		SELECT
+			@{_parameter.jul} alarmMonth,
+			COUNT (r.ID) alarmNum
+		from A_HISTORYALARM r 
+		WHERE r.ALARMTIME>=@{_parameter.jul,jdbcType=DATE} AND r.ALARMTIME<@{_parameter.aug,jdbcType=DATE}
+		UNION ALL
+		SELECT
+			@{_parameter.aug} alarmMonth,
+			COUNT (r.ID) alarmNum
+		from A_HISTORYALARM r 
+		WHERE r.ALARMTIME>=@{_parameter.aug,jdbcType=DATE} AND r.ALARMTIME<@{_parameter.sep,jdbcType=DATE}
+		UNION ALL
+		SELECT
+			@{_parameter.sep} alarmMonth,
+			COUNT (r.ID) alarmNum
+		from A_HISTORYALARM r 
+		WHERE r.ALARMTIME>=@{_parameter.sep,jdbcType=DATE} AND r.ALARMTIME<@{_parameter.oct,jdbcType=DATE}
+		UNION ALL
+		SELECT
+			@{_parameter.oct} alarmMonth,
+			COUNT (r.ID) alarmNum
+		from A_HISTORYALARM r 
+		WHERE r.ALARMTIME>=@{_parameter.oct,jdbcType=DATE} AND r.ALARMTIME<@{_parameter.nov,jdbcType=DATE}
+		UNION ALL
+		SELECT
+			@{_parameter.nov} alarmMonth,
+			COUNT (r.ID) alarmNum
+		from A_HISTORYALARM r 
+		WHERE r.ALARMTIME>=@{_parameter.nov,jdbcType=DATE} AND r.ALARMTIME<@{_parameter.dece,jdbcType=DATE}
+		UNION ALL
+		SELECT
+			@{_parameter.dece} alarmMonth,
+			COUNT (r.ID) alarmNum
+		from A_HISTORYALARM r 
+		WHERE r.ALARMTIME>=@{_parameter.dece,jdbcType=DATE} AND r.ALARMTIME<@{_parameter.nextJun,jdbcType=DATE}
+		]]>
+	</select>
+	
+	<select id="yearPieReport" parameterType="map" resultType="long" lang="velocity">
+		SELECT COUNT(*) FROM (
+			SELECT HIS.DEVICEID  FROM A_HISTORYALARM HIS
+			WHERE 
+			<![CDATA[
+			HIS.ALARMTIME>=@{_parameter.startMonth,jdbcType=DATE} AND HIS.ALARMTIME<@{_parameter.endMonth,jdbcType=DATE}
+			]]>
+		) AH
+		WHERE 1=1
+		#if($_parameter.deviceIds)
+				#set($_deviceIds =$_parameter.deviceIds)
+				AND 
+				#repeat( $_deviceIds $id "," " AH.DEVICEID IN (" ")" )
+		    		@{id,jdbcType=BIGINT}
+				#end
+		#end
+	</select>
+	
+	<select id="areaReport" parameterType="map" resultType="long" lang="velocity">
+		SELECT COUNT(*) FROM (
+			SELECT HIS.DEVICEID  FROM A_HISTORYALARM HIS
+			WHERE 
+			<![CDATA[
+			HIS.ALARMTIME>=@{_parameter.startMonth,jdbcType=DATE} AND HIS.ALARMTIME<@{_parameter.endMonth,jdbcType=DATE}
+			]]>
+		) AH LEFT JOIN DEVICE D
+		ON AH.DEVICEID = D.ID
+		WHERE 1=1
+		#if($_parameter.areaIds)
+				#set($_areaIds =$_parameter.areaIds)
+				AND 
+				#repeat( $_areaIds $id "," " D.LOCATION_ID IN (" ")" )
+		    		@{id,jdbcType=BIGINT}
+				#end
+		#end 
+	</select>
+	
+	<select id="areaPieReport" parameterType="map" resultType="long" lang="velocity">
+		<![CDATA[
+		SELECT COUNT(*) FROM (
+			SELECT HIS.DEVICEID  FROM A_HISTORYALARM HIS
+			WHERE 
+			HIS.ALARMTIME>=@{_parameter.startMonth,jdbcType=DATE} AND HIS.ALARMTIME<@{_parameter.endMonth,jdbcType=DATE}
+		) AH LEFT JOIN DEVICE D
+		ON AH.DEVICEID = D.ID
+		WHERE 1=1
+		#if($_parameter.deviceIds)
+				#set($_deviceIds =$_parameter.deviceIds)
+				AND 
+				#repeat( $_deviceIds $id "," " AH.DEVICEID IN (" ")" )
+		    		@{id,jdbcType=BIGINT}
+				#end
+		#end
+	    #if($_parameter.areaIds)
+				#set($_areaIds =$_parameter.areaIds)
+				AND 
+				#repeat( $_areaIds $id "," " D.LOCATION_ID IN (" ")" )
+		    		@{id,jdbcType=BIGINT}
+				#end
+		#end
+		]]>
+	</select>
+	
+	<select id="deptReport" parameterType="map" resultType="long" lang="velocity">
+		SELECT COUNT(*) FROM (
+			SELECT HIS.DEVICEID  FROM A_HISTORYALARM HIS
+			WHERE 
+			<![CDATA[
+			HIS.ALARMTIME>=@{_parameter.startMonth,jdbcType=DATE} AND HIS.ALARMTIME<@{_parameter.endMonth,jdbcType=DATE}
+			]]>
+		) AH LEFT JOIN DEVICE D
+		ON AH.DEVICEID = D.ID
+		WHERE 1=1
+		#if($_parameter.deptIds)
+				#set($_deptIds =$_parameter.deptIds)
+				AND 
+				#repeat( $_deptIds $id "," " D.USE_DEPARTMENT_ID IN (" ")" )
+		    		@{id,jdbcType=BIGINT}
+				#end
+		#end
+	</select>
+	
+	<select id="deptPieReport" parameterType="map" resultType="long" lang="velocity">
+	<![CDATA[
+		SELECT COUNT(*) FROM (
+			SELECT HIS.DEVICEID  FROM A_HISTORYALARM HIS
+			WHERE 
+			
+			HIS.ALARMTIME>=@{_parameter.startMonth,jdbcType=DATE} AND HIS.ALARMTIME<@{_parameter.endMonth,jdbcType=DATE}
+		) AH LEFT JOIN DEVICE D
+		ON AH.DEVICEID = D.ID
+		WHERE  1=1
+		#if($_parameter.deviceIds)
+				#set($_deviceIds =$_parameter.deviceIds)
+				AND 
+				#repeat( $_deviceIds $id "," " AH.DEVICEID IN (" ")" )
+		    		@{id,jdbcType=BIGINT}
+				#end
+		#end
+		#if($_parameter.deptIds)
+				#set($_deptIds =$_parameter.deptIds)
+				AND 
+				#repeat( $_deptIds $id "," " D.USE_DEPARTMENT_ID IN (" ")" )
+		    		@{id,jdbcType=BIGINT}
+				#end
+		#end
+		]]>
+	</select>
+	
+	
+</mapper>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconicom/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.ywgl.report.entities.Vehicle">
+    
+   <resultMap type="com.supconit.ywgl.report.entities.Vehicle" id="vehicleResultMap">
+       <result property="id" column="ID"/>
+       <result property="carNo" column="CAR_NO"/>
+       <result property="cardNo" column="CARD_NO"/>
+       <result property="roadGateId" column="ROAD_GATE_ID"/>
+       <result property="roadGateName" column="ROAD_GATE_NAME"/>
+       <result property="inTime" column="IN_TIME"/>
+       <result property="outTime" column="OUT_TIME"/>
+   </resultMap>
+   <sql id="TABLE_NAME" lang="velocity">VEHICLE</sql>
+   <sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+   <sql id="select_pre" lang="velocity">
+       select
+      A.ID,
+      A.CAR_NO,
+      A.CARD_NO,
+      A.ROAD_GATE_ID,
+      A.ROAD_GATE_NAME,
+      A.IN_TIME,
+      A.OUT_TIME
+      FROM  <include refid="TABLE_NAME" /> A       
+   </sql>
+  
+	 <sql id="count_pre" lang="velocity">
+		SELECT COUNT(*) FROM <include refid="TABLE_NAME"/> 
+	</sql>
+    <select id="findByConditions" parameterType="com.supconit.ywgl.report.entities.Vehicle" resultMap="vehicleResultMap" lang="velocity" databaseId="oracle">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre"/>
+		<include refid="condition_sql"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+    <!-- 按条件查询记录-->
+	<select id="findByConditions" parameterType="com.supconit.ywgl.report.entities.Vehicle" resultMap="vehicleResultMap" lang="velocity" databaseId="sqlserver">
+	     <include refid="select_pre"/>
+		<include refid="condition_sql"/> 
+	</select>	
+    <select id="countByConditions" parameterType="com.supconit.ywgl.report.entities.Vehicle" resultType="long" lang="velocity">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+
+	<sql id="condition_sql" lang="velocity" >
+		<![CDATA[
+		#where()
+			 #set($_p = $_parameter.condition)
+			 1=1 
+			 #if($_p.vehicleYear && $_p.vehicleYear != '')
+				#set($_vehicleYear =$_p.vehicleYear)
+				#set($_vehicleLastYear =$_p.vehicleLastYear)
+				AND to_char(IN_TIME,'yyyy')=@{_vehicleYear}
+				OR to_char(IN_TIME,'yyyy')=@{_vehicleLastYear}
+				OR to_char(OUT_TIME,'yyyy')=@{_vehicleYear}
+				OR to_char(OUT_TIME,'yyyy')=@{_vehicleLastYear}
+			#end
+			#if($_p.roadGateName && $_p.roadGateName != '')
+				#set($_roadGateName =$_p.roadGateName)
+				intersect select *FROM VEHICLE  where
+				ROAD_GATE_NAME=@{_roadGateName}
+			#end
+		#end
+		]]>	
+	</sql>
+    <sql id="condition_sql" lang="velocity" databaseId="sqlserver">
+		<![CDATA[
+		#where()
+			 #set($_p = $_parameter.condition)
+			 1=1 
+			 #if($_p.vehicleYear && $_p.vehicleYear != '')
+				#set($_vehicleYear =$_p.vehicleYear)
+				#set($_vehicleLastYear =$_p.vehicleLastYear)
+				AND datename(year,A.IN_TIME)=@{_vehicleYear}
+				OR datename(year,A.IN_TIME)=@{_vehicleLastYear}
+				OR datename(year, A.OUT_TIME)=@{_vehicleYear}
+				OR datename(year, A.OUT_TIME)=@{_vehicleLastYear}
+			#end
+			#if($_p.roadGateName && $_p.roadGateName != '')
+				#set($_roadGateName =$_p.roadGateName)
+				intersect select *FROM VEHICLE  where
+				ROAD_GATE_NAME=@{_roadGateName}
+			#end
+		#end
+		]]>	
+	</sql>
+</mapper>

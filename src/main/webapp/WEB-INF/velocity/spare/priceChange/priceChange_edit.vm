@@ -1,0 +1,152 @@
+#parse("index/_header.vm")
+<style>
+	.ui-dialog-form .k-textbox{
+		width:85%;
+	}
+	.ui-co-table .k-textbox .ui-input-choose{
+		width:100%;
+	}
+ </style>
+</head>
+<body>
+	<form id="myform_id" method="post" action="$!{rc.contextPath}/spare/priceChange/save"  class="ui-dialog-form">
+		<input type="hidden" name="id" value="$!{priceChange.id}">
+		<input type="hidden" name="isShelfLife" value="0">
+    <table width="100%" class="ui-co-table" style="padding-right:29px;">
+        <tr>
+			<td class="label" ><span class="ui-form-required">#if(!($!viewOnly)) * #end</span><label>备件名称：</label></td>
+            <td>
+				#if(!($!viewOnly))<span class="k-textbox k-space-right" id="spareNames">#end
+					 <input class="k-textbox ui-input-choose" type="text" name="spareName" id="spareName" value="$!priceChange.spareName" readonly >
+					 #if(!($!viewOnly))<a href="#" class="k-icon k-i-search">&nbsp;</a>
+                </span>#end
+            </td>
+            <td  class="label"><!-- span class="ui-form-required">#if(!($!viewOnly)) * #end</span --><label>备件编码：</label></td>
+            <td >
+				<input id="spareCode" class="k-textbox" type="text"  id="spareCode" name="spareCode" value="$!{priceChange.spareCode}" readonly />
+				<input class="k-textbox" type="hidden" id="spareId" name="spareId" value="$!{priceChange.spareId}"/>
+            </td>
+        </tr>
+        <tr>
+            <td  class="label"><!-- span class="ui-form-required">#if(!($!viewOnly)) * #end</span --><label>备件类别：</label></td>
+            <td >
+				 <input readonly class="k-textbox ui-input-choose" type="text"  name="spareCategoryName" id="spareCategoryName" value="$!{priceChange.spareCategoryName}"  readonly  />
+			</td>
+            <td class="label">设备型号：</td>
+			<td>
+				<input class="k-textbox" type="text"  name="model" id="model" value="$!priceChange.model" readonly>
+			</td>
+        </tr>
+        <tr>
+            <td class="label">设备规格：</td>
+			<td>
+				<input class="k-textbox" type="text" name="spec" id="spec" value="$!priceChange.spec" readonly>
+			</td>
+			<td class="label">标准单价：</td>
+			<td>
+				<input class="k-textbox small fNum2" $!{readonly}  type="text" id="oldPrice" name="oldPrice" value="$!priceChange.oldPrice" readonly >
+				<span class="ui-form-unit">元</span>
+			</td>
+        </tr>
+		 <tr>
+            <td class="label"><span class="ui-form-required">#if(!($!viewOnly)) * #end</span><label>新标准单价：</td>
+			<td>
+				<input class="k-textbox fNum2" name="newPrice"  value="$!priceChange.newPrice" id="newPrice" onblur="vaild1();">
+				<span class="ui-form-unit">元</span>
+			</td>
+			 <td class="label"><label><span class="ui-form-required">#if(!($!viewOnly)) * #end</span><label>调价人：</label></td>
+            <td>
+				#if(!($!viewOnly))<span class="k-textbox k-space-right" id="changePersonNames">#end
+					 <input class="k-textbox" type="hidden" id="changePersonId"  name="changePersonId" value="$!{priceChange.changePersonId}"/>
+					 <input  type="text" class="k-textbox ui-input-choose" id="changePersonName" name="changePersonName" value="$!{priceChange.changePersonName}" readonly/>
+					 #if(!($!viewOnly))<a href="#" class="k-icon k-i-search">&nbsp;</a>
+                </span>#end
+            </td>
+        </tr>
+		 <tr>
+            <td class="label"><span class="ui-form-required">#if(!($!viewOnly)) * #end</span><label>调价时间：</td>
+			<td>
+				<input type="text" name="changeDate" class="k-textbox" style="width:85%;" id="changeDate" value="#date_format($!{priceChange.changeDate},'yyyy-MM-dd HH:mm:ss')"/>
+			</td>
+        </tr>
+        <tr>
+            <td class="label">备注：</td>
+            <td colspan="3">
+				<textarea  id="textAreaId" class="k-textbox k-textarea" style="width:94.1%;height:60px" name="remark">$!{priceChange.remark}</textarea>
+			</td>
+        </tr>
+    </table>
+    <div class="actions">
+		#if(!($!viewOnly))
+        <button class="k-primary hc_btn" type="submit" id="save" ><i class="fa fa-save"></i>保 存</button>
+        <button class="hc_btn cancel" onclick="close_dialog('priceChange_add_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+		#end
+	</div>
+
+	</form>
+
+	<script type="text/javascript">
+	function emptySupplier(){
+	 $('#supplierId').val('');
+	 $('#supplierName').val('');
+	}
+	$(document).ready(function(){
+		#if($!viewOnly)
+			fNumPage();
+		#end
+		$("#changePersonNames").click(function() {
+			if("$!viewOnly" != "true")
+            quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/choose/person/page/1/changePersonId/changePersonName?dialogId=priceChange_add_dlg", 800, 600);
+     	 });
+		 
+		 $("#spareNames").click(function() {
+			if("$!viewOnly" != "true")
+            	quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/spare/spare/lookup?txtId=spareCategoryId&txtName=spareCategoryName&flag=changePrice", 950, 400);
+     	 });
+		#if(!$!viewOnly)
+			commonSingleDate("changeDate","yyyy-MM-dd HH:mm:ss","zh-CN");
+		#end
+		/*$("#changeDate").hcDateTimePicker({
+       	 	format: "yyyy-MM-dd HH:mm:ss",
+			culture: "zh-CN"
+    	});	*/
+        $("#myform_id").validator({
+            fields:{
+				spareName: "备件名称:required; ",
+    		    changeDate: "调价时间:required; ",
+    		    changePersonName: "调价人:required;",
+    		    oldPrice: "标准单价: checkIsDouble;length[~20]",
+    		    newPrice: "新标准单价: required;checkIsDouble;length[~20]",
+    			spareDesc: "备注:length[~200];"
+				
+            },
+            valid:function(form){
+                form_btn_submit($("#save"),form,function(res){
+                    validateCallback(res,"grid","priceChange_add_dlg");
+                });
+            }
+        });
+		 #if($!viewOnly)
+			 $("#save").hide();
+        	$(".k-textbox").attr("readonly","readonly");
+			/*var datetimepicker = $("#changeDate").data("kendoDateTimePicker");
+			datetimepicker.enable(false);*/
+        #end
+
+  });
+  
+  ##验证库存量是否为数字
+	function vaild1()
+	{
+	#if(!($!viewOnly)) 
+		var newPrice = $("#newPrice");
+		if("" == newPrice.val() || !isDigtal(newPrice.val()))
+		{
+			newPrice.val("");
+		}
+	#end
+	}
+
+	</script>
+</body>
+</html>

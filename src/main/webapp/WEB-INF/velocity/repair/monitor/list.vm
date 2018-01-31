@@ -1,0 +1,355 @@
+#parse("index/_header.vm")
+<style>
+    .ztree {
+        overflow: auto;
+    }
+</style>
+</head>
+<body>
+  <div class="ui-layout-west" style="border-right:solid 1px #e1e5e6;" id="leftTreeWrap">
+			<div class="ui-layout-center">
+				    <div id="tabstrip" class="k-header k-grid-toolbar" style="padding-left:10px;">
+					    <ul>
+					        <li class="k-state-active" id="li_category">系统</li>
+					        <li id="li_area">区域</li>
+					    </ul>
+						 <div id="tabstrip-1">
+				  		  <ul id="tabstripTree1" class="ztree"></ul>
+				        </div>
+					    <div id="tabstrip-2">
+						   <ul id="tabstripTree2" class="ztree"></ul>
+				        </div>
+				    </div >
+			</div>
+  </div>
+
+  <div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+    	<form class="ui-form" id='queryForm'>
+			<input id="treeId1" type="hidden" name="treeId1">
+			<input id="treeId2" type="hidden" name="treeId2">
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+				<tr>
+					<td class="ui-search-name first">诉求单号：</td>
+					<td class="ui-search-c">
+						<input name="taskCode" class="k-textbox" type="text">
+					</td>
+					
+					<td class="ui-search-name">报修部门：</td>
+				    <td>
+						<span class="k-textbox k-space-right" onclick="chooseDept('repairDeptId','repairDeptName','','')">
+    						<input readonly class="k-textbox #if(!$!{viewOnly}) ui-input-choose #end" type="text" id="repairDeptName" name="repairDeptName" />
+    						<a href="#" class="k-icon k-i-search">&nbsp;</a>
+						</span>
+						<input type="hidden" id="repairDeptId" name="repairDeptId" />
+				    </td>
+					
+					<td class="ui-search-name">报修时间：</td>
+					<td class="ui-search-c" colspan="3">
+						<input  id="startTime"  class="k-textbox"  name="startTimes" />
+						至
+						<input id="endTime"  class="k-textbox"  name="endTimes" />
+					</td>
+                </tr>
+				
+				<tr>
+					<td class="ui-search-name">受理班组：</td>
+    	            <td>
+    	            	<input type="hidden" class="k-textbox"  id="groupId" name="repairGroupId" />	            	
+    					<span class="k-textbox k-space-right" id="groupNames">
+                        	<input readonly type="text" class="k-textbox"  id="groupName" name="repairGroupName" />
+    						<a href="#" class="k-icon k-i-search" >&nbsp;</a>
+                    	</span>	            	
+    	            </td>
+					
+    	            <td class="ui-search-name">诉求来源：</td>
+                    <td class="ui-search-c">
+						<select  class="k-textbox" name="taskSource">
+							<option value=''>--请选择--</option>
+							#foreach($!{item} in $!{taskSourceList})
+		       			    <option value="$!{item.enumValue}">$!{item.enumText}</option>
+							#end
+						</select>
+	                </td>
+					<td class="ui-search-name">诉求详情：</td>
+					<td class="ui-search-c">
+						<input name="descripton" class="k-textbox" type="text">
+					</td>
+					<td class="ui-search-name">紧急程度：</td>
+                    <td class="ui-search-c">
+						<select  class="k-textbox" name="urgency">
+							<option value=''>--请选择--</option>
+							#foreach($!{item} in $!{urgencyList})
+		       			    <option value="$!{item.enumValue}">$!{item.enumText}</option>
+							#end
+						</select>
+	                </td>
+	        	</tr>
+				
+				<tr>
+					<td class="ui-search-name">报修人：</td>
+					<td class="ui-search-c">
+						<input name="contact" class="k-textbox" type="text">
+					</td>
+					
+					<td class="ui-search-name">报修人电话：</td>
+					<td class="ui-search-c">
+						<input name="contactTel" class="k-textbox" type="text">
+					</td>
+	        	</tr> 
+              </table>
+            </td>
+            <td width="150" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn" onclick="cancelLeftTreeSelected();"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+            <td></td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+  #parse("index/_footer.vm") 
+<script type="text/javascript">
+    $("#groupNames").click(function() {
+		if("$!viewOnly" != "true")
+		quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/base/dutyGroup/lookup?txtId=groupId&txtName=groupName&dialogId=dutyGroupPerson_add_dlg", 300, 300);
+    });
+  var _iframe_layout, _left_layout, _inner_layout,containerHeight;
+	$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      },
+      west: {
+        size: 0.18
+      }
+    });
+
+    _left_layout = $("#leftTreeWrap").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+    	center: {
+    	  onresize_end:function(){
+              containerHeight = _left_layout.state.container.innerHeight-78;
+              $("#tabstripTree1").css("height",containerHeight);
+              $("#tabstripTree2").css("height",containerHeight);
+  		}
+      }
+    });
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+   
+
+    $('#li_category').click(function(){
+		$("input[name='treeId2']").val('');
+		$.fn.zTree.init($("#tabstripTree2"), setting2,zNodes2);
+		$('#queryBtn').click();
+	});
+	
+    $('#li_area').click(function(){
+		$("input[name='treeId1']").val('');
+		$.fn.zTree.init($("#tabstripTree1"), setting1,zNodes1);
+		$('#queryBtn').click();
+	});
+	
+    $('#resetBtn').click(function(){
+		clearDate("startTime", "endTime");
+		$("input[name='repairDeptId']").val('');
+		$("input[name='repairGroupId']").val('');
+		$("input[name='treeId1']").val('');
+		$("input[name='treeId2']").val('');
+    });
+
+		$('.iconfont','.ui-form-pick').each(function(){
+      $(this).click(function(){
+      	$('#treeId1').val('');
+      	$('#treeId2').val('');
+      	$('#selectBlock').hide();
+      })
+    });
+		 $("#tabstrip").hcTabStrip({
+	            animation: {
+	                // fade-out current tab over 1000 milliseconds
+	                close: {
+	                    duration: 100,
+	                    effects: "fadeOut"
+	                },
+	               // fade-in new tab over 500 milliseconds
+	               open: {
+	                   duration: 100,
+	                   effects: "fadeIn"
+	               }
+	           }
+	        });
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/repair/monitor/list?r=" + new Date(), [
+		  {
+		  	field: "id",
+			hidden: true,
+			sortable:false
+		  }, {
+		  	field: "taskCode",
+			title: "诉求单号",
+			sortable: false,
+			width:150,
+            template:"<a href=\"javascript:view('#:data.id #')\" title=\"查看#: data.taskCode #的详细信息\" >#: data.taskCode #</a>"
+          }, {
+		  	field: "repairDate",
+			title: "报修时间",
+			sortable: false,
+			headerAttributes: {"class": "k-grid-equilong"},
+		  	attributes: {"class": "k-grid-equilong"}
+		  }, {
+              field: "contactTel",
+              title: "报修人电话",
+			  sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+		  	  attributes: {"class": "k-grid-equilong"}
+          }, {
+              field: "descripton",
+              title: "诉求详情",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              #*attributes: {"class": "k-grid-text"},*#
+          	  attributes: {     
+  		  		title:"#: data.escripton==null? '':data.escripton #",
+  				"class": "k-grid-text k-grid-nowrap"
+		  	  },
+			  width: 150
+          }, {
+              field: "repairGroupName",
+			  title: "受理班组",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "groupEmpName",
+              title: "受理组长",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "repairPersonName",
+              title: "维修负责人",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "dispatchTime",
+              title: "指派时间",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          },  {
+              field: "actualFinishTime",
+              title: "实际完成时间",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+			  width: 100
+          },  {
+              field: "expectFinishTime",
+              title: "要求完成时间",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+			  width: 100
+          },  {
+              field: "delayTime",
+              title: "延时时间",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }
+          
+          ], 
+      {
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          },resizable:true
+      }, {
+          serverSorting: true
+      }, [
+          #kendo_datagrid_btns("NBGL_HJZX_JKZX")#end
+      ]);
+	
+    $("#tabstripTree1").css("height",_left_layout.state.container.outerHeight-78);
+    $("#tabstripTree2").css("height",_left_layout.state.container.outerHeight-78);
+    }); 
+	
+	commonDate("startTime","endTime","yyyy-MM-dd HH:mm:ss","zh-CN");
+	
+    /* zTree */
+    var setting1 = {
+    	data: {
+    		simpleData: {enable: true}
+          },
+          callback: {
+    			onClick: function(event, treeId, treeNode) {
+    				 $('#treeId1').val(treeNode.id);
+    			 	 $('#selectBlock').show();
+    				 $('#queryBtn').click();
+    			}
+    		}
+    };
+    var setting2 = {
+    	data: {
+    		simpleData: {enable: true}
+          },
+          callback: {
+    			onClick: function(event, treeId, treeNode) {
+    				 $('#treeId2').val(treeNode.id);
+    			 	 $('#selectBlock').show();
+    				 $('#queryBtn').click();
+    			}
+    		}
+    };
+  	var zNodes1 = [];  
+  	zNodes1.push({id:"0", pId:"-1", name:"设备类别簇", open:"true"});
+  	#foreach($!{treeNode} in $!{deviceCategoryList})
+      	zNodes1.push({id:$!{treeNode.id}, pId:$!{treeNode.parentId}, name:"$!{treeNode.categoryName}"});
+  	#end 
+  	var zNodes2 = [];  
+  	zNodes2.push({id:"0", pId:"-1", name:"地理区域簇", open:"true"});
+  	#foreach($!{treeNode} in $!{geoAreaList})
+      	zNodes2.push({id:$!{treeNode.id}, pId:$!{treeNode.parentId}, name:"$!{treeNode.areaName}"});     
+  	#end 
+  	$(document).ready(function(){
+  		$.fn.zTree.init($("#tabstripTree1"), setting1,zNodes1);
+  		$.fn.zTree.init($("#tabstripTree2"), setting2,zNodes2);
+  	});
+	
+	function cancelLeftTreeSelected(){
+		$.fn.zTree.init($("#tabstripTree1"), setting1,zNodes1);
+  		$.fn.zTree.init($("#tabstripTree2"), setting2,zNodes2);
+	}
+	
+	function view(id){
+    	window.location.href="$!{rc.contextPath}/repair/newTask/edit?viewOnly=true&menuCode=$!{menu.code}&id="+id;
+    }
+</script>

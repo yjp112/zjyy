@@ -1,0 +1,210 @@
+<style>
+<!--
+#devicelst{clear: both; padding-top: 20px; display:none}
+-->
+</style>
+<form id="otherCategoryConfig_edit_form" method="post" action="$!{rc.contextPath}/nhgl/basic/otherCategoryConfig/save" class="ui-form">
+	<fieldset>
+	<input type="hidden"  name="id"  id="id" value="$!{otherCategoryConfig.id}"/>
+	<input type="hidden"  name="nhType"  id="nhType" value="$!{otherCategoryConfig.nhType}"/>
+		<div class="ui-form-item">
+            <label class="ui-label"><span class="ui-form-required">*</span>分类名称:</label>
+            <input type="hidden" id="categoryId" name="categoryId" value="$!{otherCategoryConfig.categoryId}"/>
+			<input class="ui-input ui-input-choose" data-rule="分类名称:required" id="name" name="name" readonly  value="$!{otherCategoryConfig.name}"/>
+        </div>
+        
+		<div class="ui-form-item">
+            <label class="ui-label">是否通过下级分类汇总生成:</label>
+             <input type="hidden" id="isSum2" name="isSum" #if($!{otherCategoryConfig.isSum} != 0) value="1" #else value="0" #end />
+            <input type="checkbox" class="ui-checkbox" id="isSum" #if($!{otherCategoryConfig.isSum} != 0)  checked  value="1" #else value="0" #end />
+        </div>
+        
+        <div id="devicelst">
+        	<div class="ui-block ui-block-right">
+        		<button  type="button" class="btn ui-btn"  onclick="chooseOtherCategoryDevices('LeftDevice','$!{otherCategoryConfig.nhType}','1')"><i class="iconfont icon-search"></i>选择$!devName</button>
+        		<div class="ui-table-scoll">
+	        		<table class="ui-table">
+	        			<tr>
+				          <th style="width:120px">$!devName编码</th>
+				          <th style="width:130px">$!devName名称</th>
+				          <th style="width:80px">安装位置</th>
+				          <th style="width:70px;text-align:right"><span class="ui-form-required">*</span>分摊系数</th>
+				          <th style="width:35px;text-align:center" class="operate">操作</th>
+					    </tr>
+				    	<tbody id="LeftDevice"> #set($index=0) #foreach($!config in $!otherCategoryConfig.subLeftOtherCategoryConfigList) 
+						<tr>
+				          <td ><input type='hidden'  name="subLeftOtherCategoryConfigList[$index].deviceCode" value="$!config.deviceCode">
+				          <input type='hidden' name="subLeftOtherCategoryConfigList[$index].extended1" value="$!config.extended1">
+				          <input type='hidden'  name="subLeftOtherCategoryConfigList[$index].id" value="$!config.deviceId">
+				          <input type='hidden'  name="subLeftOtherCategoryConfigList[$index].ruleFlag" value="1">
+				          <span title='$!config.deviceCode' style='width:120px'>$!config.deviceCode</span></td>
+	    				  <td ><input type='hidden'  name="subLeftOtherCategoryConfigList[$index].deviceName" value="$!config.deviceName">
+	    				  <span title='$!config.deviceName' style='width:130px'>$!config.deviceName</span></td>
+						  <td ><input type='hidden'  name="subLeftOtherCategoryConfigList[$index].locationName" value="$!config.locationName">
+						  <span title='$!config.locationName' style='width:80px'>$!config.locationName</span></td>
+						  <td ><input type="text" class="ui-input" style='text-align:right' name="subLeftOtherCategoryConfigList[$index].ftxs" value="$!config.ftxs"  onblur="finish()"></td>
+						  <td style="width:35px" class="operate"><a  href="#" class="removedevice"><span style='width:35px;text-align:center'>删除<span></a></td>
+	        			</tr>
+						#set($index=$index+1)
+						#end
+					</tbody> 	
+	        		</table>
+        		</div>
+        	</div>
+        	<div class="ui-reduce"><span class="ui-sign">减去</span></div>
+        	<div class="ui-block ui-block-left">
+        		<button  type="button" class="btn ui-btn" onclick="chooseOtherCategoryDevices('RightDevice','$!{otherCategoryConfig.nhType}','0')"><i class="iconfont icon-search" ></i>选择$!devName</button>
+        		<div class="ui-table-scoll">
+        		<table class="ui-table">
+        			<tr>
+				          <th style="width:120px">$!devName编码</th>
+				          <th style="width:130px">$!devName名称</th>
+				          <th style="width:80px">安装位置</th>
+				          <th style="width:70px;text-align:right"><span class="ui-form-required">*</span>分摊系数</th>
+				          <th class="operate" style="width:35px;text-align:center">操作</th>
+					</tr>
+        			<tbody id="RightDevice"> #set($index=0) #foreach($!config in $!otherCategoryConfig.subRightOtherCategoryConfigList) 
+					<tr>
+				          <td ><input type='hidden' name="subRightOtherCategoryConfigList[$index].deviceCode" value="$!config.deviceCode">
+				          <input type='hidden' name="subRightOtherCategoryConfigList[$index].extended1" value="$!config.extended1">
+				          <input type='hidden' name="subRightOtherCategoryConfigList[$index].id" value="$!config.deviceId">
+				          <input type='hidden'  name="subRightOtherCategoryConfigList[$index].ruleFlag" value="0">
+				          <span title='$!config.deviceCode' style='width:120px'>$!config.deviceCode</span></td>
+	    				  <td ><input type='hidden' name="subRightOtherCategoryConfigList[$index].deviceName" value="$!config.deviceName">
+	    				  <span title='$!config.deviceName' style='width:130px'>$!config.deviceName</span></td>
+						  <td ><input type='hidden' name="subRightOtherCategoryConfigList[$index].locationName" value="$!config.locationName">
+						  <span title='$!config.locationName' style='width:80px'>$!config.locationName</span></td>
+						  <td ><input type="text" style='text-align:right' class="ui-input" name="subRightOtherCategoryConfigList[$index].ftxs" value="$!config.ftxs" onblur="finish()"></td>
+						  <td style="width:35px" class="operate"><a href="#" class="removedevice"><span style='width:35px;text-align:center'>删除<span></a></td>
+	        			</tr>
+					#set($index=$index+1)
+					#end
+				</tbody>
+				</table>
+				</div> 	
+        	</div>
+        </div>
+        
+        <div class="ui-form-item ui-form-item-textarea" style="margin-top:20px;width:900px;clear:both;">
+	        <label class="ui-label">能耗配置描述:</label>
+	        <textarea style="width: 650px;" class="ui-textarea"  readonly id="description" >$!{otherCategoryConfig.description}</textarea>
+	    </div>
+	    <div class="ui-form-item ui-form-item-textarea" style="margin-top:20px;width:900px;clear:both;">
+	        <label class="ui-label">备注:</label>
+	        <textarea style="width: 650px;" class="ui-textarea"   data-rule="length[~300]"  name="memo">$!{otherCategoryConfig.memo}</textarea>
+	    </div>
+	</fieldset>
+	<div class="actions-config">
+	    	<button class="btn" onclick="save()" type="button"><i class="iconfont" data-value="ok" style="color:#FFF;"></i>确定</button>
+	    	<a class="btn" href="#" onclick="reply()" ><i class="iconfont icon-reply"></i>返回</a>
+	    	
+	</div>
+</form>
+
+<script type="text/javascript">
+$(document).ready(function(){
+
+        if($("#id").val()!=""){
+        	$("#name").removeClass("ui-input-choose").attr("disabled","disabled");
+        }
+    });
+$(function(){
+	$("#isSum").change(function(){
+ 		if($("#isSum").is(':checked')){
+ 			$("#isSum2").val("1");
+ 			if($("#id").val()!=null){
+ 				$("#LeftDevice").empty();
+ 				$("#RightDevice").empty();
+ 				$("#description").text("");
+ 			}
+	 		$("#devicelst").hide();
+ 		}else{
+ 			$("#isSum2").val("0");
+ 			$("#devicelst").show();
+ 		}
+ 	});
+ 	if($("#isSum").val()=='0'){
+ 		$("#devicelst").show();
+ 	}else{
+ 		$("#LeftDevice").empty();
+ 		$("#RightDevice").empty();
+ 	}
+ 	
+ //	finish();
+ 	$("#name").bind("click",function(){
+		chooseOtherCategory('categoryId','name',function(){
+			var categoryId=$('#categoryId').val();
+			$.post('$!{rc.contextPath}/nhgl/basic/otherCategoryConfig/check?categoryId='+categoryId+'&nhType=$!{otherCategoryConfig.nhType}',function(msg){
+				if(msg){
+					 $.message('该分类的配置已经存在！', $.message.TYPE_ERROR, 4, false, true);
+					 $('#categoryId').val('');
+					 $('#name').val('')
+				} })       		
+		})
+	})
+	$(".ui-table").on("click",".removedevice",function(){
+		var dev=$(this).parent().parent().parent("tbody").attr("id");
+		
+		var len1=$("#"+dev+" tr").length;	
+		var tr=$(this).parent().parent("tr");
+		var index=$("#"+dev+" tr").index(tr);
+		$(tr).remove();//删除当前行
+		
+		for(var i=index,j=len1-1;i<j;i++){
+			var exp = new RegExp("\\["+(i+1)+"\\]","g");					
+			var rowtemp =$("#"+dev+" tr").eq(i).html();
+			var rowcon=rowtemp.replace(exp,"["+i+"]");
+			$("#"+dev+" tr").eq(i).html(rowcon);
+		}
+		finish()
+	})
+	
+
+})
+function reply(){
+	$("#chart_content_id").load("$!{rc.contextPath}/nhgl/basic/otherCategoryConfig/list?nhType=$!{otherCategoryConfig.nhType}&menuCode=QYNNSZ");
+	return false;
+}
+function save(){
+	$.forms.submits("#otherCategoryConfig_edit_form", function(msg){
+		if(msg.status=="success"){
+			$("#chart_content_id").load("$!{rc.contextPath}/"+msg.data.next+"&menuCode=QYNNSZ");
+		}
+	    return true;
+    });
+}
+function finish(){
+
+	$("#description").text("");
+	if($("#RightDevice tr").length==0){
+		$("#description").text(calculate("Left"))
+	}else{
+		$("#description").text(calculate("Left")+" - "+calculate("Right"))
+	}
+}
+function calculate(value){
+	if($("#"+value+"Device tr").length>0){
+	debugger
+		var description="";
+		var device="#"+value+"Device";
+		var temp=$(device+" tr").length;
+		for(var i=0;i<temp;i++){
+			if(i==temp-1){
+				description=description+$(device+" input[name='sub"+value+"OtherCategoryConfigList["+i+"].extended1']").val()+"*"+$(device+" input[name='sub"+value+"OtherCategoryConfigList["+i+"].ftxs']").val();
+			}else{
+				if(value=="Left")
+					description=description+$(device+" input[name='sub"+value+"OtherCategoryConfigList["+i+"].extended1']").val()+"*"+$(device+" input[name='sub"+value+"OtherCategoryConfigList["+i+"].ftxs']").val()+" + ";
+				else
+					description=description+$(device+" input[name='sub"+value+"OtherCategoryConfigList["+i+"].extended1']").val()+"*"+$(device+" input[name='sub"+value+"OtherCategoryConfigList["+i+"].ftxs']").val()+" - ";
+			}
+		}
+		description=description+""
+		return description;
+	}
+	return "";
+}
+	#if($!viewOnly)
+	        setAllReadonly("ui-form"); 
+	        $(".operate").hide();
+	#end
+</script>

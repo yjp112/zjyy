@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.mobile.app.entities.MobilePerson">
+
+	<resultMap type="com.supconit.mobile.app.entities.MobilePerson" id="MobilePersonResultMap">
+		<id property="id" column="ID" />
+		<result property="code" column="CODE" />
+		<result property="name" column="NAME" />
+		<result property="description" column="DESCRIPTION" />
+		<result property="personTelephone" column="PERSON_TELEPHONE" />
+		<result property="personEmail" column="PERSON_EMAIL" />
+		<result property="personSex" column="PERSON_SEX" />
+		<result property="deptId" column="DEPT_ID" />
+		<result property="deptName" column="DEPT_NAME" />
+		<result property="personTell" column="PERSON_TELL" />
+		<result property="personBirth" column="PERSON_BIRTH" />
+		<result property="status" column="STATUS" />
+		<result property="personOfficePhone" column="PERSON_OFFICE_PHONE" />
+		<result property="education" column="EDUCATION" />
+		<result property="carNum" column="CAR_NUM" />
+		<result property="address" column="ADDRESS" />
+		<result property="comeTime" column="COME_TIME" />
+		<result property="joinWorkTime" column="JOIN_WORK_TIME" />
+		<result property="headPic" column="HEAD_PIC" />
+		<result property="headFile" column="HEAD_FILE" />
+	</resultMap>
+
+	<sql id="TABLE_NAME" lang="velocity">HO_PERSON</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	<sql id="SELECT_PRE" lang="velocity">SELECT * FROM <include refid="TABLE_NAME"/></sql>
+	<sql id="COUNT_PRE" lang="velocity">SELECT COUNT(1) FROM <include refid="TABLE_NAME"/></sql>
+
+	<sql id="GET_CONDITION_SQL" lang="velocity">
+		<![CDATA[
+		#where()
+			#if($_parameter.id)
+				ID = @{_parameter.id,jdbcType=NUMERIC}
+			#end
+			#if($_parameter.name && $_parameter.name != '')
+				AND NAME = @{_parameter.name,jdbcType=VARCHAR}
+			#end
+			#if($_parameter.email && $_parameter.email != '')
+				AND EMAIL = @{_parameter.email,jdbcType=VARCHAR}
+			#end
+			AND STATUS = 1
+		#end
+		]]>
+	</sql>
+	
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>(
+			#if($_databaseId == 'oracle') ID, #end
+			CODE,
+			NAME,
+			DESCRIPTION,
+			PERSON_TELEPHONE,
+			PERSON_EMAIL,
+			DEPT_ID,
+			STATUS,
+			EDUCATION,
+			HEAD_PIC,
+			HEAD_FILE,
+			<include refid="_PUBLIC_V.INSERT_AUDIT_BEFORE" />
+		) VALUES (
+			#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end
+			@{_parameter.code,jdbcType=VARCHAR},
+			@{_parameter.name,jdbcType=VARCHAR},
+			@{_parameter.description,jdbcType=VARCHAR},
+			@{_parameter.personTelephone,jdbcType=VARCHAR},
+			@{_parameter.personEmail,jdbcType=VARCHAR},
+			@{_parameter.deptId,jdbcType=NUMERIC},
+			@{_parameter.status,jdbcType=NUMERIC},
+			@{_parameter.education,jdbcType=VARCHAR},
+			@{_parameter.headPic,jdbcType=VARCHAR},
+			@{_parameter.headFile,jdbcType=VARCHAR},
+			<include refid="_PUBLIC_V.INSERT_AUDIT_AFTER" />
+		)
+	</sql>
+	<insert id="insert" parameterType="com.supconit.mobile.app.entities.MobilePerson" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="INSERT_SQL" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.mobile.app.entities.MobilePerson" keyProperty="id" keyColumn="ID" lang="velocity">
+        <include refid="INSERT_SQL"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+	<update id="update" parameterType="com.supconit.mobile.app.entities.MobilePerson" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/> 
+		#mset()
+		<![CDATA[
+			#if($_parameter.code)				CODE 				= @{_parameter.code,jdbcType=VARCHAR},		#end
+			#if($_parameter.name)				NAME 				= @{_parameter.name,jdbcType=VARCHAR},			#end
+			#if($_parameter.description) 		DESCRIPTION 		= @{_parameter.description,jdbcType=VARCHAR},		#end
+			#if($_parameter.personTelephone) 	PERSON_TELEPHONE 	= @{_parameter.personTelephone,jdbcType=VARCHAR},		#end
+			#if($_parameter.status) 			STATUS 				= @{_parameter.status,jdbcType=NUMERIC},	#end
+			#if($_parameter.personEmail) 		PERSON_EMAIL 		= @{_parameter.personEmail,jdbcType=VARCHAR},		#end
+			#if($_parameter.headPic) 			HEAD_PIC 			= @{_parameter.headPic,jdbcType=VARCHAR},		#end
+			#if($_parameter.headFile) 			HEAD_FILE 			= @{_parameter.headFile,jdbcType=VARCHAR},		#end
+		]]>
+		#end
+		WHERE id = @{_parameter.id,jdbcType=NUMERIC}
+		
+	</update>
+	
+	<update id="disabledById" parameterType="long" lang="velocity"> 
+		<!-- DELETE FROM <include refid="TABLE_NAME"/> WHERE ID = @{_parameter,jdbcType=NUMERIC} -->
+		UPDATE <include refid="TABLE_NAME"/> SET STATUS = 2 WHERE ID = @{_parameter,jdbcType=NUMERIC}
+	</update>
+	
+	<select id="getByCondition" parameterType="com.supconit.mobile.app.entities.MobilePerson" resultMap="MobilePersonResultMap" lang="velocity">
+		<include refid="SELECT_PRE"/>
+		<include refid="GET_CONDITION_SQL"/>
+		#if($_databaseId == 'mysql') LIMIT 1 #end
+	</select>
+</mapper>

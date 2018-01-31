@@ -1,0 +1,120 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<div class="ui-layout-center" id="subMain">
+    <div class="ui-layout-north">
+        <form class="ui-form" id='search_form_id'>
+            <table width="100%">
+                <tr>
+                    <td>
+                        <table class="ui-search-table">
+                            <tr>
+								<td class="ui-search-name first">流程名称：</td>
+                                <td class="ui-search-c">
+                                    <input name="description" value="" class="k-textbox" type="text">
+                                </td>
+                                <td class="ui-search-name" width="15%">当前节点：</td>
+                                <td class="ui-search-c">
+                                    <input  name="name"  class="k-textbox" type="text">
+                                </td>
+                            </tr>
+
+                        </table>
+                    </td>
+                    <td width="180" valign="top" style="padding-top:4px;">
+                        <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+                        <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+                    </td>
+                    <td></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div class="ui-layout-center">
+        <div id="grids"></div>
+    </div>
+</div>
+    #parse("index/_footer.vm")
+<script type="text/javascript">
+        var menuCode= '$!{menu.code}';
+        var _iframe_layout, _left_layout, _inner_layout;
+        $(document).ready(function(){
+            _iframe_layout = $('body').layout({
+                defaults: {
+                    resizable: false,
+                    closable: false,
+                    spacing_open: 5
+                }
+            });
+
+            _inner_layout = $("#subMain").layout({
+                defaults: {
+                    resizable: false,
+                    closable: false,
+                    spacing_open: 0
+                },
+                center: {
+                    onresize_end: function () {
+                        var grid = $("#grids").data("kendoGrid");
+                        grid.resize();
+                    }
+                }
+            })
+           // commonDate("startTime","endTime","yyyy-MM-dd HH:mm:ss","zh-CN");
+            $("#resetBtn").click(function(){
+                $("#search_form_id :text").val('');
+            })
+            //列表
+            quick_datagrid(
+                    "#grids",
+                    "#search_form_id",
+                    "$!rc.contextPath/workspace/todo/list",
+                    [
+                        {field: "id",hidden: true,sortable:false},
+                        {field:"description",title: "流程名称",sortable: false,width:300,headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"},
+                            template:"<a href=\"javascript:to_page('#:data.id #','#:data.processDefinitionKey #')\">#: data.description #</a>"
+                        },
+                        {field: "name",title: "当前节点",sortable: false,width:200,
+						headerAttributes: {"class": "k-grid-text"},
+                        attributes: {"class": "k-grid-text"}
+                        },
+                        {field: "createTime",title: "创建时间",sortable: false,width:300,
+                        attributes: {"class": "k-grid-equilong"}
+                        },
+                        {field: "residence",title: "停留时间",sortable: false,width:300,
+                        headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"}
+                        }
+                    ],
+                    {sortable: {mode: "multiple",allowUnsort: true},selectable:"multiple, row",
+                     dataBound: function(e) {
+                        var data = e.sender._data;
+                        for(var i=0;i< data.length;i++)
+                        {
+                            if(data[i].name=="组长确认"){
+                                $(e.sender.tbody[0].childNodes[i]).css("background-color","#FB9DA6");
+                            }
+                        }
+                     }
+                    },
+                    {serverSorting: true},
+                    [
+						#kendo_datagrid_btns("MY_PROCESS")#end
+                    ]
+            );
+
+        });
+		
+        function to_page(id,key){
+            var dialog = false;
+            if(key.indexOf("LEAVE_APPLY")>-1 || key.indexOf("LUNCH_APPLY")>-1){
+				dialog = true;
+            }
+			if(dialog){
+				quick_dialog("process_deal_dlg", "审批流程", "$!{rc.contextPath}/platform/bpm/task?_tid="+id,900, 600, null);
+			}else{
+				window.location.href="$!{rc.contextPath}/platform/bpm/task?_tid="+id+"&menuCode="+menuCode;
+			}
+        }
+</script>
+</body>
+</html>      

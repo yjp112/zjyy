@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.analyse.electric.area.entities.NhArea">
+
+	<resultMap type="com.supconit.nhgl.analyse.electric.area.entities.NhArea" id="NhAreaResultMap">     
+        <result property="id" column="ID" />
+        <result property="code" column="CODE" />
+        <result property="name" column="NAME" />
+        <result property="pid" column="PID" />
+        <result property="persons" column="PERSONS" />
+        <result property="area" column="AREA" />
+        <result property="memo" column="MEMO" />
+        <result property="nhType" column="nhType"/>
+
+	</resultMap>
+	<sql id="select_pre">
+		SELECT * FROM NH_AREA A
+	</sql>
+	<select id="findAreaTypeByNhType" parameterType="com.supconit.nhgl.analyse.electric.area.entities.NhArea" resultMap="NhAreaResultMap">
+		<include refid="select_pre"/>
+		LEFT JOIN NH_AREA_CONFIG B ON A.ID = B.AREA_ID
+		<where>
+			<if test="nhType != null"></if>
+		</where>
+	
+	</select>
+	<select id="getTreeById" parameterType="int" resultMap="NhAreaResultMap" lang="velocity">
+		WITH TT (ID) AS (
+				SELECT
+					ID
+				FROM
+					NH_AREA
+				#where()
+					#if($_parameter)
+						id=@{_parameter,jdbcType=NUMERIC}
+					#end
+				#end
+				UNION ALL
+					SELECT
+						A.ID
+					FROM
+						NH_AREA A,
+						TT B
+					WHERE
+						A.PARENT_ID = B.ID
+			)
+		select * from tt
+	</select>
+	
+	<select id="getDistrictArea" parameterType="com.supconit.nhgl.analyse.electric.area.entities.NhArea" resultMap="NhAreaResultMap" lang="velocity">
+		SELECT
+			TOP 10 ID,
+			ISNULL(SUM (AREA), 0) as area,
+			AREA_NAME as areaName
+		FROM
+			NH_AREA
+			#where()
+				#if($_parameter.parentId)
+					PARENT_ID = @{_parameter.parentId}
+				#end
+			#end
+		GROUP BY
+			id,
+			AREA_NAME
+	</select>
+	
+	<select id="findByCondition" resultMap="NhAreaResultMap" parameterType="com.supconit.nhgl.analyse.electric.area.entities.NhArea" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			nvl(AREA, 0) AS AREA,
+			AREA_NAME as areaName
+		FROM
+			NH_AREA
+		<where>
+			<if test="parentId != null">PARENT_ID=#{parentId}</if>
+		</where>
+		#order($_parameter.condition,"AREA DESC")
+ 		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="findByCondition" resultMap="NhAreaResultMap" parameterType="com.supconit.nhgl.analyse.electric.area.entities.NhArea" lang="velocity" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			ISNULL(AREA, 0) AS AREA,
+			AREA_NAME as areaName
+		
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" />
+		#order($_parameter.condition,"AREA DESC") 
+ 		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM
+			NH_AREA
+		#where()
+			#if($_parameter.condition.parentId)
+				PARENT_ID=@{_parameter.condition.parentId}
+			#end
+		#end
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	<select id="countByCondition" resultType="Long" parameterType="com.supconit.nhgl.analyse.electric.area.entities.NhArea" lang="velocity">
+		SELECT COUNT(*) FROM NH_AREA
+		#where()
+			#if($_parameter.parentId)
+				PARENT_ID=@{_parameter.condition.parentId}
+			#end
+		#end
+	</select>
+	<select id="findRootId" resultType="Long">
+		SELECT id FROM NH_AREA
+		where area_code='ROOT'
+	</select>
+</mapper>

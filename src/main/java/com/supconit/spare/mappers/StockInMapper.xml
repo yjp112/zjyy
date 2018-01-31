@@ -1,0 +1,531 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.spare.entities.StockIn">
+	<resultMap type="com.supconit.spare.entities.StockIn" id="StockInResultMap">      
+         <result property="id" column="ID" />
+        <result property="stockInCode" column="STOCK_IN_CODE" />
+        <result property="bpmKey" column="BPM_KEY" />
+        <result property="processId" column="PROCESS_ID" />
+        <result property="warehouseId" column="WAREHOUSE_ID" />
+        <result property="inType" column="IN_TYPE" />
+        <result property="inTime" column="IN_TIME" />
+        <result property="inPersonId" column="IN_PERSON_ID" />
+        <result property="inPersonName" column="IN_PERSON_NAME" />
+        <result property="checkerId" column="CHECKER_ID" />
+        <result property="checkerName" column="CHECKER_NAME" />
+        <result property="supplierId" column="SUPPLIER_ID" />
+        <result property="invoiceNo" column="INVOICE_NO" />
+        <result property="status" column="STATUS" />
+        <result property="descripton" column="DESCRIPTON" />
+        <result property="createId" column="CREATE_ID" />
+        <result property="creator" column="CREATOR" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="updateId" column="UPDATE_ID" />
+        <result property="updator" column="UPDATOR" />
+        <result property="updateDate" column="UPDATE_DATE" />
+        <result property="supplierName" column="supplierName" />
+        <result property="statusName" column="statusName" />
+        
+        <collection 
+        property="stockInDetailList" javaType="com.supconit.spare.entities.StockInDetail">
+         <result property="id" column="d_ID" />
+        <result property="stockInId" column="d_STOCK_IN_ID" />
+        <result property="spareId" column="d_SPARE_ID" />
+        <result property="qty" column="d_QTY" />
+        <result property="prc" column="d_PRC" />
+        <result property="money" column="d_MONEY" />
+        <result property="remark" column="d_REMARK" />
+        
+        <result property="spareCode" column="d_SPARE_CODE" />
+        <result property="spareName" column="d_SPARE_NAME" />
+        <result property="spec" column="d_SPEC" />
+        <result property="model" column="d_MODEL" />
+        </collection>
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">STOCK_IN</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	<sql id="select_pre" lang="velocity">
+		 select 
+	        ID,
+	        STOCK_IN_CODE,
+	        BPM_KEY,
+	        PROCESS_ID,
+	        WAREHOUSE_ID,
+	        IN_TYPE,
+	        IN_TIME,
+	        IN_PERSON_ID,
+	        IN_PERSON_NAME,
+	        CHECKER_ID,
+	        CHECKER_NAME,
+	        SUPPLIER_ID,
+	        INVOICE_NO,
+	        STATUS,
+	        DESCRIPTON,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE,
+	        UPDATE_ID,
+	        UPDATOR,
+	        UPDATE_DATE		
+		FROM
+	    <include refid="TABLE_NAME"/> 
+	</sql>
+	
+	<sql id="count_pre" lang="velocity">SELECT COUNT(*) FROM <include refid="TABLE_NAME"/> </sql>
+	
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			#if($_p.id && $_p.id != '')
+				#set($_id = $_p.id)
+				AND ID LIKE @{_id}
+			#end
+			#if($_p.stockInCode && $_p.stockInCode != '')
+				#set($_stockInCode = '%' + $_p.stockInCode + '%')
+				AND STOCK_IN_CODE LIKE @{_stockInCode}
+			#end
+			#if($_p.bpmKey && $_p.bpmKey != '')
+				#set($_bpmKey = '%' + $_p.bpmKey + '%')
+				AND BPM_KEY LIKE @{_bpmKey}
+			#end
+			#if($_p.processId && $_p.processId != '')
+				#set($_processId = $_p.processId)
+				AND PROCESS_ID = @{_processId}
+			#end
+			#if($_p.warehouseId && $_p.warehouseId != '')
+				#set($_warehouseId = $_p.warehouseId)
+				AND WAREHOUSE_ID = @{_warehouseId}
+			#end
+			#if($_p.inType && $_p.inType != '')
+				#set($_inType = $_p.inType)
+				AND IN_TYPE = @{_inType}
+			#end
+			
+			#if($_p.inTime && $_p.inTime != '')
+				#set($_inTime = $_p.inTime)
+				AND IN_TIME = @{_inTime}
+			#end
+			#if($_p.startInTime && $_p.startInTime != '')
+				#set($_startInTime = $_p.startInTime)
+				AND IN_TIME >= @{_startInTime}
+			#end
+			#if($_p.endInTime && $_p.endInTime != '')
+				#set($_endInTime = $_p.endInTime)
+				AND IN_TIME <= @{_endInTime}
+			#end
+			#if($_p.inPersonId && $_p.inPersonId != '')
+				#set($_inPersonId = $_p.inPersonId)
+				AND IN_PERSON_ID = @{_inPersonId}
+			#end
+			
+			#if($_p.inPersonName && $_p.inPersonName != '')
+				#set($_inPersonName = '%' + $_p.inPersonName + '%')
+				AND IN_PERSON_NAME LIKE @{_inPersonName}
+			#end
+			#if($_p.checkerId && $_p.checkerId != '')
+				#set($_checkerId = $_p.checkerId)
+				AND CHECKER_ID = @{_checkerId}
+			#end
+			
+			#if($_p.checkerName && $_p.checkerName != '')
+				#set($_checkerName = '%' + $_p.checkerName + '%')
+				AND CHECKER_NAME LIKE @{_checkerName}
+			#end
+			
+			#if($_p.supplierId && $_p.supplierId != '')
+				#set($_supplierId = $_p.supplierId)
+				AND SUPPLIER_ID = @{_supplierId}
+			#end
+			
+			#if($_p.invoiceNo && $_p.invoiceNo != '')
+				#set($_invoiceNo = '%' + $_p.invoiceNo + '%')
+				AND INVOICE_NO LIKE @{_invoiceNo}
+			#end
+		#end
+		]]>	
+    </sql>
+	
+    <!-- 插入记录-->
+    <sql id="insert_sql" lang="velocity">
+        INSERT INTO <include refid="TABLE_NAME"/>(
+	        #if($_databaseId == 'oracle') ID, #end
+		    STOCK_IN_CODE,
+	        BPM_KEY,
+	        PROCESS_ID,
+	        WAREHOUSE_ID,
+	        IN_TYPE,
+	        IN_TIME,
+	        IN_PERSON_ID,
+	        IN_PERSON_NAME,
+	        CHECKER_ID,
+	        CHECKER_NAME,
+	        SUPPLIER_ID,
+	        INVOICE_NO,
+	        STATUS,
+	        DESCRIPTON,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE,
+	        UPDATE_ID,
+	        UPDATOR,
+        UPDATE_DATE
+        ) VALUES (
+        	#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end
+	        @{_parameter.stockInCode,jdbcType=VARCHAR},
+	        @{_parameter.bpmKey,jdbcType=VARCHAR},
+	        @{_parameter.processId,jdbcType=NUMERIC},
+	        @{_parameter.warehouseId,jdbcType=NUMERIC},
+	        @{_parameter.inType,jdbcType=NUMERIC},
+	        @{_parameter.inTime,jdbcType=TIMESTAMP},
+	        @{_parameter.inPersonId,jdbcType=NUMERIC},
+	        @{_parameter.inPersonName,jdbcType=VARCHAR},
+	        @{_parameter.checkerId,jdbcType=NUMERIC},
+	        @{_parameter.checkerName,jdbcType=VARCHAR},
+	        @{_parameter.supplierId,jdbcType=VARCHAR},
+	        @{_parameter.invoiceNo,jdbcType=VARCHAR},
+	        @{_parameter.status,jdbcType=NUMERIC},
+	        @{_parameter.descripton,jdbcType=VARCHAR},
+	        @{_parameter.createId,jdbcType=NUMERIC},
+	        @{_parameter.creator,jdbcType=VARCHAR},
+	        @{_parameter.createDate,jdbcType=TIMESTAMP},
+	        @{_parameter.updateId,jdbcType=NUMERIC},
+	        @{_parameter.updator,jdbcType=VARCHAR},
+	        @{_parameter.updateDate,jdbcType=TIMESTAMP}
+        )
+    </sql>
+    
+    <insert id="insert" parameterType="com.supconit.spare.entities.StockIn" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="insert_sql" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.spare.entities.StockIn" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    
+	<!-- 更新记录-->
+	<update id="update"  parameterType="com.supconit.spare.entities.StockIn" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+			#mset()
+				<![CDATA[
+			        #if($_parameter.stockInCode && $_parameter.stockInCode !='')STOCK_IN_CODE = @{_parameter.stockInCode,jdbcType=VARCHAR},#end
+			        #if($_parameter.bpmKey && $_parameter.bpmKey !='')BPM_KEY = @{_parameter.bpmKey,jdbcType=VARCHAR},#end
+			        #if($_parameter.processId)PROCESS_ID = @{_parameter.processId,jdbcType=NUMERIC},#end
+			        #if($_parameter.warehouseId )WAREHOUSE_ID = @{_parameter.warehouseId,jdbcType=NUMERIC},#end
+			        #if($_parameter.inType )IN_TYPE = @{_parameter.inType,jdbcType=NUMERIC},#end
+			        #if($_parameter.inTime )IN_TIME = @{_parameter.inTime,jdbcType=TIMESTAMP},#end
+			        #if($_parameter.inPersonId)IN_PERSON_ID = @{_parameter.inPersonId,jdbcType=NUMERIC},#end
+			        #if($_parameter.inPersonName)IN_PERSON_NAME = @{_parameter.inPersonName,jdbcType=VARCHAR},#end
+			        #if($_parameter.checkerId)CHECKER_ID = @{_parameter.checkerId,jdbcType=NUMERIC},#end
+			        #if($_parameter.checkerName)CHECKER_NAME = @{_parameter.checkerName,jdbcType=VARCHAR},#end
+			        #if($_parameter.supplierId)SUPPLIER_ID = @{_parameter.supplierId,jdbcType=NUMERIC},#end
+			        #if($_parameter.invoiceNo)INVOICE_NO = @{_parameter.invoiceNo,jdbcType=VARCHAR},#end
+			        #if($_parameter.status)STATUS = @{_parameter.status,jdbcType=NUMERIC},#end
+			        #if($_parameter.descripton)DESCRIPTON = @{_parameter.descripton,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateId)UPDATE_ID = @{_parameter.updateId,jdbcType=NUMERIC},#end
+			        #if($_parameter.updator)UPDATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateDate)UPDATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+			       
+			    ]]>
+			#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+		<update id="updateSelective"  parameterType="com.supconit.spare.entities.StockIn" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+			#mset()
+				<![CDATA[
+			        #if($_parameter.stockInCode && $_parameter.stockInCode !='')STOCK_IN_CODE = @{_parameter.stockInCode,jdbcType=VARCHAR},#end
+			        #if($_parameter.bpmKey && $_parameter.bpmKey !='')BPM_KEY = @{_parameter.bpmKey,jdbcType=VARCHAR},#end
+			        #if($_parameter.processId)PROCESS_ID = @{_parameter.processId,jdbcType=NUMERIC},#end
+			        #if($_parameter.warehouseId )WAREHOUSE_ID = @{_parameter.warehouseId,jdbcType=NUMERIC},#end
+			        #if($_parameter.inType )IN_TYPE = @{_parameter.inType,jdbcType=NUMERIC},#end
+			        #if($_parameter.inTime )IN_TIME = @{_parameter.inTime,jdbcType=TIMESTAMP},#end
+			        #if($_parameter.inPersonId)IN_PERSON_ID = @{_parameter.inPersonId,jdbcType=NUMERIC},#end
+			        #if($_parameter.inPersonName)IN_PERSON_NAME = @{_parameter.inPersonName,jdbcType=VARCHAR},#end
+			        #if($_parameter.checkerId)CHECKER_ID = @{_parameter.checkerId,jdbcType=NUMERIC},#end
+			        #if($_parameter.checkerName)CHECKER_NAME = @{_parameter.checkerName,jdbcType=VARCHAR},#end
+			        #if($_parameter.supplierId)SUPPLIER_ID = @{_parameter.supplierId,jdbcType=NUMERIC},#end
+			        #if($_parameter.invoiceNo)INVOICE_NO = @{_parameter.invoiceNo,jdbcType=VARCHAR},#end
+			        #if($_parameter.status)STATUS = @{_parameter.status,jdbcType=NUMERIC},#end
+			        #if($_parameter.descripton)DESCRIPTON = @{_parameter.descripton,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateId)UPDATE_ID = @{_parameter.updateId,jdbcType=NUMERIC},#end
+			        #if($_parameter.updator)UPDATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateDate)UPDATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+			       
+			    ]]>
+			#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+	<!-- 按条件查询记录-->
+    <select id="findByConditions"  resultMap="StockInResultMap" lang="velocity" databaseId="oracle">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+        #set($_p = $_parameter.condition)
+		select 
+	        t.ID,
+	        t.STOCK_IN_CODE,
+	        t.BPM_KEY,
+	        t.PROCESS_ID,
+	        t.WAREHOUSE_ID,
+	        t.IN_TYPE,
+	        t.IN_TIME,
+	        t.IN_PERSON_ID,
+	        t.IN_PERSON_NAME,
+	        t.CHECKER_ID,
+	        t.CHECKER_NAME,
+	        t.SUPPLIER_ID,
+	        t.INVOICE_NO,
+	        t.STATUS,
+	        t.DESCRIPTON,
+	        t.CREATE_ID,
+	        t.CREATOR,
+	        t.CREATE_DATE,
+	        t.UPDATE_ID,
+	        t.UPDATOR,
+	        t.UPDATE_DATE,		
+	        t1.ENUM_TEXT statusName
+		FROM
+		STOCK_IN t left join ENUM_DETAIL t1 on t.STATUS=t1.ENUM_VALUE and t1.TYPE_ID= @{_p.statusDictType,jdbcType=NUMERIC}
+		<![CDATA[
+		#where()
+			
+			#if($_p.id && $_p.id != '')
+				#set($_id = $_p.id)
+				AND ID LIKE @{_id}
+			#end
+			#if($_p.stockInCode && $_p.stockInCode != '')
+				#set($_stockInCode = '%' + $_p.stockInCode + '%')
+				AND STOCK_IN_CODE LIKE @{_stockInCode}
+			#end
+			#if($_p.bpmKey && $_p.bpmKey != '')
+				#set($_bpmKey = '%' + $_p.bpmKey + '%')
+				AND BPM_KEY LIKE @{_bpmKey}
+			#end
+			#if($_p.processId && $_p.processId != '')
+				#set($_processId = $_p.processId)
+				AND PROCESS_ID = @{_processId}
+			#end
+			#if($_p.warehouseId && $_p.warehouseId != '')
+				#set($_warehouseId = $_p.warehouseId)
+				AND WAREHOUSE_ID = @{_warehouseId}
+			#end
+			#if($_p.inType && $_p.inType != '')
+				#set($_inType = $_p.inType)
+				AND IN_TYPE = @{_inType}
+			#end
+			
+			#if($_p.inTime && $_p.inTime != '')
+				#set($_inTime = $_p.inTime)
+				AND IN_TIME = @{_inTime}
+			#end
+			#if($_p.startInTime && $_p.startInTime != '')
+				#set($_startInTime = $_p.startInTime)
+				AND IN_TIME >= @{_startInTime}
+			#end
+			#if($_p.endInTime && $_p.endInTime != '')
+				#set($_endInTime = $_p.endInTime)
+				AND IN_TIME <= @{_endInTime}
+			#end
+			#if($_p.inPersonId && $_p.inPersonId != '')
+				#set($_inPersonId = $_p.inPersonId)
+				AND IN_PERSON_ID = @{_inPersonId}
+			#end
+			
+			#if($_p.inPersonName && $_p.inPersonName != '')
+				#set($_inPersonName = '%' + $_p.inPersonName + '%')
+				AND IN_PERSON_NAME LIKE @{_inPersonName}
+			#end
+			#if($_p.checkerId && $_p.checkerId != '')
+				#set($_checkerId = $_p.checkerId)
+				AND CHECKER_ID = @{_checkerId}
+			#end
+			
+			#if($_p.checkerName && $_p.checkerName != '')
+				#set($_checkerName = '%' + $_p.checkerName + '%')
+				AND CHECKER_NAME LIKE @{_checkerName}
+			#end
+			
+			#if($_p.supplierId && $_p.supplierId != '')
+				#set($_supplierId = $_p.supplierId)
+				AND SUPPLIER_ID = @{_supplierId}
+			#end
+			
+			#if($_p.invoiceNo && $_p.invoiceNo != '')
+				#set($_invoiceNo = '%' + $_p.invoiceNo + '%')
+				AND INVOICE_NO LIKE @{_invoiceNo}
+			#end
+		#end
+		]]>	
+		#order($_parameter.condition,"t.ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.spare.entities.StockIn" resultMap="StockInResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		#set($_p = $_parameter.condition)
+		select 
+        t.ID,
+        t.STOCK_IN_CODE,
+        t.BPM_KEY,
+        t.PROCESS_ID,
+        t.WAREHOUSE_ID,
+        t.IN_TYPE,
+        t.IN_TIME,
+        t.IN_PERSON_ID,
+        t.IN_PERSON_NAME,
+        t.CHECKER_ID,
+        t.CHECKER_NAME,
+        t.SUPPLIER_ID,
+        t.INVOICE_NO,
+        t.STATUS,
+        t.DESCRIPTON,
+        t.CREATE_ID,
+        t.CREATOR,
+        t.CREATE_DATE,
+        t.UPDATE_ID,
+        t.UPDATOR,
+        t.UPDATE_DATE,		
+        t1.ENUM_TEXT statusName
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"t.ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM
+		STOCK_IN t left join ENUM_DETAIL t1 on t.STATUS=t1.ENUM_VALUE and t1.TYPE_ID= @{_p.statusDictType,jdbcType=NUMERIC}
+		<![CDATA[
+		#where()
+			
+			#if($_p.id && $_p.id != '')
+				#set($_id = $_p.id)
+				AND ID LIKE @{_id}
+			#end
+			#if($_p.stockInCode && $_p.stockInCode != '')
+				#set($_stockInCode = '%' + $_p.stockInCode + '%')
+				AND STOCK_IN_CODE LIKE @{_stockInCode}
+			#end
+			#if($_p.bpmKey && $_p.bpmKey != '')
+				#set($_bpmKey = '%' + $_p.bpmKey + '%')
+				AND BPM_KEY LIKE @{_bpmKey}
+			#end
+			#if($_p.processId && $_p.processId != '')
+				#set($_processId = $_p.processId)
+				AND PROCESS_ID = @{_processId}
+			#end
+			#if($_p.warehouseId && $_p.warehouseId != '')
+				#set($_warehouseId = $_p.warehouseId)
+				AND WAREHOUSE_ID = @{_warehouseId}
+			#end
+			#if($_p.inType && $_p.inType != '')
+				#set($_inType = $_p.inType)
+				AND IN_TYPE = @{_inType}
+			#end
+			
+			#if($_p.inTime && $_p.inTime != '')
+				#set($_inTime = $_p.inTime)
+				AND IN_TIME = @{_inTime}
+			#end
+			#if($_p.startInTime && $_p.startInTime != '')
+				#set($_startInTime = $_p.startInTime)
+				AND IN_TIME >= @{_startInTime}
+			#end
+			#if($_p.endInTime && $_p.endInTime != '')
+				#set($_endInTime = $_p.endInTime)
+				AND IN_TIME <= @{_endInTime}
+			#end
+			#if($_p.inPersonId && $_p.inPersonId != '')
+				#set($_inPersonId = $_p.inPersonId)
+				AND IN_PERSON_ID = @{_inPersonId}
+			#end
+			
+			#if($_p.inPersonName && $_p.inPersonName != '')
+				#set($_inPersonName = '%' + $_p.inPersonName + '%')
+				AND IN_PERSON_NAME LIKE @{_inPersonName}
+			#end
+			#if($_p.checkerId && $_p.checkerId != '')
+				#set($_checkerId = $_p.checkerId)
+				AND CHECKER_ID = @{_checkerId}
+			#end
+			
+			#if($_p.checkerName && $_p.checkerName != '')
+				#set($_checkerName = '%' + $_p.checkerName + '%')
+				AND CHECKER_NAME LIKE @{_checkerName}
+			#end
+			
+			#if($_p.supplierId && $_p.supplierId != '')
+				#set($_supplierId = $_p.supplierId)
+				AND SUPPLIER_ID = @{_supplierId}
+			#end
+			
+			#if($_p.invoiceNo && $_p.invoiceNo != '')
+				#set($_invoiceNo = '%' + $_p.invoiceNo + '%')
+				AND INVOICE_NO LIKE @{_invoiceNo}
+			#end
+		#end
+		]]>	
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countByConditions" resultType="long" lang="velocity">
+        <include refid="count_pre"/>
+        <include refid="condition_sql"/>
+    </select>
+    
+    <select id="getById" resultMap="StockInResultMap" parameterType="long" lang="velocity">
+		<include refid="select_pre"/>
+		WHERE ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+	<select id="findById" resultMap="StockInResultMap" parameterType="long" lang="velocity">
+		   select
+        a.ID,
+        a.STOCK_IN_CODE,
+        a.BPM_KEY,
+        a.PROCESS_ID,
+        a.WAREHOUSE_ID,
+        a.IN_TYPE,
+        a.IN_TIME,
+        a.IN_PERSON_ID,
+        a.IN_PERSON_NAME,
+        a.CHECKER_ID,
+        a.CHECKER_NAME,
+        a.SUPPLIER_ID,
+        a.INVOICE_NO,
+        a.STATUS,
+        a.DESCRIPTON,
+        a.CREATE_ID,
+        a.CREATOR,
+        a.CREATE_DATE,
+        a.UPDATE_ID,
+        a.UPDATOR,
+        a.UPDATE_DATE,
+        b.ID d_ID,
+        b.STOCK_IN_ID d_STOCK_IN_ID,
+        b.SPARE_ID d_SPARE_ID,
+        b.QTY d_QTY,
+        b.PRC d_PRC,
+        b.MONEY d_MONEY,
+        b.REMARK  d_REMARK,
+        c.SPARE_CODE d_SPARE_CODE,
+        c.SPARE_NAME d_SPARE_NAME,
+        c.SPEC d_SPEC,
+        c.model d_MODEL,
+        d.FULL_NAME supplierName
+        from STOCK_IN a 
+		left join STOCK_IN_DETAIL b on a.ID = b.STOCK_IN_ID LEFT JOIN SPARE c on c.id=b.SPARE_ID LEFT JOIN SUPPLIER d on a.SUPPLIER_ID=d.id
+		WHERE a.ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+	<delete id="deleteById" parameterType="long" lang="velocity"> 
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</delete>
+	<delete id="deleteByIds">
+		DELETE FROM
+		<include refid="TABLE_NAME" />
+	    WHERE ID IN    
+	        <foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+				#{id,jdbcType=NUMERIC}
+			</foreach>
+	</delete>
+</mapper>

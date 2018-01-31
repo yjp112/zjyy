@@ -1,0 +1,312 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.base.entities.DeviceCategory">
+
+	<resultMap type="com.supconit.base.entities.DeviceCategory" id="DeviceCategoryResultMap">      
+        <result property="id" column="ID" />
+        <result property="categoryCode" column="CATEGORY_CODE" />
+        <result property="categoryName" column="CATEGORY_NAME" />
+        <result property="parentId" column="PARENT_ID" />
+        <result property="remark" column="REMARK" />
+        <result property="lastNode" column="LAST_NODE" />        
+        <result property="sortIndex" column="SORT_INDEX" />
+        <result property="createId" column="CREATE_ID" />
+        <result property="creator" column="CREATOR" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="updateId" column="UPDATE_ID" />
+        <result property="updator" column="UPDATOR" />
+        <result property="updateDate" column="UPDATE_DATE" />
+        <result property="parentName" column="PARENT_NAME" />
+        <result property="fullLevelName" column="FULL_LEVEL_NAME" />
+        
+	</resultMap>
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+	<sql id="TABLE_NAME" lang="velocity">DEVICE_CATEGORY</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+    <!-- 获取记录列表-->
+	<sql id="select_pre" lang="velocity">
+	<![CDATA[
+    select 
+        A.ID,
+        A.CATEGORY_CODE,
+        A.CATEGORY_NAME,
+        A.PARENT_ID,
+        A.LAST_NODE,
+        A.SORT_INDEX,
+        A.REMARK,
+        A.FULL_LEVEL_NAME,
+        A.CREATE_ID,
+        A.CREATOR,
+        A.CREATE_DATE,
+        A.UPDATE_ID,
+        A.UPDATOR,
+        A.UPDATE_DATE,
+        #if($_databaseId=='oracle') 
+        	nvl(B.CATEGORY_NAME,'设备类别簇') PARENT_NAME
+        #else 
+        	ISNULL(B.CATEGORY_NAME,'设备类别簇') PARENT_NAME 
+        #end
+		FROM
+		DEVICE_CATEGORY A
+		left join DEVICE_CATEGORY B
+		on A.PARENT_ID = B.ID
+		]]>
+	</sql>
+	<sql id="count_pre" lang="velocity">
+		SELECT
+		COUNT(*)
+		FROM
+		DEVICE_CATEGORY A
+	</sql>
+	<insert id="insert" parameterType="com.supconit.base.entities.DeviceCategory" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="INSERT_SQL"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    <insert id="insert" parameterType="com.supconit.base.entities.DeviceCategory" 
+		keyProperty="id" keyColumn="ID" 		lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>        
+		<include refid="INSERT_SQL" />
+	</insert>
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>
+		(#if($_databaseId=='oracle') ID,#end
+	        CATEGORY_CODE,
+	        CATEGORY_NAME,
+	        PARENT_ID,
+	        LAST_NODE,
+	        SORT_INDEX,
+	        REMARK,
+	        FULL_LEVEL_NAME,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE			
+		) VALUES (        
+		#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end
+        @{_parameter.categoryCode,jdbcType=VARCHAR},
+        @{_parameter.categoryName,jdbcType=VARCHAR},
+        @{_parameter.parentId,jdbcType=NUMERIC},
+        @{_parameter.lastNode,jdbcType=INTEGER},
+        @{_parameter.sortIndex,jdbcType=INTEGER},
+        @{_parameter.remark,jdbcType=VARCHAR},
+        @{_parameter.fullLevelName,jdbcType=VARCHAR},
+        @{_parameter.createId,jdbcType=NUMERIC},
+        @{_parameter.creator,jdbcType=VARCHAR},
+        @{_parameter.createDate,jdbcType=TIMESTAMP}		
+		)
+	</sql>
+    <!-- 插入记录-->
+	<sql id="insert_sql">
+		INSERT INTO DEVICE_CATEGORY(        
+        CATEGORY_CODE,
+        CATEGORY_NAME,
+        PARENT_ID,
+        LAST_NODE,
+        SORT_INDEX,
+        REMARK,
+        FULL_LEVEL_NAME,
+        CREATE_ID,
+        CREATOR,
+        CREATE_DATE
+		) VALUES (        
+        #{categoryCode,jdbcType=VARCHAR},
+        #{categoryName,jdbcType=VARCHAR},
+        #{parentId,jdbcType=NUMERIC},
+        #{lastNode,jdbcType=INTEGER},
+        #{sortIndex,jdbcType=INTEGER},
+        #{remark,jdbcType=VARCHAR},
+        @{fullLevelName,jdbcType=VARCHAR},
+        #{createId,jdbcType=NUMERIC},
+        #{creator,jdbcType=VARCHAR},
+        #{createDate,jdbcType=TIMESTAMP}		
+		)
+	</sql>
+
+	<select id="getById" resultMap="DeviceCategoryResultMap" parameterType="Long" lang="velocity">
+		<include refid="select_pre" />        
+        WHERE A.ID = @{_parameter.id,jdbcType=NUMERIC}
+	</select>
+	<select id="getByCode" resultMap="DeviceCategoryResultMap" parameterType="com.supconit.base.entities.DeviceCategory" lang="velocity">
+		<include refid="select_pre" />        
+        WHERE A.CATEGORY_CODE =@{_parameter.categoryCode, jdbcType=VARCHAR}
+	</select>
+    <select id="findAll" resultMap="DeviceCategoryResultMap" lang="velocity">
+		<include refid="select_pre" />
+		#order($_parameter.condition,"A.SORT_INDEX")
+	</select>
+    <select id="findByCategoryCode" resultMap="DeviceCategoryResultMap" parameterType="com.supconit.base.entities.DeviceCategory" lang="velocity">
+    with tt(ID,parent_id,category_name) as(
+       SELECT ID,parent_id,category_name FROM device_category  WHERE id=(select id from device_category where 
+       category_code=@{_parameter.categoryCode, jdbcType=VARCHAR})
+        UNION ALL 
+      select a.id,a.parent_id,a.category_name from device_category a ,tt b where a.parent_id=b.id
+      )
+      select * from tt
+	</select>
+	
+	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.base.entities.DeviceCategory">
+		UPDATE	DEVICE_CATEGORY
+		<set>
+        <if test="categoryCode != null">CATEGORY_CODE = #{categoryCode,jdbcType=VARCHAR},</if>
+        <if test="categoryName != null">CATEGORY_NAME = #{categoryName,jdbcType=VARCHAR},</if>
+        <if test="parentId != null">PARENT_ID = #{parentId,jdbcType=NUMERIC},</if>
+        <if test="lastNode != null">LAST_NODE = #{lastNode,jdbcType=INTEGER},</if>
+        <if test="sortIndex != null">SORT_INDEX = #{sortIndex,jdbcType=INTEGER},</if>
+        <if test="remark != null">REMARK = #{remark,jdbcType=VARCHAR},</if>
+        <if test="fullLevelName != null">FULL_LEVEL_NAME = #{fullLevelName,jdbcType=VARCHAR},</if>
+        <if test="createId != null">CREATE_ID = #{createId,jdbcType=NUMERIC},</if>
+        <if test="creator != null">CREATOR = #{creator,jdbcType=VARCHAR},</if>
+        <if test="createDate != null">CREATE_DATE = #{createDate,jdbcType=TIMESTAMP},</if>
+        <if test="updateId != null">UPDATE_ID = #{updateId,jdbcType=NUMERIC},</if>
+        <if test="updator != null">UPDATOR = #{updator,jdbcType=VARCHAR},</if>
+        <if test="updateDate != null">UPDATE_DATE = #{updateDate,jdbcType=TIMESTAMP},</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+    <!-- 通过 ID 获取对象-->
+	<delete id="deleteById" parameterType="Long">
+		DELETE FROM DEVICE_CATEGORY WHERE ID = #{id}
+	</delete>
+	<sql id="condition_sql" lang="velocity">
+	<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			1=1 
+			#if($_p.id)
+				#set($_id = $_p.id)
+				AND A.ID = @{_id,jdbcType=BIGINT}
+			#end		
+			#if($_p.categoryCode && $_p.categoryCode != '')
+				#set($_categoryCode = '%' + $_p.categoryCode + '%')
+				AND A.CATEGORY_CODE LIKE @{_categoryCode,jdbcType=VARCHAR}
+			#end		
+			#if($_p.categoryName && $_p.categoryName != '')
+				#set($_categoryName = '%' + $_p.categoryName + '%')
+				AND A.CATEGORY_NAME LIKE @{_categoryName,jdbcType=VARCHAR}
+			#end
+			#if($_p.parentId && $_p.childIds && $_p.childIds.size()>0)	
+				and 
+				#repeat( $_p.childIds $id "," "  A.ID IN  (" ")" )
+				    @{id,jdbcType=BIGINT}
+				#end	
+			#end
+			#if($_p.lastNode && $_p.lastNode != '')
+				#set($_lastNode = $_p.lastNode)
+				AND A.LAST_NODE = @{_lastNode,jdbcType=NUMERIC}
+			#end				
+		#end
+		]]>	
+	</sql>
+    
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.base.entities.DeviceCategory" resultMap="DeviceCategoryResultMap" lang="velocity" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre" />
+ 		<include refid="condition_sql" />
+  		#order($_parameter.condition,"A.CREATE_DATE DESC")
+ 		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.base.entities.DeviceCategory" resultMap="DeviceCategoryResultMap" lang="velocity" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+	    select 
+	        A.ID,
+	        A.CATEGORY_CODE,
+	        A.CATEGORY_NAME,
+	        A.PARENT_ID,
+	        A.LAST_NODE,
+	        A.SORT_INDEX,
+	        A.REMARK,
+	        A.CREATE_ID,
+	        A.CREATOR,
+	        A.CREATE_DATE,
+	        A.UPDATE_ID,
+	        A.UPDATOR,
+	        A.UPDATE_DATE,
+	        ISNULL(B.CATEGORY_NAME,'设备类别簇') PARENT_NAME 
+	        <include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+	 		#order($_parameter.condition,"A.CREATE_DATE DESC")
+	 		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+			FROM
+			DEVICE_CATEGORY A
+			left join DEVICE_CATEGORY B
+			on A.PARENT_ID = B.ID		
+ 		<include refid="condition_sql" />
+ 		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+
+    <select id="countByCondition" parameterType="com.supconit.base.entities.DeviceCategory" resultType="long" lang="velocity">
+		<include refid="count_pre" />
+ 	    <include refid="condition_sql" />
+	</select>
+    <!-- 递归查询子类别-->
+	<select id="findChildIds" parameterType="Long" resultType="Long">
+		WITH TT(ID) AS ( 
+		SELECT ID FROM DEVICE_CATEGORY  WHERE ID =#{id}
+	    UNION ALL 
+		SELECT A.ID FROM DEVICE_CATEGORY A,TT B WHERE A.PARENT_ID = B.ID
+		) 
+		SELECT 	ID  FROM TT   	
+	</select>  
+	
+    <!-- 递归查询子类别-->
+	<select id="findChildIdsEntity" parameterType="Long" resultMap="DeviceCategoryResultMap">
+		WITH TT(ID,CATEGORY_NAME,PARENT_ID) AS ( 
+		SELECT ID,CATEGORY_NAME,PARENT_ID FROM DEVICE_CATEGORY  WHERE ID =#{id}
+	    UNION ALL 
+		SELECT A.ID,A.CATEGORY_NAME,A.PARENT_ID FROM DEVICE_CATEGORY A,TT B WHERE A.PARENT_ID = B.ID
+		) 
+		SELECT 	ID,CATEGORY_NAME,PARENT_ID  FROM TT   	
+	</select>  
+	
+	<!-- 查询某设备类别的子节点数量-删除设备类别验证用-->
+	<select id="findChildrenCount"  parameterType="Long" resultType="Long">
+	    SELECT 
+		COUNT(A.ID)
+		FROM
+		DEVICE_CATEGORY A
+        WHERE A.PARENT_ID = #{id}
+	</select>
+	
+		<!-- 按设备类别查询层 gis-->
+	<select id="findByCodes_g" parameterType="hashmap" resultMap="DeviceCategoryResultMap">
+		SELECT A.ID
+		FROM DEVICE_CATEGORY A
+		WHERE 
+		A.CATEGORY_CODE IN 
+        <foreach item="item" index="index" collection="codes" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+	</select>
+    <!-- 删除多条记录-->
+	<delete id="deleteByIds">
+        DELETE FROM DEVICE_CATEGORY WHERE ID in 
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+
+	</delete>
+
+	<select id="findFirstLevel" resultMap="DeviceCategoryResultMap" lang="velocity">
+		<include refid="select_pre" />
+		WHERE A.PARENT_ID = 0
+	</select>
+
+	<select id="findByParentId" resultMap="DeviceCategoryResultMap" parameterType="long">
+		SELECT
+		ID,
+		CATEGORY_CODE,
+		CATEGORY_NAME,
+		PARENT_ID,
+		SORT_INDEX
+		from DEVICE_CATEGORY
+		where PARENT_ID = #{parentId} order by SORT_INDEX asc
+	</select>
+</mapper>
+

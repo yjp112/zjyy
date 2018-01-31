@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.schedule.entites.TaskCatagory">
+
+	<resultMap type="com.supconit.nhgl.schedule.entites.TaskCatagory" id="TASKCATAGORYResultMap">
+					<id property="id" column="ID" />
+							<result property="catagoryText" column="CATAGORY_TEXT" />
+							<result property="catagoryCode" column="CATAGORY_CODE" />
+							<result property="parentCode" column="PARENT_CODE" />
+							<result property="remark" column="REMARK" />
+				</resultMap>
+	
+	
+	<sql id="TABLE_NAME" lang="velocity">NH_TASK_CATAGORY</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	<sql id="SELECT_PRE" lang="velocity">SELECT * FROM <include refid="TABLE_NAME"/></sql>
+	<sql id="COUNT_PRE" lang="velocity">SELECT COUNT(1) FROM <include refid="TABLE_NAME"/></sql>
+
+	<sql id="SEARCH_CONDITION_SQL" lang="velocity">
+		<![CDATA[
+		#where()
+			
+		#end
+		]]>	
+	</sql>
+	
+	<sql id="SEARCH_CONDITION_TASKSQL" lang="velocity">
+		<![CDATA[
+		#where()
+			#if($_parameter.condition.catagoryText)
+				#set($_code='%'+$_parameter.condition.catagoryText+'%')
+				CATAGORY_TEXT like @{_code,jdbcType=VARCHAR} AND
+			#end
+			#if($_parameter.condition.id)
+				ID IN ( SELECT ID FROM my1 ) and
+			#end
+			1=1
+		#end
+		]]>	
+	</sql>
+	
+	<select id="getById" resultMap="TASKCATAGORYResultMap" parameterType="long" lang="velocity">
+		<include refid="SELECT_PRE" />
+				WHERE ID = @{_parameter, jdbcType=NUMERIC}
+			</select>
+	<select id="getTaskCategory" resultMap="TASKCATAGORYResultMap" lang="velocity">
+		<include refid="SELECT_PRE" />
+	</select>
+	<select id="selectPager" lang="velocity" resultMap="TASKCATAGORYResultMap">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="SELECT_PRE"/>
+		<include refid="SEARCH_CONDITION_SQL"/>
+		#order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	
+	<select id="selectPager" lang="velocity" resultMap="TASKCATAGORYResultMap" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT * 
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/>
+		<include refid="SEARCH_CONDITION_SQL"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	
+	<select id="selectTaskPager" lang="velocity" resultMap="TASKCATAGORYResultMap" parameterType="com.supconit.nhgl.schedule.entites.TaskCatagory">
+		WITH my1(id,catagory_text,catagory_code,parent_code,remark) as(
+		SELECT a.id,a.catagory_text,a.catagory_code,a.parent_code,a.remark FROM NH_TASK_CATAGORY a WHERE a.id = @{_parameter.condition.id, jdbcType=NUMERIC} 
+		UNION ALL
+		SELECT a.id,a.catagory_text,a.catagory_code,a.parent_code,a.remark FROM NH_TASK_CATAGORY a,my1  b WHERE  b.CATAGORY_CODE = a.PARENT_CODE)
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="SELECT_PRE"/>
+		<include refid="SEARCH_CONDITION_TASKSQL"/>
+		#order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	
+	<select id="selectTaskPager" lang="velocity" resultMap="TASKCATAGORYResultMap" databaseId="sqlserver">
+		with my1 as(
+			select * from NH_TASK_CATAGORY a where a.id = @{_parameter.condition.id, jdbcType=NUMERIC}  
+			union all select a.* from my1, NH_TASK_CATAGORY a where my1.CATAGORY_CODE = a.PARENT_CODE      
+		)
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT * 
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/>
+		<include refid="SEARCH_CONDITION_TASKSQL"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+	
+	<select id="countPager" lang="velocity" resultType="long">
+		<include refid="COUNT_PRE"/><include refid="SEARCH_CONDITION_SQL"/>
+	</select>
+	
+	<select id="countTaskPager" lang="velocity" resultType="long">
+	with my1 as(
+			select * from NH_TASK_CATAGORY a where a.id = @{_parameter.condition.id, jdbcType=NUMERIC}  
+			union all select a.* from my1, NH_TASK_CATAGORY a where my1.CATAGORY_CODE = a.PARENT_CODE      
+		)
+	<include refid="COUNT_PRE"/><include refid="SEARCH_CONDITION_TASKSQL"/>
+	</select>
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>(
+															#if($_databaseId == 'oracle') ID,#end
+																CATAGORY_TEXT
+																					,CATAGORY_CODE
+																					,PARENT_CODE
+																					,REMARK
+														) VALUES (
+															#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end
+																@{_parameter.catagoryText,jdbcType=VARCHAR}
+																					,@{_parameter.catagoryCode,jdbcType=VARCHAR}
+																					,@{_parameter.parentCode,jdbcType=VARCHAR}
+																					,@{_parameter.remark,jdbcType=VARCHAR}
+														)
+	</sql>
+	
+	<insert id="insert" parameterType="com.supconit.nhgl.schedule.entites.TaskCatagory" 
+		keyProperty="id" keyColumn="ID" 		lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>        <include refid="INSERT_SQL" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.nhgl.schedule.entites.TaskCatagory" 
+		keyProperty="id" keyColumn="ID" 		 lang="velocity">
+        <include refid="INSERT_SQL"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>    </insert>
+    
+	<update id="update" parameterType="com.supconit.nhgl.schedule.entites.TaskCatagory" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/> 
+		#mset()
+		<![CDATA[
+																							#if($_parameter.catagoryText)CATAGORY_TEXT = @{_parameter.catagoryText,jdbcType=VARCHAR},#end
+																#if($_parameter.catagoryCode)CATAGORY_CODE = @{_parameter.catagoryCode,jdbcType=VARCHAR},#end
+																#if($_parameter.parentCode)PARENT_CODE = @{_parameter.parentCode,jdbcType=VARCHAR},#end
+																#if($_parameter.remark)REMARK = @{_parameter.remark,jdbcType=VARCHAR},#end
+									]]>
+		#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+	
+	<delete id="deleteById" parameterType="long" lang="velocity">
+		DELETE FROM <include refid="TABLE_NAME" /> WHERE ID = @{_parameter,jdbcType=NUMERIC}
+	</delete>
+	
+	<delete id="deleteByIds">
+		DELETE FROM
+		<include refid="TABLE_NAME" />
+	    WHERE ID IN    
+	        <foreach item="id" index="index" collection="list" open="(" separator="," close=")">
+				#{id,jdbcType=NUMERIC}
+			</foreach>
+	</delete>
+    		
+</mapper>

@@ -1,0 +1,159 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<form id="myform_id" method="post" action="$!{rc.contextPath}/employee/leave/save" class="ui-layout-center ui-dialog-form">
+    <input type="hidden"  name="id" value="$!{leave.id}">
+    <input type="hidden"  id="status" name="status" value="$!{leave.status}">
+    <table width="100%" style="padding-right:36px;">
+        <tr>
+            <td class="label"   ><span class="ui-form-required">*</span><label>姓名：</label></td>
+            <td ><input type="text" class="k-textbox" name="creator"  readonly  value="$!{leave.creator}"></td>
+            <td class="label"><span class="ui-form-required">*</span><label>部门：</label></td>
+            <td >
+                 <select id="deptName_id" name="deptName" class="k-textbox">
+						#foreach($!dept in $!listDepartment)
+							<option value="$!{dept.deptId}" #if($!{dept.deptId}==$!{leave.deptId}) selected #end>$!{dept.fullDeptName}</option>
+						#end
+				</select>
+			</td>
+        </tr>
+        <tr>
+          <td class="label"><span class="ui-form-required">*</span>请假类别：</td>
+            <td>
+				<select id="leaveType_id" name="leaveType" class="k-textbox">
+						#foreach($!lType in $!listLeaveType)
+							<option value="$!{lType.enumValue}" #if($!{lType.enumValue}==$!{leave.leaveType}) selected #end>$!{lType.enumText}</option>
+						#end
+				</select>
+			</td>
+			<td class="label"><span class="ui-form-required">*</span>申请时间：</td>
+			<td>
+                <input  id="createDate"  class="k-textbox"  name="createDate"   readonly  value="#date_format($!{leave.createDate},'yyyy-MM-dd HH:mm:ss')"  />
+            </td>
+		</tr>
+		     <tr id ="sj">
+	        	<td  class="label"><span class="ui-form-required">*</span>开始时间：</td>
+	            <td>
+	                <input  id="startDate"  class="k-textbox"  name="startDate" value="#date_format($!{leave.startDate},'yyyy-MM-dd HH:mm:ss')"  />
+	            </td>
+				
+				<td class="label"><span class="ui-form-required">*</span>结束时间：</td>
+	            <td>
+					<input id="endDate"  class="k-textbox"  name="endDate" value="#date_format($!{leave.endDate},'yyyy-MM-dd HH:mm:ss')"/>
+	            </td>
+	          </tr>
+              <tr id="plj">
+		        	<td  class="label"><span class="ui-form-required">*</span>开始日期：</td>
+		            <td>
+		                <input  id="startTime"  class="k-textbox"  name="startTime" value="#date_format($!{leave.startDate},'yyyy-MM-dd')"  />
+		            </td>
+					<td class="label"><span class="ui-form-required">*</span>结束日期：</td>
+		            <td>
+						<input id="endTime"  class="k-textbox"  name="endTime" value="#date_format($!{leave.endDate},'yyyy-MM-dd')"/>
+		            </td>
+		          </tr>
+		      <tr id="plj1">
+		        	<td  class="label"><span class="ui-form-required">*</span>开始时间：</td>
+		            <td>
+		                <input  id="startTime1"  class="k-textbox"  name="startTime1" value="#date_format($!{leave.startDate},'HH:mm:ss')"  />
+		            </td>
+					<td class="label"><span class="ui-form-required">*</span>结束时间：</td>
+		            <td>
+						<input id="endTime1"  class="k-textbox"  name="endTime1" value="#date_format($!{leave.endDate},'HH:mm:ss')"/>
+		            </td>
+		          </tr>
+            <tr>
+            <td class="label"><span class="ui-form-required">*</span><label>请假天数：</label></td>
+            <td  colspan="3"><input    type="text"  class="k-textbox"  name="leaveDays"  value="$!{leave.leaveDays}" style="width:35px;"> 天 <input  type="text"  class="k-textbox"  name="leaveHours"  value="$!{leave.leaveHours}"  style="width:35px;" > 小时 (请假天数[天|小时] 不能同时为空! 最小颗粒度为1小时)</td>
+        </tr>
+		<tr>
+            <td class="label"><span class="ui-form-required">*</span>请假事由：</td>
+            <td colspan="3"><textarea   id="reason" name="reason" class="k-textbox k-textarea" style="height:60px">$!{leave.reason}</textarea></td>
+        </tr>
+        
+    </table>
+    <div class="actions">
+        <button class="k-primary hc_btn" id="send_button_id"  type="submit"><i class="fa fa-send"></i>提 交</button>
+        <button class="k-primary hc_btn" id="save_button_id"  type="submit"><i class="fa fa-save"></i>保 存</button>
+        <button class="hc_btn cancel" onclick="close_dialog('leave_add_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+    </div>
+
+</form>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+		      defaults: {
+		        resizable: true,
+		        closable: false,
+		        spacing_open: 5
+		      }
+	    });
+		 #if($!{leave.leaveType}==9)
+			$("#plj").show();
+	        $("#plj1").show();
+			$("#sj").hide();
+		#end
+		#if($!{leave.leaveType}!=9)
+			$("#plj").hide();
+	        $("#plj1").hide();
+		    $("#sj").show();
+		#end
+	});
+    
+	$("#leaveType_id").change(function() {
+		  var ltype=$("#leaveType_id").val();
+		  if(ltype==9){
+			  $("#plj").show();
+		        $("#plj1").show();
+				$("#sj").hide();
+	      }else{
+	    	  $("#plj").hide();
+		        $("#plj1").hide();
+			    $("#sj").show();
+	      }
+	});	
+	
+	$("#save_button_id").click(function() {
+		  $("#status").val(0);
+	});
+	
+	$("#send_button_id").click(function() {
+		  $("#status").val(1);
+	});	
+    //
+    $(document).ready(function () {
+        $("#myform_id").validator({
+        	#if(!$!viewOnly)
+	            fields: {
+	                startDate: "开始时间:required",
+	                endDate: "结束时间:required",
+	                startTime: "开始日期:required",
+	                endTime: "结束日期:required",
+	                startTime1: "开始时间:required",
+	                endTime1: "结束时间:required",
+	                leaveDays: "请假天数; length[~3]; digits",
+	                leaveHours: "请假天数; length[~3]; digits",
+	                reason: "请假事由:required; length[~200]"
+	            },
+            #end
+            valid: function (form) {
+                form_btn_submit($("#save_button_id"), form, function (res) {
+                    //console.log(res);
+                    validateCallback(res, "grid", "meeting_add_dlg");
+                });
+            }
+        });
+    });
+     //    commonDate("startDate","endDate","yyyy-MM-dd HH:mm:ss","zh-CN");
+        commonDateWithout("startTime","endTime","yyyy-MM-dd","zh-CN");
+		commonDateHms("startTime1","endTime1","HH:mm:ss","zh-CN");
+		commonDate("startDate","endDate","yyyy-MM-dd HH:mm:ss","zh-CN");
+
+		
+    #if($!viewOnly || $!{leave.stauts}>0)
+    setAllReadonly();
+    #end
+</script>
+</body>
+</html>

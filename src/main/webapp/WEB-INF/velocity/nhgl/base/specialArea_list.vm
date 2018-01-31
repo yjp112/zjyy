@@ -1,0 +1,74 @@
+<div class="ui-module-name">
+	#crumbs("$!menu.code",1)
+</div>
+<form class="ui-form ui-form-search fn-clear" id='formId'>
+    <div class="ui-form-search-left">
+        <div class="ui-form-item">
+            <label class="ui-label">区域编码：</label>
+            <input class="ui-input ui-input-small" type="text" name="code" value="$!specialArea.code" maxlength="32">
+		</div>
+		<div class="ui-form-item">
+    		<label class="ui-label">区域名称：</label>
+    		<input class="ui-input ui-input-small" type="text" name="name"  value="$!specialArea.name" maxlength="32" />
+		</div>
+		<div class="ui-form-item ui-form-item-small">
+    		<button type="submit" class="btn ui-btn" id="queryBtn"><i class="iconfont icon-search"></i>搜索</button>
+        	<button type="reset" class="btn ui-btn" id="resetBtn"><i class="iconfont icon-reset"></i>重置</button>
+		</div>
+     </div>
+</form>
+<div>
+    <table id="pagerTable" style="display: none"></table>
+</div>
+<script type="text/javascript"> 
+    $(document).ready(function(){
+    //列表
+    $("#pagerTable").datagrid({
+    url: "$!{rc.contextPath}/nhgl/spa/page",
+    dataType: "json",
+    method: "GET",
+    usepager: true,
+    rpOptions: $!{rpOptions},rp:$!{rp},
+    colModel: [
+    {display: "区域编码", name: "code", width: 100,onclick:viewOnly,align:'center'},
+    {display: "区域名称", name: "name", width: 100,align:'center'},
+    {display: "备注说明", name: "remark", width: 100,align:'center'}
+    ],buttons : [
+    {name: '新增', bclass: 'add', onpress : add},
+    {name: '修改', bclass: 'edit', onpress : edit},
+    {name: '删除', bclass: 'delete', onpress : del},
+    {separator: true}
+    ]
+    ,sortname: "num"
+    ,sortorder: "asc"
+    ,useRp: true
+    ,usepager: true
+    ,showTableToggleBtn: true
+    ,width: 700
+    ,height: 330
+    ,searchFormId: 'formId' 
+    }); 
+    });
+    function add(btnValue,grid,datagrid){
+    	openDilog(btnValue,'$!{rc.contextPath}/nhgl/spa/edit');
+    }
+    function del(btnValue,grid,datagrid){
+    	singleDelete(datagrid,"$!{rc.contextPath}/nhgl/spa/delete");
+    }
+    function edit(btnValue,grid,datagrid){
+    	var rows = datagrid.getSelectedRows();
+	    	if(rows.length==1){
+	    		openDilog(btnValue,'$!{rc.contextPath}/nhgl/spa/edit?id='+rows[0].id);
+        	}else if(rows.length>1){  
+            	alert("请选择一个修改,不能同时修改多个");  
+        	}else if(rows.length==0){  
+            	alert("请选择一个您要修改的信息")
+        	}
+    }
+    function viewOnly(row){
+    	newDialog("showDc", "load:$!{rc.contextPath}/nhgl/spa/edit?viewOnly=true&id="+row.id,"查看", true, 500, 400,null,destroyFileUpload);
+    }
+	function openDilog(title,url){
+		newDialog('addDiloag', 'load:'+url, title, true, 550, 350)
+	}
+</script>

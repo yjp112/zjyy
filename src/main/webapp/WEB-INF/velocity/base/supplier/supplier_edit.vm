@@ -1,0 +1,159 @@
+#parse("index/_header.vm")
+</head>
+<body style="padding-bottom:40px;">
+	<form id="myform_id" method="post" action="$!{rc.contextPath}/base/supplier/save"  class="ui-layout-center ui-dialog-form">
+		<input type="hidden" name="id" value="$!{supplier.id}">
+				
+    <table width="100%" cellspacing="0" >
+        <tr>
+       
+            <td width="20%"   class="label"><span class="ui-form-required">*</span><label>厂商编码：</label></td>
+	           
+            <td width="30%" ><input type="text" class="k-textbox" name="supplierCode" value="$!{supplier.supplierCode}"></td>
+            
+            <td width="15%"  class="label"><span class="ui-form-required">*</span>厂商名称：</td>
+            <td width="30%"  ><input type="text" class="k-textbox"  name="fullName" value="$!{supplier.fullName}" ></td>
+            <td width="5%" ></td>
+        </tr>
+        <tr>
+            <td  class="label"><span class="ui-form-required">*</span>厂商简称：</td>
+            <td ><input type="text" class="k-textbox"  name="simpleName" value="$!{supplier.simpleName}" ></td>
+            
+            <td  class="label">厂商简码：</td>
+            <td ><input type="text" class="k-textbox"  name="shortCode" value="$!{supplier.shortCode}" ></td>
+            <td></td>
+        </tr>
+        <tr>
+	        <td  class="label">法人代表：</td>
+	        <td ><input type="text" class="k-textbox"  name="legalPerson" value="$!{supplier.legalPerson}" ></td>
+	        
+	        <td  class="label">营业执照：</td>
+            <td ><input type="text" class="k-textbox" name="businessLicense" value="$!{supplier.businessLicense}" ></td>
+            <td></td>
+         </tr>
+        <tr>
+	        <td  class="label"><span class="ui-form-required">*</span>执照有效期：</td>
+	        <td >
+	             <input  type="text" id="datepicker"  class="k-textbox"  name="licenseExpiryDate" value="#date_format($!{supplier.licenseExpiryDate},'yyyy-MM-dd')" >
+	        </td>
+	       
+                
+	        <td  class="label">公司类型：</td>
+	        <td ><input type="text" class="k-textbox"  name="companyType" value="$!{supplier.companyType}" ></td>
+        </tr>
+        <tr>
+	        <td  class="label"><span class="ui-form-required">*</span>网址：</td>
+	        <td ><input type="text" class="k-textbox" name="website" value="$!{supplier.website}" ></td>
+	        
+	        <td  class="label">详细地址：</td>
+	        <td ><input type="text" class="k-textbox" name="address" value="$!{supplier.address}" ></td>
+        </tr>
+        <tr>
+	        <td  class="label">联系人：</td>
+	        <td ><input type="text" class="k-textbox" name="contact" value="$!{supplier.contact}"></td>
+	        
+	        <td  class="label">固定电话：</td>
+	        <td ><input type="text" class="k-textbox"  name="telNo" value="$!{supplier.telNo}" ></td>
+        </tr>
+        
+        <tr>
+	        <td  class="label">手机：</td>
+	        <td ><input type="text" class="k-textbox" name="mobile" value="$!{supplier.mobile}"></td>
+	        
+	        <td  class="label">传真：</td>
+	        <td ><input type="text" class="k-textbox"  name="fax" value="$!{supplier.fax}" ></td>
+        </tr>
+        
+        <tr>
+	        <td  class="label"><span class="ui-form-required">*</span>电子邮箱：</td>
+	        <td ><input type="text" class="k-textbox"  name="email" value="$!{supplier.email}" ></td>
+	        
+	        <td  class="label">邮政编码：</td>
+	        <td ><input type="text" class="k-textbox"  name="zipCode" value="$!{supplier.zipCode}" ></td>
+        </tr>
+    
+	    <tr>
+		    <td  class="label">邮政地址：</td>
+		    <td ><input type="text" class="k-textbox"  name="postAddress" value="$!{supplier.postAddress}"></td>
+		    
+		    <td  class="label">开户银行：</td>
+		    <td ><input type="text" class="k-textbox"  name="bank" value="$!{supplier.bank}" ></td>
+	    </tr>
+	
+		
+        <tr>
+	        <td  class="label">银行账号：</td>
+		    <td ><input type="text" class="k-textbox"  name="bankAccount" value="$!{supplier.bankAccount}"></td>
+	    </tr>
+		<tr>    
+		    <td valign="top" class="label">备注：</td>
+            <td colspan="3"><textarea  id="textAreaId" name="remark" style="height:80px"  class="k-textbox">$!{supplier.remark}</textarea></td>
+            
+        </tr>
+    </table>
+    <div class="actions">
+        
+        <button class="k-primary hc_btn" id="queryBtn" type="submit"><i class="fa fa-save"></i>保 存</button>
+		
+        <button class="hc_btn cancel" onclick="close_dialog('supplier_add_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+    </div>
+
+	</form>
+	</body>
+	<script type="text/javascript">
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+	          defaults: {
+	            resizable: true,
+	            closable: false,
+	            spacing_open: 5
+	          }
+	        });
+	});
+	</script>
+	<script type="text/javascript">
+
+	$(document).ready(function(){
+	
+        $("#myform_id").validator({
+            fields:{
+                
+            	supplierCode: "厂商编码:required; length[~20]",
+    		    fullName: "厂商名称:required; length[~100]",
+    		    simpleName: "厂商简称:required; length[~50]",
+    		    shortCode: "length[~10]",
+    		    legalPerson: "length[~20]",
+    			businessLicense: "'alpha_dash';length[~50]",
+				licenseExpiryDate :"执照有效期:required;",
+    		    companyType: "length[~20]",
+    		    website: "网址:required;'url';length[~50]",
+    		    address: "length[~100]",
+    			contact: "length[~50]",
+    			telNo: "'tel';length[~20]",
+    			mobile: "'mobile';length[~20]",
+    			fax: "'digits';length[~20]",
+    		    email: "电子邮件:required;'email';length[~50]",
+    		    zipCode: "'postcode';length[~10]",
+    		    postAddress: "length[~100]",
+    			bank: "length[~50]",
+    		    bankAccount: "'digits';length[19]",
+    		    remark: "length[~200]"	
+            },
+            valid:function(form){
+                form_btn_submit($("#queryBtn"),form,function(res){
+                    //console.log(res);
+                    validateCallback(res,"grid","supplier_add_dlg");
+                });
+            }
+        });
+
+
+  });
+	     #if($!{viewOnly})
+		    setAllReadonly("dialog");
+	     #else
+	    	 commonSingleDateWithout("datepicker","yyyy-MM-dd","zh-CN");
+		 #end
+	</script>
+
+</html>

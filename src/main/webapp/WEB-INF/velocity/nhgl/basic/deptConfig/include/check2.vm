@@ -1,0 +1,33 @@
+<div>
+  <table id="pagerTable" style="display: none"></table> 
+</div>		
+<script type="text/javascript">
+    $(document).ready(function () {
+        //列表
+        $("#pagerTable").datagrid({
+            url: "$!{rc.contextPath}/nhgl/basic/deptConfig/repeatpager?nhType=$!{nhtype}&deptId=$!{deptId}",
+            dataType: "json",
+            method: "GET",
+            usepager: true,
+            rpOptions: [10, 20, 40, 50],
+    		pageSize: 10,
+            singleSelect: true,
+            showCheckbox: true,
+            colModel: [
+                {display: "$!deviceName编码", name: "deviceCode", width: 150},
+                {display: "$!deviceName名称", name: "deviceName", width: 200},
+                {display: "服务区域", name: "serviceArea", width: 200}
+            ], 
+            buttons : [
+            ]
+            ,height: 230
+            ,width:750
+            ,onSuccess: successFunc
+        });
+        
+    });
+    function successFunc(){
+    	$(".ui-tab-panels div.flexigrid div.dgDiv div.hDiv").css({'width':'750px'})
+    	$(".ui-tab-panels div.flexigrid div.dgDiv div.bDiv").css({'width':'750px'});
+    }
+</script>

@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconicom/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.spare.entities.SpareCategory">
+	<resultMap type="com.supconit.spare.entities.SpareCategory" id="SpareCategoryResultMap">
+		<result property="id" column="ID" />
+        <result property="categoryCode" column="CATEGORY_CODE" />
+        <result property="categoryName" column="CATEGORY_NAME" />
+        <result property="parentId" column="PARENT_ID" />
+        <result property="remark" column="REMARK" />
+        <result property="createId" column="CREATE_ID" />
+        <result property="creator" column="CREATOR" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="updateId" column="UPDATE_ID" />
+        <result property="updator" column="UPDATOR" />
+        <result property="updateDate" column="UPDATE_DATE" />
+	
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">SPARE_CATEGORY</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	<sql id="select_pre" lang="velocity">
+		SELECT
+			ID,
+	        CATEGORY_CODE,
+	        CATEGORY_NAME,
+	        PARENT_ID,
+	        REMARK,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE,
+	        UPDATE_ID,
+	        UPDATOR,
+	        UPDATE_DATE
+		FROM  <include refid="TABLE_NAME"/> 
+	</sql>
+	
+	<sql id="count_pre" lang="velocity">SELECT COUNT(*) FROM <include refid="TABLE_NAME"/>  </sql>
+	
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+		#where()
+		     #set($_p = $_parameter.condition)
+		    #if($_p.id && $_p.id != '')
+				#set($_id = $_p.id)
+				AND ID = @{_id}
+			#end
+			
+			#if($_p.categoryCode && $_p.categoryCode != '')
+				#set($_categoryCode = '%' + $_p.categoryCode + '%')
+				AND CATEGORY_CODE LIKE @{_categoryCode}
+			#end
+			#if($_p.categoryName && $_p.categoryName != '')
+				#set($_categoryName = '%' + $_p.categoryName + '%')
+				AND CATEGORY_NAME LIKE @{_categoryName}
+			#end
+			#if($_p.parentId && $_p.parentId != '')
+				#set($_parentId = $_p.parentId)
+				AND  PARENT_ID = @{_parentId}
+			#end
+		
+			#if($_p.categoryIds && $_p.categoryIds.size() > 0 )
+				#set($_categoryIds =$_p.categoryIds)
+				AND 
+				#repeat( $_categoryIds $id "," " ID IN (" ")" )
+		    		@{id,jdbcType=NUMERIC}
+				#end
+			#end
+			
+			#if($_p.remark && $_p.remark != '')
+				#set($_remark = '%' + $_p.remark + '%')
+				AND REMARK LIKE @{_remark}
+			#end
+			
+			#if($_p.createId && $_p.createId != '')
+				#set($_createId = $_p.createId)
+				AND CREATE_ID  = @{_createId}
+			#end
+			#if($_p.creator && $_p.creator != '')
+				#set($_creator = '%' + $_p.creator + '%')
+				AND CREATOR LIKE @{_creator}
+			#end
+			#if($_p.createDate && $_p.createDate != '')
+				#set($_createDate = $_p.createDate)
+				AND CREATE_DATE = @{_createDate}
+			#end
+			#if($_p.updateId && $_p.updateId != '')
+				#set($_updateId = $_p.updateId)
+				AND UPDATE_ID  = @{_updateId}
+			#end
+			#if($_p.updator && $_p.updator != '')
+				#set($_updator = '%' + $_p.updator + '%')
+				AND UPDATOR LIKE @{_updator}
+			#end
+		#end
+		]]>	
+    </sql>
+	
+    <!-- 插入记录-->
+    <sql id="insert_sql" lang="velocity">
+        INSERT INTO <include refid="TABLE_NAME"/>(
+        	#if($_databaseId == 'oracle') ID, #end
+	        CATEGORY_CODE,
+	        CATEGORY_NAME,
+	        PARENT_ID,
+	        REMARK,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE,
+	        UPDATE_ID,
+	        UPDATOR,
+	        UPDATE_DATE
+        ) VALUES (
+        	#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end
+	        @{_parameter.categoryCode,jdbcType=VARCHAR},
+	        @{_parameter.categoryName,jdbcType=VARCHAR},
+	        @{_parameter.parentId,jdbcType=NUMERIC},
+	        @{_parameter.remark,jdbcType=VARCHAR},
+	        @{_parameter.createId,jdbcType=NUMERIC},
+	        @{_parameter.creator,jdbcType=VARCHAR},
+	        @{_parameter.createDate,jdbcType=TIMESTAMP},
+	        @{_parameter.updateId,jdbcType=NUMERIC},
+	        @{_parameter.updator,jdbcType=VARCHAR},
+	        @{_parameter.updateDate,jdbcType=TIMESTAMP}
+        )
+    </sql>
+    
+    <insert id="insert" parameterType="com.supconit.spare.entities.SpareCategory" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="insert_sql" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.spare.entities.SpareCategory" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    
+	<!-- 更新记录-->
+	<update id="update"  parameterType="com.supconit.spare.entities.SpareCategory" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+			#mset()
+				<![CDATA[
+			        #if($_parameter.categoryCode && $_parameter.categoryCode !='')CATEGORY_CODE = @{_parameter.categoryCode,jdbcType=VARCHAR},#end
+			        #if($_parameter.categoryName && $_parameter.categoryName !='')CATEGORY_NAME = @{_parameter.categoryName,jdbcType=VARCHAR},#end
+			        #if($_parameter.parentId)PARENT_ID = @{_parameter.parentId,jdbcType=NUMERIC},#end
+			        REMARK = @{_parameter.remark,jdbcType=VARCHAR},
+			        #if($_parameter.updateId)UPDATE_ID = @{_parameter.updateId,jdbcType=NUMERIC},#end
+			        #if($_parameter.updator)UPDATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateDate)UPDATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+			  		#if($_parameter.createId)CREATE_ID = @{_parameter.createId,jdbcType=NUMERIC},#end
+			        #if($_parameter.updator)CREATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateDate)CREATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+			    
+			    ]]>
+			#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+	<!-- 按条件查询记录-->
+	
+	<select id="selectIds" parameterType="com.supconit.spare.entities.SpareCategory" resultType="long" databaseId="oracle">
+		
+		select id from SPARE_CATEGORY  connect by PARENT_ID = prior ID start with <if test="id != null "> ID = #{id}</if>
+       
+		
+    </select>
+	<select id="selectIds" parameterType="com.supconit.spare.entities.SpareCategory" resultType="long" lang="velocity" databaseId="sqlserver">
+		with cte_root(ID,CATEGORY_CODE,CATEGORY_NAME,PARENT_ID,REMARK,CREATE_ID,CREATOR,CREATE_DATE,UPDATE_ID,UPDATOR,UPDATE_DATE	)
+		as(
+		select ID,CATEGORY_CODE,CATEGORY_NAME,PARENT_ID,REMARK,CREATE_ID,CREATOR,CREATE_DATE,UPDATE_ID,UPDATOR,UPDATE_DATE from SPARE_CATEGORY   where ID =  @{_parameter.id,jdbcType=NUMERIC}
+		UNION all
+		select a.ID,a.CATEGORY_CODE,a.CATEGORY_NAME,a.PARENT_ID,a.REMARK,a.CREATE_ID,a.CREATOR,a.CREATE_DATE,a.UPDATE_ID,a.UPDATOR,a.UPDATE_DATE from SPARE_CATEGORY a
+		INNER JOIN cte_root b on a.PARENT_ID=b.id
+		)
+		select ID from cte_root option(MAXRECURSION 1000)
+		
+	</select>    
+	
+	
+	
+    <select id="selectByIds" parameterType="com.supconit.spare.entities.SpareCategory" resultMap="SpareCategoryResultMap" lang="velocity" databaseId="oracle">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre"/>
+		<![CDATA[
+		#where()
+		ID in
+			<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+						#{item,jdbcType=NUMERIC}
+			</foreach>
+		#end
+		]]>
+		
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+	<!-- 按条件查询记录-->
+    <select id="selectByIds" parameterType="com.supconit.spare.entities.SpareCategory" resultMap="SpareCategoryResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			ID,
+	        CATEGORY_CODE,
+	        CATEGORY_NAME,
+	        PARENT_ID,
+	        REMARK,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE,
+	        UPDATE_ID,
+	        UPDATOR,
+	        UPDATE_DATE
+			<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+			<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/> 
+		<![CDATA[
+			#where()
+			   ID in 
+				<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+							#{item,jdbcType=NUMERIC}
+				</foreach>
+			#end
+		]]>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+    <select id="countByIds" resultType="long" parameterType="com.supconit.spare.entities.SpareCategory" lang="velocity">
+        <include refid="count_pre"/>
+        <![CDATA[
+			#where()
+			  ID in 
+				<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+							#{item,jdbcType=NUMERIC}
+				</foreach>
+			#end
+		]]>
+    </select>
+    
+    <!-- 按条件查询记录-->
+    <select id="findByCategories" parameterType="com.supconit.spare.entities.SpareCategory" resultMap="SpareCategoryResultMap" lang="velocity">
+		<include refid="select_pre"/>
+		<include refid="condition_sql"/>
+		#order($_parameter.condition,"ID DESC")
+    </select>
+	<!-- 按条件查询记录-->
+    <select id="findByCondition" parameterType="com.supconit.spare.entities.SpareCategory" resultMap="SpareCategoryResultMap" lang="velocity" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre"/>
+		<include refid="condition_sql"/>
+		#order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+	<!-- 按条件查询记录-->
+    <select id="findByCondition" parameterType="com.supconit.spare.entities.SpareCategory" resultMap="SpareCategoryResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			ID,
+	        CATEGORY_CODE,
+	        CATEGORY_NAME,
+	        PARENT_ID,
+	        REMARK,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE,
+	        UPDATE_ID,
+	        UPDATOR,
+	        UPDATE_DATE
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/> 
+		<include refid="condition_sql"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countByCondition" resultType="long" lang="velocity">
+        <include refid="count_pre"/>
+        <include refid="condition_sql"/>
+    </select>
+    
+    <select id="findByFilter" parameterType="com.supconit.spare.entities.SpareCategory" resultMap="SpareCategoryResultMap" lang="velocity" >
+		<include refid="select_pre"/>
+		where id not in(WITH A (ID) AS (
+        SELECT ID FROM SPARE_CATEGORY where ID=@{_parameter}
+        UNION ALL 
+        SELECT B.ID FROM SPARE_CATEGORY B, 	A WHERE A.ID = B.PARENT_ID
+      	) SELECT  * FROM A)
+		#order($_parameter.condition,"ID DESC")
+    </select>
+    <select id="findByCode" parameterType="com.supconit.spare.entities.SpareCategory"  resultMap="SpareCategoryResultMap" lang="velocity">
+        <include refid="select_pre"/> 
+        WHERE CATEGORY_CODE = @{_parameter.categoryCode,jdbcType=VARCHAR}
+    </select>
+	
+
+    <select id="countByCategoryCode" parameterType="com.supconit.spare.entities.SpareCategory"  resultType="long" lang="velocity">
+        <include refid="count_pre"/>
+        WHERE CATEGORY_CODE = @{_parameter.categoryCode,jdbcType=VARCHAR}
+    </select>
+    <delete id="deleteByIds">
+		DELETE FROM
+		<include refid="TABLE_NAME" />
+	    WHERE ID IN    
+	        <foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+				#{id,jdbcType=NUMERIC}
+			</foreach>
+	</delete>
+	
+	 <select id="countSpareCategoryIdUsed" parameterType="long"  resultType="long" lang="velocity">
+        select sum(total) from(
+			SELECT COUNT(t1.SPARE_CATEGORY_ID)total FROM SPARE t1 WHERE t1.SPARE_CATEGORY_ID=@{_parameter, jdbcType=NUMERIC}
+		    UNION
+		    SELECT count(t2.PARENT_ID)total from SPARE_CATEGORY t2 where t2.PARENT_ID=${_parameter}
+	    ) t
+	 </select>
+    <select id="getById" resultMap="SpareCategoryResultMap" parameterType="long" lang="velocity">
+		<include refid="select_pre"/>
+		WHERE ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+	
+	<delete id="deleteById" parameterType="long" lang="velocity"> 
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</delete>
+
+	<!-- 手机端 -->
+	<select id="findByParentId" resultMap="SpareCategoryResultMap" parameterType="long">
+		SELECT
+		ID,
+		CATEGORY_CODE,
+		CATEGORY_NAME,
+		PARENT_ID
+		from SPARE_CATEGORY
+		where PARENT_ID = #{parentId} order by ID
+	</select>
+</mapper>

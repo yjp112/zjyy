@@ -1,0 +1,192 @@
+#parse("index/_header.vm")
+<style>
+	.k-webkit .k-combobox .k-dropdown-wrap:before, .k-webkit .k-picker-wrap:before, .k-webkit .k-numeric-wrap:before {
+  		padding-bottom: .2em;
+	}
+	.n-bottom .msg-wrap {
+      margin-top: -15px;
+    }
+</style>
+<script charset="utf-8" src="$!{rc.contextPath}/main_static/custom/js/ueditor/ueditor.config.js"></script>
+<script charset="utf-8" src="$!{rc.contextPath}/main_static/custom/js/ueditor/ueditor.all.js"></script>
+<script charset="utf-8" src="$!{rc.contextPath}/main_static/custom/js/ueditor/lang/zh-cn/zh-cn.js"></script>
+</head>
+<body style="padding-bottom:40px;">
+<form id="myform_id" method="post" action="$!{rc.contextPath}/meeting/roomReservation/save" class="ui-layout-center ui-dialog-form">
+    <input type="hidden" name="id" value="$!{reserveMeeting.id}">
+    <input type="hidden" name="roomId" value="$!{meeting.id}">
+    <input type="hidden" name="way" value="$!{way}">
+    <table width="100%" style="padding-right: 20px;">
+        <tr>
+            <td width="13%" class="label"><label>预订人：</label></td>
+            <td width="20%" >
+				<input type="text" class="k-textbox" id="personId" name="reservePersonid" style="display:none;" value="$!{reservePerson.id}">
+				<input type="text" class="k-textbox" readonly value="$!{reservePerson.name}">
+			</td>
+				
+            <td width="13%" class="label"><label>部门：</label></td>
+            <td colspan="3"><input type="text" class="k-textbox" readonly value="$!{reservePerson.deptName}"></td>
+				
+        </tr>
+		
+        <tr>
+			<td width="13%" class="label"><label>联系电话：</label></td>
+            <td width="20%"><input type="text" class="k-textbox" readonly value="$!{reservePerson.tel}"></td>
+				
+			<td width="13%" class="label"><label>会议室类别：</label></td>
+            <td width="20%"><input type="text" class="k-textbox" name="roomType" readonly value="$!{meeting.roomTypeName}"></td>
+				
+            <td width="13%" class="label"><label>可容纳人数：</label></td>
+            <td width="20%"><input type="text" class="k-textbox" name="capacityPerson" readonly value="$!{meeting.capacityPerson}"></td>
+        </tr>
+		
+		<tr>
+			<td class="label"><label>会议室名称：</label></td>
+            <td><input type="text" class="k-textbox" name="roomName" readonly value="$!{meeting.roomName}"></td>
+				
+            <td class="label"><label>会议地址：</label></td>
+            <td><input type="text" class="k-textbox" name="location" readonly value="$!{meeting.location}"></td>
+				
+			<td class="label"><label>会议室部门：</label></td>
+            <td><input type="text" class="k-textbox" name="deptName" readonly value="$!{meeting.deptName}"></td>
+		</tr>
+		
+        <tr>
+			<td class="label"><label>网络情况：</label></td>
+            <td><input type="text" class="k-textbox" name="network" readonly value="$!{meeting.networkName}"></td>
+				
+			<td class="label">是否有投影：</td>
+            <td>
+				<input type="radio" disabled class="ui-radio" name="projector" #if("$!{meeting.projector}"==1) checked #end value="1"><span class="ui-form-text">是</span>
+				<input type="radio" disabled class="ui-radio" name="projector" #if("$!{meeting.projector}"!=1) checked #end value="0"><span class="ui-form-text">否</span>
+			</td>
+				
+            <td class="label">多功能会议室：</td>
+            <td>
+				<input type="radio" disabled class="ui-radio" name="multiFunctional" #if("$!{meeting.multiFunctional}"==1) checked #end value="1"><span class="ui-form-text">是</span>
+				<input type="radio" disabled class="ui-radio" name="multiFunctional" #if("$!{meeting.multiFunctional}"!=1) checked #end value="0"><span class="ui-form-text">否</span>
+			</td>
+		</tr>
+		<tr>
+            <td class="label"><span class="ui-form-required">*</span>会议主持人：</td>
+            <td class="inputText">
+				#if(!$!viewOnly)<span class="k-textbox k-space-right" onclick="choosePersons(1,'checkerId','checkerName','reserveMeeting_add_dlg','','','','')">#end
+				<input type="hidden" class="k-textbox" id="checkerId" name="meetingCompere" value="$!{reserveMeeting.meetingCompere}"/>
+				<input type="text" class="k-textbox ui-input-choose" id="checkerName" name="meetingCompereName" value="$!{reserveMeeting.meetingCompereName}"/>
+				#if(!$!viewOnly)<a href="#" class="k-icon k-i-search">&nbsp;</a>
+				</span>#end
+			</td>
+        
+			<td  class="label"><span class="ui-form-required">*</span>开始时间：</td>
+            <td>
+                <input  id="startTime"  class="k-textbox"  name="meetingStart" value="#date_format($!{reserveMeeting.meetingStart},'yyyy-MM-dd HH:mm:ss')"  />
+            </td>
+			
+			<td class="label"><span class="ui-form-required">*</span>结束时间：</td>
+            <td>
+				<input id="endTime"  class="k-textbox"  name="meetingEnd" value="#date_format($!{reserveMeeting.meetingEnd},'yyyy-MM-dd HH:mm:ss')"/>
+            </td>
+		</tr>
+		
+		<tr>
+            <td class="label"><span class="ui-form-required">*</span>会议主题：</td>
+            <td colspan="3"><textarea name="meetingSubject" class="k-textbox k-textarea" style="height:60px">$!{reserveMeeting.meetingSubject}</textarea></td>
+		
+			<td class="label">是否有签到：</td>
+            <td>
+				<input type="radio" disabled class="ui-radio" name="isSign" #if("$!{meeting.isSign}"==1) checked #end value="1"><span class="ui-form-text">是</span>
+				<input type="radio" disabled class="ui-radio" name="isSign" #if("$!{meeting.isSign}"!=1) checked #end value="0"><span class="ui-form-text">否</span>
+			</td>
+		</tr>
+		
+		<tr>
+            <td class="label"><span class="ui-form-required">*</span>会议人员：</td>
+            <td colspan="5">
+    			<div class="ui-co-cont ui-co-nob">
+					#parse("meeting/roomReservation/person_grid.vm")
+    			</div>
+			</td>
+        
+		</tr>
+		<tr>
+            <td class="label">会议议程：</td>
+            <td colspan="5"><textarea id="container" name="meetingProgram">$!{reserveMeeting.meetingProgram}</textarea></td>
+        
+		</tr>
+		
+    </table>
+    <div class="actions">
+        <button class="k-primary hc_btn" id="save_button_id" type="submit"><i class="fa fa-save"></i>保 存</button>
+        <button class="hc_btn cancel" onclick="close_dialog('reserveMeeting_add_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+    </div>
+	
+<input type="hidden" name="number" value="$!reserveMeeting.personDetailList.size()" id="number" />
+</form>
+<!-- 实例化编辑器 -->
+    <script type="text/javascript">
+		#if($!viewOnly)
+        	var ue = UE.getEditor('container', {
+                initialFrameWidth:851,
+            	initialFrameHeight:180,
+				wordCount:false,
+				elementPathEnabled : false,
+				readonly:true
+        	});
+		#else
+			var ue = UE.getEditor('container', {
+                initialFrameWidth:851,
+            	initialFrameHeight:180,
+				wordCount:false,
+				elementPathEnabled : false
+        	});
+        #end
+    </script>
+<script type="text/javascript">
+function closeErrors(){
+		return true;
+	}
+	window.onerror=closeErrors;
+	$(document).ready(function(){
+		 _iframe_layout = $('body').layout({
+	      defaults: {
+	        resizable: true,
+	        closable: false,
+	        spacing_open: 5
+	      }
+	    });
+	});
+
+    //
+    $(document).ready(function () {
+        $("#parentName_choose").click(function () {
+            quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/base/geoArea/lookup?txtId=parentId&txtName=parentName&dialogId=meeting_add_dlg", 300, 300);
+        });
+
+
+        $("#myform_id").validator({
+    		#if(!$!viewOnly)
+                fields: {
+                    meetingCompereName: "会议主持人:required;",
+                    meetingStart: "开始时间:required;",
+                    meetingEnd: "结束时间:required;",
+                    meetingSubject: "会议主题:required; length[~30];",
+                    personName_id_1: "会议人员:required;",
+                },
+    		#end
+                valid: function (form) {
+                    form_btn_submit($("#save_button_id"), form, function (res) {
+                        //console.log(res);
+                        validateCallback(res, "grid", "reserveMeeting_add_dlg");
+                    });
+                }
+        });
+		
+    });
+	commonDate("startTime","endTime","yyyy-MM-dd HH:mm:ss","zh-CN");
+	
+        #if($!viewOnly)
+        setAllReadonly();
+        #end
+</script>
+</body>
+</html>

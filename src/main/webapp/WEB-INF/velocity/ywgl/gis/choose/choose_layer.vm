@@ -1,0 +1,301 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<div class="ui-layout-center" id="subMain">
+	<div class="ui-layout-north">
+		 <form class="ui-form" id='queryForm'>
+			
+	     <table width="100%">
+	       <tr>
+	         <td>
+	           <table class="ui-search-table">
+	             <tr>
+	               <td class="ui-search-name first">JS图层编码：</td>
+	               <td class="ui-search-c">
+	                 <input name="layerCodeJs" value="$!gLayer.layerCodeJs" class="k-textbox" type="text">
+	               </td>
+	               <td class="ui-search-name">GIS图层编码：</td>
+	               <td class="ui-search-c">
+	                 <input  name="layerCodeGis" value="$!gLayer.layerCodeGis" class="k-textbox" type="text">
+	               </td>
+	             </tr>
+	           </table>
+	         </td>
+	         <td width="150" valign="top" style="padding-top:4px;">
+	           <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+	           <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+	         </td>
+	         <td></td>
+	       </tr>
+	     </table>
+	 	</form>
+	</div>
+	<div class="ui-layout-center">
+	  <div id="grid"></div> 
+     </div>
+</div>
+#parse("index/_footer.vm") 
+
+<script type="text/javascript">
+     var _iframe_layout,_inner_layout;
+	$(document).ready(function(){
+					_iframe_layout = $('body').layout({
+					      defaults: {
+					        resizable: false,
+					        closable: false,
+					        spacing_open: 5
+					      }
+					    });
+					 _inner_layout = $("#subMain").layout({
+					      defaults: {
+					        resizable: false,
+					        closable: false,
+					        spacing_open: 0
+					      },
+					      center: {
+					          onresize_end: function () {
+					              var grid = $("#grid").data("kendoGrid");
+					              grid.resize();
+					          }
+					      }
+			     })
+
+			    $('#resetBtn').click(function(){
+			      $("#queryForm :text").val('');  
+			    });
+	
+					//列表
+			    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/hl/gis/platform/layer/list?menulayerId=${menulayerId}", [{
+		              field: "id",
+		              hidden: true
+		          },{
+		    		 width: 50,
+		    	     headerTemplate: '<input type="checkbox" id="check-all"/>',
+		    	     template: '<div style="text-align:center;"><input type="checkbox" name="check" onclick="uncheck()"  /></div>'           
+				    }, {
+		              field: "layerCodeJs",
+		              title: "JS图层编码",
+		              sortable: false,
+		              headerAttributes: {"class": "k-grid-text"},
+		              attributes: {"class": "k-grid-text"},
+		              width: 100
+		          }, {
+		              field: "layerNameJs",
+		              title: "JS图层名",
+		              sortable: false,
+		              width: 150,
+		              template:"<input id='name#: data.id #' type='hidden' value='#: data.layerNameJs #'>#: data.layerNameJs #</input>",
+		              headerAttributes: {"class": "k-grid-text"},
+		              attributes: {"class": "k-grid-text"}
+		          }, {
+		              field: "layerCodeGis",
+		              title: "GIS图层编码",
+		              sortable: false,
+		              width: 150,
+		              headerAttributes: {"class": "k-grid-text"},
+		              attributes: {"class": "k-grid-text"}
+		          }, {
+		              field: "gisLayerDisplay",
+		              title: "显示/隐藏",
+		              sortable: false,
+		              width: 200,
+		              template:function(data){
+		              	if(data.display == '0'){
+		              	   return "<select name='display' id='"+data.id+"' class='k-textbox'><option value='1'>显示</option><option value='0' selected>隐藏</option></select>";
+		              	}else{
+		              	   return "<select name='display' id='"+data.id+"' class='k-textbox'><option value='1' selected>显示</option><option value='0' >隐藏</option></select>";
+		              	}
+		              },
+		              headerAttributes: {"class": "k-grid-equilong"},
+		              attributes: {"class": "k-grid-equilong"}
+		          },{
+		              field: "names",
+		              title: "含有的设备类别",
+		              sortable: false,
+		              headerAttributes: {"class": "k-grid-equilong"},
+		              attributes: {"class": "k-grid-equilong"}
+		          }], 
+							          {
+							            sortable: {mode: "multiple",allowUnsort: true},
+									    resizable:true,
+                                          dataBound: function(e) {
+                                            loadfunction();
+                                        }
+							          }, 
+			    		              {serverSorting: true}, 
+			    		              [{
+						    			name: "选择",
+						          		icon: "fa fa-plus",
+						    			onclick: function (obj, grid) {
+										    var cs = getCheckedData("#grid","input[name='check']");
+						        	        
+							      			var ids = [];
+							      			var names = [];
+											
+											 if (null == cs || cs.length == 0) {
+								                  notify("未选择内容", "error");
+								                  return;
+								              }
+										  
+							 
+										
+							                   for(var i=0; i<cs.length; i++){
+								            	  ids.push(cs[i].id);
+												  names.push(cs[i].layerNameJs);
+								              } 
+											  
+							      				var displayIds = [];
+								      			var name2 = [];
+								      			for(var i=0;i<ids.length;i++){
+								      				if(ids[i]!=''){
+									      				var id = "#"+ids[i];
+									      				var nameid = "#name"+ids[i];
+									      				displayIds.push(($(id).val()));
+									      				if($(id).val()=='0'){
+									      					tname = $(nameid).val()+"(隐藏)";
+									      				}else{
+									      					tname = $(nameid).val()+"(显示)";
+									      				}
+									      				name2.push(tname);
+								      				}
+								      			}
+							    	         
+								    		    if("$!{dialogId}"!=""){
+								    		    	get_el_in_dialog("$!{dialogId}","#gisLayerDisplay").val(displayIds);
+								    				get_el_in_dialog("$!{dialogId}","#$!{txtId}").val(ids);
+								    				get_el_in_dialog("$!{dialogId}","#$!{txtName}").val(name2);  
+								    				resetfocus(get_el_in_dialog("$!{dialogId}","#$!{txtName}"));
+								    		    }else{
+													$("#"+"$!{txtId}",window.parent["_main_frame"].document).val(ids);
+													$("#"+"$!{txtName}",window.parent["_main_frame"].document).val(names);
+													resetfocus($("#"+"$!{txtName}",window.parent["_main_frame"].document));
+												}
+								    	        try{
+								    	            if(typeof(extendFunc) == "function" ){
+								    	                extendFunc(rows);
+								    	            }
+								    	        }catch(e){
+								    	
+								    	        }
+								    	        close_dialog('selectDiloag');
+					      					}
+			    						} ,
+								    	{
+							          		name: "清空",
+							          		icon: "fa fa-remove",
+							          		onclick: function (obj, grid) {
+							        		    if("$!{dialogId}"!=""){
+							        		    	get_el_in_dialog("$!{dialogId}","#gisLayerDisplay").val("");
+							        		    	get_el_in_dialog("$!{dialogId}","#$!{txtId}").val("");
+								    				get_el_in_dialog("$!{dialogId}","#$!{txtName}").val(""); 
+							        				resetfocus(get_el_in_dialog("$!{dialogId}","#$!{txtName}"));
+							        		    }else{
+							        		    	$("#"+"$!{txtId}",window.parent["_main_frame"].document).val("");
+													$("#"+"$!{txtName}",window.parent["_main_frame"].document).val("");
+													resetfocus($("#"+"$!{txtName}",window.parent["_main_frame"].document));
+												}
+							        	        try{
+							        	            if(typeof(extendFunc) == "function" ){
+							        	                extendFunc(rows);
+							        	            }
+							        	        }catch(e){
+							        	
+							        	        }
+							        	        close_dialog('selectDiloag');
+							          		}
+							      		} 
+			      					]);
+				
+		 checkALL("#check-all","input[name='check']");
+		 //loadfunction();
+    });
+	
+	//setTimeout('loadfunction()',500);
+	
+	function loadfunction(){
+	    var chooseId = new Array();
+		var chooseIds = "$!{ids}";
+	    if(chooseIds.indexOf(",")>-1){
+	    	chooseId = chooseIds.split(",");
+	    }else{
+	    	if(chooseIds != ''){
+	    		chooseId.push(chooseIds);
+	    	}
+	    }
+		var ids = [];
+	    displayids = [];
+	    displayids = stringToArray(get_el_in_dialog("$!{dialogId}","#gisLayerDisplay").val());
+	    ids = stringToArray(get_el_in_dialog("$!{dialogId}","#$!{txtId}").val());
+		var grid = $("#grid").data("kendoGrid");
+	    var data = grid._data;
+	    var rows = $(grid.tbody).find("tr");
+	    var length = rows.length;
+	    
+	    for(var i=0;i<chooseId.length;i++){
+	        var id = chooseId[i];
+	    	if($.trim(chooseId[i])!=''){
+	    		for(var j=0;j<length;j++){
+            		if(id == data[j].id ){
+            		  //grid.select("tr:eq(1)");
+					   $(rows[j]).find("input[name='check']").attr("checked","checked");
+            		}
+            	}
+	    	}
+	    
+	    }
+		 
+	}
+	   //全选函数
+/*
+	参数列表:
+	  1.控制全选/全不选的checkbook选择器
+	  2.被控制的checkbook选择器
+*/
+function uncheck(){
+  		var flag = 0;
+      if(document.getElementById("check-all").checked){
+    	  document.getElementById("check-all").checked=false;
+    	}
+      $.each($("input[name='check']"),function(i,v){
+			if(v.checked == false)
+				flag = 1;
+		});
+      if(flag != 1)
+    	  document.getElementById("check-all").checked=true;
+    }
+
+function checkALL(checkAllSelector,checkSelector){
+	$(checkAllSelector).change(function(){
+		var isChecked = this.checked;
+		$.each($(checkSelector),function(i,v){
+			v.checked = isChecked;
+		});
+	});
+}
+
+// 获取grid中有checkbox元素，并且选中的数据
+/*
+	参数列表:
+	  1.grid的选择器
+	  2.grid中checkbook的选择器
+	返回
+	  Array
+*/
+function getCheckedData(gridSelector,checkSelector){
+	var grid = $(gridSelector).data("kendoGrid");
+	var data = grid._data;
+	var rows = $(grid.tbody).find("tr");
+	var length = rows.length;
+	var resData = [];
+	for(var i=0;i<length;i++){
+		if($(rows[i]).has(checkSelector+":checked").length>0){
+			resData.push(data[i]);
+		}
+	}
+	return resData;
+}
+
+
+</script>
+</body>
+</html>

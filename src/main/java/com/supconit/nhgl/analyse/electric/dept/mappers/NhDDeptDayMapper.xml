@@ -1,0 +1,626 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptDay">
+
+	<resultMap type="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptDay" id="NhDDeptDayResultMap">     
+        <result property="id" column="ID" />
+        <result property="deptId" column="DEPT_ID" />
+        <result property="itemCode" column="ITEM_CODE" />
+        <result property="dayOfMonthKey" column="DAY_OF_MONTH_KEY" />
+        <result property="peakValue" column="PEAK_VALUE" />
+        <result property="vallyValue" column="VALLY_VALUE" />
+        <result property="commonValue" column="COMMON_VALUE" />
+        <result property="dayDaytimeValue" column="DAY_DAYTIME_VALUE"/>
+        <result property="dayNightValue" column="DAY_NIGHT_VALUE"/>
+        <result property="totalDayValue" column="TOTAL_DAY_VALUE"/>
+        <result property="totalYoy" column="TOTAL_YOY"/>
+        <result property="total" column="total"/>
+        <result property="deptName" column="deptName"/>
+        <result property="parentId" column="parentId"/>
+        <result property="tbzl" column="tbzl"/>
+        <result property="tb" column="tb"/>
+        <result property="itemName" column="itemName"/>
+		<result property="weekendTotal" column="weekendTotal"/>
+        <result property="workTotal" column="workTotal"/>
+        <result property="weekName" column="WEEK_OF_YEAR_VALUE_1"/>
+        <result property="dayOfWeekName" column="dayOfWeekName"/>
+        <result property="holidayName" column="holidayName"/>
+
+	</resultMap>
+	<select id="getDeptDayList" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptDay" resultMap="NhDDeptDayResultMap" lang="velocity">
+		<![CDATA[
+		SELECT
+			t.DAY_OF_MONTH_KEY,sum(t.TOTAL_DAY_VALUE) total,sum(t.TOTAL_YOY) TOTAL_YOY
+		FROM
+			NH_D_DEPT_DAY t
+		INNER JOIN 
+		#if($_databaseId=='oracle')
+			TABLE(func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR}))
+		#else
+			func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR})
+		#end
+		t2 ON t.ITEM_CODE=t2.standard_code
+		INNER JOIN VIEW_NH_D_DEPT A ON t.DEPT_ID = A.id
+		where 1=1
+			#if($_databaseId=='oracle')
+				#if($_parameter.startTime)
+						AND t.DAY_OF_MONTH_KEY  >=to_date(@{_parameter.startTime,jdbcType=VARCHAR},'yyyy-mm-dd')
+				#end
+				#if($_parameter.endTime)
+						AND t.DAY_OF_MONTH_KEY <=to_date(@{_parameter.endTime,jdbcType=VARCHAR},'yyyy-mm-dd')
+				#end
+			#else
+				#if($_parameter.startTime)
+						AND t.DAY_OF_MONTH_KEY  >=@{_parameter.startTime,jdbcType=VARCHAR}
+				#end
+				#if($_parameter.endTime)
+						AND t.DAY_OF_MONTH_KEY <=@{_parameter.endTime,jdbcType=VARCHAR}
+				#end
+			#end
+				#if($_parameter.deptId)
+						AND t.DEPT_ID =@{_parameter.deptId,jdbcType=NUMERIC}
+			    #else
+			    		AND A.CODE='ROOT'
+				#end
+		GROUP BY t.DAY_OF_MONTH_KEY
+		]]>
+	</select>
+	<select id="getDeptDayNightList" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptDay" resultMap="NhDDeptDayResultMap" lang="velocity">
+		<![CDATA[
+		SELECT
+			t.DAY_OF_MONTH_KEY,SUM(t.DAY_DAYTIME_VALUE) DAY_DAYTIME_VALUE, SUM(t.DAY_NIGHT_VALUE) DAY_NIGHT_VALUE
+		FROM
+			NH_D_DEPT_DAY t
+		INNER JOIN 
+		#if($_databaseId=='oracle')
+			TABLE(func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR}))
+		#else
+			func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR})
+		#end
+		t2 ON t.ITEM_CODE=t2.standard_code
+		INNER JOIN VIEW_NH_D_DEPT A ON A.ID=T.DEPT_ID
+		where 1=1
+			#if($_databaseId=='oracle')
+				#if($_parameter.startTime)
+						AND t.DAY_OF_MONTH_KEY  >=to_date(@{_parameter.startTime,jdbcType=VARCHAR},'yyyy-mm-dd')
+				#end
+				#if($_parameter.endTime)
+						AND t.DAY_OF_MONTH_KEY <=to_date(@{_parameter.endTime,jdbcType=VARCHAR},'yyyy-mm-dd')
+				#end
+			#else
+				#if($_parameter.startTime)
+						AND t.DAY_OF_MONTH_KEY  >=@{_parameter.startTime,jdbcType=VARCHAR}
+				#end
+				#if($_parameter.endTime)
+						AND t.DAY_OF_MONTH_KEY <=@{_parameter.endTime,jdbcType=VARCHAR}
+				#end
+			#end
+				#if($_parameter.deptId)
+						AND t.DEPT_ID =@{_parameter.deptId,jdbcType=NUMERIC}
+				#else
+						and a.CODE='ROOT'
+				#end
+		GROUP BY t.DAY_OF_MONTH_KEY
+		]]>
+	</select>
+	<select id="getDeptDayNight" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptDay" resultMap="NhDDeptDayResultMap" lang="velocity">
+		<![CDATA[
+		SELECT
+			ROUND(SUM(t.DAY_DAYTIME_VALUE),0) DAY_DAYTIME_VALUE, ROUND(SUM(t.DAY_NIGHT_VALUE),0) DAY_NIGHT_VALUE
+		FROM
+			NH_D_DEPT_DAY t
+		INNER JOIN 
+		#if($_databaseId=='oracle')
+			TABLE(func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR}))
+		#else
+			func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR})
+		#end
+		t2 ON t.ITEM_CODE=t2.standard_code
+		INNER JOIN VIEW_NH_D_DEPT A ON A.ID=T.DEPT_ID
+		where 1=1
+			#if($_databaseId=='oracle')
+				#if($_parameter.startTime)
+						AND t.DAY_OF_MONTH_KEY  >=to_date(@{_parameter.startTime,jdbcType=VARCHAR},'yyyy-mm-dd')
+				#end
+				#if($_parameter.endTime)
+						AND t.DAY_OF_MONTH_KEY <=to_date(@{_parameter.endTime,jdbcType=VARCHAR},'yyyy-mm-dd')
+				#end
+			#else
+				#if($_parameter.startTime)
+						AND t.DAY_OF_MONTH_KEY  >=@{_parameter.startTime,jdbcType=VARCHAR}
+				#end
+				#if($_parameter.endTime)
+						AND t.DAY_OF_MONTH_KEY <=@{_parameter.endTime,jdbcType=VARCHAR}
+				#end
+			#end
+				#if($_parameter.deptId)
+						AND t.DEPT_ID =@{_parameter.deptId,jdbcType=NUMERIC}
+				#else
+						and a.CODE='ROOT'
+				#end
+		]]>
+	</select>
+	<select id="getDeptHolidayDayNight" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptDay" resultMap="NhDDeptDayResultMap" lang="velocity">
+		<![CDATA[
+		SELECT
+			ROUND(SUM(t.DAY_DAYTIME_VALUE),0) DAY_DAYTIME_VALUE, ROUND(SUM(t.DAY_NIGHT_VALUE),0) DAY_NIGHT_VALUE
+		FROM
+			NH_D_DEPT_DAY t
+		INNER JOIN 
+		#if($_databaseId=='oracle')
+			TABLE(func_getnhitem(1,@{_parameter.itemCode,jdbcType=VARCHAR}))
+		#else
+			func_getnhitem(1,@{_parameter.itemCode,jdbcType=VARCHAR})
+		#end
+		t1 ON t.ITEM_CODE=t1.standard_code
+		INNER JOIN VIEW_NH_D_DEPT A ON A.ID=T.DEPT_ID
+		INNER JOIN NH_STATISTICAL_PROP_DAY t2 ON t.day_of_month_key = t2.day_of_month_key
+		where t2.flag = 2
+			#if($_databaseId=='oracle')
+				#if($_parameter.startTime)
+						AND t.DAY_OF_MONTH_KEY  >=to_date(@{_parameter.startTime,jdbcType=VARCHAR},'yyyy-mm-dd')
+				#end
+				#if($_parameter.endTime)
+						AND t.DAY_OF_MONTH_KEY <=to_date(@{_parameter.endTime,jdbcType=VARCHAR},'yyyy-mm-dd')
+				#end
+			#else
+				#if($_parameter.startTime)
+						AND t.DAY_OF_MONTH_KEY  >=@{_parameter.startTime,jdbcType=VARCHAR}
+				#end
+				#if($_parameter.endTime)
+						AND t.DAY_OF_MONTH_KEY <=@{_parameter.endTime,jdbcType=VARCHAR}
+				#end
+			#end
+				#if($_parameter.deptId)
+						AND t.DEPT_ID =@{_parameter.deptId,jdbcType=NUMERIC}
+				#else
+						and a.CODE='ROOT'
+				#end
+		]]>
+	</select>
+	<select id="getDeptList" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptDay" resultMap="NhDDeptDayResultMap" lang="velocity">
+		<![CDATA[
+		SELECT
+			A.ID DEPT_ID,
+			A.PID as parentId,
+			A.NAME as deptName,
+			#if($_databaseId=='oracle')
+				NVL(SUM (B.TOTAL_DAY_VALUE),0) total,
+				CASE  
+				when NVL(SUM(B.TOTAL_YOY),0) < NVL(sum(B.TOTAL_DAY_VALUE),0) then 1
+				when NVL(SUM(B.TOTAL_YOY),0) = NVL(sum(B.TOTAL_DAY_VALUE),0) then 0
+			#else
+				ISNULL(SUM (B.TOTAL_DAY_VALUE),0) total,
+				CASE  
+				when ISNULL(SUM(B.TOTAL_YOY),0) < ISNULL(sum(B.TOTAL_DAY_VALUE),0) then 1
+				when ISNULL(SUM(B.TOTAL_YOY),0) = ISNULL(sum(B.TOTAL_DAY_VALUE),0) then 0
+			#end
+			else -1 end as tb
+		FROM
+			VIEW_NH_D_DEPT A 
+		LEFT JOIN(
+			SELECT t.* FROM NH_D_DEPT_DAY t
+			INNER JOIN 
+			#if($_databaseId=='oracle')
+				TABLE(func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR}))
+			#else
+				func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR})
+			#end
+			t2 ON t.ITEM_CODE=t2.standard_code
+			where 1=1
+				#if($_databaseId=='oracle')
+					#if($_parameter.startTime)
+							AND t.DAY_OF_MONTH_KEY  >=to_date(@{_parameter.startTime,jdbcType=VARCHAR},'yyyy-mm-dd')
+					#end
+					#if($_parameter.endTime)
+							AND t.DAY_OF_MONTH_KEY <=to_date(@{_parameter.endTime,jdbcType=VARCHAR},'yyyy-mm-dd')
+					#end
+				#else
+					#if($_parameter.startTime)
+							AND t.DAY_OF_MONTH_KEY  >=@{_parameter.startTime,jdbcType=VARCHAR}
+					#end
+					#if($_parameter.endTime)
+							AND t.DAY_OF_MONTH_KEY <=@{_parameter.endTime,jdbcType=VARCHAR}
+					#end
+				#end)
+		B ON A.ID=B.DEPT_ID
+		GROUP BY
+			A.ID,
+			A.NAME,
+			A.PID
+		ORDER BY A.ID
+			]]>
+	</select>	
+	<select id="getDeptListCompareLastYear" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptDay" resultMap="NhDDeptDayResultMap" lang="velocity">
+		<![CDATA[
+			SELECT A1.DEPT_ID,
+				   A1.parentId,
+				   A1.deptName,
+				   A1.total,
+			       CASE when A2.total < A1.total then 1 when A2.total = A1.total then 0 else -1 end as tb  
+				   FROM
+			(SELECT A.ID DEPT_ID,
+			       A.PID as parentId,
+			       A.NAME as deptName,
+				   #if($_databaseId=='oracle')
+			       NVL(ROUND(SUM (B.TOTAL_DAY_VALUE),0),0) total
+				   #else
+				   ISNULL(ROUND(SUM (B.TOTAL_DAY_VALUE),0),0) total
+				   #end
+			  FROM VIEW_NH_D_DEPT A
+			  LEFT JOIN (SELECT t.*
+			               FROM NH_D_DEPT_DAY t
+			              INNER JOIN 
+						#if($_databaseId=='oracle')
+							TABLE(func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR}))
+						#else
+							func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR})
+						#end
+						  t2 ON t.ITEM_CODE = t2.standard_code
+			              where 1 = 1
+			                #if($_databaseId=='oracle')
+								#if($_parameter.startTime)
+										AND t.DAY_OF_MONTH_KEY  >=to_date(@{_parameter.startTime,jdbcType=VARCHAR},'yyyy-mm-dd')
+								#end
+								#if($_parameter.endTime)
+										AND t.DAY_OF_MONTH_KEY <=to_date(@{_parameter.endTime,jdbcType=VARCHAR},'yyyy-mm-dd')
+								#end
+							#else
+								#if($_parameter.startTime)
+										AND t.DAY_OF_MONTH_KEY  >=@{_parameter.startTime,jdbcType=VARCHAR}
+								#end
+								#if($_parameter.endTime)
+										AND t.DAY_OF_MONTH_KEY <=@{_parameter.endTime,jdbcType=VARCHAR}
+								#end
+							#end) B
+			    ON A.ID=B.DEPT_ID
+			 GROUP BY A.ID,A.NAME,A.PID) A1
+			LEFT JOIN
+			(SELECT A.ID DEPT_ID,
+			       A.PID as parentId,
+			       A.NAME as deptName,
+			       #if($_databaseId=='oracle')
+			       NVL(ROUND(SUM (C.TOTAL_DAY_VALUE),0),0) total
+				   #else
+				   ISNULL(ROUND(SUM (C.TOTAL_DAY_VALUE),0),0) total
+				   #end
+			  FROM VIEW_NH_D_DEPT A
+			  LEFT JOIN (SELECT t.*
+			               FROM NH_D_DEPT_DAY t
+			              INNER JOIN 			
+						#if($_databaseId=='oracle')
+							TABLE(func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR}))
+						#else
+							func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR})
+						#end
+						  t2 ON t.ITEM_CODE = t2.standard_code
+			              where 1 = 1
+			                #if($_databaseId=='oracle')
+								#if($_parameter.startTime)
+										AND t.DAY_OF_MONTH_KEY  >=add_months(to_date(@{_parameter.startTime,jdbcType=VARCHAR},'yyyy-mm-dd'),-12)
+								#end
+								#if($_parameter.endTime)
+										AND t.DAY_OF_MONTH_KEY <=add_months(to_date(@{_parameter.endTime,jdbcType=VARCHAR},'yyyy-mm-dd'),-12)
+								#end
+							#else
+								#if($_parameter.startTime)
+										AND t.DAY_OF_MONTH_KEY  >=dateadd(year,-1,@{_parameter.startTime,jdbcType=VARCHAR})
+								#end
+								#if($_parameter.endTime)
+										AND t.DAY_OF_MONTH_KEY <=dateadd(year,-1,@{_parameter.endTime,jdbcType=VARCHAR})
+								#end
+							#end) C
+			    ON A.ID = C.DEPT_ID
+			GROUP BY A.ID,A.NAME,A.PID) A2
+			ON A1.DEPT_ID=A2.DEPT_ID  
+			ORDER BY A1.DEPT_ID
+			]]>
+	</select>	
+	<select id="getDeptHolidayList" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptDay" resultMap="NhDDeptDayResultMap" lang="velocity">
+		<![CDATA[
+		SELECT
+			A.ID DEPT_ID,
+			A.PID as parentId,
+			A.NAME as deptName,
+			#if($_databaseId=='oracle')
+				NVL(SUM (B.TOTAL_DAY_VALUE),0) total,
+				CASE  
+				when NVL(SUM(B.TOTAL_YOY),0) < NVL(sum(B.TOTAL_DAY_VALUE),0) then 1
+				when NVL(SUM(B.TOTAL_YOY),0) = NVL(sum(B.TOTAL_DAY_VALUE),0) then 0
+			#else
+				ISNULL(SUM (B.TOTAL_DAY_VALUE),0) total,
+				CASE  
+				when ISNULL(SUM(B.TOTAL_YOY),0) < ISNULL(sum(B.TOTAL_DAY_VALUE),0) then 1
+				when ISNULL(SUM(B.TOTAL_YOY),0) = ISNULL(sum(B.TOTAL_DAY_VALUE),0) then 0
+			#end
+			else -1 end as tb
+		FROM
+			VIEW_NH_D_DEPT A 
+		LEFT JOIN(
+			SELECT t.* FROM NH_D_DEPT_DAY t
+			INNER JOIN 
+			#if($_databaseId=='oracle')
+				TABLE(func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR}))
+			#else
+				func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR})
+			#end
+			t1 ON t.ITEM_CODE=t1.standard_code
+			INNER JOIN NH_STATISTICAL_PROP_DAY t2 ON t.day_of_month_key = t2.day_of_month_key
+			where t2.flag = 2
+				#if($_databaseId=='oracle')
+					#if($_parameter.startTime)
+							AND t.DAY_OF_MONTH_KEY  >=to_date(@{_parameter.startTime,jdbcType=VARCHAR},'yyyy-mm-dd')
+					#end
+					#if($_parameter.endTime)
+							AND t.DAY_OF_MONTH_KEY <=to_date(@{_parameter.endTime,jdbcType=VARCHAR},'yyyy-mm-dd')
+					#end
+				#else
+					#if($_parameter.startTime)
+							AND t.DAY_OF_MONTH_KEY  >=@{_parameter.startTime,jdbcType=VARCHAR}
+					#end
+					#if($_parameter.endTime)
+							AND t.DAY_OF_MONTH_KEY <=@{_parameter.endTime,jdbcType=VARCHAR}
+					#end
+				#end)
+		B ON A.ID=B.DEPT_ID
+		GROUP BY
+			A.ID,
+			A.NAME,
+			A.PID
+		ORDER BY A.ID
+			]]>
+	</select>	
+	<select id="getDeptHolidayListCompareLastYear" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptDay" resultMap="NhDDeptDayResultMap" lang="velocity">
+		<![CDATA[
+		SELECT A1.DEPT_ID,
+				   A1.parentId,
+				   A1.deptName,
+				   A1.total,
+			       CASE when A2.total < A1.total then 1 when A2.total = A1.total then 0 else -1 end as tb  
+				   FROM
+			(SELECT A.ID DEPT_ID,
+			       A.PID as parentId,
+			       A.NAME as deptName,
+				   #if($_databaseId=='oracle')
+			       NVL(ROUND(SUM (B.TOTAL_DAY_VALUE),0),0) total
+				   #else
+				   ISNULL(ROUND(SUM (B.TOTAL_DAY_VALUE),0),0) total
+				   #end
+			  FROM VIEW_NH_D_DEPT A
+			  LEFT JOIN (SELECT t.*
+			               FROM NH_D_DEPT_DAY t
+			              INNER JOIN 
+						#if($_databaseId=='oracle')
+							TABLE(func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR}))
+						#else
+							func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR})
+						#end
+						  t1 ON t.ITEM_CODE = t1.standard_code
+						  INNER JOIN NH_STATISTICAL_PROP_DAY t2 ON t.day_of_month_key = t2.day_of_month_key
+			              where t2.flag = 2
+			                #if($_databaseId=='oracle')
+								#if($_parameter.startTime)
+										AND t.DAY_OF_MONTH_KEY  >=to_date(@{_parameter.startTime,jdbcType=VARCHAR},'yyyy-mm-dd')
+								#end
+								#if($_parameter.endTime)
+										AND t.DAY_OF_MONTH_KEY <=to_date(@{_parameter.endTime,jdbcType=VARCHAR},'yyyy-mm-dd')
+								#end
+							#else
+								#if($_parameter.startTime)
+										AND t.DAY_OF_MONTH_KEY  >=@{_parameter.startTime,jdbcType=VARCHAR}
+								#end
+								#if($_parameter.endTime)
+										AND t.DAY_OF_MONTH_KEY <=@{_parameter.endTime,jdbcType=VARCHAR}
+								#end
+							#end) B
+			    ON A.ID=B.DEPT_ID
+			 GROUP BY A.ID,A.NAME,A.PID) A1
+			LEFT JOIN
+			(SELECT A.ID DEPT_ID,
+			       A.PID as parentId,
+			       A.NAME as deptName,
+			       #if($_databaseId=='oracle')
+			       NVL(ROUND(SUM (C.TOTAL_DAY_VALUE),0),0) total
+				   #else
+				   ISNULL(ROUND(SUM (C.TOTAL_DAY_VALUE),0),0) total
+				   #end
+			  FROM VIEW_NH_D_DEPT A
+			  LEFT JOIN (SELECT t.*
+			               FROM NH_D_DEPT_DAY t
+			              INNER JOIN 			
+						#if($_databaseId=='oracle')
+							TABLE(func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR}))
+						#else
+							func_getnhitem(@{_parameter.nhType,jdbcType=NUMERIC},@{_parameter.itemCode,jdbcType=VARCHAR})
+						#end
+						  t1 ON t.ITEM_CODE = t1.standard_code
+						  INNER JOIN NH_STATISTICAL_PROP_DAY t2 ON t.day_of_month_key = t2.day_of_month_key
+			                #if($_databaseId=='oracle')
+								#if($_parameter.startTime)
+										AND t.DAY_OF_MONTH_KEY  >=add_months(to_date(@{_parameter.startTime,jdbcType=VARCHAR},'yyyy-mm-dd'),-12)
+								#end
+								#if($_parameter.endTime)
+										AND t.DAY_OF_MONTH_KEY <=add_months(to_date(@{_parameter.endTime,jdbcType=VARCHAR},'yyyy-mm-dd'),-12)
+								#end
+							#else
+								#if($_parameter.startTime)
+										AND t.DAY_OF_MONTH_KEY  >=dateadd(year,-1,@{_parameter.startTime,jdbcType=VARCHAR})
+								#end
+								#if($_parameter.endTime)
+										AND t.DAY_OF_MONTH_KEY <=dateadd(year,-1,@{_parameter.endTime,jdbcType=VARCHAR})
+								#end
+							#end) C
+			    ON A.ID = C.DEPT_ID
+			GROUP BY A.ID,A.NAME,A.PID) A2
+			ON A1.DEPT_ID=A2.DEPT_ID  
+			ORDER BY A1.DEPT_ID
+			]]>
+	</select>	
+	<select id="getDeptWeekList" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptDay" resultMap="NhDDeptDayResultMap" lang="velocity">
+		<![CDATA[
+		SELECT
+			ROUND(SUM (case when t2.DAY_OF_WEEK_KEY>5 then t.TOTAL_DAY_VALUE else 0 end),0) weekendTotal,
+			ROUND(SUM(case when t2.DAY_OF_WEEK_KEY <=5 then t.TOTAL_DAY_VALUE  ELSE 0 end),0) workTotal,
+			t2.WEEK_OF_YEAR_VALUE_1
+		FROM
+			NH_D_DEPT_DAY t
+		INNER JOIN 
+		#if($_databaseId=='oracle')
+			TABLE(func_getnhitem(1,@{_parameter.itemCode,jdbcType=VARCHAR}))
+		#else
+			func_getnhitem(1,@{_parameter.itemCode,jdbcType=VARCHAR})
+		#end
+		t1 ON t.ITEM_CODE=t1.standard_code
+		INNER JOIN NH_STATISTICAL_PROP_DAY t2 ON t.DAY_OF_MONTH_KEY = t2.DAY_OF_MONTH_KEY
+		INNER JOIN VIEW_NH_D_DEPT A ON A.ID=T.DEPT_ID
+		where 1=1
+			#if($_databaseId=='oracle')
+				#if($_parameter.startTime)
+						AND t.DAY_OF_MONTH_KEY  >=to_date(@{_parameter.startTime,jdbcType=VARCHAR},'yyyy-mm-dd')
+				#end
+				#if($_parameter.endTime)
+						AND t.DAY_OF_MONTH_KEY <=to_date(@{_parameter.endTime,jdbcType=VARCHAR},'yyyy-mm-dd')
+				#end
+			#else
+				#if($_parameter.startTime)
+						AND t.DAY_OF_MONTH_KEY  >=@{_parameter.startTime,jdbcType=VARCHAR}
+				#end
+				#if($_parameter.endTime)
+						AND t.DAY_OF_MONTH_KEY <=@{_parameter.endTime,jdbcType=VARCHAR}
+				#end
+			#end
+				#if($_parameter.deptId)
+						AND t.DEPT_ID =@{_parameter.deptId,jdbcType=NUMERIC}
+				#else
+						and a.CODE='ROOT'
+				#end
+		GROUP BY
+				t2.WEEK_OF_YEAR_VALUE_1
+		ORDER BY
+				t2.WEEK_OF_YEAR_VALUE_1
+			]]>
+	</select>			
+	<select id="getDeptWeekDays" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptDay" resultMap="NhDDeptDayResultMap" lang="velocity">
+		<![CDATA[
+		SELECT
+			ROUND(sum(t.TOTAL_DAY_VALUE),0) TOTAL_DAY_VALUE,
+			t2.DAY_OF_WEEK_VALUE_1 dayOfWeekName
+		FROM
+			NH_D_DEPT_DAY t
+		INNER JOIN 
+		#if($_databaseId=='oracle')
+			TABLE(func_getnhitem(1,@{_parameter.itemCode,jdbcType=VARCHAR}))
+		#else
+			func_getnhitem(1,@{_parameter.itemCode,jdbcType=VARCHAR})
+		#end
+		t1 ON t.ITEM_CODE=t1.standard_code
+		INNER JOIN NH_STATISTICAL_PROP_DAY t2 ON t.DAY_OF_MONTH_KEY = t2.DAY_OF_MONTH_KEY
+		INNER JOIN VIEW_NH_D_DEPT A ON A.ID=T.DEPT_ID
+		where 1=1
+				#if($_parameter.weekName)
+						AND t2.WEEK_OF_YEAR_VALUE_1 =@{_parameter.weekName,jdbcType=VARCHAR}
+				#end
+				#if($_parameter.endTime)
+						#if($_databaseId=='oracle')
+							AND t.day_of_month_key<=to_date(@{_parameter.endTime,jdbcType=VARCHAR},'yyyy-mm-dd')
+						#else
+							AND t.day_of_month_key<=@{_parameter.endTime,jdbcType=VARCHAR}
+						#end							
+				#end
+				#if($_parameter.deptId)
+						AND t.DEPT_ID =@{_parameter.deptId,jdbcType=NUMERIC}
+				#else
+						and a.CODE='ROOT'
+				#end
+		GROUP BY
+				t2.DAY_OF_WEEK_VALUE_1
+		ORDER BY
+				t2.DAY_OF_WEEK_VALUE_1
+			]]>
+	</select>			
+	<select id="getDeptHolidays" parameterType="com.supconit.nhgl.analyse.electric.dept.entities.NhDDeptDay" resultMap="NhDDeptDayResultMap" lang="velocity">
+		<![CDATA[
+		SELECT
+			SUM (t.TOTAL_DAY_VALUE) TOTAL_DAY_VALUE,
+			(SELECT
+				#if($_databaseId=='oracle')
+					NVL(SUM (t.TOTAL_DAY_VALUE),0)
+				#else
+					isnull(SUM (t.TOTAL_DAY_VALUE),0)
+				#end
+			 FROM
+				NH_D_DEPT_DAY t
+			INNER JOIN 
+			#if($_databaseId=='oracle')
+				TABLE(func_getnhitem(1,@{_parameter.itemCode,jdbcType=VARCHAR}))
+			#else
+				func_getnhitem(1,@{_parameter.itemCode,jdbcType=VARCHAR})
+			#end
+			t1 ON t.ITEM_CODE=t1.standard_code	
+			INNER JOIN NH_STATISTICAL_PROP_DAY t2 ON t.day_of_month_key = t2.day_of_month_key
+			INNER JOIN VIEW_NH_D_DEPT A ON A.ID=T.DEPT_ID
+			where t2.flag = 2 AND
+			    t2.FLAG_VALUE = t3.FLAG_VALUE
+				#if($_databaseId=='oracle')
+					#if($_parameter.startTime)
+							AND t.DAY_OF_MONTH_KEY  >=add_months(to_date(@{_parameter.startTime,jdbcType=VARCHAR},'yyyy-mm-dd'),-12)
+					#end
+					#if($_parameter.endTime)
+							AND t.DAY_OF_MONTH_KEY < to_date(@{_parameter.startTime,jdbcType=VARCHAR},'yyyy-mm-dd')
+					#end
+				#else
+					#if($_parameter.startTime)
+							AND t.DAY_OF_MONTH_KEY  >=dateadd(year,-1,@{_parameter.startTime,jdbcType=VARCHAR})
+					#end
+					#if($_parameter.endTime)
+							AND t.DAY_OF_MONTH_KEY < @{_parameter.startTime,jdbcType=VARCHAR}
+					#end
+				#end
+					#if($_parameter.deptId)
+							AND t.DEPT_ID =@{_parameter.deptId,jdbcType=NUMERIC}
+					#else
+							and a.CODE='ROOT'
+					#end			
+			
+			) TOTAL_YOY,
+			t3.FLAG_VALUE holidayName
+		FROM
+			NH_D_DEPT_DAY t
+		INNER JOIN 
+			#if($_databaseId=='oracle')
+				TABLE(func_getnhitem(1,@{_parameter.itemCode,jdbcType=VARCHAR}))
+			#else
+				func_getnhitem(1,@{_parameter.itemCode,jdbcType=VARCHAR})
+			#end
+			t1 ON t.ITEM_CODE=t1.standard_code
+		INNER JOIN NH_STATISTICAL_PROP_DAY t3 ON t.day_of_month_key = t3.day_of_month_key
+		INNER JOIN VIEW_NH_D_DEPT A ON A.ID=T.DEPT_ID
+		where t3.flag = 2
+			#if($_databaseId=='oracle')
+				#if($_parameter.startTime)
+						AND t.DAY_OF_MONTH_KEY  >=to_date(@{_parameter.startTime,jdbcType=VARCHAR},'yyyy-mm-dd')
+				#end
+				#if($_parameter.endTime)
+						AND t.DAY_OF_MONTH_KEY <=to_date(@{_parameter.endTime,jdbcType=VARCHAR},'yyyy-mm-dd')
+				#end
+			#else
+				#if($_parameter.startTime)
+						AND t.DAY_OF_MONTH_KEY  >=@{_parameter.startTime,jdbcType=VARCHAR}
+				#end
+				#if($_parameter.endTime)
+						AND t.DAY_OF_MONTH_KEY <=@{_parameter.endTime,jdbcType=VARCHAR}
+				#end
+			#end
+				#if($_parameter.deptId)
+						AND t.DEPT_ID =@{_parameter.deptId,jdbcType=NUMERIC}
+				#else
+						and a.CODE='ROOT'
+				#end
+		GROUP BY
+				t3.FLAG_VALUE
+			]]>
+	</select>			
+</mapper>

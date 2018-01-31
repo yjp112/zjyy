@@ -1,0 +1,110 @@
+@charset "utf-8";
+/* -----------通用CSS开始---------- */
+
+/* -- 全局定义 -- */
+
+*{ margin:0;padding:0;}
+/* 修正IE5.x和IE6的斜体溢出bug */
+html,body{height:100%;}
+* html body{ _overflow:visible; !important overflow:auto; !important visibility:inherit;}
+* html iframe, * html frame{ overflow:auto; visibility:inherit; }
+* html frameset{ overflow:hidden;}
+/* 常用标签，基本标签默认样式取消，HTML标签，取消基本标签默认样式，防止不同浏览器显示效果不同，text-align:center; 解决不同浏览器居中问题 */
+body{ color:#000; background:#FFF; font:12px/22px Verdana,Arial,sans-serif,"Times New Roman",宋体; text-align:center;}
+body,ul,ol,li,p,h1,h2,h3,h4,h5,h6,form,fieldset,table,td,img,div,tr{ margin:0; padding:0;}
+input,select{ font-size:12px; vertical-align:middle; }
+/* 设置内容左对齐，恢复因BODY设置剧中产生的继承 */
+body div{ text-align:left;}
+iframe{height: 100%; width: 100%;}
+/* 标签属性，textarea,input 强制输入时内容超出时换行 */
+textarea,input{ word-wrap:break-word; word-break:break-all; padding:0px;}
+/* 清除ul列表标记的样式，ul列表更多的用在不需要列表前置符号的样式里 */
+li{ list-style-type:none;}
+/* 定义图片边框，当图片作为链接内容被填充时，会有默认边框出现，重定义掉 */
+img{ border:0 none;}
+/* 定义H系列标签，覆盖H系列标签默认属性 */
+h1{ font-size:24px;}
+h2{ font-size:20px;}
+h3{ font-size:18px;}
+h4{ font-size:16px;}
+h5{ font-size:14px;}
+h6{ font-size:12px;}
+
+/* -- 通用属性定义 -- */
+
+/* 鼠标样式  */
+.pointer{ cursor:pointer;}
+/* 取消边框 */
+.NoBorder{ border:0 none;}
+/* 文本对齐方式 */
+.t_l{ text-align:left;}
+.t_c{ text-align:center;}
+.t_r{ text-align:right;}
+/* 浮动定义 */
+.FL{ float:left;}
+.FR{ float:right;}
+.CL{ clear:both;}
+/* 定位关系 */
+.absolute{ position:absolute;}
+.relative{ position:relative;}
+
+/* -- 通用容器定义 -- */
+
+/* 隐藏元素，visibility可以隐藏元素，但是还是会在布局中占位 */
+.invisible{ visibility:hidden;}
+/* 从页面布局上隐藏元素，从布局上隐藏元素 */
+.hidden{ display:none;}
+.block{ display:block;}
+.inline{display:inline-block; *display:inline}
+
+/* 清理浮动元素,当浮动换行时后面元素不希望浮动，添加此属性，防止IE BUG */
+.clear{ clear:both; height:0px; width:100%; font-size:1px; line-height:0px; visibility:hidden; overflow:hidden;}
+
+/* 定义字体样式，由大写字母F开头,表示FONT */
+/* 字体样式 */
+.FB{ font-weight:bold;}
+.FN{ font-weight:normal;}
+.FI{ font-style:italic;}
+/* 字体大小 */
+.F10{ font-size:10px;}
+.F11{ font-size:11px;}
+.F12{ font-size:12px;}
+.F13{ font-size:13px;}
+.F14{ font-size:14px;}
+.F16{ font-size:16px;}
+.F18{ font-size:18px;}
+.F30{ font-size:30px;}
+
+/* 更多样式设计 MORE 显示在右侧更多/MORE样式,可根据需求扩展 */
+.More{
+	text-align:right;
+	position:absolute;
+	top:5px;
+	right:5px;
+	font:12px;
+}
+.MoreR5{ position:absolute; top:0px; right:3px; font:12px normal; }
+.MoreR15{ position:absolute; top:0px; right:15px; font:12px normal;}
+.MoreBR0{position:absolute; bottom:0px; right:0px;}
+.MoreBR{position:absolute; bottom:5px; right:10px;}
+
+.Mg_4{margin:4px;}
+.Mg_10{margin:10px;}
+.Mg_L10{margin-left:10px;}
+.Mg_L20{margin-left:20px;}
+.Mg_L25{margin-left:25px;}
+.Mg_T5{margin-top:5px;}
+.Mg_T10{margin-top:10px;}
+.Mg_R10{margin-right:10px;}
+.Mg_LR10{margin-left:10px; margin-right:10px;}
+.Mg_TB10{margin-top:10px; margin-bottom:10px;}
+.Mg_LRT10{margin-left:10px; margin-right:10px; margin-top:10px;}
+.Mg_LRB10{margin-left:10px; margin-right:10px; margin-bottom:10px;}
+.Pd_4{padding:4px;}
+.Pd_10{padding:8px 10px;}
+.Pd_L10{padding-left:10px;}
+.Pd_L20{padding-left:20px;}
+.Pd_L30{padding-left:30px;}
+.Pd_LR10{padding-left:10px; padding-right:10px;}
+.Pd_TB10{padding-top:10px; padding-bottom:10px;}
+/* -- 通用CSS结束 -- */

@@ -1,0 +1,46 @@
+#parse("index/_header.vm")
+  <table id='bpmlog'>
+  <tr>
+	<td colspan="3">
+		<div id="grid" class="k-grid k-widget">
+		    <div class="k-grid-header" style="padding-right: 17px;">
+		        <div class="k-grid-header-wrap">
+		            <table role="grid">
+		                <thead role="rowgroup">
+		                    <tr role="row">
+			                    <th >序号</th>
+                                <th >操作时间</th>
+                                <th >操作者</th>
+                                <th >所属环节</th>
+                                <th >操作类型</th>
+                                <th >流转意见</th>
+		                    </tr>
+		                </thead>
+		            </table>
+		        </div>
+		    </div>
+		    <div class="k-grid-content">
+		        <table class="k-selectable">
+		            <tbody id="collapse9" align='center'>
+		            </tbody>
+		        </table>
+		    </div>
+		</div>
+	</td>
+</tr>
+</table>
+  
+<script type="text/javascript">
+    $(function () {
+        $.post("$!rc.contextPath/platform/bpm/approval/fetch", {"processInstanceId": "$!_PROCESS_INSTANCE_ID"}, function (res) {
+            $.each(res, function(index,item){
+                var hand = item.handleComment||'';
+                if(hand.length>15)
+                    hand = hand.substring(0,15)+"...";
+                $("#collapse9").append("<tr><td>" + (index + 1) + "</td><td>" + item.handleTime + "</td><td>" + item.personName + "</td><td>" + item.activityName + "</td><td>" + item.operateName+"</td><td><a title="+item.handleComment+">"+hand+ "</a></td></tr>")
+            });
+
+        });
+    });
+</script>
+   #parse("index/_footer.vm")

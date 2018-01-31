@@ -1,0 +1,273 @@
+#parse("index/_header.vm")
+</head>
+<body>
+
+  <div class="ui-layout-center" id="subMain">
+ 
+    <div class="ui-layout-north">
+    	<form class="ui-form" id='queryForm'>
+        <table width="100%">
+          <tr>
+            <td>
+              <table class="ui-search-table">
+                <tr>
+                  <td class="ui-search-name" style="padding-left: 20px;">大楼名称：</td>
+                  <td class="ui-search-c"  >
+                  	<select  class="k-textbox" id="initBuild" name="initBuild"  onchange="changeFloor(this)">
+					<option value=''>--请选择--</option>
+				    #foreach($!{e} in $!{topArea})
+	   					<option value="$!{e.id}">$!{e.areaName}</option>
+	   				#end   
+				   </select>
+                  </td>
+                  
+                  <td class="ui-search-name" style="padding-left: 20px;">大楼楼层：</td>
+                  <td class="ui-search-c"  >
+                  	<select  class="k-textbox"  id="initFloor"  name="initFloor"  >
+				    	<option value=''>--请选择--</option>
+				    </select>
+                  </td>
+                  
+                  <td class="ui-search-name">图层模式：</td>
+				  <td class="ui-search-c" >
+					  <select  class="k-textbox" id="type" name="type" onchange="changBuildSystem()">
+						  <option value=''>--请选择--</option>
+		   				  <option value="1" >楼层图</option>
+		   				  <option value="2" >系统图</option>
+					  </select>
+				  </td>
+                  <td class="ui-search-name" style="padding-left: 20px;">底层地图：</td>
+                  <td class="ui-search-c"  >
+                  	<input type="text" class="k-textbox" name="baseLayer">
+                  </td>
+
+                </tr>
+              </table>
+            </td>
+            <td width="150" valign="top" style="padding-top:4px;">
+              <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+              <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+            </td>
+          </tr>
+        </table>
+    	</form>
+    </div>
+  	<div class="ui-layout-center">
+  	  <div id="grid"></div> 
+    </div>
+  </div>
+#parse("index/_footer.vm") 
+
+<script type="text/javascript">
+  var _iframe_layout, _inner_layout;
+	$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      }
+     
+    });
+
+  
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+
+    $('#resetBtn').click(function(){
+      $("#queryForm :text").val('');  
+    });
+	
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/dev/gis/mapLevel/list", [{
+              field: "id",
+              hidden: true
+          }, {
+              field: "type",
+              title: "图层模式",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-num"},
+              template: function(data){
+              	if(data.type == '1'){
+              		return "楼层图";
+              	}
+              	if(data.type == '2'){
+              		return "系统图";
+              	}
+              },
+              attributes: {"class": "k-grid-num"},
+              width: 80
+          },{
+              field: "fullLevelName",
+              title: "区域名称",
+              sortable: false,
+              template:function(data){
+              	if(data.type == '1'){
+              		return "<a href=\"javascript:void(0)\" title=\"查看"+data.fullLevelName+"的详细信息\" onclick=\"quick_dialog('mapLevel_add_dlg','查看"+data.fullLevelName+"的信息','$!{rc.contextPath}/dev/gis/mapLevel/edit?viewOnly=true&id="+data.id+"',650,300)\">"+data.fullLevelName+"</a>";
+              	}else{
+              		return "";
+              	}
+              },
+              headerAttributes: {"class": "k-grid-text"},
+              #*attributes: {"class": "k-grid-text"},*#
+              attributes: {     
+      		  	 title:"#: data.initBuild==null? '':data.initBuild #",
+      			 "class": "k-grid-text k-grid-nowrap"
+    		  },
+              width: 200
+          },
+          {
+			  field: "baseLayer",
+              title: "底层地图",
+			  sortable: false,
+			  headerAttributes: {"class": "k-grid-text"},
+			   #*attributes: {"class": "k-grid-text"},*#
+              attributes: {     
+      		  	 title:"#: data.floorName==null? '':data.floorName #",
+      			 "class": "k-grid-text k-grid-nowrap"
+    		  },
+              width: 100
+		  },
+		  {
+              field: "systemName",
+              title: "系统名称",
+              sortable: false,
+              template:function(data){
+              	if(data.type == '2'){
+              		return "<a href=\"javascript:void(0)\" title=\"查看"+data.systemName+"的详细信息\" onclick=\"quick_dialog('mapLevel_add_dlg','查看"+data.systemName+"的信息','$!{rc.contextPath}/dev/gis/mapLevel/edit?viewOnly=true&id="+data.id+"',650,300)\">"+data.systemName+" </a>";
+              	}else{
+              		return "";
+              	}
+              },
+              headerAttributes: {"class": "k-grid-text"},
+              #*attributes: {"class": "k-grid-text"},*#
+              attributes: {     
+      		  	 title:"#: data.systemName==null? '':data.systemName #",
+      			 "class": "k-grid-text k-grid-nowrap"
+    		  },
+              width: 100
+          },{
+              field: "systemCode",
+              title: "系统编码",
+              sortable: false,
+              template:function(data){
+              	if(data.type == '2'){
+              		return  data.systemCode;
+              	}else{
+              		return "";
+              	}
+              },
+              headerAttributes: {"class": "k-grid-text"},
+    		  #*attributes: {"class": "k-grid-text"},*#
+              attributes: {     
+      		  	 title:"#: data.systemCode==null? '':data.systemCode #",
+      			 "class": "k-grid-text k-grid-nowrap"
+    		  },
+              width: 100
+          },{
+              field: "initlevel",
+              title: "初始级别",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-num"},
+              attributes: {"class": "k-grid-num"},
+              width: 80
+          },{
+              field: "minlon",
+              title: "最小经度",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-num"},
+              attributes: {"class": "k-grid-num"},
+              width: 150
+          },{
+              field: "maxlon",
+              title: "最大经度",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-num"},
+              attributes: {"class": "k-grid-num"},
+              width: 150
+          },{
+              field: "minlat",
+              title: "最小纬度",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-num"},
+              attributes: {"class": "k-grid-num"},
+              width: 150
+          },{
+              field: "maxlat",
+              title: "最大纬度",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-num"},
+              attributes: {"class": "k-grid-num"},
+              width: 150
+          },{
+              field: "centerx",
+              title: "中心点X坐标",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-num"},
+              attributes: {"class": "k-grid-num"},
+              width: 120
+          },{
+              field: "centery",
+              title: "中心点Y坐标",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-num"},
+              attributes: {"class": "k-grid-num"},
+              width: 120
+          },{
+              field: "scales",
+              title: "比例尺",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              #*attributes: {"class": "k-grid-text"},*#
+              attributes: {     
+      		  	 title:"#: data.scales==null? '':data.scales #",
+      			 "class": "k-grid-text k-grid-nowrap"
+    		  },
+    		  width: 240
+          }], 
+      {
+          sortable: {
+              mode: "multiple",
+              allowUnsort: true
+          },resizable:true
+      }, {
+          serverSorting: true
+      }, [
+	  #kendo_datagrid_btns("MAPLEVEL")#end 
+      ]);
+		
+    });
+	
+	function changeFloor(obj){
+        $.ajax({
+	            'url': "$!{rc.contextPath}/dev/gis/mapLevel/getFloor",
+	            'dataType': 'json',
+	            'type': 'post',
+	            'data': {'id':obj.value},
+	            'success': function (res) {
+	                 var select = $("#initFloor");
+	                 $(select).empty();
+	                 var op0 = "<option value=''>--请选择--</option>";
+	                 $(select).append(op0);
+	            	 for(var i=0;i<res.length;i++){
+	            	 	var tt = res[i];
+	            	 	var option = "<option value='"+tt.id+"'>"+tt.areaName+"</option>";
+	            	 	$(select).append(option);
+	            	 }
+	            }
+        	});
+   }     
+</script>
+</body>
+</html>

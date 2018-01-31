@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.dev.gis.entities.VrvElectric">
+
+	<resultMap type="com.supconit.dev.gis.entities.VrvElectric" id="vrvElectricResultMap">
+        <result property="id" column="ID" />
+        <result property="deviceId" column="DEVICE_ID" />
+        <result property="dayMonth" column="DAY_OF_MONTH_KEY" />
+        <result property="electricValue" column="DAY_ALL_VALUE" />
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">NH_D_DEVICE_DAY</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+    <!-- 获取记录列表-->
+	<sql id="select_pre" lang="velocity">
+	    SELECT  ID
+	      , DEVICE_ID
+	      , DAY_OF_MONTH_KEY
+	      , DAY_ALL_VALUE
+	    FROM <include refid="TABLE_NAME"/> a
+	</sql>
+
+	<sql id="count_pre" lang="velocity">
+		SELECT COUNT(*) FROM <include refid="TABLE_NAME"/> a
+	</sql>
+	
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[		
+		#where()
+			#set($_p = $_parameter.condition)
+			
+			#if($_p.deviceId)
+				AND a.DEVICE_ID = @{_p.deviceId,jdbcType=BIGINT}
+			#end
+			#if($_p.startTime)
+				AND a.DAY_OF_MONTH_KEY >=  to_date(@{_p.startTime,jdbcType=VARCHAR},'yyyy-MM-dd') 
+			#end
+			#if($_p.endTime)
+				AND a.DAY_OF_MONTH_KEY <= to_date(@{_p.endTime,jdbcType=VARCHAR},'yyyy-MM-dd') 
+			#end
+		#end
+		]]>	
+	</sql>
+    
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.dev.gis.entities.VrvElectric" resultMap="vrvElectricResultMap" lang="velocity" databaseId="oracle">
+		 <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre" />
+		<include refid="condition_sql" />
+		#order($_parameter.condition,"DAY_OF_MONTH_KEY ASC")
+ 		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>
+
+    <select id="countByCondition" parameterType="com.supconit.dev.gis.entities.VrvElectric" resultType="long" lang="velocity">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+	
+</mapper>

@@ -1,0 +1,110 @@
+<script type="text/javascript" src="$!{nhgl_static_custom_url}/js/jquery.validate.rules.js"></script>
+<div class="nh-header">
+	<span class="nh-menu-name">#crumbs("$!menu.code",1)</span>
+##	<span class="nh-header-time" style="color: #fff;">数据更新时间：<span id="dateTime">$!nowTime </span></span>	
+</div>
+<div class="nh-content" style="margin-left:0px">
+	<div class="nh-nd">
+		<div class="nh-nd-date">
+			<input type="hidden" id="nowTime" value="$!{start}"/>
+			<input type="hidden" id="flag"/>
+            <label style="width:80px;float:left">起止月份：</label> 
+    		<input style="float:left" onclick="WdatePicker({dateFmt:'yyyy-MM',maxDate:'#F{$dp.$D(\'endsMonth\')}',onpicked:se})" data-rule="required" name="startMonth" class="ui-input Wdate" type="text" id="startMonth"/>
+            <label style="width:20px;float:left;margin-left:11px">-</label>
+    		<input onclick="WdatePicker({dateFmt:'yyyy-MM',minDate:'#F{$dp.$D(\'startMonth\')}',onpicked:se,maxDate:'%y-%M-%d'})" name="endsMonth" data-rule="required" class="ui-input Wdate" type="text" id="endsMonth"/>
+			<ul class="nh-option">
+				<li><a name="month" id="month1" href ="javascript:;"  onclick="linkTo(1)" class="current">本月</a></li>
+				<li><a name="month" id="month3" href="javascript:;"  onclick="linkTo(3)">最近三个月</a></li>
+				<li><a name="month" id="month6" href="javascript:;"  onclick="linkTo(6)">半年</a></li>
+				<li><a name="month" id="month12" href="javascript:;"  onclick="linkTo(12)">一年</a></li>
+			</ul>
+		</div>
+		<div class="nh-nd-entry">
+			<div>
+				<label>能耗统计：</label>
+				<ul class="nh-option">
+					<li><a href="javascript:;" id="total" onclick="nhtj('total')" class="current">总能耗</a></li>
+					<li><a href="javascript:;" id="area" onclick="nhtj('area')">单位面积</a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div id="allView1" class="nh-ct">
+	</div>
+</div>
+ <script type="text/javascript">
+ 	var width = $(window).width();
+	var height = $(window).height();
+	$(document).ready(function(){
+		$("#allView1").load("$!{rc.contextPath}/nhgl/publicity/nhgl_all?flag=1");
+		var s = '$!{sMonth}';
+		var e = '$!{eMonth}';
+		$("#startMonth").attr("value",s);
+		$("#endsMonth").attr("value",e);
+	});
+	function linkTo(flag){
+		var name = $("#subName").val();
+		var code = $("#subCode").val();
+		$("a[name='month']").each(function(){
+    		$(this).removeClass();
+    	});
+		$("#month"+flag).addClass("current");
+		//点击本月，最近三月修改起止月份
+		var start = $("#startMonth").val();
+		var end = $("#endsMonth").val();
+		$("#flag").attr("value",flag);
+		//当能耗统计这一栏单位面积被选中的时候
+		var areaClass = $("#area").attr("class");
+		if(areaClass == 'current'){
+			$("#allView1").load("$!{rc.contextPath}/nhgl/publicity/nhgl_area?flag="+flag+"&startMonth="+start+"&endsMonth="+end);
+		}else{
+			$("#allView1").load("$!{rc.contextPath}/nhgl/publicity/nhgl_all?flag="+flag+"&startMonth="+start+"&endsMonth="+end);
+		}
+	}
+	function se(){
+		var startMonth = $("#startMonth").val();
+		var endsMonth = $("#endsMonth").val();
+		if(startMonth =="" && endsMonth ==""){
+			return;
+		}
+		$("a[name='month']").each(function(){
+    		$(this).removeClass();
+    	});
+		var name = $("#subName").val();
+		var areaClass = $("#area").attr("class");
+		if(areaClass == 'current'){
+			$("#allView1").load("$!{rc.contextPath}/nhgl/publicity/nhgl_area?startMonth="+startMonth+"&endsMonth="+endsMonth);
+		}else{
+			$("#allView1").load("$!{rc.contextPath}/nhgl/publicity/nhgl_all?startMonth="+startMonth+"&endsMonth="+endsMonth);
+		}
+	}
+	function openDilog(name,kindly,device){
+		url = "load:$!{rc.contextPath}/nhgl/publicity/getSubAll?name="+name+"&kindly="+kindly+"&device="+device;
+		new dialog({
+		  id:'subd',
+		  skin: '#fff',
+		  content: url,
+		  title: '查看更多',
+		  padding: 0,
+		  lock: true,
+		  width:600,
+          height:500
+		});
+	}
+	function nhtj(type){
+		var flag = $("#flag").val();
+		var startMonth = $("#startMonth").val();
+		var endsMonth = $("#endsMonth").val();
+		if(type == 'area'){
+			$("#area").addClass('current');
+			$("#total").removeClass('current');
+			$("#allView1").load("$!{rc.contextPath}/nhgl/publicity/nhgl_area?endsMonth="+endsMonth+"&startMonth="+startMonth);
+			
+		}else{
+			$("#total").addClass('current');
+			$("#area").removeClass('current');
+			$("#allView1").load("$!{rc.contextPath}/nhgl/publicity/nhgl_all?endsMonth="+endsMonth+"&startMonth="+startMonth);
+		}
+	}
+	
+ </script>

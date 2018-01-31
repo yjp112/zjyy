@@ -1,0 +1,372 @@
+#parse("index/_header.vm")
+<style>
+	.ui-table input.k-textbox{width:100%;}
+	.ui-table .k-widget.k-datepicker.k-header{width: 120px;}
+	.ui-co-table .k-widget.k-datetimepicker.k-header,.ui-co-table .k-widget.k-datepicker.k-header {width: 85%;}
+	.ui-table td{overflow: visible;}  
+</style>
+</head>
+<body>
+<form id="queryForm"  class="ui-dialog-form" method="post" action="$!{rc.contextPath}/duty/dutylog/save">
+	<input type="hidden" name="id" value="$!{dutyLog.id}" />
+	<input type="hidden" name="status" value="$!{dutyLog.status}" />
+	<input type="hidden" name="dutyType" value="$!{dutyLog.dutyType}" />
+	<div class="actions">
+                <span class="lf-tool print">
+					<span class="lf-btns"><a href="javascript:showReport('$!dutyLog.id','dutyLog');" class="lf-btn lf-btn-print" title="打印"></a>
+				</span></span>
+				<button class="k-primary hc_btn" type="submit" id="duty_log_save">
+					<i class="fa fa-save"></i>保 存
+				</button>
+				<button class="k-primary hc_btn" id="duty_log_submit" type="submit">
+					<i class="fa  icon-ok"></i>提交
+				</button>
+				<a class="k-primary hc_btn"
+					onclick="window.location.href='$!{rc.contextPath}/duty/dutylog/go?dutyType=$!dutyLog.dutyType&menuCode=$!menu.code';"><i
+					class="fa fa-reply"></i>返回</a>
+	</div>
+	<div class="ui-layout-center ui-largeform">
+	<div class="ui-composer">
+		<div class="ui-co-seg" data-role="anchor" id="index1" style="margin-bottom: 20px;">
+            <div id="tab-container">
+			<div class="container" id="index1">
+				<div class="container-title title1">
+					<span class="seg-num">1</span> 值班日志基本信息
+				</div>
+	   			<div style="height:200px">
+				<table class="ui-co-table" width="100%">
+					<tr>
+						<td width="13%" class="label"><span class="ui-form-required">*</span>值班日期：</td>
+						<td  width="35%"><input type="text"
+							class="k-textbox" id="dutyDate" name="dutyDate"
+							value="#date_format($!dutyLog.dutyDate,'yyyy-MM-dd')" /></td>
+
+						<td width="13%" class="label"><span class="ui-form-required">*</span>班次：</td>
+						<td  width="35%"><select name="orderType" id="orderType"
+							class="k-textbox" style="height:26px;">
+								<option value="">请选择班次</option> #foreach($!list in
+								$!listOrderType)
+								<option value="$!{list.enumValue}"
+									#if($!{dutyLog.orderType}==$!{list.enumValue})
+									selected="selected" #end>$!{list.enumText}</option> #end
+						</select></td> 
+					</tr>
+					<tr>
+						<td class="label"><span class="ui-form-required">*</span>班组名称：</td>
+						<td><select name="groupType" id="groupTypeName"
+							class="k-textbox" style="height:26px;">
+								<option value="">请选择班组</option> #foreach($!list in
+								$!listGroupType)
+								<option value="$!{list.enumValue}"
+									#if($!{dutyLog.groupType}==$!{list.enumValue})
+									selected="selected" #end>$!{list.enumText}</option> #end </td>
+
+						<td class="label"><span class="ui-form-required">*</span>值班人：</td>
+						#if($!viewOnly)
+							<td><input class="k-textbox" type="text" id="personName" name="personName" value="$!{dutyLog.personName}" />
+							<input class="k-textbox" type="hidden"  id="personId"  name="personId" value="2222"  />
+						#else
+						<td><input class="k-textbox" type="text" id="personName" name="personName" value="$!dutyLog.creator" />
+							<input class="k-textbox" type="hidden"  id="personId"  name="personId" value="2222"  />
+						#end
+						 <!-- <span class="k-textbox k-space-right k-text-log" id="personNames">
+			            	<input class="k-textbox" type="hidden"  id="personId"  name="personId" value="$!{dutyLog.personId}"  />
+			        		<input readonly class="k-textbox"  type="text"  id="personName" name="personName" value="$!{dutyLog.personName}" />
+			        		<a href="#" class="k-icon k-i-search">&nbsp;</a>
+		        		</span> --></td>
+					</tr>
+					<tr>
+						<td class="label"><span class="ui-form-required">*</span>开始时间：</td>
+						<td ><input type="text" class="k-textbox"
+							id="startTime" name="startTime"
+							value="#date_format($!dutyLog.startTime'yyyy-MM-dd HH:mm:ss')" />
+
+						</td>
+
+						<td class="label"><span class="ui-form-required">*</span>结束时间：</td>
+						<td><input type="text" class="k-textbox"
+							id="endTime" name="endTime"
+							value="#date_format($!dutyLog.endTime'yyyy-MM-dd HH:mm:ss')" />
+
+						</td>
+					</tr>
+					<tr>
+						<td  class="label"><span class="ui-form-required"></span>交班时间：</td>
+						<td ><input type="text" class="k-textbox"
+							id="replaceTime" name="replaceTime"
+							value="#date_format($!dutyLog.replaceTime,'yyyy-MM-dd HH:mm:ss')" />
+						</td>
+
+						<td  class="label"><span class="ui-form-required"></span>交班人：</td>
+						<td ><input type="text"
+							class="k-textbox" id="replacePersonName"
+							name="replacePersonName" value="$!{dutyLog.replacePersonName}" />
+							<input  type="hidden" class="k-textbox" id="replacePersonId" name="replacePersonId" value="11111"/>
+						</td>
+					</tr>
+				</table>
+			 </div>
+			 <div class="container-inner" id="index2-1">
+				<div class="container-inner-title">
+					<span class="seg-num">1.1</span>
+					值班日志详细信息
+				</div>
+				<div class="container-inner-content">
+					<table class="ui-table" id="addTable">
+					<thead>
+						<tr>
+							<th style="width: 30px;text-align: center;">序号</th>
+							<th style="width: 100px;">发生时间</th>
+							<th style="width: 100px;">具体位置</th>
+							<th style="width: 100px;">报警设备号</th>
+							<th style="width: 150px;">报警类型</th>
+							<th style="width: 150px;">原因及处理结果</th>
+							<th style="width: 80px;">记录人</th>
+							<th style="width: 20px;text-align: center;"><a href="#" class="hc_bth addRow"><i class="fa fa-plus-circle"></i></a></th>
+						</tr>
+					</thead>
+					<tbody>
+
+						#set($index=0) #foreach($list in $!dutyLog.dutyLogDetailList)
+						<tr id="row_$index">
+							<td align= "center"><span
+								class="rowNumber">$velocityCount</span></td>
+								
+							<td class="eventTime">
+								<input type="hidden" name="dutyLogDetailList[$index].id" value="$!list.id" />
+								<input type="hidden" name="dutyLogDetailList[$index].dutyLogId" value="$!{list.dutyLogId}" />
+								<input
+								type="text"  name="dutyLogDetailList[$index].eventTime"
+								class="k-textbox eventTime" id="eventTime_$index"
+								value="#date_format($!list.eventTime,'yyyy-MM-dd HH:mm:ss')" data-rule="发生时间:required"/></td>
+								
+							<td ><input type="text"
+								name="dutyLogDetailList[$index].place" class="k-textbox"
+								value="$!list.place" data-rule="具体位置:required;length[~100]" /></td>
+							<td ><input type="text"
+								name="dutyLogDetailList[$index].deviceCode"
+								class="k-textbox" value="$!list.deviceCode" data-rule="报警设备号:required;length[~100]"/></td>
+							<td align="center">
+								<input  type="radio"  name="dutyLogDetailList[$index].aralmType" value="1" #if($!list.aralmType==1) checked #end data-rule="报警类型:checked"/>火警 
+								<input  type="radio"  name="dutyLogDetailList[$index].aralmType" value="2" #if($!list.aralmType==2) checked #end/>入侵 
+								<input  type="radio"  name="dutyLogDetailList[$index].aralmType" value="3" #if($!list.aralmType==3) checked #end/>误报 
+							</td>
+							<td ><input type="text"
+								name="dutyLogDetailList[$index].result" class="k-textbox"
+								value="$!list.result"  data-rule="原因及处理结果:required;length[~100]"/></td>
+							<td ><input readonly type="text" name="creator" class="k-textbox"
+								value="$!dutyLog.creator" /></td>
+							<td align="center"><a href="#"><i
+									class="iconfont fa fa-close delRow"></i></a></td>
+						</tr>
+
+						#set($index=$index+1) #end 
+						#if($index==0)
+						#set($num=$index+1)
+						<tr id="row_$index">
+							<td align="center">$num</span></td>
+							<td  class="eventTime">
+								<input type="text" name="dutyLogDetailList[$index].eventTime"class="k-textbox eventTime" 
+								id="eventTime_$index" value="#date_format($!list.eventTime,'yyyy-MM-dd HH:mm:ss')" data-rule="发生时间:required"/></td>
+								
+							<td><input type="text"
+								name="dutyLogDetailList[$index].place" class="k-textbox"
+								value="$!list.place" data-rule="具体位置:required;length[~100]"/></td>
+								
+							<td ><input type="text"
+								name="dutyLogDetailList[$index].deviceCode"
+								class="k-textbox" value="$!list.deviceCode"  data-rule="报警设备号:required;length[~100]"/></td>
+								
+							<td>
+								<input  type="radio"  name="dutyLogDetailList[$index].aralmType" value="1" #if($!list.aralmType==1) checked #end data-rule="报警类型:checked"/>火警 
+								<input  type="radio"  name="dutyLogDetailList[$index].aralmType" value="2" #if($!list.aralmType==2) checked #end/>入侵 
+								<input  type="radio"  name="dutyLogDetailList[$index].aralmType" value="3" #if($!list.aralmType==3) checked #end/>误报 
+							</td>
+							
+							<td ><input type="text"
+								name="dutyLogDetailList[$index].result" class="k-textbox"
+								value="$!list.result" data-rule="原因及处理结果:required;length[~100]"/></td>
+								
+							<td><input readonly type="text" name="creator" class="k-textbox"
+								value="$!dutyLog.creator" /></td>
+								
+							<td align="center"><a href="#"><i
+									class="iconfont fa fa-close delRow"></i></a></td>
+									
+						</tr>
+						#end
+					</tbody>
+				</table>
+				</div>
+			</div>
+		  </div>
+		  </div>
+	  </div>
+   </div>
+   </div>
+</form>
+	#parse("index/_footer.vm")
+	<script type="text/javascript">
+	$(document).ready(function(){
+		
+		 _iframe_layout = $('body').layout({
+              defaults: {
+                resizable: true,
+                closable: false,
+                spacing_open: 5
+              }
+            });
+		 #if(!$!viewOnly)
+			 	commonSingleDateWithout("dutyDate","yyyy-MM-dd HH:mm:ss","zh-CN");
+			 	commonSingleDate("replaceTime","yyyy-MM-dd HH:mm:ss","zh-CN");		 	
+			 	commonDate("startTime","endTime","yyyy-MM-dd HH:mm:ss","zh-CN");
+			 	
+		#end
+		$("#replacePersonNames").click(function(){
+			quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/choose/person/page/1/replacePersonId/replacePersonName?dialogId=dutyLog_add_dlg", 600, 500);
+		})
+		$("#personNames").click(function(){
+			quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/choose/person/page/1/personId/personName?dialogId=dutyLog_add_dlg", 600, 500);
+		})
+		
+ 		
+	});
+       
+</script>
+	<script type="text/javascript">
+		
+
+	   $(document).ready(function(){
+		   
+		   	if($("input[name='status']").val()==""){
+		   		$(".print").hide();
+		   	}
+	   		for(var i=0;i<$("#addTable tr").length-1;i++){
+	   			commonSingleDateWithout("eventTime_"+i,"yyyy-MM-dd HH:mm:ss","zh-CN");
+	   			
+	   		}
+	   		if($("#addTable tr").length-1==1){
+	   			$('.delRow').hide();
+	  		 }
+		   //添加行
+			$(".addRow").bind("click",function(){
+				var len=$("#addTable tr").length-1;
+				var pre=len-1;
+				var next=len;
+				var exp = new RegExp("\\["+pre+"\\]","g");
+				var rowtemp =$("#addTable tr").eq(len).html();
+				
+				//重新加载时间控件
+				var temp=$("#addTable tr").eq(len).find(".eventTime").html();
+				var re="<input type='text' name='dutyLogDetailList["+next+"].eventTime' class='eventTime' id='eventTime_"+next+"' data-rule='required;length[~20]'/>";
+				rowtemp =	rowtemp.replace(temp,re);
+				
+				//内容替换
+				var rowcon="<tr>"+rowtemp.replace(exp,"["+next+"]")+"</tr>";
+				rowcon=rowcon.replace(">"+len+"<",">"+(next+1)+"<").replace("_"+pre,"_"+next);
+				$('#addTable').append(rowcon); 
+				$('.delRow').show();
+				commonSingleDateWithout("eventTime_"+next,"yyyy-MM-dd HH:mm:ss","zh-CN");
+				//添加行里的数据校验 
+				formValidator(next);				
+				//清除控件中的数据
+				$("#addTable input[name='dutyLogDetailList["+next+"].place']").val("");
+				$("#addTable [name='dutyLogDetailList["+next+"].deviceCode']").val("");
+				$("#addTable [name='dutyLogDetailList["+next+"].aralmType']").removeAttr("checked");
+				$("#addTable [name='dutyLogDetailList["+next+"].result']").val("");
+			});
+			
+	    	// 删除行
+			$('#addTable').on("click",".delRow",function(){
+				var len1=$("#addTable tr").length;			
+				var tr=$(this).parent().parent().parent();	
+				//alert(tr.html());			
+				var index=$('#addTable tr').index(tr);
+				$(tr).remove();//删除当前行
+				
+				for(var i=index,j=len1-1;i<j;i++){
+					var exp = new RegExp("\\["+i+"\\]","g");					
+					var rowtemp =$("#addTable tr").eq(i).html();
+					initValue(i);
+					var temp=$("#addTable tr").eq(i).find(".eventTime").html();
+					var re="<input type='text' name='dutyLogDetailList["+i+"].eventTime' class='eventTime' id='eventTime_"+i+"' data-rule='required;length[~20]'/>";
+					rowtemp =	rowtemp.replace(temp,re);
+					var rowcon=rowtemp.replace(exp,"["+(i-1)+"]").replace("_"+i,"_"+(i-1));
+					rowcon=rowcon.replace(">"+(i+1)+"<",">"+i+"<");
+					$("#addTable tr").eq(i).html(rowcon);
+					commonSingleDateWithout("eventTime_"+(i-1),"yyyy-MM-dd HH:mm:ss","zh-CN");
+					writeValue(i-1);
+				}
+				if($("#addTable tr").length-1==1){
+	   				$('.delRow').hide();
+	  			 }
+				
+	     	 });
+	  });
+	 var eventTime,place,deviceCode,aralmType,result;
+	function initValue(value){
+		eventTime=$("#addTable input[name='dutyLogDetailList["+value+"].eventTime']").val();
+		place=$("#addTable input[name='dutyLogDetailList["+value+"].place']").val();
+		deviceCode=$("#addTable input[name='dutyLogDetailList["+value+"].deviceCode']").val();
+		result=$("#addTable input[name='dutyLogDetailList["+value+"].result']").val();
+		aralmType=$("#addTable input[name='dutyLogDetailList["+value+"].aralmType']:checked").val();
+	}
+	function writeValue(value){
+		$("#addTable input[name='dutyLogDetailList["+value+"].eventTime']").val(eventTime);
+		$("#addTable input[name='dutyLogDetailList["+value+"].place']").val(place);
+		$("#addTable input[name='dutyLogDetailList["+value+"].deviceCode']").val(deviceCode);
+		$("#addTable input[name='dutyLogDetailList["+value+"].result']").val(result);
+		$("#addTable input[name='dutyLogDetailList["+value+"].aralmType'][value="+aralmType+"]").attr("checked","checked");
+	}
+</script>
+	<script> 
+		function formValidator(value){
+			$("form").validator('setField', 'dutyLogDetailList['+value+'].eventTime', '开始时间:required'); 
+			$("form").validator('setField', 'dutyLogDetailList['+value+'].place', '具体位置:required,length[~100]');
+			$("form").validator('setField', 'dutyLogDetailList['+value+'].deviceCode', '报警设备号:required,length[~100]');
+			$("form").validator('setField', 'dutyLogDetailList['+value+'].aralmType', '报警类型:checked');
+			$("form").validator('setField', 'dutyLogDetailList['+value+'].result', '原因及处理结果:required,length[~100]');
+		}
+	   $(document).ready(function(){
+		   $("#duty_log_save").bind("click",function(){
+			   $("input[name='status']").val(0);
+		   });
+		   $("#duty_log_submit").bind("click",function(){  
+			   $("input[name='status']").val(1);
+		   });
+		  $("#queryForm").validator({
+	          fields:{
+	            dutyDate: "值班日期:required,length[~20]",
+                orderType: "班次:required,length[~10]",
+                groupType:"班组名称:required,length[~10]",
+                startTime: "开始时间:required",
+                endTime: "开始时间:required",
+                personName:"值班人:required,length[~32]"
+	             },
+	             valid:function(form){
+	                 var status=$("input[name='status']").val()
+	              
+	                 var submitBtnId="#duty_log_submit";
+	                 if(status==0){
+	                   submitBtnId="#save";
+	                 }
+	         
+	                 form_btn_submit($(submitBtnId),form,function(res){
+	                     //console.log(res);
+	                     validateCallback(res,"grid","");
+	                 });
+	             }
+	         });
+	   });
+			
+	  #if($!viewOnly)
+	        setAllReadonly();
+	  #end
+	  
+	  #if($!dutyLog.status==1)
+	        setAllReadonly();
+	  #end
+	  
+	</script>
+</body>
+</html>

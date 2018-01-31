@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<style type="text/css">
+			html, body {
+				width:99%;
+				height:96%;
+			}
+		</style>
+		<script type="text/javascript" src="http://10.10.76.128:8080/301Hospital/html/Supconmap.js"></script>
+		<!--link rel="stylesheet" href="http://10.10.76.128:8080/301Hospital/html/supconjs/popstyle.css" type="text/css">
+		<script type="text/javascript" src="http://10.10.76.128:8080/301Hospital/html/lib/OpenLayers.js"></script>
+		<script type="text/javascript" src="http://10.10.76.128:8080/301Hospital/html/supconjs/HCPanZoomBar.js"></script>
+		<script type="text/javascript" src="http://10.10.76.128:8080/301Hospital/html/supconjs/GisFramedCloud.js"></script>
+		<script type="text/javascript" src="gisConfig.js"></script>
+		<script type="text/javascript" src="gisDeviceControl.js"></script>
+		<script type="text/javascript" src="keyMap.js"></script>
+		<script type="text/javascript" src="gis.js"></script>
+		<script type="text/javascript" src="popup.js"></script-->
+		<script type="text/javascript">
+			function changeFloor(floor){
+				if(map!=null){
+					map.destroy();
+					map=null;
+				}
+				g_init(floor);
+				g_selectFeatures();
+				initLayer();
+			}
+			
+			function initLayer(){
+				g_addDeviceLayers("ceng_SXT",false);
+				g_addDeviceLayers("ceng_XF",true);
+			}
+			
+			function show(evt){
+				g_changLayerVisibility("ceng_SXT",evt.checked);
+			}
+			
+			function geoquery(){
+				g_toggleControl("square");
+			}
+			
+			function fireAlarm(){
+				g_dcPoint("A_01F_SXT_020,A_01F_SXT_044,A_01F_SXT_028",0);
+			}
+			
+			function state(){
+				g_dcPoint("A_01F_SXT_020,A_01F_SXT_043,A_01F_SXT_023",2);
+			}
+			
+			function showPopup(feature){
+				var title="标题";
+				var content="内容";
+				addPopUp(feature,title,content)
+			}			
+		</script>
+	</head>
+	<body onload="changeFloor('A_01F')">
+		<input id="filterButton" type="button" onclick="changeFloor('A_02F')" value="切换"/>
+		<input id="filterButton" type="checkbox" onclick="show(this)"/>图层控制
+		<input id="filterButton" type="button" onclick="geoquery()" value="几何查询"/>
+		<input id="filterButton" type="button" onclick="fireAlarm()" value="报警"/>
+		<input id="filterButton" type="button" onclick="state()" value="状态"/>
+		<div id="map" style="width:100%;height:100%;border: 1px solid black;"></div>
+	</body>
+</html>

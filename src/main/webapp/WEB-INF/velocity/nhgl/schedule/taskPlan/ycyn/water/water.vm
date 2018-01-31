@@ -1,0 +1,114 @@
+<style type="text/css">
+.fixed-width-auto {
+  width: 1200px;
+  margin: 0 auto;
+  //border:1px solid blue;
+}
+.module-a {
+  ##background: red;
+  //border:1px solid red;
+  overflow:auto;
+}
+
+.module-b {
+  ##background: black;
+  //padding-left:110px;
+  //border:1px solid black;
+}
+.chooseBox{
+	width:100%;
+	height:300px;
+	border:#cccccc 1px solid;
+	overflow:auto;
+}
+.chooseUl li{
+	height:22px;
+	line-height:22px;
+	cursor:pointer;
+	padding-left:6px;
+	margin-bottom:1px;
+	width:240px;
+}
+.choosePick{
+	background:#6ebffe;
+	color:#FFF;
+}
+.t_c{
+	text-align:center;  
+} 
+.mt_10{ margin-top:10px;}
+ul{ margin:0; padding:0;} 
+</style>
+##bread_crumbs("NHGL_YCYNJCSZ")
+<form class="ui-form fn-left" id="deviceRuntime_edit_form" action="$!{rc.contextPath}/nhgl/basic/taskSet/water/edit" method="post">
+	      <input type="hidden" name="task.jobId" value="$!task.jobId">
+		  <input type="hidden" name="task.taskVesting" value="3">
+	      <input type="hidden" name="task.id" value="$!task.id">
+	      <input type="hidden" name="task.taskCode" value="$!task.taskCode">
+	      <input type="hidden" name="task.executionPlan.id" value="$!task.executionPlan.id">
+	      <input type="hidden" name="task.deviceIdListStr" value="$!task.deviceIdListStr" id="deviceIdListStr">
+          <!--div class="fn-right"> 
+			  <button type="button" class="btn btn-primary" onclick="readyForSave(this)"><i class="iconfont icon-save"></i>保存</button>
+              <button type="button" class="btn"><i class="iconfont icon-reply"></i>取消</button>
+		  </div-->
+			<div class="module-b">
+				<div id="tab-container1" class='ui-tab'>
+    	         <ul class='ui-tab-items'>
+    	           <li class='ui-tab-item'><a href="#tab11">基本信息</a></li>
+    	           <li class='ui-tab-item'><a href="#tab12">执行时间</a></li>
+    	           <li class='ui-tab-item'><a href="#tab13">监控对象</a></li>
+    	           <li class='ui-tab-item'><a href="#tab14">评价标准</a></li>
+    	         </ul>
+    	         <div class='ui-tab-panels'  style="overflow:visible;">
+    		          <div id="tab11" class='ui-tab-panel'>
+    						#parse("nhgl/schedule/taskPlan/ycyn/water/include/basic_info.vm")
+    		          </div>
+    		          <div id="tab12" class='ui-tab-panel'>
+    						#parse("nhgl/schedule/taskPlan/ycyn/water/include/excute_time.vm")
+    		          </div>
+    		          <div id="tab13" class='ui-tab-panel'>
+    		          		#parse("nhgl/schedule/taskPlan/ycyn/water/include/monitor_object.vm")
+    		          </div>
+    		          <div id="tab14" class='ui-tab-panel'>
+    		          		#parse("nhgl/schedule/taskPlan/ycyn/water/include/judgment.vm")
+    		          </div>
+    	          </div>
+    	         </div>
+            </div>
+
+</form>
+<script type="text/javascript">
+	 $(document).ready(function(){
+		
+		//$('#tab-container1').tabs({height:450});
+		$('#tab-container1').tabs();
+		
+	 });//ready
+    $(document).ready(function(){
+	});
+ function before(){
+	//获取类别属性信息
+	var subIds = new Array();
+	var sorts = new Array();
+	$.each($("ul[name='all_sub'] li[subId]:visible"), function(i,val){  
+		subIds.push($(val).attr("subId"));
+		sorts.push(i);
+	}); 
+	$("#propertyIds").val(subIds);
+	$("#propertySorts").val(sorts);
+ }
+	function readyForSave(btn){
+	    if(!validateExecuteTimeTab()){
+		 return false;
+		}
+		if(getSelectedDevice()==''){
+		  alert('请选择监控设备。');
+		  return false;
+		}
+		$('#deviceIdListStr').val(getSelectedDevice());
+	    genarateExpression();
+		/*$.forms.submits("#deviceRuntime_edit_form",function(){
+			alert('保存成功');
+		},btn);*/
+	} 
+</script>

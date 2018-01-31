@@ -1,0 +1,156 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<div class="ui-layout-center" id="subMain">
+	<div class="ui-layout-north">
+		 <form class="ui-form" id='queryForm'>
+			
+	     <table width="100%">
+	       <tr>
+	         <td>
+	           <table class="ui-search-table">
+	             <tr>
+	               <td class="ui-search-name first">设备编码：</td>
+	               <td class="ui-search-c">
+	                 <input  name="deviceCode" value="$!deviceChange.deviceCode" maxlength="32" class="k-textbox" type="text">
+	               </td>
+	              
+	               <td class="ui-search-name">设备名称：</td>
+	               <td class="ui-search-c">
+	                 <input  name="deviceName" value="$!deviceChange.deviceName" maxlength="50" class="k-textbox" type="text">
+	               </td>
+	               
+	               <td class="ui-search-name">变更时间：</td>
+	               <td class="ui-search-c">
+	                <input id="startTime" style="width: 200px" name="changeDateFrom" value="" />
+	 			   <span class="ui-form-text">至</span>
+	 			    <input id="endTime" style="width: 200px" name="changeDateTo" value=""/>
+	               </td>
+	             </tr>
+	           </table>
+	         </td>
+	         <td width="150" valign="top" style="padding-top:4px;">
+	           <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+	           <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+	         </td>
+	         <td></td>
+	       </tr>
+	     </table>
+	 	</form>
+	</div>
+	<div class="ui-layout-center">
+	  <div id="grid"></div> 
+     </div>
+</div>
+#parse("index/_footer.vm") 
+
+<script type="text/javascript">
+     var _iframe_layout,_inner_layout;
+	$(document).ready(function(){
+		_iframe_layout = $('body').layout({
+		      defaults: {
+		        resizable: false,
+		        closable: false,
+		        spacing_open: 5
+		      }
+		    });
+		 _inner_layout = $("#subMain").layout({
+		      defaults: {
+		        resizable: false,
+		        closable: false,
+		        spacing_open: 0
+		      },
+		      center: {
+		          onresize_end: function () {
+		              var grid = $("#grid").data("kendoGrid");
+		              grid.resize();
+		          }
+		      }
+     });
+		 
+    $('#resetBtn').click(function(){
+      clearDate("startTime", "endTime");
+      $("#queryForm :text").val('');  
+    });
+   // commonDate("startTime","endTime","yyyy-MM-dd HH:mm:ss","zh-CN");
+
+    commonDate("startTime","endTime","yyyy-MM-dd HH:mm:ss","zh-CN");
+    
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/device/deviceChange/page", [{
+              field: "id",
+              hidden: true
+          }, {
+              field: "deviceCode",
+              title: "设备编码",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              template:"<a href=\"javascript:view('#:data.deviceId #')\" title=\"查看#: data.deviceCode #的详细信息\" >#: data.deviceCode #</a>"
+          }, {
+              field: "deviceName",
+              title: "设备名称",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+		  	  #*attributes: {"class": "k-grid-text"},*#
+          	  attributes: {     
+  		  		title:"#: data.deviceName==null? '':data.deviceName #",
+  				"class": "k-grid-text k-grid-nowrap"
+		  	  }
+          }, {
+              field: "categoryName",
+              title: "设备类别",
+              sortable: false,
+             
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "changeProperty",
+              sortable: false,
+              title: "变更属性",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "oldValue",
+              title: "原值",
+              sortable: false,
+             
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "newValue",
+              sortable: false,
+              title: "新值",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "createDate",
+              sortable: false,
+              title: "变更时间",
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"}
+          }
+          
+          ], 
+          {
+              sortable: {
+                  mode: "multiple",
+                  allowUnsort: true
+              },resizable:true
+          }, {
+              serverSorting: true
+          }, [
+          #kendo_datagrid_btns("SBBG")#end
+          ]
+    		);
+    
+
+    });
+	
+	function view(id){
+    	window.location.href="$!{rc.contextPath}/device/deviceChange/edit?showFlag=1&id="+id;
+    }  
+	 
+</script>
+</body>
+</html>

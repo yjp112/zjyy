@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.meeting.entities.AccessRecord">
+	<resultMap type="com.supconit.meeting.entities.AccessRecord" id="accessRecordResultMap">
+		<result property="id" column="ID"/>
+        <result property="deviceId" column="DEVICE_ID"/>
+        <result property="cardNo" column="CARD_NO"/>
+        <result property="personId" column="PERSON_ID"/>
+        <result property="personName" column="PERSON_NAME"/>
+        <result property="eventTime" column="EVENT_TIME"/>
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">ACCESS_RECORD</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	<sql id="select_pre" lang="velocity">
+		SELECT
+			a.ID,
+			a.DEVICE_ID,
+			a.CARD_NO,
+	        a.PERSON_ID,
+	        a.PERSON_NAME,
+	        a.EVENT_TIME
+		FROM <include refid="TABLE_NAME"/> a
+	</sql>
+	
+	<sql id="count_pre" lang="velocity">SELECT COUNT(*) FROM <include refid="TABLE_NAME"/> a </sql>
+	
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			#if($_p.deviceId)
+				#set($_deviceId = $_p.deviceId)
+				AND DEVICE_ID = @{_deviceId}
+			#end
+			#if($_p.personId)
+				#set($_personId = $_p.personId)
+				AND PERSON_ID = @{_personId}
+			#end
+			#if($_p.startTimes && $_p.endTimes)
+				#set($_startTimes = $_p.startTimes)
+				#set($_endTimes = $_p.endTimes)
+				AND a.EVENT_TIME >= @{_startTimes,jdbcType=TIMESTAMP}
+				AND a.EVENT_TIME <= @{_endTimes,jdbcType=TIMESTAMP}
+			#end
+		#end
+		]]>	
+    </sql>
+	
+    
+	
+	<!-- 按条件查询记录-->
+    <select id="findRecordByTime" parameterType="com.supconit.meeting.entities.AccessRecord" resultMap="accessRecordResultMap" lang="velocity" databaseId="oracle">
+		<include refid="select_pre"/>
+		<include refid="condition_sql"/>
+		#order($_parameter.condition,"a.EVENT_TIME")
+    </select>
+    
+    <select id="getById" resultMap="accessRecordResultMap" parameterType="long" lang="velocity">
+		<include refid="select_pre"/>
+		WHERE a.ID = @{_parameter, jdbcType=NUMERIC}
+	</select>
+	
+	
+</mapper>

@@ -1,0 +1,213 @@
+  <style>
+  body #centerMain {
+	overflow: hidden !important;
+	}
+  </style>
+<script type="text/javascript" src="$!{nhgl_static_custom_url}/js/tabs.min.js"> </script>
+
+<SCRIPT type="text/javascript">
+$(document).ready(function(){
+		fNumPage();
+    	showProgress("span_area");
+    	showProgress("span_area_list",38);
+    	$('#tab-containers').tabs();
+	   	$('#qy_accordion_area').accordion({
+            "handle": ".handle",
+            "panel": ".panel"
+       	});
+		var standardCode = '$!{fxCode}';
+		if(standardCode != ''){
+    		$("a[name='sub']").each(function(){
+        		$(this).removeClass();
+        	});
+			$("#code"+standardCode).attr("class","current");
+		}
+		var d = new Date();
+		var nowYear = d.getFullYear();
+		if(nowYear == $!year)
+			$("#noNowYear").css("display","none");
+		else
+			$("#noNowYear").css("display","block");
+		var areaId='$!areaId';
+		if(areaId!=''){
+			if($("#qy_accordion_area #"+areaId).parent().is(".accordion")){
+				$("#qy_accordion_area #"+areaId+" .accordion-opener").click();
+			}else{
+				$("#qy_accordion_area #"+areaId).parent().parent("li").addClass("current");
+				$("#qy_accordion_area #"+areaId).parent().removeAttr("style");
+				$("#qy_accordion_area #"+areaId).parent().addClass("open");
+				$("#qy_accordion_area #"+areaId+" a").click();
+				$("#qy_accordion_area #"+areaId).addClass("current");
+				
+			}
+		}
+		
+		$("ul.panel li").click(function(){
+			$(".panel li").removeClass("current");
+			$(this).addClass("current");
+		});			
+		if(areaId==''){
+			$("#tabBlock").load('$!{rc.contextPath}/nhgl/analyse/water/area/subYear?year='+$!year+'&fxCode='+standardCode+'&eleTotal='+'$!nhMonth.totalMonthValue');
+		}
+    });
+</SCRIPT>
+
+<div class="nh-header">
+	<span class="nh-tab-name">水</span>
+	<span class="nh-menu-name">#crumbs("$!menu.code",1)</span>
+	<div class="nh-count">
+    		<div class="count-item count-item-rise" id="rudD">
+			<div class="item-data">
+				<span class="data-num fInt" id="dayTimeTotal">$!nhMonth.monthDaytimeValue</span>
+				<span>同比去年</span>
+					<span class="data-trend" id="percentD">增长$!nhMonth.percentD%</span>
+			</div>
+			<div class="item-ratio">
+				<div class="item-ratio-i"></div>
+			</div>
+			<div class="item-info">
+				<span class="info-date" id="sTime1"></span>
+				<span class="info-name" id="areaName1">所有区域 白天总用水量</span>
+			</div>
+		</div>
+    		<div class="count-item count-item-rise" id="rudN">
+			<div class="item-data">
+				<span class="data-num fInt" id="nightTotal">$!nhMonth.monthNightValue</span>
+				<span>同比去年</span>
+					<span class="data-trend" id="percentN">增长$!nhMonth.percentN%</span>
+			</div>
+			<div class="item-ratio">
+				<div class="item-ratio-i"></div>
+			</div>
+			<div class="item-info">
+				<span class="info-date" id="sTime2"></span>
+				<span class="info-name" id="areaName2">所有区域 夜间总用水量</span>
+			</div>
+		</div>
+	</div>	
+</div>	
+<div id="tab-containers" class="nh-box ui-tab ui-tab-h">
+	<input id="areaId" type="hidden"/>
+	<input id="subId" type="hidden"/>
+	<input id="isp" type="hidden"/>
+	<input id="fullLevelName" type="hidden"/>
+	<input id="year" value="$!{year}" type="hidden"/>
+	<input id="start" type="hidden"/>
+	<input id="flag" type="hidden" value="2"/>
+	<input id="fxCode" value="$!{fxCode}" type="hidden"/>
+	<ul class='ui-tab-items ui-tab-items-h'>
+       <li class='ui-tab-item'><a href="#tabArea"><span class="ui-tab-area"></span>区域</a></li>
+	</ul>
+	<div  class="ui-tab-panels" style="overflow:auto">
+		<div id="tabArea" class="ui-tab-panel">
+        	<ul id="qy_accordion_area" class="accordion">
+        		#foreach($me in $list)
+        			#if($me.parentId == $rootId)
+        				<li name="subli" id="$me.areaId" isp="1">
+        					#if($me.tb==1)
+        						<h3 class="handle handle-rise" onclick="toTab('$!me.areaName','$!me.areaId','1','$!me.total','$!me.waterTotalBefore','$!me.percent')">
+        					#elseif($me.tb==0)
+        						<h3 class="handle handle-unchanged" onclick="toTab('$!me.areaName','$!me.areaId','1','$!me.total','$!me.waterTotalBefore','$!me.percent')">
+        					#else
+        						<h3 class="handle handle-decline" onclick="toTab('$!me.areaName','$!me.areaId','1','$!me.total','$!me.waterTotalBefore','$!me.percent')">
+        					#end
+        					    <span class="handle-name" name="nameCss" title="$!me.areaName">$!me.areaName</span>
+        						<span class="handle-num fInt">$!me.total</span>
+        						<span class="handle-bar" name="span_area" num="$!me.total"></span>
+        					</h3>
+        					<ul class="panel">
+        						#foreach($cm in $list)
+        							#if($!me.areaId == $!cm.parentId)
+        								#if($cm.tb==1)
+        									<li name="subli" isp="" id="$cm.areaId" onclick="toTab('$!cm.areaName','$!cm.areaId','','$!cm.total','$!cm.waterTotalBefore','$!cm.percent')" class="pitem-rise">
+        								#elseif($cm.tb==0)
+        									<li name="subli" isp="" id="$cm.areaId" onclick="toTab('$!cm.areaName','$!cm.areaId','','$!cm.total','$!cm.waterTotalBefore','$!cm.percent')" class="pitem-unchanged">
+        								#else
+        									<li name="subli" isp="" id="$cm.areaId" onclick="toTab('$!cm.areaName','$!cm.areaId','','$!cm.total','$!cm.waterTotalBefore','$!cm.percent')" class="pitem-decline">
+        								#end
+        									<a class="pitem-link" href="javascript:;">
+        										<span class="pitem-name" name="nameCss" title="$!cm.areaName">$!cm.areaName</span>
+                        						<span class="pitem-num fInt">$!cm.total</span>
+                        						<span class="pitem-bar" name="span_area_list" num="$!cm.total"></span>
+        									</a>
+        								</li>
+        							#end
+        						#end
+        					</ul>
+        				</li>
+        			#end
+        		#end
+        	</ul>
+		</div>
+	</div>
+</div>
+<div class="nh-content">
+	<div class="nh-nd">
+		<div id="dateTime" class="nh-nd-date">
+			<label>年度： </label>
+			<ul class="nh-option">
+				<li><a name = "time" id="$!{nextyear}" href="javascript:linkTo('$!{nextyear}')">$!{nextyear}年</a></li>
+				<li><a name = "time" id="$!{year}" href="javascript:linkTo('$!{year}')" class="current">$!{year}年</a></li>
+				<li><a name = "time" id="noNowYear" href="javascript:linkTo('')">今年</a></li>
+			</ul>
+		</div>
+		<div class="nh-nd-entry">
+			<label>分项能耗：</label>
+			<ul class="nh-option">
+				<li><a href="#" name="sub" id="" class="current" onclick="subTime('')">全部</a></li>
+				##这里使用循环遍历出分项
+				#foreach($s in $slist)
+					#if($s.parentCode == '0')
+						<li><a href="#" name="sub" id="code$!{s.standardCode}" onclick="subTime('$!{s.standardCode}')">$s.name</a></li>
+					#end
+				#end
+			</ul>
+		</div>
+	</div>
+	<div id="tabBlock" class="nh-ct">
+	</div>
+</div>
+
+<script type="text/javascript">
+	var code='$!code';
+	if(code!='fzjc'){
+		T.nhInit();
+	}
+	//重新load右边的tab
+	function toTab(fullLevelName,areaId,isp,eleTotal,lastEleTotal,percent)
+	{	
+		$("#areaId").val(areaId);
+		$("#start").attr("value","");
+		var subCode="";
+		$("a[name='sub']").each(function(){
+    		var aStyle = $(this).attr("class");
+    		//如果样式为current，则表示被选中
+    		if(aStyle == "current")
+    			subCode = $(this).attr("id");
+		});
+		subCode = subCode.substring(4,subCode.length);
+		var year = $("#year").val();
+		var fName = fullLevelName;
+		if(fullLevelName.length>8)
+    		fullLevelName = fullLevelName.substring(0,8)+"...";
+    	$("#areaName1").text(fullLevelName+" 白天总用水量");
+    	$("#areaName2").text(fullLevelName+" 夜间总用水量");
+		$("#fullLevelName").attr("value",fName);
+		$("#tabBlock").load('$!{rc.contextPath}/nhgl/analyse/water/area/subYear?year='+year+'&fullLevelName='+encodeURIComponent(fName)+'&areaId='+areaId+'&isp='+isp+'&fxCode='+subCode);
+	}
+	function linkTo(year)
+	{
+		var areaId=$("#areaId").val();
+		$("#year").attr("value",year);
+		var name = $("#fullLevelName").val();
+		var menuCode = '$!menu.code'
+		$("#chart_content_id").load('$!{rc.contextPath}/nhgl/analyse/water/area/index?yearParam='+year+'&areaId='+areaId+'&menuCode='+encodeURIComponent(menuCode)+'&code='+encodeURIComponent(code));
+	}
+	function subTime(standardCode){
+		var areaId=$("#areaId").val();
+		var name = $("#fullLevelName").val();
+		var year = $("#year").val();
+		var menuCode = '$!menu.code'
+		$("#chart_content_id").load('$!{rc.contextPath}/nhgl/analyse/water/area/index?yearParam='+year+'&areaId='+areaId+'&fxCode='+standardCode+'&menuCode='+encodeURIComponent(menuCode)+'&code='+encodeURIComponent(code));
+	}
+</script>

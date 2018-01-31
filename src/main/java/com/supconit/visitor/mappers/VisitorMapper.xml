@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.visitor.entities.Visitor">
+	<resultMap type="com.supconit.visitor.entities.Visitor" id="visitorResultMap">
+		<result property="id" column="ID"/>
+        <result property="reservationId" column="RESERVATION_ID"/>
+        <result property="visitorName" column="NAME"/>
+        <result property="visitorUnit" column="COMPANY"/>
+        <result property="visitorCardType" column="ZJLX"/>
+        <result property="visitorCardNum" column="ZJHM"/>
+        <result property="visitorPhone" column="PHONE_NO"/>
+        <result property="visitorCardNo" column="VISITOR_CARD_NO"/>	
+        <result property="visitorReturnCard" column="RETURNED"/>
+        <result property="grantTime" column="GRANT_TIME"/>
+        <result property="returnTime" column="RETURN_TIME"/>	
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">VISITOR</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	<sql id="select_pre" lang="velocity">
+		SELECT
+			a.ID,
+			a.RESERVATION_ID,
+			a.NAME,
+	        a.COMPANY,
+	        a.ZJLX,
+	        a.ZJHM,
+	        a.PHONE_NO,
+	        a.VISITOR_CARD_NO,
+	        a.RETURNED,
+	        a.GRANT_TIME,
+	        a.RETURN_TIME
+		FROM <include refid="TABLE_NAME"/> a
+	</sql>
+	
+	<sql id="count_pre" lang="velocity">
+		SELECT
+			COUNT(a.ID)
+		FROM <include refid="TABLE_NAME"/> a
+	</sql>
+	
+	<sql id="condition_sql" lang="velocity">
+        <![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			#if($_p.reservationId && $_p.reservationId != '')
+				#set($_reservationId = '%' + $_p.reservationId + '%')
+				AND a.RESERVATION_ID LIKE @{_reservationId}
+			#end
+			#if($_p.visitorName && $_p.visitorName != '')
+				#set($_visitorName = '%' + $_p.visitorName + '%')
+				AND a.NAME LIKE @{_visitorName}
+			#end
+			#if($_p.visitorUnit)
+				#set($_visitorUnit = $_p.visitorUnit)
+				AND a.COMPANY = @{_visitorUnit}
+			#end
+			#if($_p.visitorCardType)
+				#set($_visitorCardType = $_p.visitorCardType)
+				AND a.ZJLX = @{_visitorCardType}
+			#end
+			#if($_p.visitorPhone)
+				#set($_visitorPhone = $_p.visitorPhone)
+				AND a.PHONE_NO = @{_visitorPhone}
+			#end
+			#if($_p.visitorReturnCard)
+				#set($_visitorReturnCard = $_p.visitorReturnCard)
+				AND a.RETURNED = @{_visitorReturnCard}
+			#end
+		#end
+		]]>
+    </sql>
+	
+    <!-- 插入记录-->
+    <sql id="insert_sql" lang="velocity">
+        INSERT INTO VISITOR(
+        	#if($_databaseId == 'oracle') ID, #end
+	        RESERVATION_ID,
+	        NAME,
+	        COMPANY,
+	        ZJLX,
+	        ZJHM,
+	        PHONE_NO,
+	        VISITOR_CARD_NO,
+	        RETURNED,
+	        GRANT_TIME,
+	        RETURN_TIME
+        ) VALUES (
+        	#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end
+	        @{_parameter.reservationId,jdbcType=BIGINT},
+	        @{_parameter.visitorName,jdbcType=VARCHAR},
+	        @{_parameter.visitorUnit,jdbcType=VARCHAR},
+	        @{_parameter.visitorCardType,jdbcType=BIGINT},
+	        @{_parameter.visitorCardNum,jdbcType=VARCHAR},
+	        @{_parameter.visitorPhone,jdbcType=VARCHAR},
+	        @{_parameter.visitorCardNo,jdbcType=VARCHAR},
+	        @{_parameter.visitorReturnCard,jdbcType=VARCHAR},
+	        @{_parameter.grantTime,jdbcType=TIMESTAMP},
+	        @{_parameter.returnTime,jdbcType=TIMESTAMP}
+        )
+    </sql>
+    
+    <insert id="insert" parameterType="com.supconit.visitor.entities.Visitor" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="insert_sql" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.visitor.entities.Visitor" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    
+	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.visitor.entities.Visitor" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+			#mset()
+				<![CDATA[
+			        #if($_parameter.reservationId)RESERVATION_ID = @{_parameter.reservationId,jdbcType=BIGINT},#end
+			        #if($_parameter.visitorName)NAME = @{_parameter.visitorName,jdbcType=VARCHAR},#end
+			        #if($_parameter.visitorUnit)COMPANY = @{_parameter.visitorUnit,jdbcType=VARCHAR},#end
+			        #if($_parameter.visitorCardType && $_parameter.visitorCardType !=0)ZJLX = @{_parameter.visitorCardType,jdbcType=BIGINT},#end
+			        #if($_parameter.visitorCardNum && $_parameter.visitorCardNum !='')ZJHM = @{_parameter.visitorCardNum,jdbcType=VARCHAR},#end
+			        #if($_parameter.visitorPhone)PHONE_NO = @{_parameter.visitorPhone,jdbcType=VARCHAR},#end
+			        #if($_parameter.visitorCardNo)VISITOR_CARD_NO = @{_parameter.visitorCardNo,jdbcType=VARCHAR},#end
+			        #if($_parameter.visitorReturnCard && $_parameter.visitorReturnCard !='')RETURNED = @{_parameter.visitorReturnCard,jdbcType=BIGINT},#end
+			        #if($_parameter.grantTime)GRANT_TIME = @{_parameter.grantTime,jdbcType=TIMESTAMP},#end
+			        #if($_parameter.returnTime)RETURN_TIME = @{_parameter.returnTime,jdbcType=TIMESTAMP},#end
+			    ]]>
+			#end
+		WHERE ID = @{_parameter.id,jdbcType=BIGINT}
+	</update>
+	
+    <!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.visitor.entities.Visitor" resultMap="visitorResultMap" lang="velocity" databaseId="oracle">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre"/>
+		<include refid="condition_sql"/>
+		#order($_parameter.condition,"a.ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+	<!-- 按条件查询记录-->
+    <select id="findByConditions" parameterType="com.supconit.visitor.entities.Visitor" resultMap="visitorResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			a.ID,
+			a.RESERVATION_ID,
+			a.NAME,
+	        a.COMPANY,
+	        a.ZJLX,
+	        a.ZJHM,
+	        a.PHONE_NO,
+	        a.VISITOR_CARD_NO,
+	        a.RETURNED,
+	        a.GRANT_TIME,
+	        a.RETURN_TIME
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"a.ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/> a
+		<include refid="condition_sql"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countByConditions" resultType="long" lang="velocity">
+        <include refid="count_pre"/>
+        <include refid="condition_sql"/>
+    </select>
+    
+    <select id="findByCardNo" resultMap="visitorResultMap" parameterType="String" lang="velocity">
+    		<include refid="select_pre" />   
+    		where (a.returned is null or a.returned !=1) 
+		    and a.visitor_card_no=@{_parameter.cardNo, jdbcType=VARCHAR}
+		    order by id desc 
+    </select>
+    <select id="getById" resultMap="visitorResultMap" parameterType="Long" lang="velocity">
+		<include refid="select_pre" />        
+        WHERE a.ID = @{_parameter.id, jdbcType=BIGINT}
+	</select>
+	
+    <select id="findByReservationId" resultMap="visitorResultMap" parameterType="Long" lang="velocity">
+		<include refid="select_pre" />        
+        WHERE a.NAME IS NOT NULL and a.RESERVATION_ID = @{_parameter.reservationId, jdbcType=BIGINT}
+	</select>
+	
+	<delete id="deleteByVisitorId" parameterType="long" lang="velocity">
+        DELETE FROM VISITOR WHERE RESERVATION_ID = @{_parameter.visitorId, jdbcType=BIGINT}
+    </delete>
+    
+    <select id="autoCompletePersonList" resultMap="visitorResultMap" parameterType="string" databaseId="oracle">
+		SELECT
+			distinct
+			a.NAME,
+	        a.COMPANY,
+	        a.PHONE_NO
+		FROM <include refid="TABLE_NAME"/> a        
+        WHERE a.NAME like '%'||#{visitorName}||'%'
+	</select>
+	
+	<select id="autoCompletePersonList" resultMap="visitorResultMap" parameterType="string" databaseId="sqlserver">
+		SELECT
+			distinct
+			a.NAME,
+	        a.COMPANY
+		FROM <include refid="TABLE_NAME"/> a        
+        WHERE a.NAME LIKE '%'+#{visitorName}+'%'
+	</select>
+    
+</mapper>

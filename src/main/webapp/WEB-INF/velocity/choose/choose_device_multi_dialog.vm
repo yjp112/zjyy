@@ -1,0 +1,319 @@
+#parse("index/_header.vm")
+<style>
+    .ztree {
+        overflow: auto;
+    }
+</style>
+</head>
+<body>
+	<div class="ui-layout-west" style="border-right:solid 1px #e1e5e6;" id="leftTreeWrap">
+    	<div class="ui-layout-center">
+				    <div id="tabstrip" class="k-header k-grid-toolbar" >
+					    <ul>
+					        <li class="k-state-active" id="li_category">系统</li>
+					        <li id="li_area">区域</li>
+					    </ul>
+						 <div id="tabstrip-1">
+							<span class="k-header k-grid-toolbar" style="padding-left:10px;padding-top:10px;">系统类别</span>
+							<ul id="tabstripTree1" class="ztree"></ul>
+				        </div>
+					    <div id="tabstrip-2">
+							<span class="k-header k-grid-toolbar" style="padding-left:10px;padding-top:10px;">地理区域</span>
+							<ul id="tabstripTree2" class="ztree"></ul>
+				        </div>
+				    </div >
+		</div>
+	</div>
+  
+	<div class="ui-layout-center" id="subMain">
+    	<div class="ui-layout-north">
+			<form class="ui-form" id='pagerForm'>	
+					<input id="treeId1" type="hidden" name="categoryId">
+					<input id="treeId2" type="hidden" name="locationId">
+            	<table width="100%">
+    				<tr>
+                		<td><table class="ui-search-table">
+						<tr>
+                        	<td class="ui-search-name first">设备编码：</td>
+        					<td class="ui-search-c">
+        						<input name="deviceCode" class="k-textbox" type="text">
+        					</td>
+        					
+        					<td class="ui-search-name first">设备名称：</td>
+        					<td class="ui-search-c">
+        						<input name="deviceName" class="k-textbox" type="text">
+        					</td>
+                        </tr>
+						</table></td>
+                    	<td width="150" valign="top" style="padding-top:4px;">
+                      		<button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+                      		<button type="reset" class="hc_btn" id="resetBtn" onclick="cancelLeftTreeSelected();"><i class="fa fa-refresh"></i>重置</button>
+                    	</td>
+                    	<td></td>
+                	</tr>
+    			</table>
+    		</form>
+		</div>
+  		<div class="ui-layout-center">
+  	  		<div id="grid"></div> 
+    	</div>
+	</div>	 
+#parse("index/_footer.vm") 
+<script type="text/javascript">
+  var _iframe_layout, _left_layout, _inner_layout,containerHeight;
+	$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      },
+      west: {
+        size: 0.18
+      }
+    });
+
+    _left_layout = $("#leftTreeWrap").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+    	center: {
+    	  onresize_end:function(){
+	  		containerHeight = _left_layout.state.container.innerHeight-78;
+	  		$("#tabstripTree1").css("height",containerHeight);
+	  		$("#tabstripTree2").css("height",containerHeight);
+  		}
+      }
+    });
+
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+	$("#tabstripTree1").css("height",_left_layout.state.container.outerHeight-78);
+    $("#tabstripTree2").css("height",_left_layout.state.container.outerHeight-78);
+	
+	$('#li_category').click(function(){
+		$("#treeId2").val('');
+		$.fn.zTree.init($("#tabstripTree2"), setting2,zNodes2);
+		$('#queryBtn').click();
+	});
+	
+    $('#li_area').click(function(){
+		$("#treeId1").val('');
+		$.fn.zTree.init($("#tabstripTree1"), setting1,zNodes1);
+		$('#queryBtn').click();
+	});
+	
+    $('#resetBtn').click(function(){
+		$("#treeId1").val('');
+		$("#treeId2").val('');
+		$("#pagerForm :text").val('');  
+    }); 
+	
+	//列表
+    quick_datagrid(
+    		"#grid", 
+    		"#pagerForm", 
+    		"$!{rc.contextPath}/choose/device?t=" + new Date().getTime(),
+    		[
+    			{field: "id",hidden: true}, 
+    			{field: "deviceCode",title: "设备编码",headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"},sortable: false,width: 100},
+              	{field: "deviceName",title: "设备名称",headerAttributes: {"class": "k-grid-equilong"},attributes: {"class": "k-grid-equilong"},sortable: false,width: 200}, 
+              	{field: "deviceSpec",title: "规格型号",headerAttributes: {"class": "k-grid-num"},attributes: {"class": "k-grid-num"},sortable: false,width: 100}, 
+              	{field: "locationName",title: "安装位置",headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"},sortable: false,width: 200}, 
+            ],                 
+      		{sortable: {mode: "multiple",allowUnsort: true},selectable:"multiple, row"}, 
+      		{serverSorting: true}, 
+      		[
+      			{
+              		name: "选择",
+              		icon: "fa fa-plus",
+              		onclick: function (obj, grid) {
+              			var rows = grid.select();
+            	        if (null == rows || rows.length == 0) {
+            	            notify("你还没有选择!", "warn");
+            	            return;
+            	        }
+						var id = $!{id};
+						var len = rows.length; 
+						var $tr_tmp = get_el_in_dialog("$!{dialogId}","#deviceGrid").find("tr:gt("+(-id)+")");
+						var html_tmp = "";
+						var id_tmp = -id;
+						var planTimeIds = new Array();
+						var planTimeVals = new Array();
+						$($tr_tmp).each(function(){
+							id_tmp +=1;
+							var next = Number(id_tmp)+(len-1);
+							planTimeIds.push(next);
+							var planInput="<input type='text' id='planTime_id-"+next+"' name='deviceList["+next+"].startTime' class='planTime'/>";
+							var $copy = $(this).clone();
+							planTimeVals.push($($copy).find("#planTime_id-"+id_tmp).val());
+                			$($copy).find(".planTimeTd").empty();
+                			$($copy).find(".planTimeTd").append(planInput);
+    						var exp = new RegExp("\\["+id_tmp+"\\]","g");
+                            var exps = new RegExp("-"+id_tmp,"g");
+                            var html = "<tr>"+$($copy).html().replace(exp,"["+next+"]")+"</tr>";
+                            html = html.replace(">"+id_tmp+"<",">"+next+"<").replace(exps,"-"+next);
+							get_el_in_dialog("$!{dialogId}","#deviceGrid").find("tr:gt("+(-id)+")");
+							
+                            get_el_in_dialog("$!{dialogId}","#deviceNumber").val(next);
+							html_tmp += html;
+						});
+						get_el_in_dialog("$!{dialogId}","#deviceGrid").find("tr:gt("+(-id)+")").remove();
+						get_el_in_dialog("$!{dialogId}","#deviceNumber").val(-id);
+						for(var i =0;i<len;i++){
+							var data = grid.dataItem(rows[i]);
+    						var number = get_el_in_dialog("$!{dialogId}","#deviceNumber").val();
+    						if(!number){
+    							get_el_in_dialog("$!{dialogId}","#deviceNumber").val(1);
+    						}
+							if(i != 0){
+								id = Number(id)-1;
+                        		var num = get_el_in_dialog("$!{dialogId}","#deviceNumber").val();
+                        		if(num==0)num=1;
+                        		var next = Number(num)+1;
+                        		var $tr = get_el_in_dialog("$!{dialogId}","#deviceGrid").find("tr:last");
+								var planInput="<input type='text' id='planTime_id-"+next+"' name='deviceList["+next+"].startTime' class='planTime'/>";
+								var $copy = $($tr).clone();
+                    			$($copy).find(".planTimeTd").empty();
+                    			$($copy).find(".planTimeTd").append(planInput);
+                        		var exp = new RegExp("\\["+num+"\\]","g");
+                        		var exps = new RegExp("-"+num,"g");
+                        		var html = "<tr>"+$($copy).html().replace(exp,"["+next+"]")+"</tr>";
+                        		html = html.replace(">"+num+"<",">"+next+"<").replace(exps,"-"+next);
+                        		get_el_in_dialog("$!{dialogId}","#deviceNumber").val(next);
+                        		$($tr).after(html);
+                        		
+								bindDateTime(next,"yyyy-MM-dd HH:mm:ss","zh-CN");
+								
+                        		get_el_in_dialog("$!{dialogId}","#deviceId_id"+id).val("");
+            					get_el_in_dialog("$!{dialogId}","#deviceCode_id"+id).val("");
+            					get_el_in_dialog("$!{dialogId}","#deviceName_id"+id).val("");
+            					get_el_in_dialog("$!{dialogId}","#deviceSpec_id"+id).val("");
+            					get_el_in_dialog("$!{dialogId}","#locationName_id"+id).val("");
+            					get_el_in_dialog("$!{dialogId}","#useDepartmentName_id"+id).val("");
+            					get_el_in_dialog("$!{dialogId}","#planTime_id"+id).val("");
+							}
+    						get_el_in_dialog("$!{dialogId}","#deviceId_id"+id).val(data.id);
+							
+    						get_el_in_dialog("$!{dialogId}","#deviceCode_id"+id).attr("type","hidden");
+    						get_el_in_dialog("$!{dialogId}","#deviceCode_id"+id).val(data.deviceCode);
+							get_el_in_dialog("$!{dialogId}","#deviceCode_id"+id).attr("type","text");
+							
+    						get_el_in_dialog("$!{dialogId}","#deviceName_id"+id).attr("type","hidden");
+    						get_el_in_dialog("$!{dialogId}","#deviceName_id"+id).val(data.deviceName);
+    						get_el_in_dialog("$!{dialogId}","#deviceName_id"+id).attr("type","text");
+							
+    						get_el_in_dialog("$!{dialogId}","#deviceSpec_id"+id).attr("type","hidden");
+    						get_el_in_dialog("$!{dialogId}","#deviceSpec_id"+id).val(data.deviceSpec);
+    						get_el_in_dialog("$!{dialogId}","#deviceSpec_id"+id).attr("type","text");
+							
+    						get_el_in_dialog("$!{dialogId}","#locationName_id"+id).attr("type","hidden");
+    						get_el_in_dialog("$!{dialogId}","#locationName_id"+id).val(data.locationName);
+    						get_el_in_dialog("$!{dialogId}","#locationName_id"+id).attr("type","text");
+							
+    						get_el_in_dialog("$!{dialogId}","#useDepartmentName_id"+id).attr("type","hidden");
+    						get_el_in_dialog("$!{dialogId}","#useDepartmentName_id"+id).val(data.useDepartmentName);
+    						get_el_in_dialog("$!{dialogId}","#useDepartmentName_id"+id).attr("type","text");
+							
+						}
+						if(html_tmp){
+							var $tr = get_el_in_dialog("$!{dialogId}","#deviceGrid").find("tr:last");
+							$($tr).after(html_tmp);
+							for(var i=0;i<planTimeIds.length;i++){
+								bindDateTime(planTimeIds[i],"yyyy-MM-dd HH:mm:ss","zh-CN");
+								get_el_in_dialog("$!{dialogId}","#planTime_id-"+planTimeIds[i]).val(planTimeVals[i]);
+							}
+						}
+            	        resetfocus(get_el_in_dialog("$!{dialogId}","#deviceCode_id"+"$!{id}"));
+                	    close_dialog('selectDiloag');
+              		}
+          		}
+				
+          	]
+      	);
+	    
+        
+    });	
+	
+	 $("#tabstrip").hcTabStrip({
+	            animation: {
+	                // fade-out current tab over 1000 milliseconds
+	                close: {
+	                    duration: 100,
+	                    effects: "fadeOut"
+	                },
+	               // fade-in new tab over 500 milliseconds
+	               open: {
+	                   duration: 100,
+	                   effects: "fadeIn"
+	               }
+	           }
+	});
+	
+	/* zTree */
+    var setting1 = {
+    	data: {
+    		simpleData: {enable: true}
+          },
+          callback: {
+    			onClick: function(event, treeId, treeNode) {
+    				 $('#treeId1').val(treeNode.id);
+    			 	 $('#selectBlock').show();
+    				 $('#queryBtn').click();
+    			}
+    		}
+    };
+    var setting2 = {
+    	data: {
+    		simpleData: {enable: true}
+          },
+          callback: {
+    			onClick: function(event, treeId, treeNode) {
+    				 $('#treeId2').val(treeNode.id);
+    			 	 $('#selectBlock').show();
+    				 $('#queryBtn').click();
+    			}
+    		}
+    };
+  	var zNodes1 = [];  
+  	zNodes1.push({id:"0", pId:"-1", name:"设备类别簇", open:"true"});
+  	#foreach($!{treeNode} in $!{deviceCategoryList})
+      	zNodes1.push({id:$!{treeNode.id}, pId:$!{treeNode.parentId}, name:"$!{treeNode.categoryName}"});
+  	#end 
+  	var zNodes2 = [];  
+  	zNodes2.push({id:"0", pId:"-1", name:"地理区域簇", open:"true"});
+  	#foreach($!{treeNode} in $!{geoAreaList})
+      	zNodes2.push({id:$!{treeNode.id}, pId:$!{treeNode.parentId}, name:"$!{treeNode.areaName}"});     
+  	#end 
+  	$(document).ready(function(){
+  		$.fn.zTree.init($("#tabstripTree1"), setting1,zNodes1);
+  		$.fn.zTree.init($("#tabstripTree2"), setting2,zNodes2);
+  	});
+	
+	function cancelLeftTreeSelected(){
+		$.fn.zTree.init($("#tabstripTree1"), setting1,zNodes1);
+  		$.fn.zTree.init($("#tabstripTree2"), setting2,zNodes2);
+	}
+	
+	function bindDateTime(id,formatStr,local){
+		get_el_in_dialog("$!{dialogId}","#planTime_id-"+id).removeClass("k-textbox").hcDateTimePicker({
+    		format: formatStr, 
+    		culture: local
+    	}).attr("readonly",true);
+	}
+</script>
+</body>
+</html>		

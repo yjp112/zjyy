@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 学习可参看：http://www.mybatis.org/core/zh/index.html -->
+
+<mapper namespace="com.supconit.nhgl.alarm.device.entities.IRealAlarm">
+
+	<resultMap type="com.supconit.nhgl.alarm.device.entities.IRealAlarm" id="IRealAlarmResultMap">
+		<id property="id" column="ID" />
+		<result property="objectType" column="OBJECTTYPE" />
+		<result property="objectId" column="OBJECTID" />
+		<result property="indicatorId" column="INDICATORID" />
+		<result property="itemId" column="ITEMID" />
+		<result property="tagId" column="TAGID" />
+		<result property="alarmTime" column="ALARMTIME" />
+		<result property="alarmLevel" column="ALARMLEVEL" />
+		<result property="alarmData" column="ALARMDATA" />
+		<result property="alarmState" column="ALARMSTATE" />
+		<result property="changeTime" column="CHANGETIME" />
+		<result property="processTime" column="PROCESSTIME" />
+		<result property="alarmRemark" column="REMARK" />
+		<result property="hisAlarmId" column="HISALARMID" />
+		<result property="lastAlarmTime" column="LASTALARMTIME" />
+		<result property="attention" column="ROLEATTENTION" />
+		<result property="processPerson" column="PROCESSPERSON" />
+		<result property="processType" column="PROCESSTYPE" />
+		<result property="processState" column="PROCESSSTATE" />
+		<result property="handleTime" column="HANDLETIME" />
+		<result property="alarmRank" column="ALARMRANK" />
+		<result property="areaId" column="AREAID" />
+		
+		<result property="showAreaStr" column="AREANAME"/>
+		<result property="showAlarmObject" column="EQUNAME"/>
+		<result property="alarmType" column="ALARMTYPE"/>
+		<result property="typeId" column="TYPEID"/>
+	</resultMap>
+
+	<!-- SELECT -->
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+	
+	<sql id="select_pre"  lang="velocity" >
+		select 
+			A.ID,
+			R.AREANAME,
+			M.EQUNAME,	
+			A.OBJECTID,
+			A.REMARK,
+			A.ALARMSTATE,
+			A.ALARMTIME,
+			A.ALARMDATA,
+			A.LASTALARMTIME,
+			T.ALARMTYPE
+        from M_REALALARM A
+        left join M_MONITOROBJECT M
+        on A.OBJECTID=M.MONITORID AND A.AREAID=M.AREAID
+        LEFT JOIN M_ALARMAREA R
+        ON A.AREAID=R.ID
+        LEFT JOIN M_ALARMTYPE T
+        ON M.TYPEID=T.ID
+	</sql>
+	<sql id="count_pre"  lang="velocity">
+		select count(*) 
+		from M_REALALARM A
+        left join M_MONITOROBJECT M
+        on A.OBJECTID=M.MONITORID AND A.AREAID=M.AREAID
+        LEFT JOIN M_ALARMAREA R
+        ON A.AREAID=R.ID
+        LEFT JOIN M_ALARMTYPE T
+        ON M.TYPEID=T.ID
+	</sql>
+	<sql id="whereByConditions" lang="velocity">
+		<![CDATA[
+		#where()
+				
+				#if($_parameter.condition.startTime && $_parameter.condition.startTime != '')
+					 A.ALARMTIME>=@{_parameter.condition.startTime,jdbcType=TIMESTAMP} AND
+				#end
+				#if($_parameter.condition.endTime && $_parameter.condition.endTime != '')
+					 A.ALARMTIME<=@{_parameter.condition.endTime,jdbcType=TIMESTAMP}  AND
+				#end
+				#if($_parameter.condition.objectId && $_parameter.condition.objectId != '')
+					  A.OBJECTID = @{_parameter.condition.objectId,jdbcType=VARCHAR} AND
+				#end
+				#if($_parameter.condition.alarmState && $_parameter.condition.alarmState != 0)
+					 A.ALARMSTATE= @{_parameter.condition.alarmState,jdbcType=NUMERIC} AND
+				#end
+				#if($_parameter.condition.processState && $_parameter.condition.processState != 0)
+					 A.PROCESSSTATE= @{_parameter.condition.processState,jdbcType=NUMERIC} AND
+				#end
+				#if($_parameter.condition.objectType && $_parameter.condition.objectType != 0)
+					 A.OBJECTTYPE = @{_parameter.condition.objectType,jdbcType=NUMERIC} AND
+				#end
+				#if($_parameter.condition.areaId && $_parameter.condition.areaId != 0)
+					 A.AREAID= @{_parameter.condition.areaId,jdbcType=NUMERIC} AND
+				#end
+				#if($_parameter.condition.index && $_parameter.condition.index != 0)
+					 A.ID= @{_parameter.condition.index,jdbcType=NUMERIC} AND
+				#end
+				(#if($_parameter.condition.typeId && $_parameter.condition.typeId != 0)
+					 M.TYPEID= @{_parameter.condition.typeId,jdbcType=NUMERIC} OR
+				#end
+				#if($_parameter.condition.typeId && $_parameter.condition.typeId != 0)
+					 T.PARENTTYPE= @{_parameter.condition.typeId,jdbcType=NUMERIC} AND
+				#end
+				1=1
+				)
+				AND 1=1
+		#end
+		]]>
+	</sql>
+	
+	<select id="findByConditions" resultMap="IRealAlarmResultMap" lang="velocity" databaseId="oracle">
+	    <include refid="_PUBLIC_V.PAGER_BEFORE" />
+		<include refid="select_pre" />
+		<include refid="whereByConditions" />
+		#order($_parameter.condition,"A.ALARMSTATE ASC,A.ALARMTIME DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER" />
+	</select>
+	<select id="findByConditions" resultMap="IRealAlarmResultMap" lang="velocity" databaseId="sqlserver">
+	     <include refid="_PUBLIC_V.PAGER_BEFORE" />
+	     select 
+			A.ID,
+			R.AREANAME,
+			M.EQUNAME,	
+			A.OBJECTID,
+			A.REMARK,
+			A.ALARMSTATE,
+			A.ALARMTIME,
+			A.ALARMDATA,
+			A.LASTALARMTIME,
+			T.ALARMTYPE
+	     <include refid="_PUBLIC_V.ROW_NUMBER_OVER" />
+		  #order($_parameter.condition,"A.ALARMSTATE ASC,A.ALARMTIME DESC")
+		 <include refid="_PUBLIC_V.AS_ROW_NUM" />
+		 FROM M_REALALARM A
+        left join M_MONITOROBJECT M
+        on A.OBJECTID=M.MONITORID AND A.AREAID=M.AREAID
+        LEFT JOIN M_ALARMAREA R
+        ON A.AREAID=R.ID
+        LEFT JOIN M_ALARMTYPE T
+        ON M.TYPEID=T.ID
+		<include refid="whereByConditions" />
+		<include refid="_PUBLIC_V.PAGER_AFTER" /> 
+	</select>
+	<select id="findById" resultMap="IRealAlarmResultMap" parameterType="long" lang="velocity">
+		<include refid="select_pre" /> WHERE A.ID = @{_parameter,jdbcType=NUMERIC}
+	</select>
+
+	<select id="countByConditions" resultType="long" lang="velocity">
+		<include refid="count_pre"/>
+		<include refid="whereByConditions" />
+	</select>
+</mapper>

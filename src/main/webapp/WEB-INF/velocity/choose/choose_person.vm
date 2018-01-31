@@ -1,0 +1,342 @@
+<!--
+if($!multi)
+	//多选
+	if($!dialogId !=''){
+		//给弹出框赋值
+		if($!stype){
+    		//给列表赋值
+    	}else{
+    		//给单个框赋多个值
+    	}
+	}else{
+		//给非弹出框赋值
+		if($!stype){
+    		//给列表赋值(该功能此处不提供,参考maintain/item/device_grid.vm)
+    	}else{
+    		//给单个框赋多个值
+    	}
+	}
+else
+ 	//单选
+	if($!dialogId !=''){
+		//给弹出框赋值
+	}else{
+		//给非弹出框赋值
+	}
+end
+
+note by yuhuan
+-->
+#parse("index/_header.vm")
+</head>
+<body>
+	<div class="ui-layout-west" style="border-right:solid 1px #e1e5e6;" id="leftTreeWrap">
+    	<div class="ui-layout-north">
+    		<div class="k-header k-grid-toolbar" style="padding-left:10px;">部门信息</div>
+    	</div>
+    	<div class="ui-layout-center">
+			<div class="tree">
+				<ul id="deptTree" class="ztree"></ul>
+			</div>
+    	</div>
+	</div>
+  
+	<div class="ui-layout-center" id="subMain">
+    	<div class="ui-layout-north">
+			<form class="ui-form" id='pagerForm'>	
+				<input id="treeId" type="hidden" name="deptId" value="$!{treeId}">
+            	<table width="100%">
+    				<tr>
+                		<td><table class="ui-search-table"><tr>
+                        	<td class="ui-search-name first">人员编码：</td>
+                          	<td class="ui-search-c">
+                            	<input name="code" value="" class="k-textbox" type="text">
+                         	</td>
+                          	<td class="ui-search-name">人员姓名：</td>
+                          	<td class="ui-search-c">
+                            	<input  name="name" value="" class="k-textbox" type="text">
+                          	</td>
+                        </tr></table></td>
+                    	<td width="150" valign="top" style="padding-top:4px;">
+                      		<button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+                      		<button type="reset" class="hc_btn" id="resetBtn" onclick="cancelLeftTreeSelected();"><i class="fa fa-refresh"></i>重置</button>
+                    	</td>
+                    	<td></td>
+                	</tr>
+    			</table>
+    		</form>
+		</div>
+  		<div class="ui-layout-center">
+  	  		<div id="grid"></div> 
+    	</div>
+	</div>	 
+#parse("index/_footer.vm") 
+<script type="text/javascript">
+  var _iframe_layout, _left_layout, _inner_layout;
+	$(document).ready(function(){
+    _iframe_layout = $('body').layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 5
+      }
+    });
+    _left_layout = $('#leftTreeWrap').layout({
+        defaults: {
+            resizable: false,
+            closable: false,
+            spacing_open: 5
+          },
+          north: {
+        	  size:28
+          }
+        });
+    
+    _inner_layout = $("#subMain").layout({
+      defaults: {
+        resizable: false,
+        closable: false,
+        spacing_open: 0
+      },
+      center: {
+          onresize_end: function () {
+              var grid = $("#grid").data("kendoGrid");
+              grid.resize();
+          }
+      }
+    })
+
+    $('#resetBtn').click(function(){
+      $("#pagerForm :text").val('');  
+    }); 
+	
+	//列表
+    quick_datagrid(
+    		"#grid", 
+    		"#pagerForm", 
+    		"$!{rc.contextPath}/choose/person?t=" + new Date().getTime(),
+    		[
+    			{field: "id",hidden: true}, 
+    			{field: "code",title: "人员编码",headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"},sortable: false,width: 100},
+              	{field: "name",title: "人员姓名",headerAttributes: {"class": "k-grid-equilong"},attributes: {"class": "k-grid-equilong"},sortable: false,width: 100}, 
+              	{field: "personTelephone",title: "电话",headerAttributes: {"class": "k-grid-num"},attributes: {"class": "k-grid-num"},sortable: false,width: 100}, 
+              	{field: "deptName",title: "部门",headerAttributes: {"class": "k-grid-text"},attributes: {"class": "k-grid-text"},sortable: false,width: 400}, 
+            ],
+			#if($!{multi})
+      		{sortable: {mode: "multiple",allowUnsort: true},selectable:"multiple, row"},
+			#else
+			{sortable: {mode: "multiple",allowUnsort: true}}, 
+			#end
+      		{serverSorting: true}, 
+      		[
+      			{
+              		name: "选择",
+              		icon: "fa fa-plus",
+              		onclick: function (obj, grid) {
+              			var rows = grid.select();
+            	        if (null == rows || rows.length == 0) {
+            	            notify("你还没有选择!", "warn");
+            	            return;
+            	        }
+						#if($!{multi})
+							if("$!{dialogId}"!=""){
+								if($!{stype}){
+									var id = $!{id};
+            						var len = rows.length; 
+            						var $tr_tmp = get_el_in_dialog("$!{dialogId}","#stock").find("tr:gt("+(-id)+")");
+            						var html_tmp = "";
+            						var id_tmp = -id;
+									var final = '';
+            						$($tr_tmp).each(function(){
+            							id_tmp +=1;
+            							var next = Number(id_tmp)+(len-1);
+                						var exp = new RegExp("\\["+id_tmp+"\\]","g");
+                                        var exps = new RegExp("-"+id_tmp,"g");
+                                        var html = "<tr>"+$(this).html().replace(exp,"["+next+"]")+"</tr>";
+                                        html = html.replace(">"+id_tmp+"<",">"+next+"<").replace(exps,"-"+next);
+            								get_el_in_dialog("$!{dialogId}","#stock").find("tr:gt("+(-id)+")");
+            							
+                                        get_el_in_dialog("$!{dialogId}","#number").val(next);
+            							html_tmp += html;
+										final = next;
+            						});
+            						get_el_in_dialog("$!{dialogId}","#stock").find("tr:gt("+(-id)+")").remove();
+            						get_el_in_dialog("$!{dialogId}","#number").val(-id);
+            						for(var i =0;i<len;i++){
+            							var data = grid.dataItem(rows[i]);
+                						var number = get_el_in_dialog("$!{dialogId}","#number").val();
+                						if(!number){
+                							get_el_in_dialog("$!{dialogId}","#number").val(1);
+                						}
+            							if(i != 0){
+            								id = Number(id)-1;
+                                    		var num = get_el_in_dialog("$!{dialogId}","#number").val();
+                                    		if(num==0)num=1;
+                                    		var next = Number(num)+1;
+                                    		var $tr = get_el_in_dialog("$!{dialogId}","#stock").find("tr:last");
+                                    		var exp = new RegExp("\\["+num+"\\]","g");
+                                    		var exps = new RegExp("-"+num,"g");
+                                    		var html = "<tr>"+$($tr).html().replace(exp,"["+next+"]")+"</tr>";
+                                    		html = html.replace(">"+num+"<",">"+next+"<").replace(exps,"-"+next);
+                                    		get_el_in_dialog("$!{dialogId}","#number").val(next);
+                                    		$($tr).after(html);
+                                    			
+                                    		get_el_in_dialog("$!{dialogId}","#personId"+id).val("");
+                        					get_el_in_dialog("$!{dialogId}","#personName_id"+id).val("");
+                        					get_el_in_dialog("$!{dialogId}","#personDept_id"+id).val("");
+                        					get_el_in_dialog("$!{dialogId}","#personEmail_id"+id).val("");
+            							}
+                						get_el_in_dialog("$!{dialogId}","#personId"+id).val(data.id);
+            							
+                						get_el_in_dialog("$!{dialogId}","#personName_id"+id).attr("value",data.name);
+            							
+                						get_el_in_dialog("$!{dialogId}","#personDept_id"+id).attr("value",data.deptName==null? '':data.deptName);
+            							
+                						get_el_in_dialog("$!{dialogId}","#personEmail_id"+id).attr("value",data.personEmail==null? '':data.personEmail);
+            						}
+            						if(html_tmp){
+            							var $tr = get_el_in_dialog("$!{dialogId}","#stock").find("tr:last");
+            							$($tr).after(html_tmp);
+										get_el_in_dialog("$!{dialogId}","#number").val(final);
+            						}
+                        	        resetfocus(get_el_in_dialog("$!{dialogId}","#personName_id"+"$!{id}"));
+								}else{
+									var ids='';
+									var names='';
+									for(var i =0;i<rows.length;i++){
+            							var data = grid.dataItem(rows[i]);
+										ids += data.id + ',';
+										names += data.name + ',';
+									}
+									ids = ids.substring(0,ids.length-1);
+									names = names.substring(0,names.length-1);
+									get_el_in_dialog("$!{dialogId}","#$!{txtId}").val(ids);
+            	        			get_el_in_dialog("$!{dialogId}","#$!{txtName}").val(names);
+    								resetfocus(get_el_in_dialog("$!{dialogId}","#$!{txtName}"));
+								}
+							}else{
+								if($!{stype}){
+									alert("该功能此处不提供!");
+								}else{
+									var ids='';
+									var names='';
+									for(var i =0;i<rows.length;i++){
+            							var data = grid.dataItem(rows[i]);
+										ids += data.id + ',';
+										names += data.name + ',';
+									}
+									ids = ids.substring(0,ids.length-1);
+									names = names.substring(0,names.length-1);
+									var id_v = $("#"+"$!{txtId}",window.parent["_main_frame"].document);
+	    							id_v.val(ids);
+	    							var id_t = $("#"+"$!{txtName}",window.parent["_main_frame"].document);
+	    							id_t.val(names);
+	    							resetfocus($("#"+"$!{txtName}",window.parent["_main_frame"].document));
+								}
+							}
+            			#else
+            				var data = grid.dataItem(rows);
+						
+                		    if("$!{dialogId}"!=""){
+                		    	    get_el_in_dialog("$!{dialogId}","#$!{txtId}").val(data.id);
+            	        			get_el_in_dialog("$!{dialogId}","#$!{txtName}").val(data.name);
+            						if('$!{deptId}'!=''){
+            							get_el_in_dialog("$!{dialogId}","#$!{deptId}").val(data.deptId);
+                    					get_el_in_dialog("$!{dialogId}","#$!{deptName}").val(data.deptName);
+                    					get_el_in_dialog("$!{dialogId}","#$!{tel}").val(data.personTelephone);
+    						        }
+    								resetfocus(get_el_in_dialog("$!{dialogId}","#$!{txtName}"));
+    	        			
+                			}else{
+                				if("$!{txtId}"=="repairPersonId"){
+                					alert(11111);
+                					var id_v = $("#"+"$!{txtId}",window.parent["_main_frame"].document);
+	    							id_v.val(data.id);
+	    							var id_t = $("#"+"$!{txtName}",window.parent["_main_frame"].document);
+	    							id_t.val(data.name);
+	    							resetfocus($("#"+"$!{txtName}",window.parent["_main_frame"].document));
+                				}else{
+                					if(top.frames[0].window.workerCheckedCallback){
+	                                    top.frames[0].window.workerCheckedCallback(data);
+	                                }else{
+		                				var id_v = $("#"+"$!{txtId}",window.parent["_main_frame"].document);
+		    							id_v.val(data.id);
+		    							var id_t = $("#"+"$!{txtName}",window.parent["_main_frame"].document);
+		    							id_t.val(data.name);
+		    							resetfocus($("#"+"$!{txtName}",window.parent["_main_frame"].document));
+		    							if("$!{deptId}"!=""){
+		    								var id_v = $("#"+"$!{deptId}",window.parent["_main_frame"].document);
+		    								id_v.val(data.deptId);
+		    								var id_t = $("#"+"$!{deptName}",window.parent["_main_frame"].document);
+		    								id_t.val(data.deptName);
+		    								resetfocus($("#"+"$!{deptName}",window.parent["_main_frame"].document));
+		    							}
+	    							}
+                				}
+    						}
+            			#end
+                	    close_dialog('selectDiloag');
+              		}
+          		}
+				
+          	]
+      	);
+	    
+        $("#selectButton").click(function () {
+            var ids = new Array();
+            var names = new Array();
+            var data = $("#grid").getSelectedRows();
+            if (data.length == 0) {
+                alert("未选择");
+                return false;
+            } else {
+                $.each(data, function (i,p) {
+                    ids.push(p.id);
+                    names.push(p.name);
+                });
+                $("#$!{txtId}").val(ids);
+                $("#$!{txtName}").val(names);
+            	closeDialog();
+            }
+        });  
+        
+    });	
+	
+	/* zTree */
+    var setting = {
+    	data: {
+    		simpleData: {enable: true}
+          },
+          callback: {
+    			onClick: function(event, treeId, treeNode) {
+    				 $('#treeId').val(treeNode.id);
+    			 	 $('#selectBlock').show();
+    				 $('#queryBtn').click();
+    			}
+    		}
+    };
+  	var zNodes = [];  
+  	zNodes.push({id:"10001", pId:"0", name:"中控信息", open:"true"});
+    #foreach($!{treeNode} in $!{deptList})
+		zNodes.push({id:$!{treeNode.id}, pId:$!{treeNode.pid}, name:"$!{treeNode.name}"});
+  	#end    
+
+  	$(document).ready(function(){
+  		$.fn.zTree.init($("#deptTree"), setting,zNodes);
+		var treeId = $("#treeId").val();
+		if(treeId!='10001'){
+			var treeNode = $.fn.zTree.getZTreeObj("deptTree");
+    		var node = treeNode.getNodeByParam("id",treeId,null);
+    		if(node){
+    			treeNode.selectNode(node);
+    		}
+		}
+  	});
+	
+	function cancelLeftTreeSelected(){
+		$('#treeId').val('');
+		$.fn.zTree.init($("#deptTree"), setting,zNodes);
+	}
+</script>
+</body>
+</html>		

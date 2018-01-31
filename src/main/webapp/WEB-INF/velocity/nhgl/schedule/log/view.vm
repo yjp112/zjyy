@@ -1,0 +1,13 @@
+<link rel="stylesheet" href="${rc.contextPath}/offLineHC/css/jquery.syntaxhighlighter.css" />
+<form class="ui-form" id="jobschedule_schedule_job_view_form" action="$!{rc.contextPath}/jobschedule/schedule-job/view" method="post">
+<pre><code>
+$!{planLog.errorMsg}
+  </code>
+</pre>
+</form>
+##<script type="text/javascript" src="${rc.contextPath}/offLineHC/js/jquery.syntaxhighlighter.min.js"></script>
+##<script type="text/javascript">
+## $(document).ready(function(){
+##   $('pre code').highlightSyntax();
+## });
+##</script>

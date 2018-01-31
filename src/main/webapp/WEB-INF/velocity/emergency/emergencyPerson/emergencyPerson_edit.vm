@@ -1,0 +1,92 @@
+#parse("index/_header.vm")
+<!-- <style type="text/css">
+span{color:red;}
+</style> -->
+</head>
+<body>		
+	<form id="myform_id" method="post" action="$!{rc.contextPath}/emergency/emergencyPerson/save" class="ui-dialog-form">
+		<input type="hidden" name="id" value="$!{emergencyPerson.id}">
+	    <table width="100%">   
+			     #set($readonly='')
+    	         #if($!{viewOnly})
+    	         #set($readonly='readonly')
+    	         #end
+	        <tr>
+	            <td width="30%" class="label"><span class="ui-form-required">*</span><label>所属分组：</label></td>
+	            <td width="60%">
+	            	<input type="hidden" class="k-textbox"  id="groupId" name="groupId"  value="$!{emergencyPerson.groupId}"  >	            	
+					<span class="k-textbox k-space-right" id="groupNames">
+                    	<input readonly type="text" class="k-textbox"  id="groupName" name="groupName" value="$!{emergencyPerson.groupName}" >
+						<a href="#" class="k-icon k-i-search" >&nbsp;</a>
+                	</span>	            	
+	            </td>
+	            <td width="10%"></td>
+	        </tr> 		               
+	        <tr>
+	            <td class="label"><span class="ui-form-required">*</span><label>姓名：</label></td>
+	            <td>
+	            	<input type="hidden" class="k-textbox" id="personId" name="personId" value="$!{emergencyPerson.personId}" >
+	            	<span class="k-textbox k-space-right" id="personNames">
+	            		<input readonly type="text" class="k-textbox" id="personName" name="personName" value="$!{emergencyPerson.personName}" >
+	            		<a href="#" class="k-icon k-i-search" >&nbsp;</a>
+                	</span>	 
+	            </td>
+	            <td></td>
+	        </tr> 
+			<tr>
+                <td  class="label"><span class="ui-form-required">*</span><label>是否组长：</label></td>
+			    <td class="ui-search-c">
+		             <select name="header"  class="k-textbox" >
+						<option value="" >--请选择--</option>
+    			        #foreach($!{e} in $!{lstStatus})
+    			     	<option value="$!{e.enumValue}" #if($!{emergencyPerson.header}==$!{e.enumValue}) selected="selected" #end>$!{e.enumText}</option>
+    				    #end
+					 </select>
+			    </td>
+			</tr>						
+	        <tr>
+	            <td class="label">备注：</td>
+	            <td><textarea  id="textAreaId"  name="remark" class="k-textbox k-textarea" style="height:60px">$!{emergencyPerson.remark}</textarea></td>
+	            <td></td>
+	        </tr>  	        
+	    </table>
+	    <div class="actions">
+			#if( $!{readonly} != 'readonly')
+	        <button class="k-primary hc_btn" id="emergencyPersonSave" type="submit"><i class="fa fa-save"></i>保 存</button>
+	        <button class="hc_btn cancel" onclick="close_dialog('emergencyPerson_add_dlg')" type="button"><i class="fa fa-close"></i>取 消</button>
+	        #end
+		</div> 	            
+	</form>
+<script type="text/javascript">
+	$(document).ready(function(){
+		$("#groupNames").click(function() {
+			if("$!viewOnly" != "true")
+            quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/emergency/emergencyGroup/lookup?txtId=groupId&txtName=groupName&dialogId=emergencyPerson_add_dlg", 300, 300);
+        });
+		
+		$("#personNames").click(function() {
+			if("$!viewOnly" != "true")
+       		quick_dialog("selectDiloag", "选择", "$!{rc.contextPath}/choose/personPage?type=1&txtId=personId&txtName=personName&dialogId=emergencyPerson_add_dlg&personId=0",1135, 540);
+		});		
+		
+        $("#myform_id").validator({
+            fields:{
+            	groupName: "所属分组:required; length[~20]",
+            	personName: "姓名:required; lenght[~20]",
+            	header: "是否组长:required; length[~20];",
+				remark: "备注:length[~200];"
+            },
+            valid:function(form){
+                form_btn_submit($("#emergencyPersonSave"),form,function(res){
+                    // 关闭窗口
+                    validateCallback(res,"grid","emergencyPerson_add_dlg");
+                });
+            }
+        }); 
+        #if($!viewOnly)
+        	setAllReadonly();
+        #end     		
+  });
+</script>
+</body>
+</html>

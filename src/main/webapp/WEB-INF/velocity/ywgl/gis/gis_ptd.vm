@@ -1,0 +1,80 @@
+<script src="${static_url}/js/jquery-1.11.1.js"></script>
+<style>
+* {
+	padding: 0;
+	margin: 0;
+}
+.contanier {
+	width: 100%;
+}
+.table-head {
+	padding-right: 17px;
+	border-top: 1px solid #0d5279;
+	border-bottom: 1px solid #0d5279;
+}
+.table-head table td {
+	padding: 4px 0;
+	font-weight: bold;
+}
+.table-body {
+	width:100%;
+	height: 290px;
+	overflow: auto;
+}
+.table-body table {
+	border-collapse: collapse;
+}
+.table-body table td {
+	padding: 6px 0;
+	color: #000;
+	border-bottom: 1px solid #0d5279;
+	font-size: 14px;
+}
+.table-body table td:first-child {
+	padding-left: 10px;
+}
+#chicken_contentDiv {
+	left: 0;
+	padding-left: 3px;
+	padding-right: 0;
+}
+</style>
+<div class="contanier">
+	<div class="table-head">
+		<table width="100%">
+               <tr>
+		           <td width="60">序号</td>
+		           <td >点位名称</td>
+		           <td width="80">实时值</td>
+               </tr>
+		</table>
+	</div>
+	<div class="table-body">
+		<table width="100%">
+			<input id="table-title" type="hidden" value="$!{device.deviceName}">
+			#foreach($!{p} in $!{deviceBlocks})        
+               <tr>
+		           <td width="50">$!{velocityCount}</td>
+		           <td>$!{p.tagDesc}</td>
+		           <td width="80">$!{p.extension1}</td>
+               </tr>
+			#end
+		</table>
+	</div>
+</div>
+<script>
+	$(function(){
+		var title = $("#table-title").val();
+		$(".titleDisplayClass",window.parent.document).text(title);
+		$("#chicken_contentDiv",window.parent.document).css({
+			'width': '100%',
+			'left': '0',
+			'top': '10px',
+			'padding-left': '3px',
+			'padding-right': '0',
+		});
+		
+		$("#chicken_contentDiv",window.parent.document).find('iframe').width('326px');
+		$("#chicken_contentDiv",window.parent.document).find('iframe').height('322px');
+	});
+</script>

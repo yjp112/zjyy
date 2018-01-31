@@ -1,0 +1,67 @@
+<div data-page="test" class="page page-about">
+
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="navbar-inner">
+                <div class="navbar-left">
+                    <a href="config" class="link back" data-force="true">
+                        <i class="icon icon-c-back only-icon"></i>
+                    </a>
+                </div>
+                <div class="navbar-center">测试</div>
+                <div class="navbar-right"></div>
+            </div>
+        </div>
+    </div>
+    <div class="page-content">
+        <div class="list-block" style="font-size: 35px">
+            <ul>
+                <li>
+                    <a href="" onclick="playVideo()">看视频</a>
+                </li>
+                <li>
+                    <a href="" onclick="scanQRCode()">扫二维码</a>
+                </li>
+                <li>
+                    <a href="" onclick="getLocation()">定位</a>
+                </li>
+                <li>
+                    <a href="" onclick="getDeviceIMEI()">获取设备码</a>
+                </li>
+                <li>
+                    <a href="" onclick="getUserInfo()">获取用户信息</a>
+                </li>
+                <li>
+                    <a href="" onclick="gesturePassword()">设置手势密码锁</a>
+                </li>
+                <li>
+                    <a href="" onclick="checkGesturePassword()">验证手势密码锁</a>
+                </li>
+                <li>
+                    <a href="" onclick="useGesturePassword(true)">开启手势密码锁</a>
+                </li>
+                <li>
+                    <a href="" onclick="useGesturePassword(false)">关闭手势密码锁</a>
+                </li>
+                <li>
+                    <a href="" onclick="addressBook()">通讯录</a>
+                </li>
+                <li>
+                    <a href="" onclick="telPhone('13777892765')">拨打电话</a>
+                </li>
+                <li>
+                    <a href="" onclick="smsPhone('13777892765')">发送短信</a>
+                </li>
+                <li>
+                    <a href="" onclick="getUID()">获取卡上识别码</a>
+                </li>
+                <li>
+                    <a href="" onclick="readSingleBlock()">读取卡上address区块JSON数据</a>
+                </li>
+                <li>
+                    <a href="" onclick="writeSingleBlock()">写入JSON数据到卡上address区块</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

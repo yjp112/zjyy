@@ -1,0 +1,228 @@
+#parse("index/_header.vm")
+</head>
+<body>
+<div class="ui-layout-center" id="subMain">
+	<div class="ui-layout-north">
+		 <form class="ui-form" id='queryForm'>
+			
+	     <table width="100%">
+	       <tr>
+	         <td>
+	           <table class="ui-search-table">
+	             <tr>
+	               <td class="ui-search-name first">JS图层编码：</td>
+	               <td class="ui-search-c">
+	                 <input name="layerCodeJs" value="$!gLayer.layerCodeJs" class="k-textbox" type="text">
+	               </td>
+	               <td class="ui-search-name">GIS图层编码：</td>
+	               <td class="ui-search-c">
+	                 <input  name="layerCodeGis" value="$!gLayer.layerCodeGis" class="k-textbox" type="text">
+	               </td>
+	             </tr>
+	           </table>
+	         </td>
+	         <td width="150" valign="top" style="padding-top:4px;">
+	           <button type="submit" class="hc_btn k-primary" id="queryBtn"><i class="fa fa-search"></i>查询</button>
+	           <button type="reset" class="hc_btn" id="resetBtn"><i class="fa fa-refresh"></i>重置</button>
+	         </td>
+	         <td></td>
+	       </tr>
+	     </table>
+	 	</form>
+	</div>
+	<div class="ui-layout-center">
+	  <div id="grid"></div> 
+     </div>
+</div>
+#parse("index/_footer.vm") 
+
+<script type="text/javascript">
+     var _iframe_layout,_inner_layout;
+	$(document).ready(function(){
+		_iframe_layout = $('body').layout({
+		      defaults: {
+		        resizable: false,
+		        closable: false,
+		        spacing_open: 5
+		      }
+		    });
+		 _inner_layout = $("#subMain").layout({
+		      defaults: {
+		        resizable: false,
+		        closable: false,
+		        spacing_open: 0
+		      },
+		      center: {
+		          onresize_end: function () {
+		              var grid = $("#grid").data("kendoGrid");
+		              grid.resize();
+		          }
+		      }
+     })
+
+    $('#resetBtn').click(function(){
+      $("#queryForm :text").val('');  
+    });
+	
+		//列表
+    quick_datagrid("#grid", "#queryForm", "$!{rc.contextPath}/dev/gislayer/list", [{
+              field: "id",
+              hidden: true
+          }, {
+              field: "layerCodeJs",
+              title: "JS图层编码",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"},
+              width: 100
+          }, {
+              field: "layerNameJs",
+              title: "JS图层名",
+              sortable: false,
+              width: 150,
+              template:"<input id='name#: data.id #' type='hidden' value='#: data.layerNameJs #'>#: data.layerNameJs #</input>",
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "layerCodeGis",
+              title: "GIS图层编码",
+              sortable: false,
+              width: 150,
+              headerAttributes: {"class": "k-grid-text"},
+              attributes: {"class": "k-grid-text"}
+          }, {
+              field: "gisLayerDisplay",
+              title: "显示/隐藏",
+              sortable: false,
+              width: 200,
+              template:"<select name='display' id='#: data.id #' class='k-textbox'><option value='1'>显示</option><option value='0'>隐藏</option></select>",
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"}
+          },{
+              field: "gSystemRuleIds",
+              title: "含有的设备类别",
+              sortable: false,
+              headerAttributes: {"class": "k-grid-equilong"},
+              attributes: {"class": "k-grid-equilong"}
+          }], 
+          {sortable: {mode: "multiple",allowUnsort: true},resizable:true,selectable:"multiple, row"
+//    		,change: function(e){
+//        	  var selectedRows = this.select();
+//        	    var selectedDataItems = [];
+//        	    for (var i = 0; i < selectedRows.length; i++) {
+//        	      var dataItem = this.dataItem(selectedRows[i]);
+//        	      selectedDataItems.push(dataItem);
+//        	    }
+//		      	}
+          }, 
+    		{serverSorting: true}, [{
+    			name: "选择",
+          		icon: "fa fa-plus",
+    			onclick: function (obj, grid) {
+	      			var ids = [];
+	      			var names = [];
+	      			var row = grid.select();
+	      			if (null == row || row.length == 0) {
+		                  notify("请选择要处理的项", "error");
+		                  return;
+	              	}
+	      			if("$!{dialogId}"!=""){
+	      				if(get_el_in_dialog("$!{dialogId}","#$!{txtId}").val()!=""){
+	          				ids = stringToArray(get_el_in_dialog("$!{dialogId}","#$!{txtId}").val());
+	    					names = stringToArray(get_el_in_dialog("$!{dialogId}","#$!{txtName}").val());
+	    				}
+	      			}else{
+	          			if($("#"+"$!{txtId}",window.parent["_main_frame"].document).val()!=""){
+	          				ids = stringToArray($("#"+"$!{txtId}",window.parent["_main_frame"].document).val());
+	    					names = stringToArray($("#"+"$!{txtName}",window.parent["_main_frame"].document).val());
+	    				}
+	      			}
+	      			for(var i=0; i<row.length; i++){
+	            	  var data = grid.dataItem(row[i]);
+	            	  if(!isExist(ids,data.id)){				
+	                        ids.push(data.id);
+//	                        names.push(data.layerNameJs);
+						}
+	              	}
+
+	      			var displayIds = [];
+	      			var name2 = [];
+	      			for(var i=0;i<ids.length;i++){
+	      				if(ids[i]!=''){
+		      				var id = "#"+ids[i];
+		      				var nameid = "#name"+ids[i];
+		      				displayIds.push(($(id).val()));
+		      				if($(id).val()=='0'){
+		      					tname = $(nameid).val()+"(隐藏)";
+		      				}else{
+		      					tname = $(nameid).val()+"(显示)";
+		      				}
+		      				name2.push(tname);
+	      				}
+	      			}
+	    	         
+	    		    if("$!{dialogId}"!=""){
+	    		    	get_el_in_dialog("$!{dialogId}","#gisLayerDisplay").val(displayIds);
+	    				get_el_in_dialog("$!{dialogId}","#$!{txtId}").val(ids);
+	    				get_el_in_dialog("$!{dialogId}","#$!{txtName}").val(name2);  
+	    				resetfocus(get_el_in_dialog("$!{dialogId}","#$!{txtName}"));
+	    		    }else{
+						$("#"+"$!{txtId}",window.parent["_main_frame"].document).val(ids);
+						$("#"+"$!{txtName}",window.parent["_main_frame"].document).val(names);
+						resetfocus($("#"+"$!{txtName}",window.parent["_main_frame"].document));
+					}
+	    	        try{
+	    	            if(typeof(extendFunc) == "function" ){
+	    	                extendFunc(rows);
+	    	            }
+	    	        }catch(e){
+	    	
+	    	        }
+	    	        close_dialog('selectDiloag');
+	      		}
+	    	} ,
+	    	{
+          		name: "清空",
+          		icon: "fa fa-remove",
+          		onclick: function (obj, grid) {
+        		    if("$!{dialogId}"!=""){
+        		    	get_el_in_dialog("$!{dialogId}","#gisLayerDisplay").val("");
+        		    	get_el_in_dialog("$!{dialogId}","#$!{txtId}").val("");
+	    				get_el_in_dialog("$!{dialogId}","#$!{txtName}").val(""); 
+        				resetfocus(get_el_in_dialog("$!{dialogId}","#$!{txtName}"));
+        		    }else{
+        		    	$("#"+"$!{txtId}",window.parent["_main_frame"].document).val("");
+						$("#"+"$!{txtName}",window.parent["_main_frame"].document).val("");
+						resetfocus($("#"+"$!{txtName}",window.parent["_main_frame"].document));
+					}
+        	        try{
+        	            if(typeof(extendFunc) == "function" ){
+        	                extendFunc(rows);
+        	            }
+        	        }catch(e){
+        	
+        	        }
+        	        close_dialog('selectDiloag');
+          		}
+      		} 
+      	]);
+    });
+	
+	setTimeout('loadfunction()',400);
+	
+	function loadfunction(){
+	    var ids = [];
+	    displayids = [];
+	    displayids = stringToArray(get_el_in_dialog("$!{dialogId}","#gisLayerDisplay").val());
+	    ids = stringToArray(get_el_in_dialog("$!{dialogId}","#$!{txtId}").val());
+	    for(var i=0;i<ids.length;i++){
+	    	if(ids[i]!=''){
+		    	var id = "#"+ids[i];
+		    	$(id).val(displayids[i]);
+	    	}
+	    }
+	}
+	 
+</script>
+</body>
+</html>

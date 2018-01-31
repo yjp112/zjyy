@@ -1,0 +1,801 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.repair.entities.Repair">
+
+	<resultMap type="com.supconit.repair.entities.Repair" id="RepairResultMap">      
+        <result property="id" column="ID" />
+        <result property="processInstanceId" column="PROCESS_INSTANCE_ID"/>
+        <result property="taskSource" column="TASK_SOURCE" />
+        <result property="taskCode" column="TASK_CODE" />
+        <result property="urgency" column="URGENCY" />
+        <result property="categoryId" column="CATEGORY_ID" />
+        <result property="categoryName" column="CATEGORY_NAME" />
+        <result property="areaId" column="AREA_ID" />
+        <result property="areaName" column="AREA_NAME" />
+        <result property="repairTel" column="REPAIR_TEL" />
+        <result property="repairDeptId" column="REPAIR_DEPT_ID" />
+        <result property="repairDeptName" column="REPAIR_DEPT_NAME" />
+        <result property="contact" column="CONTACT" />
+        <result property="contactId" column="CONTACT_ID" />
+        <result property="contactTel" column="CONTACT_TEL" />
+        <result property="repairDate" column="REPAIR_DATE" />
+        <result property="descripton" column="DESCRIPTON" />
+        <result property="repairCode" column="REPAIR_CODE" />
+        <result property="alarmId" column="ALARM_ID" />
+        <result property="deviceId" column="DEVICE_ID" />
+        <result property="engineerId" column="ENGINEER_ID" />
+        <result property="engineerName" column="ENGINEER_NAME" />
+        <result property="dispatchTime" column="DISPATCH_TIME" />
+        <result property="repairMode" column="REPAIR_MODE" />
+        <result property="repairWorry" column="REPAIR_WORRY" />
+        <result property="repairGroupId" column="REPAIR_GROUP_ID" />
+        <result property="repairGroupName" column="REPAIR_GROUP_NAME" />
+        <result property="groupEmpId" column="GROUP_EMP_ID" />
+        <result property="groupEmpName" column="GROUP_EMP_NAME" />
+        <result property="repairPersonId" column="REPAIR_PERSON_ID" />
+        <result property="repairPersonName" column="REPAIR_PERSON_NAME" />
+        <result property="stopHours" column="STOP_HOURS" />
+        <result property="expectFinishTime" column="EXPECT_FINISH_TIME" />
+        <result property="actualFinishTime" column="ACTUAL_FINISH_TIME" />
+        <result property="delayTime" column="DELAY_TIME" />
+        <result property="result" column="RESULT" />
+        <result property="causeType" column="CAUSE_TYPE" />
+        <result property="cause" column="CAUSE" />
+        <result property="propose" column="PROPOSE" />
+        <result property="costSaving" column="COST_SAVING" />
+        <result property="lastCostSaving" column="lastCostSaving" />
+        <result property="grade1" column="GRADE1" />
+        <result property="grade2" column="GRADE2" />
+        <result property="grade3" column="GRADE3" />
+        <result property="grade4" column="GRADE4" />
+        <result property="grade5" column="GRADE5" />
+        <result property="remark" column="REMARK" />
+        <result property="status" column="STATUS" />
+        <result property="createId" column="CREATE_ID" />
+        <result property="creator" column="CREATOR" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="updateId" column="UPDATE_ID" />
+        <result property="updator" column="UPDATOR" />
+        <result property="updateDate" column="UPDATE_DATE" />
+        <result property="deviceName" column="DEVICE_NAME" />
+        <result property="startTime" column="startTime" />
+        <result property="endTime" column="endTime" />
+        <result property="causeValue" column="CAUSE_VALUE" />
+        <result property="repairTypeValue" column="REPAIR_TYPE_VALUE" />
+        <result property="sumRepair" column="SUM_REPAIR" />
+        <result property="sumCause" column="SUM_CAUSE" />
+        <result property="sumMode" column="SUM_MODE" />
+        <result property="modeValue" column="MODE_VALUE" />
+        <result property="repairMonth" column="repair_month" />
+        <result property="avgGrade" column="avg_grade" />
+        <result property="timeRate" column="time_rate" />
+        <result property="repairTimes" column="repairTimes" />
+        
+        
+        <result property="sumGrade3" column="sum_grade3" />
+	</resultMap>
+
+	<sql id="TABLE_NAME" lang="velocity">REPAIR</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	<!-- 获取记录列表-->
+	<sql id="select_pre" lang="velocity">
+		select
+			A.ID,
+			A.PROCESS_INSTANCE_ID,
+	        A.TASK_SOURCE,
+			A.TASK_CODE,
+	        A.URGENCY,
+	        A.CATEGORY_ID,
+	        A.CATEGORY_NAME,
+	        A.AREA_ID,
+	        A.AREA_NAME,
+	        A.REPAIR_TEL,
+	        A.REPAIR_DEPT_ID,
+	        A.REPAIR_DEPT_NAME,
+	        A.CONTACT,
+	        A.CONTACT_ID,
+	        A.CONTACT_TEL,
+	        A.REPAIR_DATE,
+	        A.DESCRIPTON,
+	        A.REPAIR_CODE,
+	        A.ALARM_ID,
+	        A.DEVICE_ID,
+	        A.ENGINEER_ID,
+	        A.ENGINEER_NAME,
+	        A.DISPATCH_TIME,
+	        A.REPAIR_MODE,
+	        A.REPAIR_WORRY,
+	        A.REPAIR_GROUP_ID,
+	        A.REPAIR_GROUP_NAME,
+	        A.GROUP_EMP_ID,
+	        A.GROUP_EMP_NAME,
+	        A.REPAIR_PERSON_ID,
+	        A.REPAIR_PERSON_NAME,
+	        A.STOP_HOURS,
+	        A.EXPECT_FINISH_TIME,
+	        A.ACTUAL_FINISH_TIME,
+	        A.DELAY_TIME,
+	        A.RESULT,
+	        A.CAUSE_TYPE,
+	        A.CAUSE,
+	        A.PROPOSE,
+	        A.COST_SAVING,
+	        A.GRADE1,
+	        A.GRADE2,
+	        A.GRADE3,
+	        A.GRADE4,
+	        A.GRADE5,
+	        A.REMARK,
+	        A.STATUS,
+	        A.CREATE_ID,
+	        A.CREATOR,
+	        A.CREATE_DATE,
+			A.UPDATE_ID,
+			A.UPDATOR,
+			A.UPDATE_DATE,
+			B.DEVICE_NAME AS DEVICE_NAME
+		FROM
+		<include refid="TABLE_NAME"/> A 
+		LEFT JOIN DEVICE B ON B.ID = A.DEVICE_ID
+	</sql>
+	
+	<sql id="count_pre" lang="velocity">
+		SELECT
+		COUNT(*)
+		FROM
+		<include refid="TABLE_NAME"/> A
+		LEFT JOIN DEVICE B ON B.ID = A.DEVICE_ID
+	</sql>
+	
+	<insert id="insert" parameterType="com.supconit.repair.entities.Repair" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="insert_sql" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.repair.entities.Repair" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+	
+	 <!-- 插入记录-->
+	<sql id="insert_sql" lang="velocity">
+	     INSERT INTO <include refid="TABLE_NAME"/>(
+        	#if($_databaseId == 'oracle') ID, #end
+        	PROCESS_INSTANCE_ID,
+	        TASK_SOURCE,
+			TASK_CODE,
+	        URGENCY,
+	        CATEGORY_ID,
+	        CATEGORY_NAME,
+	        AREA_ID,
+	        AREA_NAME,
+	        REPAIR_TEL,
+	        REPAIR_DEPT_ID,
+	        REPAIR_DEPT_NAME,
+	        CONTACT,
+	        CONTACT_ID,
+	        CONTACT_TEL,
+	        REPAIR_DATE,
+	        DESCRIPTON,
+	        REPAIR_CODE,
+	        ALARM_ID,
+	        DEVICE_ID,
+	        ENGINEER_ID,
+	        ENGINEER_NAME,
+	        DISPATCH_TIME,
+	        REPAIR_MODE,
+	        REPAIR_WORRY,
+	        REPAIR_GROUP_ID,
+	        REPAIR_GROUP_NAME,
+	        GROUP_EMP_ID,
+	        GROUP_EMP_NAME,
+	        REPAIR_PERSON_ID,
+	        REPAIR_PERSON_NAME,
+	        STOP_HOURS,
+	        EXPECT_FINISH_TIME,
+	        ACTUAL_FINISH_TIME,
+	        DELAY_TIME,
+	        RESULT,
+	        CAUSE_TYPE,
+	        CAUSE,
+	        PROPOSE,
+	        COST_SAVING,
+	        GRADE1,
+	        GRADE2,
+	        GRADE3,
+	        GRADE4,
+	        GRADE5,
+	        REMARK,
+	        STATUS,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE
+        ) VALUES (
+        	#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end
+	        @{_parameter.processInstanceId,jdbcType=VARCHAR},
+	        @{_parameter.taskSource,jdbcType=INTEGER},
+	        @{_parameter.taskCode,jdbcType=VARCHAR},
+	        @{_parameter.urgency,jdbcType=INTEGER},
+	        @{_parameter.categoryId,jdbcType=NUMERIC},
+	        @{_parameter.categoryName,jdbcType=VARCHAR},
+	        @{_parameter.areaId,jdbcType=NUMERIC},
+	        @{_parameter.areaName,jdbcType=VARCHAR},
+	        @{_parameter.repairTel,jdbcType=VARCHAR},
+	        @{_parameter.repairDeptId,jdbcType=NUMERIC},
+	        @{_parameter.repairDeptName,jdbcType=VARCHAR},
+	        @{_parameter.contact,jdbcType=VARCHAR},
+	        @{_parameter.contactId,jdbcType=NUMERIC},
+	        @{_parameter.contactTel,jdbcType=VARCHAR},
+	        @{_parameter.repairDate,jdbcType=TIMESTAMP},
+	        @{_parameter.descripton,jdbcType=VARCHAR},
+	        @{_parameter.repairCode,jdbcType=VARCHAR},
+	        @{_parameter.alarmId,jdbcType=NUMERIC},
+	        @{_parameter.deviceId,jdbcType=NUMERIC},
+	        @{_parameter.engineerId,jdbcType=NUMERIC},
+	        @{_parameter.engineerName,jdbcType=VARCHAR},
+	        @{_parameter.dispatchTime,jdbcType=TIMESTAMP},
+	        @{_parameter.repairMode,jdbcType=INTEGER},
+	        @{_parameter.repairWorry,jdbcType=INTEGER},
+	        @{_parameter.repairGroupId,jdbcType=NUMERIC},
+	        @{_parameter.repairGroupName,jdbcType=VARCHAR},
+	        @{_parameter.groupEmpId,jdbcType=NUMERIC},
+	        @{_parameter.groupEmpName,jdbcType=VARCHAR},
+	        @{_parameter.repairPersonId,jdbcType=NUMERIC},
+	        @{_parameter.repairPersonName,jdbcType=VARCHAR},
+	        @{_parameter.stopHours,jdbcType=NUMERIC},
+	        @{_parameter.expectFinishTime,jdbcType=TIMESTAMP},
+	        @{_parameter.actualFinishTime,jdbcType=TIMESTAMP},
+	        @{_parameter.delayTime,jdbcType=NUMERIC},
+	        @{_parameter.result,jdbcType=VARCHAR},
+	        @{_parameter.causeType,jdbcType=INTEGER},
+	        @{_parameter.cause,jdbcType=VARCHAR},
+	        @{_parameter.propose,jdbcType=VARCHAR},
+	        @{_parameter.costSaving,jdbcType=VARCHAR},
+	        @{_parameter.grade1,jdbcType=INTEGER},
+	        @{_parameter.grade2,jdbcType=INTEGER},
+	        @{_parameter.grade3,jdbcType=INTEGER},
+	        @{_parameter.grade4,jdbcType=INTEGER},
+	        @{_parameter.grade5,jdbcType=INTEGER},
+	        @{_parameter.remark,jdbcType=VARCHAR},
+	        @{_parameter.status,jdbcType=INTEGER},
+	        @{_parameter.createId,jdbcType=NUMERIC},
+	        @{_parameter.creator,jdbcType=VARCHAR},
+	        @{_parameter.createDate,jdbcType=TIMESTAMP}
+        )
+	</sql>
+	
+	<select id="getById" resultMap="RepairResultMap" parameterType="Long" lang="velocity">
+		<include refid="select_pre" />        
+         WHERE A.ID = @{_parameter, jdbcType=BIGINT}
+	</select>
+	
+	
+    <select id="findAll" resultMap="RepairResultMap" lang="velocity">
+		<include refid="select_pre" />
+		ORDER BY A.SORT_IDX
+	</select>
+	
+	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.repair.entities.Repair" lang="velocity">
+	     UPDATE <include refid="TABLE_NAME"/>
+			#mset()
+				<![CDATA[
+			        #if($_parameter.processInstanceId && $_parameter.processInstanceId !='')PROCESS_INSTANCE_ID = @{_parameter.processInstanceId,jdbcType=VARCHAR},#end
+			        #if($_parameter.taskSource)TASK_SOURCE = @{_parameter.taskSource,jdbcType=INTEGER},#end
+					#if($_parameter.taskCode && $_parameter.taskCode!='')TASK_CODE = @{_parameter.taskCode,jdbcType=VARCHAR},#end
+			        #if($_parameter.urgency)URGENCY = @{_parameter.urgency,jdbcType=INTEGER},#end
+			        #if($_parameter.categoryId)CATEGORY_ID = @{_parameter.categoryId,jdbcType=NUMERIC},#end
+			        #if($_parameter.categoryName && $_parameter.categoryName!='')CATEGORY_NAME = @{_parameter.categoryName,jdbcType=VARCHAR},#end
+			        #if($_parameter.areaId)AREA_ID = @{_parameter.areaId,jdbcType=NUMERIC},#end
+			        #if($_parameter.areaName && $_parameter.areaName!='')AREA_NAME = @{_parameter.areaName,jdbcType=VARCHAR},#end
+			        #if($_parameter.repairTel && $_parameter.repairTel!='')REPAIR_TEL = @{_parameter.repairTel,jdbcType=VARCHAR},#end
+			        #if($_parameter.repairDeptId)REPAIR_DEPT_ID = @{_parameter.repairDeptId,jdbcType=NUMERIC},#end
+			        #if($_parameter.repairDeptName && $_parameter.repairDeptName!='')REPAIR_DEPT_NAME = @{_parameter.repairDeptName,jdbcType=VARCHAR},#end
+			        #if($_parameter.contact && $_parameter.contact!='')CONTACT = @{_parameter.contact,jdbcType=VARCHAR},#end
+			        #if($_parameter.contactId)CONTACT_ID = @{_parameter.contactId,jdbcType=NUMERIC},#end
+			        #if($_parameter.contactTel && $_parameter.contactTel!='')CONTACT_TEL = @{_parameter.contactTel,jdbcType=VARCHAR},#end
+			        #if($_parameter.repairDate)REPAIR_DATE = @{_parameter.repairDate,jdbcType=TIMESTAMP},#end
+			        #if($_parameter.descripton && $_parameter.descripton!='')DESCRIPTON = @{_parameter.descripton,jdbcType=VARCHAR},#end
+			        #if($_parameter.repairCode && $_parameter.repairCode!='')REPAIR_CODE = @{_parameter.repairCode,jdbcType=VARCHAR},#end
+			        #if($_parameter.alarmId)ALARM_ID = @{_parameter.alarmId,jdbcType=NUMERIC},#end
+			        #if($_parameter.deviceId)DEVICE_ID = @{_parameter.deviceId,jdbcType=NUMERIC},#end
+			        #if($_parameter.engineerId)ENGINEER_ID = @{_parameter.engineerId,jdbcType=NUMERIC},#end
+			        #if($_parameter.engineerName && $_parameter.engineerName!='')ENGINEER_NAME = @{_parameter.engineerName,jdbcType=VARCHAR},#end
+			        #if($_parameter.dispatchTime)DISPATCH_TIME = @{_parameter.dispatchTime,jdbcType=TIMESTAMP},#end
+			        #if($_parameter.repairMode)REPAIR_MODE = @{_parameter.repairMode,jdbcType=INTEGER},#end
+			        #if($_parameter.repairWorry)REPAIR_WORRY = @{_parameter.repairWorry,jdbcType=INTEGER},#end
+			        #if($_parameter.repairGroupId)REPAIR_GROUP_ID = @{_parameter.repairGroupId,jdbcType=NUMERIC},#end
+			        #if($_parameter.repairGroupName && $_parameter.repairGroupName!='')REPAIR_GROUP_NAME = @{_parameter.repairGroupName,jdbcType=VARCHAR},#end
+			        #if($_parameter.groupEmpId)GROUP_EMP_ID = @{_parameter.groupEmpId,jdbcType=NUMERIC},#end
+			        #if($_parameter.groupEmpName && $_parameter.groupEmpName!='')GROUP_EMP_NAME = @{_parameter.groupEmpName,jdbcType=VARCHAR},#end
+			        #if($_parameter.repairPersonId)REPAIR_PERSON_ID = @{_parameter.repairPersonId,jdbcType=NUMERIC},#end
+			        #if($_parameter.repairPersonName && $_parameter.repairPersonName!='')REPAIR_PERSON_NAME = @{_parameter.repairPersonName,jdbcType=VARCHAR},#end
+			        #if($_parameter.stopHours)STOP_HOURS = @{_parameter.stopHours,jdbcType=NUMERIC},#end
+			        #if($_parameter.expectFinishTime)EXPECT_FINISH_TIME = @{_parameter.expectFinishTime,jdbcType=TIMESTAMP},#end
+			        #if($_parameter.actualFinishTime)ACTUAL_FINISH_TIME = @{_parameter.actualFinishTime,jdbcType=TIMESTAMP},#end
+			        #if($_parameter.delayTime)DELAY_TIME = @{_parameter.delayTime,jdbcType=NUMERIC},#end
+			        #if($_parameter.result && $_parameter.result!='')RESULT = @{_parameter.result,jdbcType=VARCHAR},#end
+			        #if($_parameter.causeType)CAUSE_TYPE = @{_parameter.causeType,jdbcType=INTEGER},#end
+			        #if($_parameter.cause && $_parameter.cause!='')CAUSE = @{_parameter.cause,jdbcType=VARCHAR},#end
+			        #if($_parameter.propose && $_parameter.propose!='')PROPOSE = @{_parameter.propose,jdbcType=VARCHAR},#end
+			        #if($_parameter.costSaving && $_parameter.costSaving!='')COST_SAVING = @{_parameter.costSaving,jdbcType=VARCHAR},#end
+			        #if($_parameter.grade1)GRADE1 = @{_parameter.grade1,jdbcType=INTEGER},#end
+			        #if($_parameter.grade2)GRADE2 = @{_parameter.grade2,jdbcType=INTEGER},#end
+			        #if($_parameter.grade3)GRADE3 = @{_parameter.grade3,jdbcType=INTEGER},#end
+			        #if($_parameter.grade4)GRADE4 = @{_parameter.grade4,jdbcType=INTEGER},#end
+			        #if($_parameter.grade5)GRADE5 = @{_parameter.grade5,jdbcType=INTEGER},#end
+			        #if($_parameter.remark && $_parameter.taskCode!='')REMARK = @{_parameter.remark,jdbcType=VARCHAR},#end
+			        #if($_parameter.status)STATUS = @{_parameter.status,jdbcType=INTEGER},#end
+			        #if($_parameter.updateId)UPDATE_ID = @{_parameter.updateId,jdbcType=NUMERIC},#end
+			        #if($_parameter.updator)UPDATOR = @{_parameter.updator,jdbcType=VARCHAR},#end
+			        #if($_parameter.updateDate)UPDATE_DATE = @{_parameter.updateDate,jdbcType=DATE},#end
+			    ]]>
+			#end
+		WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</update>
+	
+    <!-- 通过 ID 获取对象-->
+	<delete id="deleteById" parameterType="Long" lang="velocity">
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE ID = @{_parameter.id,jdbcType=BIGINT}
+	</delete>
+	
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+			#where()
+				#set($_p = $_parameter.condition)
+				#if($_p.processInstanceId && $_p.processInstanceId != '')
+					AND A.PROCESS_INSTANCE_ID IS NULL
+				#else
+				    AND A.PROCESS_INSTANCE_ID IS NOT NULL
+				#end
+				#if($_p.taskSource && $_p.taskSource != '')
+					#set($_taskSource = $_p.taskSource)
+					AND A.TASK_SOURCE = @{_taskSource}
+				#end
+				#if($_p.deviceId && $_p.deviceId != '')
+					#set($_deviceId = $_p.deviceId)
+					AND A.DEVICE_ID = @{_deviceId}
+				#end
+				#if($_p.urgency && $_p.urgency != '')
+					#set($_urgency = $_p.urgency)
+					AND A.URGENCY = @{_urgency}
+				#end
+				#if($_p.repairDeptId && $_p.repairDeptId != '')
+					#set($_repairDeptId = $_p.repairDeptId)
+					AND A.REPAIR_DEPT_ID = @{_repairDeptId}
+				#end
+				#if($_p.repairGroupId && $_p.repairGroupId != '')
+					#set($_repairGroupId = $_p.repairGroupId)
+					AND A.REPAIR_GROUP_ID = @{_repairGroupId}
+				#end
+				#if($_p.taskCode && $_p.taskCode != '')
+					#set($_taskCode = '%' + $_p.taskCode + '%')
+					AND A.TASK_CODE LIKE @{_taskCode}
+				#end
+				#if($_p.repairCode && $_p.repairCode != '')
+					#set($_repairCode = '%' + $_p.repairCode + '%')
+					AND A.REPAIR_CODE LIKE @{_repairCode}
+				#end
+				#if($_p.descripton && $_p.descripton != '')
+					#set($_descripton = '%' + $_p.descripton + '%')
+					AND A.DESCRIPTON LIKE @{_descripton}
+				#end
+				#if($_p.repairGroupName && $_p.repairGroupName != '')
+					#set($_repairGroupName = '%' + $_p.repairGroupName + '%')
+					AND A.REPAIR_GROUP_NAME LIKE @{_repairGroupName}
+				#end
+				#if($_p.engineerName && $_p.engineerName != '')
+					#set($_engineerName = '%' + $_p.engineerName + '%')
+					AND A.ENGINEER_NAME LIKE @{_engineerName}
+				#end
+				#if($_p.startTimes && $_p.startTimes != '')
+					#set($_startTimes = $_p.startTimes)
+					AND A.REPAIR_DATE >= @{_startTimes,jdbcType=TIMESTAMP}
+				#end
+				#if($_p.endTimes && $_p.endTimes != '')
+					#set($_endTimes = $_p.endTimes)
+					AND A.REPAIR_DATE <= @{_endTimes,jdbcType=TIMESTAMP}
+				#end
+				#if($_p.startTimes1 && $_p.startTimes1 != '')
+					#set($_startTimes1 = $_p.startTimes1)
+					AND A.ACTUAL_FINISH_TIME >= @{_startTimes1,jdbcType=TIMESTAMP}
+				#end
+				#if($_p.endTimes1 && $_p.endTimes1 != '')
+					#set($_endTimes1 = $_p.endTimes1)
+					AND A.ACTUAL_FINISH_TIME <= @{_endTimes1,jdbcType=TIMESTAMP}
+				#end
+				#if($_p.deviceType && $_p.deviceType != '')
+					#set($_deviceType = $_p.deviceType)
+					AND B.DEVICE_TYPE = @{_deviceType}
+				#end	
+				#if($_p.deviceCode && $_p.deviceCode != '')
+					#set($_deviceCode = '%' + $_p.deviceCode + '%')
+					AND B.DEVICE_CODE LIKE @{_deviceCode}
+				#end	
+				#if($_p.deviceName && $_p.deviceName != '')
+					#set($_deviceName = '%' + $_p.deviceName + '%')
+					AND B.DEVICE_NAME LIKE @{_deviceName}
+				#end
+				#if($_p.contact && $_p.contact != '')
+					#set($_contact = '%' + $_p.contact + '%')
+					AND A.CONTACT LIKE @{_contact}
+				#end
+				#if($_p.createId && $_p.createId != '')
+					#set($_createId = $_p.createId)
+					AND A.CREATE_ID = @{_createId}
+				#end	
+			#end
+		]]>	
+	</sql>
+	
+	<sql id="condition_sql1" lang="velocity">
+		<![CDATA[
+			#where()
+				#set($_p = $_parameter.condition)
+				#if($_p.deviceId && $_p.deviceId != '')
+					#set($_deviceId = $_p.deviceId)
+					AND A.DEVICE_ID = @{_deviceId}
+				#end
+			#end
+		]]>	
+	</sql>
+
+	<!-- 按条件查询记录-->
+    <select id="findByCondition" parameterType="com.supconit.repair.entities.Repair" resultMap="RepairResultMap" lang="velocity" databaseId="oracle">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre"/>
+		<include refid="condition_sql"/>
+		#order($_parameter.condition,"A.ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+    <!-- 按条件查询记录-->
+    <select id="findByCondition" parameterType="com.supconit.repair.entities.Repair" resultMap="RepairResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		 select
+			A.*,
+			B.DEVICE_NAME AS DEVICE_NAME
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"A.ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/> A
+		LEFT JOIN DEVICE B ON B.ID = A.DEVICE_ID
+		<include refid="condition_sql"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+    	<!-- 按条件查询记录-->
+    <select id="findByDeviceId" parameterType="com.supconit.repair.entities.Repair" resultMap="RepairResultMap" lang="velocity" databaseId="oracle">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre"/>
+		<include refid="condition_sql1"/>
+		#order($_parameter.condition,"A.ID DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+    <!-- 按条件查询记录-->
+    <select id="findByDeviceId" parameterType="com.supconit.repair.entities.Repair" resultMap="RepairResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		 select
+			A.*,
+			B.DEVICE_NAME AS DEVICE_NAME
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"A.ID DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM <include refid="TABLE_NAME"/> A
+		LEFT JOIN DEVICE B ON B.ID = A.DEVICE_ID
+		<include refid="condition_sql1"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+    
+    <select id="countByCondition" parameterType="com.supconit.repair.entities.Repair" resultType="long" lang="velocity">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+	
+	<select id="countByDeviceId" parameterType="com.supconit.repair.entities.Repair" resultType="long" lang="velocity">
+		<include refid="count_pre" />
+		<include refid="condition_sql1" />
+	</select>
+	
+	
+    <select id="findByRepairType" parameterType="com.supconit.repair.entities.Repair" resultMap="RepairResultMap">
+    	select count(A.ID)SUM_REPAIR,e.enum_text REPAIR_TYPE_VALUE
+        FROM REPAIR A 
+        LEFT JOIN DEVICE D ON A.DEVICE_ID=D.ID
+        left join enum_detail e on e.enum_value=d.repair_type and e.type_id=62
+        <where>
+			A.ACTUAL_FINISH_TIME IS NOT NULL and 
+	        <if test="causeType!= null"> A.CAUSE_TYPE =#{causeType} and</if>
+	        <if test="startTime != null and startTime != ''">	A.REPAIR_DATE >=#{startTime} and</if>
+	        <if test="endTime != null and endTime != ''">A.REPAIR_DATE &lt;#{endTime} and </if>
+	        1=1 
+		</where>
+		 group by e.enum_text
+    </select>
+    <select id="findByCauseType" parameterType="com.supconit.repair.entities.Repair" resultMap="RepairResultMap">
+	select count(A.ID)SUM_CAUSE,e.enum_text CAUSE_VALUE
+		    FROM REPAIR A 
+		    LEFT JOIN DEVICE D ON A.DEVICE_ID=D.ID
+		    left join enum_detail e on E.ENUM_VALUE=A.CAUSE_TYPE and E.TYPE_ID=61
+		    <where>
+				A.ACTUAL_FINISH_TIME IS NOT NULL and 
+		        <if test="causeType!= null"> A.CAUSE_TYPE =#{causeType} and</if>
+		        <if test="startTime != null and startTime != ''">	A.REPAIR_DATE >=#{startTime} and</if>
+		        <if test="endTime != null and endTime != ''">A.REPAIR_DATE &lt;#{endTime} and </if>
+		        1=1 
+			</where>
+		    group by e.enum_text
+	</select>
+    <select id="findByRepairMode" parameterType="com.supconit.repair.entities.Repair" resultMap="RepairResultMap">
+		select count(a.repair_mode) sum_mode,(case when a.repair_mode=0 then '委外' else  '自修' end) mode_value,
+		to_char(a.repair_date,'yyyy-mm') repair_month,a.repair_mode
+		from repair a
+		<where>
+			A.ACTUAL_FINISH_TIME IS NOT NULL and
+	        <if test="startTime != null and startTime != ''">	A.REPAIR_DATE >=to_date(#{startTime},'yyyy-mm') and</if>
+	        <if test="endTime != null and endTime != ''">A.REPAIR_DATE &lt;to_date(#{endTime},'yyyy-mm') and </if>
+	        1=1 
+		</where>
+		group by a.repair_mode,to_char(a.repair_date,'yyyy-mm')
+	</select>
+    <select id="findByCostSaving" parameterType="com.supconit.repair.entities.Repair" resultMap="RepairResultMap">
+		select nvl(sum(a.cost_saving),0) COST_SAVING,
+		nvl((select sum(t.cost_saving)
+		 from repair t
+		 left join device s on t.device_id=s.id
+		 where t.actual_finish_time is not null and s.device_type=1
+		 and to_char(t.actual_finish_time,'yyyy')=#{startTime}-1 and
+		 to_char(t.actual_finish_time,'mm')=to_char(a.ACTUAL_FINISH_TIME,'mm')
+		 group by to_char(t.ACTUAL_FINISH_TIME,'mm')
+		),0) lastCostSaving,to_char(a.ACTUAL_FINISH_TIME,'mm') repair_month
+		from repair a
+		LEFT JOIN DEVICE D ON A.DEVICE_ID=D.ID
+		<where>
+			A.ACTUAL_FINISH_TIME IS NOT NULL and
+			d.DEVICE_TYPE=1 and 
+	        <if test="startTime != null and startTime != ''">to_char(a.ACTUAL_FINISH_TIME,'yyyy') =#{startTime}</if>
+		</where>
+		group by to_char(a.ACTUAL_FINISH_TIME,'mm')
+    	order by to_char(a.ACTUAL_FINISH_TIME,'mm')
+	</select>
+    <select id="findByRepairTrend" parameterType="com.supconit.repair.entities.Repair" resultMap="RepairResultMap">
+		select count(a.id) repairTimes,to_char(a.REPAIR_DATE, 'mm') repair_month
+	    from repair a
+	  	left join device d on a.device_id = d.id
+		<where>
+	       <!--  <if test="deviceType != null">d.device_type =#{deviceType} and</if> -->
+	        <if test="startTime != null and startTime != ''">to_char(a.REPAIR_DATE,'yyyy') =#{startTime} and</if>
+	        1=1
+		</where>
+		group by to_char(a.REPAIR_DATE,'mm')
+    	order by to_char(a.REPAIR_DATE,'mm')
+	</select>
+    <select id="findByRepairArea" parameterType="com.supconit.repair.entities.Repair" resultMap="RepairResultMap">
+		select count(a.id) repairTimes,g.area_name
+	    from geo_area g 
+		  left join repair a on g.id=a.area_id and<!--  <if test="deviceType != null">and d.device_type =#{deviceType} and</if> -->
+		  <if test="startTime != null and startTime != ''">to_char(a.REPAIR_DATE,'yyyy') =#{startTime}</if>
+		  <if test="endTime != null and endTime != ''">and to_char(a.REPAIR_DATE,'mm') =#{endTime}</if>
+		  left join device d on a.device_id = d.id
+		<where>
+			 g.area_type=3 
+		</where>
+		group by g.area_name
+		order by g.area_name
+	</select>
+    <select id="findByDelay" parameterType="com.supconit.repair.entities.Repair" resultMap="RepairResultMap">
+		select 1-count(a.delay_time)/count(a.ACTUAL_FINISH_TIME) time_rate,to_char(a.ACTUAL_FINISH_TIME,'yyyy-mm') repair_month from repair a
+		<where>
+			A.ACTUAL_FINISH_TIME IS NOT NULL and
+	        <if test="repairMode != null ">	A.REPAIR_MODE =#{repairMode} and</if>
+	        <if test="startTime != null and startTime != ''">	to_char(A.REPAIR_DATE,'yyyy') =#{startTime} and</if>
+	        1=1 
+		</where>
+		group by to_char(a.ACTUAL_FINISH_TIME,'yyyy-mm')
+	</select>
+    <select id="findGradeByGroups" parameterType="com.supconit.repair.entities.Repair" resultMap="RepairResultMap" databaseId="oracle">
+		select avg(nvl(a.grade3,0)) avg_grade,a.repair_group_name from repair a
+		<where>
+			A.ACTUAL_FINISH_TIME IS NOT NULL and a.repair_mode=0 and
+	        <if test="startTime != null and startTime != ''">	A.REPAIR_DATE >=to_date(#{startTime},'yyyy-mm') and</if>
+	        <if test="endTime != null and endTime != ''">A.REPAIR_DATE &lt;to_date(#{endTime},'yyyy-mm') and </if>
+	        1=1 
+		</where>
+		group by a.repair_group_name
+	</select>
+    <select id="findByGrade" parameterType="com.supconit.repair.entities.Repair" resultMap="RepairResultMap" databaseId="oracle">
+		SELECT nvl(a.grade3,0) grade3,count(a.grade3) sum_grade3
+		FROM REPAIR a
+		<where>
+			A.ACTUAL_FINISH_TIME IS NOT NULL and a.repair_mode=0 and
+	        <if test="startTime != null and startTime != ''">	A.REPAIR_DATE >=to_date(#{startTime},'yyyy-mm') and</if>
+	        <if test="endTime != null and endTime != ''">A.REPAIR_DATE &lt;to_date(#{endTime},'yyyy-mm') and </if>
+	        1=1 
+		</where>
+		group by a.grade3
+	</select>
+    <select id="findByGrade" parameterType="com.supconit.repair.entities.Repair" resultMap="RepairResultMap" databaseId="sqlserver">
+		SELECT isnull(a.grade3,0) grade3,count(a.grade3) sum_grade3
+		FROM REPAIR a
+		<where>
+			A.ACTUAL_FINISH_TIME IS NOT NULL and a.repair_mode=0 and
+	        <if test="startTime != null and startTime != ''">	A.REPAIR_DATE >=to_date(#{startTime},'yyyy-mm') and</if>
+	        <if test="endTime != null and endTime != ''">A.REPAIR_DATE &lt;to_date(#{endTime},'yyyy-mm') and </if>
+	        1=1 
+		</where>
+		group by a.grade3
+	</select>
+    <select id="findGradeByGroups" parameterType="com.supconit.repair.entities.Repair" resultMap="RepairResultMap" databaseId="sqlserver">
+		<where>
+			A.ACTUAL_FINISH_TIME IS NOT NULL and a.repair_mode=0 and
+	        <if test="startTime != null and startTime != ''">	A.REPAIR_DATE >=to_date(#{startTime},'yyyy-mm') and</if>
+	        <if test="endTime != null and endTime != ''">A.REPAIR_DATE &lt;to_date(#{endTime},'yyyy-mm') and </if>
+	        1=1 
+		</where>
+		group by a.repair_group_name
+	</select>
+	<select id="queryByGrade" parameterType="com.supconit.repair.entities.Repair" resultMap="RepairResultMap" databaseId="oracle">
+		select avg(nvl(a.grade3,0)) avg_grade,to_char(a.actual_finish_time,'yyyy-mm') repair_month
+		from repair a
+		<where>
+			A.ACTUAL_FINISH_TIME IS NOT NULL and a.repair_mode=0 and
+	        <if test="repairMonth != null and repairMonth!=''">to_char(A.ACTUAL_FINISH_TIME,'yyyy') =#{repairMonth} and</if>
+	        1=1 
+		</where>
+		group by to_char(a.ACTUAL_FINISH_TIME,'yyyy-mm')
+	</select>
+	<select id="queryByGrade" parameterType="com.supconit.repair.entities.Repair" resultMap="RepairResultMap" databaseId="sqlserver">
+		select avg(isnull(a.grade3,0)) avg_grade,to_char(a.actual_finish_time,'yyyy-mm') repair_month
+		from repair a
+		<where>
+			A.ACTUAL_FINISH_TIME IS NOT NULL and a.repair_mode=0 and 
+	        <if test="repairMonth != null and repairMonth!=''">to_char(A.ACTUAL_FINISH_TIME,'yyyy') =#{repairMonth} and</if>
+	        1=1 
+		</where>
+		group by to_char(a.ACTUAL_FINISH_TIME,'yyyy-mm')
+	</select>
+    <!-- 删除多条记录-->
+	<delete id="deleteByIds" lang="velocity">
+        DELETE FROM <include refid="TABLE_NAME"/> WHERE 
+		#repeat( $_parameter.ids $id "," " ID IN (" ")" )
+			@{id,jdbcType=BIGINT}
+		#end 
+  	</delete>
+  	
+  	<!-- 监控中心start -->
+  	
+  		<sql id="selectRepairMonitor_pre" lang="velocity">
+			select
+				A.*
+			FROM
+			<include refid="TABLE_NAME"/> A
+			LEFT JOIN DEVICE D ON A.DEVICE_ID = D.ID
+		</sql>
+		
+		<sql id="countRepairMonitor_pre" lang="velocity">
+			SELECT
+			COUNT(*)
+			FROM
+			<include refid="TABLE_NAME"/> A
+			LEFT JOIN DEVICE D ON A.DEVICE_ID = D.ID
+		</sql>
+		<sql id="conditionRepairMonitor_sql" lang="velocity">
+			<![CDATA[
+			#where()
+				PROCESS_INSTANCE_ID IS NOT NULL
+				#set($_p = $_parameter.condition)
+				#if($_p.taskCode && $_p.taskCode != '')
+					#set($_taskCode = '%' + $_p.taskCode + '%')
+					AND A.TASK_CODE LIKE @{_taskCode}
+				#end
+				#if($_p.deptChildIds && $_p.deptChildIds.size()>0)
+					#set($_deptChildIds =$_p.deptChildIds)
+					AND 
+					#repeat( $_deptChildIds $id "," " A.REPAIR_DEPT_ID IN (" ")" )
+						@{id,jdbcType=BIGINT}
+					#end
+				#end
+				#if($_p.startTimes && $_p.startTimes != '')
+					#set($_startTimes = $_p.startTimes)
+					AND A.REPAIR_DATE >= @{_startTimes,jdbcType=TIMESTAMP}
+				#end
+				#if($_p.endTimes && $_p.endTimes != '')
+					#set($_endTimes = $_p.endTimes)
+					AND A.REPAIR_DATE <= @{_endTimes,jdbcType=TIMESTAMP}
+				#end
+				#if($_p.repairGroupId && $_p.repairGroupId != '')
+					#set($_repairGroupId = $_p.repairGroupId)
+					AND A.REPAIR_GROUP_ID = @{_repairGroupId}
+				#end
+				#if($_p.taskSource && $_p.taskSource != '')
+					#set($_taskSource = $_p.taskSource)
+					AND A.TASK_SOURCE = @{_taskSource}
+				#end
+				#if($_p.taskCode && $_p.taskCode != '')
+					#set($_taskCode = '%' + $_p.taskCode + '%')
+					AND A.TASK_CODE LIKE @{_taskCode}
+				#end
+				#if($_p.descripton && $_p.descripton != '')
+					#set($_descripton = '%' + $_p.descripton + '%')
+					AND A.DESCRIPTON LIKE @{_descripton}
+				#end
+				#if($_p.urgency && $_p.urgency != 0)
+					#set($_urgency = $_p.urgency)
+					AND A.URGENCY = @{_urgency}
+				#end
+				#if($_p.contact && $_p.contact != '')
+					#set($_contact = '%' + $_p.contact + '%')
+					AND A.CONTACT LIKE @{_contact}
+				#end
+				#if($_p.contactTel && $_p.contactTel != '')
+					#set($_contactTel = '%' + $_p.contactTel + '%')
+					AND A.CONTACT_TEL LIKE @{_contactTel}
+				#end
+				#if($_p.deviceCategoryChildIds && $_p.deviceCategoryChildIds.size()>0)
+					#set($_deviceCategoryChildIds =$_p.deviceCategoryChildIds)
+					AND 
+					#repeat( $_deviceCategoryChildIds $id "," " D.CATEGORY_ID IN (" ")" )
+						@{id,jdbcType=BIGINT}
+					#end
+				#end
+				#if($_p.geoAreaChildIds && $_p.geoAreaChildIds.size()>0)
+					#set($_geoAreaChildIds =$_p.geoAreaChildIds)
+					AND 
+					#repeat( $_geoAreaChildIds $id "," " AREA_ID IN (" ")" )
+						@{id,jdbcType=BIGINT}
+					#end
+				#end
+			#end
+			]]>	
+		</sql>
+	  	<!-- 按条件查询记录-->
+	    <select id="findRepairMonitorPages" parameterType="com.supconit.repair.entities.Repair" resultMap="RepairResultMap" lang="velocity" databaseId="oracle">
+	        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+			<include refid="selectRepairMonitor_pre"/>
+			<include refid="conditionRepairMonitor_sql"/>
+			#order($_parameter.condition,"A.ID DESC")
+			<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	    </select>
+	    
+	    <!-- 按条件查询记录-->
+	    <select id="findRepairMonitorPages" parameterType="com.supconit.repair.entities.Repair" resultMap="RepairResultMap" lang="velocity" databaseId="sqlserver">
+	        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+			SELECT
+				A.*
+			<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+			#order($_parameter.condition,"A.ID DESC")
+			<include refid="_PUBLIC_V.AS_ROW_NUM" />
+			FROM <include refid="TABLE_NAME"/> A
+			LEFT JOIN DEVICE D ON A.DEVICE_ID = D.ID
+			<include refid="conditionRepairMonitor_sql"/>
+			<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	    </select>
+	    
+	    
+	    <select id="countRepairMonitorPages" parameterType="com.supconit.repair.entities.Repair" resultType="long" lang="velocity">
+			<include refid="countRepairMonitor_pre" />
+			<include refid="conditionRepairMonitor_sql" />
+		</select>
+		
+  	<!-- 监控中心end -->
+	
+	<select id="getByDeviceId" resultMap="RepairResultMap" parameterType="Long" lang="velocity">
+		SELECT
+			a.*
+		FROM <include refid="TABLE_NAME" /> a
+    	WHERE 
+    		a.DEVICE_ID = @{_parameter.deviceId, jdbcType=BIGINT}
+    	and
+    		a.ACTUAL_FINISH_TIME = (
+	    		SELECT MIN(b.ACTUAL_FINISH_TIME) FROM <include refid="TABLE_NAME" /> b
+	    		WHERE 
+	    			b.DEVICE_ID = @{_parameter.deviceId, jdbcType=BIGINT}
+	    		and
+	    			b.STATUS = @{_parameter.status, jdbcType=BIGINT}
+        	)
+	</select>
+</mapper>

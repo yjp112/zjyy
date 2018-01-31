@@ -1,0 +1,69 @@
+      <div id="processAudit" class="ui-box">
+          <div class="ui-box-head">
+            <div class="ui-box-head-center">
+              <span class="ui-box-head-title">审批信息</span>
+            </div>
+          </div>
+          <div class="ui-box-container">
+            <div class="ui-box-content">  
+	               <div class="ui-form-item">
+				      <label class="ui-label" for="">
+				        <span class="ui-form-required">*</span>流转意见
+				      </label>
+				      <select class="ui-select">
+				        <option>--请选择--</option>
+				        <option>类别编码2</option>
+				        <option>类别编码3</option>
+				        <option>类别编码4</option>
+				      </select>
+	              </div>
+			    <div class="ui-form-item ui-form-item-textarea">
+			      <label class="ui-label" for="" ></label>
+			      <textarea  id="textAreaId" class="k-textbox k-textarea"></textarea>
+			    </div>
+          	</div>
+          </div>
+        <div>
+		    <table id='processlog_table' class="ui-table">
+		        <thead>
+					<tr>
+						<th  width="30">序号</th>
+						<th>操作时间</th>
+						<th>操作者</th>
+						<th>操作类型</th>
+						<th>流转意见</th>
+						<th>
+								<a class="btn btn-small ui-box-toggle" href="#" data-trigger="collapse" data-target="#collapse9"><i class="iconfont icon-caret-down"></i></a>
+					
+          				</th>
+					</tr>
+		        </thead>
+		        <tbody id="collapse9" style="display:none">
+                   <tr>
+                    <td>1</td>
+                    <td>111</td>
+                    <td>111</td>
+                    <td>11</td>
+                    <td>1111</td>
+                    <td></td>
+                   </tr>
+                   <tr>
+                    <td>1</td>
+                    <td>111</td>
+                    <td>111</td>
+                    <td>11</td>
+                    <td>1111</td>
+                    <td></td>
+                   </tr>
+                   <tr>
+                    <td>1</td>
+                    <td>111</td>
+                    <td>111</td>
+                    <td>11</td>
+                    <td>1111</td>
+                    <td></td>
+                   </tr>
+		        </tbody>
+		   </table>     
+      </div>
+      </div>

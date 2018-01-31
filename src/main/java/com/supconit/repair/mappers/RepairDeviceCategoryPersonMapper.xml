@@ -1,0 +1,344 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+<mapper namespace="com.supconit.repair.entities.RepairDeviceCategoryPerson">
+
+	<resultMap type="com.supconit.repair.entities.RepairDeviceCategoryPerson" id="RepairDeviceCategoryPersonResultMap">      
+        <result property="id" column="ID" />
+        <result property="categoryType" column="CATEGORY_TYPE" />
+        <result property="categoryId" column="CATEGORY_ID" />
+        <result property="areaId" column="AREA_ID" />
+        <result property="personId" column="PERSON_ID" />
+        <result property="createId" column="CREATE_ID" />
+        <result property="creator" column="CREATOR" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="personName" column="PERSON_NAME" />
+        <result property="departmentName" column="DEPT_NAME" />
+        <result property="departmentId" column="DEPT_ID" />
+        <result property="repairGroupId" column="GROUP_ID" />
+        <result property="repairGroupName" column="GROUP_NAME" />
+        <result property="repairMode" column="REPAIR_MODE" />
+        <result property="categoryName" column="CATEGORY_NAME" />
+        <result property="telephone" column="PERSON_TELEPHONE" />
+        <result property="areaName" column="AREA_NAME" /> 
+	</resultMap>
+	
+	<sql id="TABLE_NAME" lang="velocity">REPAIR_EVT_CATEGORY_PERSON</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+	
+	<sql id="select_pre" lang="velocity">
+	SELECT
+		    A.AREA_ID,
+		    A.CATEGORY_TYPE,
+			A.CATEGORY_ID,
+			A.CREATE_DATE,
+			A.CREATE_ID,
+			A.CREATOR,
+			A.ID,
+			A.REPAIR_MODE,
+			A.PERSON_ID,
+			A.PERSON_NAME,
+			A.PERSON_TELEPHONE,
+			A.FULL_LEVEL_NAME AS AREA_NAME,
+			A.GROUP_ID,
+			A.GROUP_NAME,
+			#if($_databaseId=='oracle') 
+        		nvl(A.FULL_LEVEL_NAME_DEVICE,'维修类别簇') CATEGORY_NAME
+	        #else 
+	        	ISNULL(A.FULL_LEVEL_NAME_DEVICE,'维修类别簇') CATEGORY_NAME 
+	        #end	
+	FROM
+		(
+			SELECT
+				A.AREA_ID,
+				A.CATEGORY_TYPE,
+				A.CATEGORY_ID,
+				A.CREATE_DATE,
+				A.CREATE_ID,
+				A.CREATOR,
+				A.ID,
+				A.PERSON_ID,
+				A.REPAIR_MODE,
+				B.NAME AS PERSON_NAME,
+				B.PERSON_TELEPHONE,
+				E.CATEGORY_NAME,
+				E.FULL_LEVEL_NAME FULL_LEVEL_NAME_DEVICE,
+				F.FULL_LEVEL_NAME,
+				G.ID AS GROUP_ID,
+				G.GROUP_NAME AS GROUP_NAME
+			FROM
+				<include refid="TABLE_NAME"/> A
+			LEFT JOIN HO_PERSON B ON B.ID = A.PERSON_ID
+			LEFT JOIN DEVICE_CATEGORY E ON E.ID=A.CATEGORY_ID
+			LEFT JOIN GEO_AREA F ON F.ID=A.AREA_ID
+			LEFT JOIN DUTY_GROUP G ON G.ID=A.REPAIR_GROUP_ID
+		) A
+
+	</sql>
+	<sql id="count_pre" lang="velocity">
+		SELECT
+		count(*)			
+			FROM
+				(
+					SELECT
+						A.AREA_ID,
+						A.CATEGORY_TYPE,
+						A.CATEGORY_ID,
+						A.CREATE_DATE,
+						A.CREATE_ID,
+						A.CREATOR,
+						A.ID,
+						A.PERSON_ID,
+						A.REPAIR_MODE,
+						B.NAME AS PERSON_NAME,
+						B.PERSON_TELEPHONE,
+						E.CATEGORY_NAME,
+				        F.FULL_LEVEL_NAME,
+						G.ID AS GROUP_ID,
+				        G.GROUP_NAME AS GROUP_NAME
+					FROM
+						<include refid="TABLE_NAME"/> A
+			            LEFT JOIN HO_PERSON B ON B.ID = A.PERSON_ID
+						LEFT JOIN DEVICE_CATEGORY E ON E.ID=A.CATEGORY_ID
+						LEFT JOIN GEO_AREA F ON F.ID=A.AREA_ID
+						LEFT JOIN DUTY_GROUP G ON G.ID=A.REPAIR_GROUP_ID
+				) A
+		
+	</sql>
+    
+	<insert id="insert" parameterType="com.supconit.repair.entities.RepairDeviceCategoryPerson" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE"><include refid="SEQUENCE" /></selectKey>
+        <include refid="insert_sql" />
+	</insert>
+	<insert id="insert" parameterType="com.supconit.repair.entities.RepairDeviceCategoryPerson" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="insert_sql"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    
+	<!-- 插入记录-->
+    <sql id="insert_sql" lang="velocity">
+        INSERT INTO <include refid="TABLE_NAME"/>(
+        	#if($_databaseId == 'oracle') ID, #end
+        	CATEGORY_TYPE,
+	        CATEGORY_ID,
+	        AREA_ID,
+	        PERSON_ID,
+	        REPAIR_MODE,
+	        REPAIR_GROUP_ID,
+	        CREATE_ID,
+	        CREATOR,
+	        CREATE_DATE
+        ) VALUES (
+        	#if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC}, #end
+        	@{_parameter.categoryType,jdbcType=BIGINT},
+	        @{_parameter.categoryId,jdbcType=BIGINT},
+	        @{_parameter.areaId,jdbcType=BIGINT},
+	        @{_parameter.personId,jdbcType=BIGINT},
+	        @{_parameter.repairMode,jdbcType=BIGINT},
+	        @{_parameter.repairGroupId,jdbcType=BIGINT},
+	        @{_parameter.createId,jdbcType=BIGINT},
+	        @{_parameter.creator,jdbcType=VARCHAR},
+	        @{_parameter.createDate,jdbcType=TIMESTAMP}
+        )
+    </sql>
+
+	<select id="getById" resultMap="RepairDeviceCategoryPersonResultMap" parameterType="Long" lang="velocity">
+		<include refid="select_pre" />        
+        WHERE A.ID = @{_parameter, jdbcType=BIGINT}
+	</select>
+	
+    <select id="findAll" resultMap="RepairDeviceCategoryPersonResultMap" lang="velocity">
+		<include refid="select_pre" />
+		ORDER BY A.SORT
+	</select>
+	
+	<select id="findByCategoryIdAndAreaID" parameterType="map" resultMap="RepairDeviceCategoryPersonResultMap" lang="velocity">
+        <include refid="select_pre" />
+        WHERE A.CATEGORY_TYPE= @{categoryType} AND A.CATEGORY_ID= @{categoryId} AND AREA_ID = @{areaId}
+    </select>
+	
+	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.repair.entities.RepairDeviceCategoryPerson" lang="velocity">
+		UPDATE <include refid="TABLE_NAME"/>
+		#mset()
+			<![CDATA[
+			       #if($_parameter.categoryType)CATEGORY_TYPE = @{_parameter.categoryType,jdbcType=BIGINT},#end
+			       #if($_parameter.categoryId)CATEGORY_ID = @{_parameter.categoryId,jdbcType=BIGINT},#end
+			       #if($_parameter.personId)PERSON_ID = @{_parameter.personId,jdbcType=BIGINT},#end
+			       #if($_parameter.areaId)AREA_ID = @{_parameter.areaId,jdbcType=BIGINT},#end
+			       #if($_parameter.personId)REPAIR_MODE = @{_parameter.repairMode,jdbcType=BIGINT},#end
+			       #if($_parameter.personId)REPAIR_GROUP_ID = @{_parameter.repairGroupId,jdbcType=BIGINT},#end
+			]]>
+		#end
+		WHERE ID = @{_parameter.id,jdbcType=BIGINT}
+	</update>
+	
+    <!-- 通过 ID 获取对象-->
+	<delete id="deleteById" parameterType="Long" lang="velocity">
+		DELETE FROM <include refid="TABLE_NAME"/> WHERE ID = @{_parameter.id,jdbcType=NUMERIC}
+	</delete>
+	
+	<delete id="deleteBypersonId" parameterType="com.supconit.repair.entities.RepairDeviceCategoryPerson" lang="velocity">
+		DELETE FROM <include refid="TABLE_NAME"/> 
+		WHERE PERSON_ID = @{_parameter.oldPersonId,jdbcType=BIGINT} 
+		AND REPAIR_MODE = @{_parameter.oldRepairMode,jdbcType=BIGINT}
+		AND REPAIR_GROUP_ID = @{_parameter.oldRepairGroupId,jdbcType=BIGINT}
+		AND CATEGORY_TYPE = @{_parameter.oldCategoryType,jdbcType=BIGINT}
+		AND CATEGORY_ID = @{_parameter.oldCategoryId,jdbcType=BIGINT} 
+	</delete>
+	
+	<sql id="condition_sql" lang="velocity">
+		<![CDATA[
+		#where()
+			#set($_p = $_parameter.condition)
+			#if($_p.id)
+				#set($_id =$_p.id)
+				AND A.ID = @{_id}
+			#end
+			#if($_p.repairMode)
+				#set($_repairMode =$_p.repairMode)
+				AND A.REPAIR_MODE = @{_repairMode}
+			#end
+			#if($_p.categoryType)
+				#set($_categoryType =$_p.categoryType)
+				AND A.CATEGORY_TYPE = @{_categoryType}
+			#end
+			#if($_p.personName && $_p.personName != '')
+				#set($_personName = '%' + $_p.personName + '%')
+				AND A.PERSON_NAME LIKE @{_personName}
+			#end
+			#if($_p.repairGroupId)
+				#set($_repairGroupId =$_p.repairGroupId)
+				AND A.GROUP_ID = @{_repairGroupId}
+			#end
+			#if($_p.areaId && $_p.lstLocationId && $_p.lstLocationId.size()>0)
+				#set($_lstLocationId =$_p.lstLocationId)
+				AND 
+				#repeat( $_lstLocationId $id "," " a.AREA_ID IN (" ")" )
+		    		@{id,jdbcType=BIGINT}
+				#end
+			#end
+			#if($_p.categoryId && $_p.lstCategoryId && $_p.lstCategoryId.size()>0)
+				#set($_lstCategoryId =$_p.lstCategoryId)
+				AND 
+				#repeat( $_lstCategoryId $id "," " a.CATEGORY_ID IN (" ")" )
+		    		@{id,jdbcType=BIGINT}
+				#end
+			#end
+			
+		#end
+		]]>
+	</sql>
+    
+    <!-- 按条件查询记录-->
+    <select id="findByCondition" parameterType="com.supconit.repair.entities.RepairDeviceCategoryPerson" resultMap="RepairDeviceCategoryPersonResultMap" lang="velocity" databaseId="oracle">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre"/>
+		<include refid="condition_sql"/>
+		#order($_parameter.condition,"A.CREATE_DATE DESC")
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+    
+    	<!-- 按条件查询记录-->
+    <select id="findByCondition" parameterType="com.supconit.repair.entities.RepairDeviceCategoryPerson" resultMap="RepairDeviceCategoryPersonResultMap" lang="velocity" databaseId="sqlserver">
+        <include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+			A.AREA_ID,
+			A.CATEGORY_TYPE,
+			A.CATEGORY_ID,
+			A.CREATE_DATE,
+			A.CREATE_ID,
+			A.CREATOR,
+			A.ID,
+			A.PERSON_ID,
+			A.REPAIR_MODE,
+			A.PERSON_NAME,
+			A.PERSON_TELEPHONE,
+			A.GROUP_ID,
+			A.GROUP_NAME,
+			ISNULL(A.FULL_LEVEL_NAME_DEVICE,'维修类别簇') CATEGORY_NAME,
+			A.FULL_LEVEL_NAME AS AREA_NAME
+		<include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+		#order($_parameter.condition,"A.CREATE_DATE DESC")
+		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM (
+			SELECT
+				A.AREA_ID,
+				A.CATEGORY_TYPE,
+				A.CATEGORY_ID,
+				A.CREATE_DATE,
+				A.CREATE_ID,
+				A.CREATOR,
+				A.ID,
+				A.PERSON_ID,
+				A.REPAIR_MODE,
+				B.NAME AS PERSON_NAME,
+				B.PERSON_TELEPHONE,
+				E.CATEGORY_NAME,
+				E.FULL_LEVEL_NAME FULL_LEVEL_NAME_DEVICE,
+				F.FULL_LEVEL_NAME,
+				G.ID AS GROUP_ID,
+				G.GROUP_NAME AS GROUP_NAME
+			FROM
+				<include refid="TABLE_NAME"/> A
+			LEFT JOIN HO_PERSON B ON B.ID = A.PERSON_ID
+			LEFT JOIN DEVICE_CATEGORY E ON E.ID=A.CATEGORY_ID
+			LEFT JOIN GEO_AREA F ON F.ID=A.AREA_ID
+			LEFT JOIN DUTY_GROUP G ON G.ID=A.REPAIR_GROUP_ID
+		) A
+		<include refid="condition_sql"/>
+		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+    </select>
+
+    <select id="countByCondition" resultType="long" lang="velocity">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+	
+	<!-- 通过personid和categoryid回显树 -->
+	<select id="findByPersonIdandCategoryId"  parameterType="com.supconit.repair.entities.RepairDeviceCategoryPerson" resultMap="RepairDeviceCategoryPersonResultMap" lang="velocity">
+	    SELECT *
+		FROM
+		<include refid="TABLE_NAME"/> A
+        WHERE A.PERSON_ID = @{_parameter.personId} AND A.CATEGORY_TYPE= @{_parameter.categoryType} AND A.CATEGORY_ID= @{_parameter.categoryId} AND  REPAIR_MODE = @{_parameter.repairMode} AND REPAIR_GROUP_ID = @{_parameter.repairGroupId} 
+	</select>
+    
+	<!-- 去重复 -->
+	<delete id="deleteForDistinct" lang="velocity">
+	delete from <include refid="TABLE_NAME"/>
+	where id not in (select min(id) from <include refid="TABLE_NAME"/>  
+	GROUP BY REPAIR_MODE,CATEGORY_TYPE,CATEGORY_ID,AREA_ID,PERSON_ID,REPAIR_GROUP_ID)
+	</delete>
+	
+	<!-- 批量插入 -->
+   <insert id="insertlist" lang="velocity">
+ 	INSERT INTO <include refid="TABLE_NAME"/>(
+     	#if($_databaseId == 'oracle') ID, #end
+		CATEGORY_TYPE,
+		CATEGORY_ID,
+        AREA_ID,
+        PERSON_ID,
+        REPAIR_MODE,
+	    REPAIR_GROUP_ID,
+        CREATE_ID,
+        CREATOR,
+        CREATE_DATE
+	) SELECT 
+		#if($_databaseId == 'oracle') SEQ_<include refid="TABLE_NAME"/>.NEXTVAL, #end
+		@{_parameter.person.categoryType,jdbcType=BIGINT},
+		@{_parameter.person.categoryId,jdbcType=BIGINT},
+		a.ID,
+		@{_parameter.person.personId,jdbcType=BIGINT},
+		@{_parameter.person.repairMode,jdbcType=BIGINT},
+		@{_parameter.person.repairGroupId,jdbcType=BIGINT},
+		@{_parameter.person.createId,jdbcType=BIGINT},
+		@{_parameter.person.creator,jdbcType=VARCHAR},
+		@{_parameter.person.createDate,jdbcType=TIMESTAMP}
+		FROM GEO_AREA a WHERE 
+		#repeat( $_parameter.list $areaId "," " a.ID IN (" ")" )
+		    @{areaId,jdbcType=BIGINT}
+		#end
+	</insert>
+	
+</mapper>

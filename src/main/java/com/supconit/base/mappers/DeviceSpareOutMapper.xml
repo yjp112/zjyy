@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://hc.supconit.com/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supconit.base.entities.DeviceSpareOut">
+
+	<resultMap type="com.supconit.base.entities.DeviceSpareOut" id="DeviceSpareOutResultMap">
+		<result property="id" column="ID"/> 
+        <result property="spareId" column="SPARE_ID" />
+        <result property="getSum" column="GET_SUM" />
+        <result property="getDate" column="GET_DATE" />
+        <result property="getor" column="GETOR" />
+        <result property="affirmor" column="AFFIRMOR" />
+        <result property="remark" column="REMARK" />
+	</resultMap>
+	<sql id="CURRENT_DATE_TIME">		
+		<if test="_databaseId == 'microsoft sql server'">getDate()</if>
+	</sql>
+    <!-- 获取记录列表-->
+    <sql id="select_pre" lang="velocity">
+    	SELECT
+    		*
+		FROM
+			DEVICE_SPARE_OUT 
+    </sql>
+    <sql id="count_pre" lang="velocity">
+		SELECT
+			COUNT(d.id)
+		FROM
+			 DEVICE_SPARE_OUT 
+
+	</sql>
+	<sql id="condition_sql" lang="velocity">
+	</sql>
+    
+    <!-- 按条件查询记录-->
+	<select id="findByCondition" parameterType="com.supconit.base.entities.DeviceSpareOut" resultMap="DeviceSpareOutResultMap" lang="velocity" databaseId="oracle">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		<include refid="select_pre" />
+		<include refid="condition_sql" />
+ 		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+	<select id="findByCondition" parameterType="com.supconit.base.entities.DeviceSpareOut" resultMap="DeviceSpareOutResultMap" lang="velocity" databaseId="sqlserver">
+		<include refid="_PUBLIC_V.PAGER_BEFORE"/>
+		SELECT
+    		*
+        <include refid="_PUBLIC_V.ROW_NUMBER_OVER" /> 
+ 		<include refid="_PUBLIC_V.AS_ROW_NUM" />
+		FROM
+			DEVICE_SPARE_OUT 
+		<include refid="condition_sql" />
+ 		<include refid="_PUBLIC_V.PAGER_AFTER"/>
+	</select>	
+
+    <select id="countByCondition" parameterType="com.supconit.base.entities.DeviceSpareOut" resultType="long" lang="velocity">
+		<include refid="count_pre" />
+		<include refid="condition_sql" />
+	</select>
+	<sql id="TABLE_NAME" lang="velocity">DEVICE_SPARE_OUT</sql>
+	<sql id="SEQUENCE" lang="velocity">SELECT SEQ_<include refid="TABLE_NAME"/>.NEXTVAL FROM DUAL</sql>
+        <!-- 插入记录-->
+	<insert id="insert" parameterType="com.supconit.base.entities.DeviceSpareOut" keyProperty="id" keyColumn="ID" lang="velocity" databaseId="sqlserver">
+        <include refid="INSERT_SQL"/>
+        <selectKey keyProperty="id" resultType="long" order="AFTER"><include refid="_PUBLIC_V.SELECT_KEY"/> </selectKey>
+    </insert>
+    <insert id="insert" parameterType="com.supconit.base.entities.DeviceSpareOut" 
+		keyProperty="id" keyColumn="ID" 		lang="velocity" databaseId="oracle">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			<include refid="SEQUENCE" />
+		</selectKey>        
+		<include refid="INSERT_SQL" />
+	</insert>    
+	<sql id="INSERT_SQL" lang="velocity">
+		INSERT INTO <include refid="TABLE_NAME"/>
+		(#if($_databaseId=='oracle') ID,#end	
+			SPARE_ID,
+	        GET_SUM,
+	        GET_DATE,
+	        GETOR,
+	        AFFIRMOR,
+	        REMARK
+		) VALUES (        
+		 #if($_databaseId == 'oracle') @{_parameter.id,jdbcType=NUMERIC},#end	
+			@{_parameter.spareId,jdbcType=NUMERIC},
+	        @{_parameter.getSum,jdbcType=NUMERIC},
+	        @{_parameter.getDate,jdbcType=TIMESTAMP},
+	        @{_parameter.getor,jdbcType=VARCHAR},
+	        @{_parameter.affirmor,jdbcType=VARCHAR},
+	        @{_parameter.remark,jdbcType=VARCHAR}
+		)
+	</sql>
+        <!-- 插入记录-->
+	
+    	<!-- 更新记录-->
+	<update id="update" parameterType="com.supconit.base.entities.DeviceSpareOut">
+		UPDATE	DEVICE_SPARE_OUT
+		<set>
+        <if test="spareId != null">SPARE_ID = #{spareId,jdbcType=NUMERIC},</if>
+        <if test="getSum != null">GET_SUM = #{getSum,jdbcType=NUMERIC},</if>
+        <if test="getDate != null"> GET_DATE= #{getDate,jdbcType=TIMESTAMP},</if>
+        <if test="getor != null">GETOR = #{getor,jdbcType=VARCHAR},</if>
+        <if test="affirmor != null">AFFIRMOR = #{affirmor,jdbcType=VARCHAR},</if>
+        <if test="remark != null">REMARK = #{remark,jdbcType=VARCHAR},</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+</mapper>
